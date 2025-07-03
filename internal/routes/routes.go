@@ -1,3 +1,4 @@
+// Package routes contains the routing logic for the application
 package routes
 
 import (
