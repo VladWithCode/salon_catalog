@@ -1,3 +1,6 @@
 .env*
 
 web/style/node_modules
+
+web/static/uploads
+!web/static/uploads/unoptimized/.keep
