@@ -26,7 +26,6 @@ func (csm *customServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, pattern := csm.Handler(r)
 
 	if pattern == "" {
-		w.WriteHeader(http.StatusNotFound)
 		csm.notFoundHandle(w, r)
 		return
 	}
