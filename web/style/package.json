@@ -1,0 +1,16 @@
+{
+  "name": "style",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -w -i ./styles.css -o ../static/css/styles.css"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tailwindcss": "^4.1.11"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

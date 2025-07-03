@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: "Plus Jakarta Sans", sans-serif;
+    --font-mono: "Crimson Text", monospace;
+}
+
+@layer utilities {
+    .grid-rows-page {
+        grid-template-rows: auto 1fr auto;
+    }
+}
