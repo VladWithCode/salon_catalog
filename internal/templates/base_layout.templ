@@ -1,0 +1,44 @@
+package templates
+
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+var headHandle = templ.NewOnceHandle()
+
+templ BaseLayout(title string, contents templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>
+				if title == "" {
+					Salon Catalog
+				} else {
+					{ title }
+				}
+			</title>
+			@headHandle.Once() {
+				<link rel="dns-prefetch" href={ `//fonts.googleapis.com` }/>
+				<link rel="dns-prefetch" href={ `//fonts.gstatic.com` }/>
+				<link rel="preconnect" href="https://fonts.googleapis.com"/>
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+				<link
+					href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Crimson+Text:wght@400;600&display=swap"
+					rel="stylesheet"
+				/>
+				<link rel="stylesheet" href="/static/css/styles.css"/>
+				<script src="/static/js/htmx.js"></script>
+				<script src="/static/js/htmx-response-targets.js"></script>
+				<script src="/static/js/htmx-json-enc.js"></script>
+				<script src="/static/js/gsap.js"></script>
+			}
+		</head>
+		<body>
+			<div class="grid grid-rows-page min-h-screen w-full overflow-x-hidden overflow-y-auto">
+                @components.Header()
+				{children...}
+                @components.Footer()
+			</div>
+		</body>
+	</html>
+}
