@@ -16,7 +16,7 @@ var (
 	ErrFileCreateFail     = errors.New("failed to create output file")
 	ErrFileCopyFail       = errors.New("failed to copy file")
 
-	UploadsPath = os.Getenv("UPLOADS_PATH")
+	UploadsPath = "web/static/uploads"
 )
 
 func writeFile(file multipart.FileHeader, writePath string) error {
@@ -42,7 +42,7 @@ func writeFile(file multipart.FileHeader, writePath string) error {
 
 func Upload(file multipart.FileHeader) (filename string, err error) {
 	date := time.Now().Format("2006-01-02T15:04:05")
-	uploadsPath := filepath.Join("web/static/uploads")
+	uploadsPath := UploadsPath
 
 	filename = fmt.Sprintf("upload_%s_%d%s", date, 0, filepath.Ext(file.Filename))
 	writePath := filepath.Join(uploadsPath, filename)
@@ -56,7 +56,7 @@ func Upload(file multipart.FileHeader) (filename string, err error) {
 
 func UploadMultiple(files []multipart.FileHeader) (fileNames []string, err error) {
 	date := time.Now().Format("2006-01-02T15:04:05")
-	uploadsPath := filepath.Join("web/static/uploads")
+	uploadsPath := UploadsPath
 	fileNames = make([]string, len(files))
 
 	for i, fHeader := range files {
