@@ -59,8 +59,7 @@ func UploadMultiple(files []multipart.FileHeader) (fileNames []string, err error
 	uploadsPath := filepath.Join("web/static/uploads")
 	fileNames = make([]string, len(files))
 
-	i := 0
-	for _, fHeader := range files {
+	for i, fHeader := range files {
 		filename := fmt.Sprintf("upload_%s_%d%s", date, i, filepath.Ext(fHeader.Filename))
 		writePath := filepath.Join(uploadsPath, filename)
 
