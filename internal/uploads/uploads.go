@@ -19,7 +19,7 @@ var (
 	UploadsPath = "web/static/uploads"
 )
 
-func writeFile(file multipart.FileHeader, writePath string) error {
+func writeFile(file *multipart.FileHeader, writePath string) error {
 	p, err := file.Open()
 	if err != nil {
 		return errors.Join(ErrFileHeaderOpenFail, err)
@@ -40,7 +40,7 @@ func writeFile(file multipart.FileHeader, writePath string) error {
 	return nil
 }
 
-func Upload(file multipart.FileHeader) (filename string, err error) {
+func Upload(file *multipart.FileHeader) (filename string, err error) {
 	date := time.Now().Format("2006-01-02T15:04:05")
 	uploadsPath := UploadsPath
 
@@ -54,7 +54,7 @@ func Upload(file multipart.FileHeader) (filename string, err error) {
 	return filename, nil
 }
 
-func UploadMultiple(files []multipart.FileHeader) (fileNames []string, err error) {
+func UploadMultiple(files []*multipart.FileHeader) (fileNames []string, err error) {
 	date := time.Now().Format("2006-01-02T15:04:05")
 	uploadsPath := UploadsPath
 	fileNames = make([]string, len(files))
