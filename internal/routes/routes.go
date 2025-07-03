@@ -3,14 +3,19 @@ package routes
 
 import (
 	"context"
+	"log"
 	"net/http"
 
+	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
 func NewRouter() http.Handler {
 	router := NewCustomServeMux()
 
 	router.HandleFunc("GET /{$}", RenderIndex)
+
+
+	router.NotFoundHandleFunc(render404Page)
 
 	return router
 }
@@ -24,3 +29,7 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func render404Page(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 page not found"))
+}
