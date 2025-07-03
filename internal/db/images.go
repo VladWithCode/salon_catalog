@@ -13,6 +13,45 @@ type Image struct {
 	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
 }
 
+func CreateImages(imgs []*Image) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for _, img := range imgs {
+		_, err = tx.Exec(
+			ctx,
+			`INSERT INTO images (id, filename, no_optimize, size, created_at)
+				VALUES ($1, $2, $3, $4, $5)`,
+			img.ID,
+			img.Filename,
+			img.NoOptimize,
+			img.Size,
+			img.CreatedAt,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CreateImage(img *Image) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
