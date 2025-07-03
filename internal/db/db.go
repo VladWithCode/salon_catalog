@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	ErrNoConnStr = errors.New("DATABASE_URL is not set")
+	ErrNoConnStr = errors.New("required env var DATABASE_URL is not set")
+	ErrUUIDFail  = errors.New("failed to generate new uuid")
 )
 
 var dbPool *pgxpool.Pool
