@@ -6,8 +6,8 @@ import (
 )
 
 type Image struct {
-	Id           string `db:"id" json:"id"`
-	PublicUrl    string `db:"public_url" json:"publicUrl"`
+	ID           string `db:"id" json:"id"`
+	PublicURL    string `db:"public_url" json:"publicUrl"`
 	InternalPath string `db:"internal_path" json:"internalPath"`
 	NoOptimize   bool   `db:"no_optimize" json:"noOptimize"`
 	Size         int    `db:"size" json:"size"`
@@ -44,7 +44,7 @@ func CreateImage(img *Image) error {
 	return nil
 }
 
-func FindImageById(id string) (*Image, error) {
+func FindImageByID(id string) (*Image, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
