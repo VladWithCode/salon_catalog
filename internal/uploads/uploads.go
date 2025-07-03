@@ -73,3 +73,19 @@ func UploadMultiple(files []*multipart.FileHeader) (fileNames []string, err erro
 
 	return fileNames, nil
 }
+
+func Update(filename string, newFile *multipart.FileHeader) error {
+	writePath := filepath.Join(UploadsPath, filename)
+	err := writeFile(newFile, writePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Delete(filename string) error {
+	delPath := filepath.Join(UploadsPath, filename)
+
+	return os.Remove(delPath)
+}
