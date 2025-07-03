@@ -29,7 +29,7 @@ func main() {
 	defer dbPool.Close()
 
 	router := routes.NewRouter()
-	fmt.Printf("Starting server on port :%s\n", port)
+	fmt.Printf("Starting server on port http://localhost:%s\n", port)
 	err = http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 	if err != nil {
 		log.Fatalf("failed to listen and serve %v\n", err)
