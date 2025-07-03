@@ -14,6 +14,9 @@ func NewRouter() http.Handler {
 
 	router.HandleFunc("GET /{$}", RenderIndex)
 
+	// Serve static files
+	fs := http.FileServer(http.Dir("web/static/"))
+	router.Handle("GET /static/", http.StripPrefix("/static/", fs))
 
 	router.NotFoundHandleFunc(render404Page)
 
