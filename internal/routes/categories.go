@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
@@ -54,6 +55,10 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 		DisplayImg:  r.Form.Get("displayImg"),
 	}
 
+	if ctg.Slug == "" {
+		ctg.Slug = internal.Slugify(ctg.Name)
+	}
+
 	err = db.CreateCategory(&ctg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -83,11 +88,12 @@ func UpdateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Form.Get("name") != "" {
-		ctg.Name = r.Form.Get("name")
-	}
 	if r.Form.Get("slug") != "" {
 		ctg.Slug = r.Form.Get("slug")
+	}
+	if r.Form.Get("name") != "" {
+		ctg.Name = r.Form.Get("name")
+		ctg.Slug = internal.Slugify(ctg.Name)
 	}
 	if r.Form.Get("description") != "" {
 		ctg.Description = r.Form.Get("description")
