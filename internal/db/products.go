@@ -8,7 +8,7 @@ import (
 )
 
 type Product struct {
-	Id          string            `db:"id" json:"id"`
+	ID          string            `db:"id" json:"id"`
 	Name        string            `db:"name" json:"name"`
 	Slug        string            `db:"slug" json:"slug"`
 	Description string            `db:"description" json:"description"`
@@ -16,6 +16,7 @@ type Product struct {
 	Gallery     []string          `db:"gallery" json:"gallery"`
 	Price       int               `db:"price" json:"price"`
 	Features    map[string]string `db:"features" json:"features"`
+	Category    string            `db:"category" json:"category"`
 }
 
 func CreateProduct(product *Product) error {
@@ -62,7 +63,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 		`SELECT id, name, slug, description FROM products WHERE slug = $1`,
 		slug,
 	).Scan(
-		&product.Id,
+		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
@@ -74,7 +75,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 	return &product, nil
 }
 
-func FindProductById(id string) (*Product, error) {
+func FindProductByID(id string) (*Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -89,7 +90,7 @@ func FindProductById(id string) (*Product, error) {
 		`SELECT id, name, slug, description, FROM products WHERE id = $1`,
 		id,
 	).Scan(
-		&product.Id,
+		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
@@ -123,7 +124,7 @@ func FindAllProducts() ([]*Product, error) {
 	for rows.Next() {
 		var product Product
 		err = rows.Scan(
-			&product.Id,
+			&product.ID,
 			&product.Name,
 			&product.Slug,
 			&product.Description,
@@ -153,7 +154,7 @@ func UpdateProduct(product *Product) error {
 		product.Slug,
 		product.Description,
 		product.Price,
-		product.Id,
+		product.ID,
 	)
 	if err != nil {
 		return err
