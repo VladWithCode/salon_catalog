@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,6 +12,8 @@ import (
 
 func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /api/products", GetProducts)
+	router.HandleFunc("GET /api/products/{slug}", GetProductBySlug)
+
 	router.HandleFunc("POST /api/products", CreateProduct)
 	router.HandleFunc("PUT /api/products/{id}", UpdateProduct)
 	router.HandleFunc("PUT /api/products/{id}/images", UpdateProductImages)
@@ -21,6 +22,47 @@ func RegisterProductsRoutes(router *customServeMux) {
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
+	prods, err := db.FindAllProducts()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to find products"))
+		log.Printf("failed to find products: %v\n", err)
+		return
+	}
+
+	data, err := json.Marshal(prods)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to marshal products"))
+		log.Printf("failed to marshal products: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+func GetProductBySlug(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+
+	prod, err := db.FindProductBySlug(slug)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to find product"))
+		log.Printf("failed to find product: %v\n", err)
+		return
+	}
+
+	data, err := json.Marshal(prod)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to marshal product"))
+		log.Printf("failed to marshal product: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +75,9 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("data: %+v\n", data)
+	if data.Slug == "" {
+		data.Slug = internal.Slugify(data.Name)
+	}
 
 	err = db.CreateProduct(&data)
 	if err != nil {
