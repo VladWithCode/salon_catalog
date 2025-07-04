@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,6 +62,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 	defer conn.Release()
 
 	var product Product
+	var mainImg sql.NullString
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
@@ -82,11 +84,15 @@ func FindProductBySlug(slug string) (*Product, error) {
 		&product.Description,
 		&product.Price,
 		&product.Features,
-		&product.MainImg,
+		&mainImg,
 		&product.Gallery,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if mainImg.Valid {
+		product.MainImg = mainImg.String
 	}
 
 	return &product, nil
@@ -102,6 +108,7 @@ func FindProductByID(id string) (*Product, error) {
 	defer conn.Release()
 
 	var product Product
+	var mainImg sql.NullString
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
@@ -124,11 +131,14 @@ func FindProductByID(id string) (*Product, error) {
 		&product.Price,
 		&product.Features,
 		&product.Category,
-		&product.MainImg,
+		&mainImg,
 		&product.Gallery,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if mainImg.Valid {
+		product.MainImg = mainImg.String
 	}
 
 	return &product, nil
@@ -160,6 +170,7 @@ func FindAllProducts() ([]*Product, error) {
 	var products []*Product
 	for rows.Next() {
 		var product Product
+		var mainImg sql.NullString
 		err = rows.Scan(
 			&product.ID,
 			&product.Name,
@@ -168,10 +179,13 @@ func FindAllProducts() ([]*Product, error) {
 			&product.Price,
 			&product.Features,
 			&product.Category,
-			&product.MainImg,
+			&mainImg,
 		)
 		if err != nil {
 			return nil, err
+		}
+		if mainImg.Valid {
+			product.MainImg = mainImg.String
 		}
 		products = append(products, &product)
 	}
@@ -188,17 +202,23 @@ func UpdateProduct(product *Product) error {
 	}
 	defer conn.Release()
 
+	mainImg := sql.NullString{
+		String: product.MainImg,
+		Valid:  product.MainImg != "",
+	}
+
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE products SET
-			name = $1, slug = $2, description = $3, price = $4, features = $5, category = $6 
-		WHERE id = $7`,
+			name = $1, slug = $2, description = $3, price = $4, features = $5, category = $6, main_img = $7
+		WHERE id = $8`,
 		product.Name,
 		product.Slug,
 		product.Description,
 		product.Price,
 		product.Features,
 		product.Category,
+		mainImg,
 		product.ID,
 	)
 	if err != nil {
