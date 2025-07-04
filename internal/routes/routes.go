@@ -15,6 +15,8 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /{$}", RenderIndex)
 
 	RegisterImagesRoutes(router)
+	RegisterCategoriesRoutes(router)
+	RegisterProductsRoutes(router)
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("web/static/"))
