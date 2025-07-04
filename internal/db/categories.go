@@ -76,8 +76,8 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		ctx,
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
-			header.public_url AS header_img,
-			display.public_url AS display_img
+			header.filename AS header_img,
+			display.filename AS display_img
 		FROM categories
 			JOIN images header ON header.id = ctg.header_img
 			JOIN images display ON display.id = ctg.display_img
@@ -124,9 +124,9 @@ func FindCategoryByID(id string) (*Category, error) {
 		ctx,
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
-			header.public_url AS header_img,
-			display.public_url AS display_img
-		FROM categories
+			header.filename AS header_img,
+			display.filename AS display_img
+		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
 		WHERE id = $1`,
@@ -166,8 +166,8 @@ func FindAllCategories() ([]*Category, error) {
 		ctx,
 		`SELECT
 			ctg.id, ctg.name, ctg.slug, ctg.description, 
-			header.public_url AS header_img,
-			display.public_url AS display_img
+			header.filename AS header_img,
+			display.filename AS display_img
 		FROM categories
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
