@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,15 @@ func CreateCategory(category *Category) error {
 		return ErrUUIDFail
 	}
 
+	headerImg := sql.NullString{
+		String: category.HeaderImg,
+		Valid:  category.HeaderImg != "",
+	}
+	displayImg := sql.NullString{
+		String: category.DisplayImg,
+		Valid:  category.DisplayImg != "",
+	}
+
 	_, err = conn.Exec(
 		ctx,
 		`INSERT INTO categories (id, name, slug, description, header_img, display_img) VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -37,8 +47,8 @@ func CreateCategory(category *Category) error {
 		category.Name,
 		category.Slug,
 		category.Description,
-		category.HeaderImg,
-		category.DisplayImg,
+		headerImg,
+		displayImg,
 	)
 	if err != nil {
 		return err
@@ -56,7 +66,12 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 	}
 	defer conn.Release()
 
-	var category Category
+	var (
+		category   Category
+		headerImg  sql.NullString
+		displayImg sql.NullString
+	)
+
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
@@ -73,11 +88,18 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		&category.Name,
 		&category.Slug,
 		&category.Description,
-		&category.HeaderImg,
-		&category.DisplayImg,
+		&headerImg,
+		&displayImg,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if headerImg.Valid {
+		category.HeaderImg = headerImg.String
+	}
+	if displayImg.Valid {
+		category.DisplayImg = displayImg.String
 	}
 
 	return &category, nil
@@ -92,7 +114,12 @@ func FindCategoryByID(id string) (*Category, error) {
 	}
 	defer conn.Release()
 
-	var category Category
+	var (
+		category   Category
+		headerImg  sql.NullString
+		displayImg sql.NullString
+	)
+
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
@@ -109,11 +136,18 @@ func FindCategoryByID(id string) (*Category, error) {
 		&category.Name,
 		&category.Slug,
 		&category.Description,
-		&category.HeaderImg,
-		&category.DisplayImg,
+		&headerImg,
+		&displayImg,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if headerImg.Valid {
+		category.HeaderImg = headerImg.String
+	}
+	if displayImg.Valid {
+		category.DisplayImg = displayImg.String
 	}
 
 	return &category, nil
@@ -146,18 +180,31 @@ func FindAllCategories() ([]*Category, error) {
 
 	var categories []*Category
 	for rows.Next() {
-		var category Category
+		var (
+			category   Category
+			headerImg  sql.NullString
+			displayImg sql.NullString
+		)
+
 		err = rows.Scan(
 			&category.ID,
 			&category.Name,
 			&category.Slug,
 			&category.Description,
-			&category.HeaderImg,
-			&category.DisplayImg,
+			&headerImg,
+			&displayImg,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		if headerImg.Valid {
+			category.HeaderImg = headerImg.String
+		}
+		if displayImg.Valid {
+			category.DisplayImg = displayImg.String
+		}
+
 		categories = append(categories, &category)
 	}
 
@@ -173,6 +220,14 @@ func UpdateCategory(category *Category) error {
 	}
 	defer conn.Release()
 
+	headerImg := sql.NullString{
+		String: category.HeaderImg,
+		Valid:  category.HeaderImg != "",
+	}
+	displayImg := sql.NullString{
+		String: category.DisplayImg,
+		Valid:  category.DisplayImg != "",
+	}
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE categories SET
@@ -181,8 +236,8 @@ func UpdateCategory(category *Category) error {
 		category.Name,
 		category.Slug,
 		category.Description,
-		category.HeaderImg,
-		category.DisplayImg,
+		headerImg,
+		displayImg,
 		category.ID,
 	)
 	if err != nil {
