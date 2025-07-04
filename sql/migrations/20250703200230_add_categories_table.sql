@@ -5,8 +5,8 @@ CREATE TABLE categories (
     name VARCHAR(512) NOT NULL,
     slug VARCHAR(512) UNIQUE NOT NULL,
     description VARCHAR(512) NOT NULL,
-    header_img UUID REFERENCES images(id),
-    display_img UUID REFERENCES images(id)
+    header_img UUID REFERENCES images(id) ON DELETE SET NULL,
+    display_img UUID REFERENCES images(id) ON DELETE SET NULL
 );
 -- +goose StatementEnd
 

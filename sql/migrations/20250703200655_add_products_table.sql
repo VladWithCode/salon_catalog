@@ -5,10 +5,10 @@ CREATE TABLE products (
     name VARCHAR(512) NOT NULL,
     slug VARCHAR(512) UNIQUE NOT NULL,
     description VARCHAR(512) NOT NULL,
-    main_img UUID REFERENCES images(id),
-    price INT NOT NULL,
+    main_img UUID REFERENCES images(id) ON DELETE SET NULL,
+    price INT DEFAULT 0 NOT NULL,
     features JSONB NOT NULL,
-    category UUID REFERENCES categories(id)
+    category UUID REFERENCES categories(id) ON DELETE RESTRICT
 );
 -- +goose StatementEnd
 
