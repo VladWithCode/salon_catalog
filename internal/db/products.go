@@ -34,14 +34,19 @@ func CreateProduct(product *Product) error {
 		return ErrUUIDFail
 	}
 
+	mainImg := sql.NullString{
+		String: product.MainImg,
+		Valid:  product.MainImg != "",
+	}
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description, main_img, category, features) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		`INSERT INTO products (id, name, slug, description, price, main_img, category, features) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		id.String(),
 		product.Name,
 		product.Slug,
 		product.Description,
-		product.MainImg,
+		product.Price,
+		mainImg,
 		product.Category,
 		product.Features,
 	)
