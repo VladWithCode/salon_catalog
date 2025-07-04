@@ -8,12 +8,12 @@ import (
 )
 
 type Category struct {
-	Id          string `db:"id" json:"id"`
+	ID          string `db:"id" json:"id"`
 	Name        string `db:"name" json:"name"`
 	Slug        string `db:"slug" json:"slug"`
 	Description string `db:"description" json:"description"`
 	HeaderImg   string `db:"header_img" json:"headerImg"`
-	DisplayIcon string `db:"display_icon" json:"displayIcon"`
+	DisplayImg  string `db:"display_img" json:"displayImg"`
 }
 
 func CreateCategory(category *Category) error {
@@ -32,13 +32,13 @@ func CreateCategory(category *Category) error {
 
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO categories (id, name, slug, description, header_img, display_icon) VALUES ($1, $2, $3, $4, $5, $6)`,
+		`INSERT INTO categories (id, name, slug, description, header_img, display_img) VALUES ($1, $2, $3, $4, $5, $6)`,
 		id.String(),
 		category.Name,
 		category.Slug,
 		category.Description,
 		category.HeaderImg,
-		category.DisplayIcon,
+		category.DisplayImg,
 	)
 	if err != nil {
 		return err
@@ -62,12 +62,12 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		`SELECT id, name, slug, description, header_img, display_icon FROM categories WHERE slug = $1`,
 		slug,
 	).Scan(
-		&category.Id,
+		&category.ID,
 		&category.Name,
 		&category.Slug,
 		&category.Description,
 		&category.HeaderImg,
-		&category.DisplayIcon,
+		&category.DisplayImg,
 	)
 	if err != nil {
 		return nil, err
@@ -91,12 +91,12 @@ func FindCategoryById(id string) (*Category, error) {
 		`SELECT id, name, slug, description, header_img, display_icon FROM categories WHERE id = $1`,
 		id,
 	).Scan(
-		&category.Id,
+		&category.ID,
 		&category.Name,
 		&category.Slug,
 		&category.Description,
 		&category.HeaderImg,
-		&category.DisplayIcon,
+		&category.DisplayImg,
 	)
 	if err != nil {
 		return nil, err
@@ -127,12 +127,12 @@ func FindAllCategories() ([]*Category, error) {
 	for rows.Next() {
 		var category Category
 		err = rows.Scan(
-			&category.Id,
+			&category.ID,
 			&category.Name,
 			&category.Slug,
 			&category.Description,
 			&category.HeaderImg,
-			&category.DisplayIcon,
+			&category.DisplayImg,
 		)
 		if err != nil {
 			return nil, err
@@ -159,8 +159,8 @@ func UpdateCategory(category *Category) error {
 		category.Slug,
 		category.Description,
 		category.HeaderImg,
-		category.DisplayIcon,
-		category.Id,
+		category.DisplayImg,
+		category.ID,
 	)
 	if err != nil {
 		return err
