@@ -77,6 +77,72 @@ func CreateImage(img *Image) error {
 	return nil
 }
 
+func LinkImagesToProduct(imgID []string, prodID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for _, id := range imgID {
+		_, err = tx.Exec(
+			ctx,
+			`INSERT INTO images_products (image_id, product_id)
+				VALUES ($1, $2)`,
+			id,
+			prodID,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
+func UnlinkImagesFromProduct(imgID []string, prodID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for _, id := range imgID {
+		_, err = tx.Exec(
+			ctx,
+			`DELETE FROM images_products WHERE image_id = $1 AND product_id = $2`,
+			id,
+			prodID,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func FindImageByID(id string) (*Image, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
