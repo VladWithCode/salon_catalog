@@ -79,7 +79,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
 			LEFT JOIN images img ON img_prod.image_id = img.id
 			LEFT JOIN images main ON main.id = prod.main_img
-		WHERE slug = $1
+		WHERE prod.slug = $1
 		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, prod.category, main.main_img`,
 		slug,
 	).Scan(

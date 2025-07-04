@@ -129,7 +129,7 @@ func FindCategoryByID(id string) (*Category, error) {
 		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
-		WHERE id = $1`,
+		WHERE ctg.id = $1`,
 		id,
 	).Scan(
 		&category.ID,
