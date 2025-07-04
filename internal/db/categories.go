@@ -59,7 +59,14 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 	var category Category
 	err = conn.QueryRow(
 		ctx,
-		`SELECT id, name, slug, description, header_img, display_icon FROM categories WHERE slug = $1`,
+		`SELECT 
+			ctg.id, ctg.name, ctg.slug, ctg.description,
+			header.public_url AS header_img,
+			display.public_url AS display_img
+		FROM categories
+			JOIN images header ON header.id = ctg.header_img
+			JOIN images display ON display.id = ctg.display_img
+		WHERE slug = $1`,
 		slug,
 	).Scan(
 		&category.ID,
@@ -76,7 +83,7 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 	return &category, nil
 }
 
-func FindCategoryById(id string) (*Category, error) {
+func FindCategoryByID(id string) (*Category, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -88,7 +95,14 @@ func FindCategoryById(id string) (*Category, error) {
 	var category Category
 	err = conn.QueryRow(
 		ctx,
-		`SELECT id, name, slug, description, header_img, display_icon FROM categories WHERE id = $1`,
+		`SELECT 
+			ctg.id, ctg.name, ctg.slug, ctg.description,
+			header.public_url AS header_img,
+			display.public_url AS display_img
+		FROM categories
+			LEFT JOIN images header ON header.id = ctg.header_img
+			LEFT JOIN images display ON display.id = ctg.display_img
+		WHERE id = $1`,
 		id,
 	).Scan(
 		&category.ID,
@@ -116,7 +130,14 @@ func FindAllCategories() ([]*Category, error) {
 
 	rows, err := conn.Query(
 		ctx,
-		`SELECT id, name, slug, description, header_img, display_icon FROM categories`,
+		`SELECT
+			ctg.id, ctg.name, ctg.slug, ctg.description, 
+			header.public_url AS header_img,
+			display.public_url AS display_img
+		FROM categories
+			LEFT JOIN images header ON header.id = ctg.header_img
+			LEFT JOIN images display ON display.id = ctg.display_img
+		ORDER BY ctg.name`,
 	)
 	if err != nil {
 		return nil, err
@@ -154,7 +175,9 @@ func UpdateCategory(category *Category) error {
 
 	_, err = conn.Exec(
 		ctx,
-		`UPDATE categories SET name = $1, slug = $2, description = $3, header_img = $4, display_icon = $5 WHERE id = $6`,
+		`UPDATE categories SET
+			name = $1, slug = $2, description = $3, header_img = $4, display_img = $5 
+		WHERE id = $6`,
 		category.Name,
 		category.Slug,
 		category.Description,
