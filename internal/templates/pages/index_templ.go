@@ -43,7 +43,7 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"px-2\"><h1 class=\"text-4xl font-bold\">Hello, world!</h1></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"relative z-0 mb-8\"><div class=\"absolute inset-0 -z-10\"><img src=\"/static/assets/salon_hero_bg.png\" alt=\"Salon Hero Background\" class=\"w-full h-full object-cover object-center\"></div><div class=\"bg-stone-900/45 flex flex-col items-center justify-center h-[90vh]\"><h1 class=\"text-stone-50 text-3xl text-center font-semibold px-4 mb-4\">Celebra con<br><span class=\"uppercase font-bold\">elegancia</span> inigualable.</h1><p class=\"text-stone-100 font-bold text-center px-4\">Eventos inolvidables sin importar la ocasión.</p><a href=\"#\" class=\"text-stone-50 text-xl text-center font-medium px-8 py-4 border-2 border-current mt-16 transition-[background,color] duration-120 bg-stone-50/0 hover:bg-stone-50/100 hover:text-yellow-500 hover:font-bold\">¡Agenda ya!</a></div></section><section class=\"px-4\"><h1 class=\"text-4xl font-bold mb-4\">Nuestra Oferta</h1></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
