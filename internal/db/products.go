@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Product struct {
@@ -18,6 +19,7 @@ type Product struct {
 	Price       int               `db:"price" json:"price"`
 	Features    map[string]string `db:"features" json:"features"`
 	Category    string            `db:"category" json:"category"`
+	CategoryID  string            `db:"category_id" json:"categoryId"`
 }
 
 func CreateProduct(product *Product) error {
@@ -68,19 +70,23 @@ func FindProductBySlug(slug string) (*Product, error) {
 
 	var product Product
 	var mainImg sql.NullString
+	var gallery pgtype.Array[*string]
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
 			prod.id, prod.name, prod.slug, prod.description,
 			prod.price, prod.features,
-			main.public_url AS main_img,
-			ARRAY_AGG(img.public_url) AS gallery,
+			ctg.name AS category,
+			ctg.id AS category_id,
+			main.filename AS main_img,
+			ARRAY_AGG(img.filename) AS gallery
 		FROM products prod 
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
 			LEFT JOIN images img ON img_prod.image_id = img.id
 			LEFT JOIN images main ON main.id = prod.main_img
+			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, prod.category, main.main_img`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, main.filename, ctg.name, ctg.id`,
 		slug,
 	).Scan(
 		&product.ID,
@@ -89,8 +95,10 @@ func FindProductBySlug(slug string) (*Product, error) {
 		&product.Description,
 		&product.Price,
 		&product.Features,
+		&product.Category,
+		&product.CategoryID,
 		&mainImg,
-		&product.Gallery,
+		&gallery,
 	)
 	if err != nil {
 		return nil, err
@@ -98,6 +106,13 @@ func FindProductBySlug(slug string) (*Product, error) {
 
 	if mainImg.Valid {
 		product.MainImg = mainImg.String
+	}
+	if gallery.Valid {
+		for _, img := range gallery.Elements {
+			if img != nil {
+				product.Gallery = append(product.Gallery, *img)
+			}
+		}
 	}
 
 	return &product, nil
@@ -114,19 +129,23 @@ func FindProductByID(id string) (*Product, error) {
 
 	var product Product
 	var mainImg sql.NullString
+	var gallery pgtype.Array[*string]
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
 			prod.id, prod.name, prod.slug, prod.description, prod.price,
-			prod.features, prod.category,
-			main.public_url AS main_img,
-			ARRAY_AGG(img.public_url) AS gallery,
-		FROM products
+			prod.features, 
+			ctg.name AS category,
+			ctg.id AS category_id,
+			main.filename AS main_img,
+			ARRAY_AGG(img.filename) AS gallery
+		FROM products prod
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
 			LEFT JOIN images img ON img_prod.image_id = img.id
 			LEFT JOIN images main ON main.id = prod.main_img
+			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, prod.category, main.main_img`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, main.filename, ctg.name, ctg.id`,
 		id,
 	).Scan(
 		&product.ID,
@@ -136,14 +155,22 @@ func FindProductByID(id string) (*Product, error) {
 		&product.Price,
 		&product.Features,
 		&product.Category,
+		&product.CategoryID,
 		&mainImg,
-		&product.Gallery,
+		&gallery,
 	)
 	if err != nil {
 		return nil, err
 	}
 	if mainImg.Valid {
 		product.MainImg = mainImg.String
+	}
+	if gallery.Valid {
+		for _, img := range gallery.Elements {
+			if img != nil {
+				product.Gallery = append(product.Gallery, *img)
+			}
+		}
 	}
 
 	return &product, nil
@@ -162,10 +189,13 @@ func FindAllProducts() ([]*Product, error) {
 		ctx,
 		`SELECT 
 			prod.id, prod.name, prod.slug, prod.description, prod.price,
-			prod.features, prod.category,
-			main.public_url AS main_img
-		FROM products
-		LEFT JOIN images img ON img.id = prod.main_img`,
+			prod.features, 
+			ctg.name AS category,
+			ctg.id AS category_id,
+			img.filename AS main_img
+		FROM products prod
+			LEFT JOIN images img ON img.id = prod.main_img
+			LEFT JOIN categories ctg ON ctg.id = prod.category`,
 	)
 	if err != nil {
 		return nil, err
@@ -184,6 +214,7 @@ func FindAllProducts() ([]*Product, error) {
 			&product.Price,
 			&product.Features,
 			&product.Category,
+			&product.CategoryID,
 			&mainImg,
 		)
 		if err != nil {
