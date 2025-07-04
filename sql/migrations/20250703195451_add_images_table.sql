@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE images (
     id UUID PRIMARY KEY,
-    filename VARCHAR(512) NOT NULL,
+    filename VARCHAR(512) UNIQUE NOT NULL,
     no_optimize BOOLEAN NOT NULL,
     size INT NOT NULL,
     created_at TIMESTAMP NOT NULL
