@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+	RemoveImgFlag = "delete"
+)
+
 var (
 	ErrFileHeaderOpenFail = errors.New("failed to open file from fileheader")
 	ErrFileCreateFail     = errors.New("failed to create output file")
