@@ -78,7 +78,7 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 			ctg.id, ctg.name, ctg.slug, ctg.description,
 			header.filename AS header_img,
 			display.filename AS display_img
-		FROM categories
+		FROM categories ctg
 			JOIN images header ON header.id = ctg.header_img
 			JOIN images display ON display.id = ctg.display_img
 		WHERE slug = $1`,
@@ -168,7 +168,7 @@ func FindAllCategories() ([]*Category, error) {
 			ctg.id, ctg.name, ctg.slug, ctg.description, 
 			header.filename AS header_img,
 			display.filename AS display_img
-		FROM categories
+		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
 		ORDER BY ctg.name`,
