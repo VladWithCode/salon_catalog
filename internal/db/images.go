@@ -77,7 +77,7 @@ func CreateImage(img *Image) error {
 	return nil
 }
 
-func LinkImagesToProduct(imgID []string, prodID string) error {
+func LinkImagesToProduct(imgIDs []string, prodID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -91,7 +91,7 @@ func LinkImagesToProduct(imgID []string, prodID string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	for _, id := range imgID {
+	for _, id := range imgIDs {
 		_, err = tx.Exec(
 			ctx,
 			`INSERT INTO images_products (image_id, product_id)
