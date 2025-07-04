@@ -108,7 +108,7 @@ func LinkImagesToProduct(imgIDs []string, prodID string) error {
 	return tx.Commit(ctx)
 }
 
-func UnlinkImagesFromProduct(imgID []string, prodID string) error {
+func UnlinkImagesFromProduct(imgIDs []string, prodID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -122,7 +122,7 @@ func UnlinkImagesFromProduct(imgID []string, prodID string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	for _, id := range imgID {
+	for _, id := range imgIDs {
 		_, err = tx.Exec(
 			ctx,
 			`DELETE FROM images_products WHERE image_id = $1 AND product_id = $2`,
