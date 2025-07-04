@@ -35,11 +35,14 @@ func CreateProduct(product *Product) error {
 
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description) VALUES ($1, $2, $3, $4)`,
+		`INSERT INTO products (id, name, slug, description, main_img, category, features) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		id.String(),
 		product.Name,
 		product.Slug,
 		product.Description,
+		product.MainImg,
+		product.Category,
+		product.Features,
 	)
 	if err != nil {
 		return err
@@ -60,13 +63,27 @@ func FindProductBySlug(slug string) (*Product, error) {
 	var product Product
 	err = conn.QueryRow(
 		ctx,
-		`SELECT id, name, slug, description FROM products WHERE slug = $1`,
+		`SELECT 
+			prod.id, prod.name, prod.slug, prod.description,
+			prod.price, prod.features,
+			main.public_url AS main_img,
+			ARRAY_AGG(img.public_url) AS gallery,
+		FROM products prod 
+			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
+			LEFT JOIN images img ON img_prod.image_id = img.id
+			LEFT JOIN images main ON main.id = prod.main_img
+		WHERE slug = $1
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, prod.category, main.main_img`,
 		slug,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
+		&product.Price,
+		&product.Features,
+		&product.MainImg,
+		&product.Gallery,
 	)
 	if err != nil {
 		return nil, err
@@ -87,13 +104,28 @@ func FindProductByID(id string) (*Product, error) {
 	var product Product
 	err = conn.QueryRow(
 		ctx,
-		`SELECT id, name, slug, description, FROM products WHERE id = $1`,
+		`SELECT 
+			prod.id, prod.name, prod.slug, prod.description, prod.price,
+			prod.features, prod.category,
+			main.public_url AS main_img,
+			ARRAY_AGG(img.public_url) AS gallery,
+		FROM products
+			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
+			LEFT JOIN images img ON img_prod.image_id = img.id
+			LEFT JOIN images main ON main.id = prod.main_img
+		WHERE prod.id = $1
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, prod.category, main.main_img`,
 		id,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
+		&product.Price,
+		&product.Features,
+		&product.Category,
+		&product.MainImg,
+		&product.Gallery,
 	)
 	if err != nil {
 		return nil, err
@@ -113,7 +145,12 @@ func FindAllProducts() ([]*Product, error) {
 
 	rows, err := conn.Query(
 		ctx,
-		`SELECT id, name, slug, description FROM products`,
+		`SELECT 
+			prod.id, prod.name, prod.slug, prod.description, prod.price,
+			prod.features, prod.category,
+			main.public_url AS main_img
+		FROM products
+		LEFT JOIN images img ON img.id = prod.main_img`,
 	)
 	if err != nil {
 		return nil, err
@@ -128,6 +165,10 @@ func FindAllProducts() ([]*Product, error) {
 			&product.Name,
 			&product.Slug,
 			&product.Description,
+			&product.Price,
+			&product.Features,
+			&product.Category,
+			&product.MainImg,
 		)
 		if err != nil {
 			return nil, err
@@ -149,11 +190,15 @@ func UpdateProduct(product *Product) error {
 
 	_, err = conn.Exec(
 		ctx,
-		`UPDATE products SET name = $1, slug = $2, description = $3, price = $6 WHERE id = $7`,
+		`UPDATE products SET
+			name = $1, slug = $2, description = $3, price = $4, features = $5, category = $6 
+		WHERE id = $7`,
 		product.Name,
 		product.Slug,
 		product.Description,
 		product.Price,
+		product.Features,
+		product.Category,
 		product.ID,
 	)
 	if err != nil {
