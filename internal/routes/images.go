@@ -20,6 +20,14 @@ func RegisterImagesRoutes(router *customServeMux) {
 }
 
 func GetImages(w http.ResponseWriter, r *http.Request) {
+	sortOrder := r.URL.Query().Get("sortOrder")
+	sortBy := r.URL.Query().Get("sortBy")
+	if sortOrder == "" {
+		sortOrder = "desc"
+	}
+	if sortBy == "" {
+		sortBy = "created_at"
+	}
 }
 
 func UploadImages(w http.ResponseWriter, r *http.Request) {

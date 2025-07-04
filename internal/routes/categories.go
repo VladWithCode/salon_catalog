@@ -93,13 +93,13 @@ func UpdateCategory(w http.ResponseWriter, r *http.Request) {
 		ctg.Description = r.Form.Get("description")
 	}
 	if himg := r.Form.Get("headerImg"); himg != "" {
-		if himg == uploads.DelImgFlag {
+		if himg == uploads.RemoveImgFlag {
 			ctg.HeaderImg = ""
 		}
 		ctg.HeaderImg = r.Form.Get("headerImg")
 	}
 	if dimg := r.Form.Get("displayImg"); dimg != "" {
-		if dimg == uploads.DelImgFlag {
+		if dimg == uploads.RemoveImgFlag {
 			ctg.DisplayImg = ""
 		}
 		ctg.DisplayImg = r.Form.Get("displayImg")
