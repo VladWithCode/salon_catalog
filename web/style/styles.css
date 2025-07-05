@@ -5,9 +5,9 @@
     --font-mono: "Crimson Text", monospace;
 
     --color-light: var(--color-stone-100);
-    --color-dark: var(--color-stone-800);
-    --color-primary: var(--color-amber-500);
-    --color-secondary: var(--color-slate-800);
+    --color-dark: #2C1810;
+    --color-primary: #D4AF37;
+    --color-secondary: #E8B4B8;
 }
 
 @layer utilities {
