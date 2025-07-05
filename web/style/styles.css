@@ -6,8 +6,8 @@
 
     --color-light: var(--color-stone-100);
     --color-dark: var(--color-stone-800);
-    --color-primary: #B8860B;
-    --color-secondary: #2C3E51;
+    --color-primary: var(--color-amber-500);
+    --color-secondary: var(--color-slate-800);
 }
 
 @layer utilities {
