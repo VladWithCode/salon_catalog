@@ -1,9 +1,134 @@
 package components
 
 templ Footer() {
-    <footer class="w-full overflow-hidden bg-slate-700 px-4 py-12 xl:px-24">
-        <div class="">
-            <h1 class="text-2xl font-bold tracking-wide uppercase text-white">Salon</h1>
+<footer class="w-full overflow-hidden bg-secondary text-light">
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold">Salon Eventos</h3>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Creamos momentos inolvidables con servicios de planificación de eventos excepcionales y estilos.
+                </p>
+                <div class="flex place-items-center space-x-4">
+                    <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 m-auto text-light" fill="none"
+                            viewBox="0 0 512 512">
+                            <path
+                                d="M352 176h-48c-8.8 0-16 7.2-16 16v32h64l-8 64h-56v160h-64V288h-48v-64h48v-40c0-39.8 32.2-72 72-72h56v64z"
+                                fill="#fff"></path>
+                        </svg>
+                        <span class="sr-only">Facebook</span>
+                    </a>
+                    <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 m-auto text-light" viewBox="0 0 50 50"
+                            fill="currentColor">
+                            <path
+                                d="M 16 3 C 8.8324839 3 3 8.8324839 3 16 L 3 34 C 3 41.167516 8.8324839 47 16 47 L 34 47 C 41.167516 47 47 41.167516 47 34 L 47 16 C 47 8.8324839 41.167516 3 34 3 L 16 3 z M 16 5 L 34 5 C 40.086484 5 45 9.9135161 45 16 L 45 34 C 45 40.086484 40.086484 45 34 45 L 16 45 C 9.9135161 45 5 40.086484 5 34 L 5 16 C 5 9.9135161 9.9135161 5 16 5 z M 37 11 A 2 2 0 0 0 35 13 A 2 2 0 0 0 37 15 A 2 2 0 0 0 39 13 A 2 2 0 0 0 37 11 z M 25 14 C 18.936712 14 14 18.936712 14 25 C 14 31.063288 18.936712 36 25 36 C 31.063288 36 36 31.063288 36 25 C 36 18.936712 31.063288 14 25 14 z M 25 16 C 29.982407 16 34 20.017593 34 25 C 34 29.982407 29.982407 34 25 34 C 20.017593 34 16 29.982407 16 25 C 16 20.017593 20.017593 16 25 16 z">
+                            </path>
+                        </svg>
+                        <span class="sr-only">Instagram</span>
+                    </a>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-lg font-medium">Servicios</h4>
+                <ul class="space-y-2 text-sm">
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Planeacion de Bodas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Eventos Corporativos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Fiestas de Cumpleaños
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-lg font-medium">Quick as</h4>
+                <ul class="space-y-2 text-sm">
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Acerca de Nosotros
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Portafolio
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Testimonios
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Blog
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-slate-300 hover:text-white transition-colors">
+                            Contacto
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="text-lg font-medium">Información de Contacto</h4>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-slate-300">
+                            123 Avenida de Eventos
+                            <br />
+                            Downtown, NY 10001
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="tel:+1234567890" class="text-slate-300 hover:text-white transition-colors">
+                            618 123 4455
+                        </a>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="mailto:info@eleganceevents.com"
+                            class="text-slate-300 hover:text-white transition-colors">
+                            info@saloneventos.com
+                        </a>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="text-slate-300">
+                            <div>Lun - Vie: 9AM - 6PM</div>
+                            <div>Sáb - Dom: 9AM - 6PM</div>
+                            <div>Dom: Con cita</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="border-t border-slate-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <p class="text-slate-400 text-sm">
+                    © 2023 Salon Eventos. Todos los derechos reservados.
+                </p>
+                <div class="flex space-x-6 text-sm">
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        Política de Privacidad
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        Terminos de Servicio
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        Política de Cookies
+                    </a>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
+</footer>
 }

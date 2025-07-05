@@ -3,10 +3,19 @@
 @theme {
     --font-sans: "Plus Jakarta Sans", sans-serif;
     --font-mono: "Crimson Text", monospace;
+
+    --color-light: var(--color-stone-100);
+    --color-dark: var(--color-stone-800);
+    --color-primary: #B8860B;
+    --color-secondary: #2C3E51;
 }
 
 @layer utilities {
     .grid-rows-page {
         grid-template-rows: auto 1fr auto;
     }
+}
+
+@base {
+    @apply bg-stone-200;
 }
