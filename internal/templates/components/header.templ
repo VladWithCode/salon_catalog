@@ -8,7 +8,12 @@ templ Header() {
 		class="absolute top-0 left-0 right-0 flex h-12 z-40 flex items-center justify-between text-stone-50 px-4"
 	>
 		<div class="flex items-center">
-			<a href="/" class="text-2xl font-extrabold uppercase tracking-wide">Salon</a>
+			<a href="/" class="flex items-center gap-4">
+                <svg class="w-8 h-8 fill-current">
+                    <use href="/static/assets/logo.svg#logo"></use>
+                </svg>
+                // <img src="/static/assets/logo_name.png" alt="Logotipo del Villa Chenacolo" class="h-8 invert w-auto" />
+            </a>
 		</div>
 		<div class="hidden items-center space-x-4 md:flex">
 			<a href="/" class="text-2xl font-bold">Home</a>
@@ -48,15 +53,15 @@ templ Header() {
 	>
 		<div class="flex flex-col h-full">
 			<!-- Menu Header -->
-			<div class="bg-gradient-to-r from-primary to-secondary p-6">
+			<div class="bg-gradient-to-l from-primary to-accent p-6">
 				<div class="flex items-center justify-between">
-					<div class="flex items-center space-x-3">
-						<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-							<span class="text-primary font-bold">E</span>
-						</div>
+					<div class="flex items-center space-x-3 text-secondary">
+                        <svg class="w-10 h-10 fill-current my-auto">
+                            <use href="/static/assets/logo.svg#logo"></use>
+                        </svg>
 						<div>
-							<h2 class="text-white font-bold text-lg">Salon Eventos</h2>
-							<p class="text-white text-sm opacity-90">Eventos de Elegância</p>
+							<h2 class="text-white font-bold text-lg">Villa Chenacolo</h2>
+							<p class="text-white text-xs opacity-90">Sala de Acontecimientos Especiales</p>
 						</div>
 					</div>
 					<button
@@ -75,7 +80,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 hover:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -96,7 +101,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -117,7 +122,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -138,7 +143,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20  active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -159,7 +164,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -180,7 +185,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -207,7 +212,7 @@ templ Header() {
 					<li class="menu-item">
 						<a
 							href="#"
-							class="flex items-center px-6 py-3 text-gray-700 hover:bg-secondary/20 hover:text-dark transition-colors group"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
 								class="w-5 h-5 mr-3 text-primary menu-icon"
@@ -280,7 +285,6 @@ templ Script() {
         const tl = gsap.timeline();
         const pageTopObserver = new IntersectionObserver(entries => {
             const ent = entries[0];
-            console.log("intersected: ", ent);
 
             if (!ent.isIntersecting) {
                 tl.to("#header", {
