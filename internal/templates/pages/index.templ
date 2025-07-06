@@ -4,6 +4,7 @@ import "github.com/vladwithcode/salon_catalog/internal/templates"
 
 templ Index() {
 	@templates.BaseLayout("", nil) {
+        @Script()
 		<section class="relative z-0 mb-8">
 			<div class="absolute inset-0 -z-10">
 				<img
@@ -12,29 +13,31 @@ templ Index() {
 					class="w-full h-full object-cover object-center"
 				/>
 			</div>
-			<div class="bg-gradient-to-br from-primary/80 to-secondary/80 flex flex-col items-center justify-center h-[90vh]">
-				<h1 class="text-stone-50 text-3xl text-center font-semibold px-4 mb-4">
+			<div class="bg-gradient-to-br from-primary/90 to-accent/80 flex flex-col items-center justify-center h-[90vh]">
+				<h1 class="text-stone-50 text-3xl text-center font-semibold px-4 mb-4 opacity-0 translate-y-6" data-hero-item>
 					Celebra con
 					<br/>
 					<span class="uppercase font-bold">elegancia</span> inigualable.
 				</h1>
-				<p class="text-stone-100 font-bold text-center px-4">
+				<p class="text-stone-100 font-bold text-center px-4 opacity-0 translate-y-6" data-hero-item>
 					Eventos inolvidables sin importar la ocasión.
 				</p>
 				<a
 					href="#"
-					class="text-light text-xl text-center font-medium px-8 py-4 border-2 border-current mt-16 transition-[background,color,font-weight] duration-120 bg-primary/0 hover:bg-primary/100 hover:font-bold hover:border-primary"
+					class="text-secondary text-xl text-center font-bold px-8 py-4 border-2 border-accent mt-16 transition-[background,color,font-weight] duration-120 bg-accent shadow shadow-dark/35 hover:bg-secondary hover:text-primary hover:border-current opacity-0 translate-y-6"
+					data-hero-item
 				>
 					¡Agenda ya!
 				</a>
 			</div>
 		</section>
-		<section class="px-4 mb-6">
-			<h1 class="text-3xl text-center font-bold mb-4">Nuestra Oferta</h1>
-			<p class="text-center mb-8">Conoce los servicios que tenemos para tu evento.</p>
+        <section class="px-4 mb-6">
+			<h1 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Nuestra Oferta</h1>
+			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Conoce los servicios que tenemos para tu evento.</p>
 			<div class="space-y-4">
 				<div
-					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer"
+					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
+                    data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/event_salon_pic_2.png"
@@ -42,7 +45,7 @@ templ Index() {
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/45 text-stone-50 relative w-full h-full z-10 p-4 transition-[background] group-hover:bg-stone-800/70"
+						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
 						<h3 class="text-xl font-bold tracking-wide uppercase mb-6">El material adecuado</h3>
 						<p class="max-w-[24ch]">
@@ -55,7 +58,8 @@ templ Index() {
 					</a>
 				</div>
 				<div
-					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer"
+					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
+                    data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/event_salon_pic_1.png"
@@ -63,7 +67,7 @@ templ Index() {
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/45 text-stone-50 relative w-full h-full z-10 p-4 transition-[background] group-hover:bg-stone-800/70"
+						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
 						<h3 class="text-xl font-bold tracking-wide uppercase mb-6">Cualquier evento</h3>
 						<p class="max-w-[24ch]">
@@ -76,7 +80,8 @@ templ Index() {
 					</a>
 				</div>
 				<div
-					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer"
+					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
+                    data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/event_salon_pic_3.png"
@@ -84,7 +89,7 @@ templ Index() {
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/45 text-stone-50 relative w-full h-full z-10 p-4 transitino-[background] group-hover:bg-stone-800/70"
+						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
 						<h3 class="text-xl font-bold tracking-wide uppercase mb-6">Todo el espacio</h3>
 						<p class="max-w-[24ch]">
@@ -106,15 +111,16 @@ templ Index() {
 					class="w-full h-full object-cover object-center"
 				/>
 			</div>
-			<div class="bg-gradient-to-tl from-primary/80 to-secondary/80 text-light relative w-full z-10 px-4 py-12">
-				<h1 class="text-3xl text-center font-bold mb-4">Conoce nuestro extenso catalogo</h1>
-				<p class="text-center font-medium mb-8">
+			<div class="bg-gradient-to-tl from-primary/80 to-accent/80 text-light relative w-full z-10 px-4 py-12">
+				<h1 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">Conoce nuestro extenso catalogo</h1>
+				<p class="text-center font-medium mb-8 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus.
 				</p>
 				<div class="space-y-4">
 					<a
 						href="#"
-						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110"
+						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
+                        data-intsc-animate-item="catalog-section"
 					>
 						<img
 							src="/static/assets/event_salon_pic_4.png"
@@ -125,14 +131,15 @@ templ Index() {
 							class="relative flex flex-col items-center justify-center bg-stone-200/90 text-dark w-full h-full p-4 z-10"
 						>
 							<h3 class="text-3xl font-bold uppercase mb-2">Copas</h3>
-							<p class="text-[0px] group-hover:text-base transition-[font-size] underline duration-120">
+							<p class="text-[0px] group-hover:text-base group-active:text-base transition-[font-size] underline duration-120">
 								Ver más
 							</p>
 						</div>
 					</a>
 					<a
 						href="#"
-						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110"
+						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
+                        data-intsc-animate-item="catalog-section"
 					>
 						<img
 							src="/static/assets/event_salon_sample_3.png"
@@ -143,14 +150,15 @@ templ Index() {
 							class="relative flex flex-col items-center justify-center bg-stone-200/90 text-dark w-full h-full p-4 z-10"
 						>
 							<h3 class="text-3xl font-bold uppercase mb-2">Sillas</h3>
-							<p class="text-[0px] group-hover:text-base transition-[font-size] underline duration-120">
+							<p class="text-[0px] group-hover:text-base group-active:text-base transition-[font-size] underline duration-120">
 								Ver más
 							</p>
 						</div>
 					</a>
 					<a
 						href="#"
-						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110"
+						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
+                        data-intsc-animate-item="catalog-section"
 					>
 						<img
 							src="/static/assets/event_salon_sample_2.png"
@@ -170,12 +178,13 @@ templ Index() {
 			</div>
 		</section>
 		<section class="py-12 px-4 relative">
-			<h1 class="text-3xl text-center font-bold mb-4">Galería</h1>
-			<p class="text-center mb-8">Aquí encontrarás fotos y videos de eventos que hemos organizado.</p>
+			<h1 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Galería</h1>
+			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Aquí encontrarás fotos y videos de eventos que hemos organizado.</p>
 			<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 				<a
 					href="#"
-					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110"
+					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
+                    data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/event_salon_sample_4.webp"
@@ -185,7 +194,8 @@ templ Index() {
 				</a>
 				<a
 					href="#"
-					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110"
+					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
+                    data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/event_salon_sample_3.png"
@@ -195,7 +205,8 @@ templ Index() {
 				</a>
 				<a
 					href="#"
-					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110"
+					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
+                    data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/event_salon_sample_2.png"
@@ -205,7 +216,8 @@ templ Index() {
 				</a>
 				<a
 					href="#"
-					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110"
+					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
+                    data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/event_salon_sample_1.png"
@@ -218,7 +230,7 @@ templ Index() {
 				<a class="tracking-normal hover:tracking-wide transition-all" href="#">Ver todas ></a>
 			</p>
 		</section>
-		<section class="py-12 px-4 relative bg-secondary text-light">
+		<section class="py-12 px-4 relative bg-primary text-light">
 			<h1 class="text-3xl text-center font-bold mb-8">¿Quienes somos?</h1>
 			<p class="text-lg font-bold">
 				Salon eventos es una empresa que se dedica a ofrecer una experiencia de eventos innovadora y personalizada
@@ -229,7 +241,7 @@ templ Index() {
 			<h1 class="text-3xl text-center font-bold mb-4">Contactanos</h1>
 			<p class="text-center mb-8">Si deseas agendar una fecha o recibir más información, contáctanos.</p>
 			<div class="flex flex-col items-center">
-				<form class="bg-secondary text-yellow-900 rounded-t-lg w-7/8 max-w-96 px-4 py-8 pb-12">
+				<form class="bg-secondary text-dark rounded-t-lg w-7/8 max-w-96 px-4 py-8 pb-12">
 					<h2 class="text-2xl font-extrabold mb-4">Dejanos tus datos</h2>
 					<p class="font-semibold mb-8">Nos pondremos en contacto lo antes posible.</p>
 					<div class="space-y-4">
@@ -329,4 +341,41 @@ templ Index() {
 			</div>
 		</section>
 	}
+}
+
+templ Script() {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tl = gsap.timeline();
+
+            tl.to("[data-hero-item]", {
+                y: "0px",
+                opacity: 1,
+                duration: 0.4,
+                stagger: 0.15,
+            });
+
+            const intscObsv = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        tl.to(entry.target, {
+                            y: "0px",
+                            opacity: 1,
+                            duration: 0.4,
+                            stagger: 0.15,
+                        }, ">");
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.25
+            });
+
+            let observedElems = document.querySelectorAll("[data-intsc-animate-item]")
+            for (let elem of observedElems) {
+                intscObsv.observe(elem);
+            }
+        });
+    </script>
 }
