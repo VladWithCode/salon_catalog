@@ -6,8 +6,11 @@
 
     --color-light: var(--color-stone-100);
     --color-dark: #2C1810;
-    --color-primary: #D4AF37;
-    --color-secondary: #E8B4B8;
+    /*--color-primary: #D4AF37;*/
+    --color-primary: #5C4033;
+    /*--color-secondary: #E8B4B8;*/
+    --color-secondary: #F8F2E4;
+    --color-accent: #DE7C5A;
 }
 
 @layer utilities {
