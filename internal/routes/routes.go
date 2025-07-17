@@ -13,6 +13,7 @@ func NewRouter() http.Handler {
 	router := NewCustomServeMux()
 
 	router.HandleFunc("GET /{$}", RenderIndex)
+	router.HandleFunc("GET /catalogo", RenderCatalaog)
 
 	RegisterImagesRoutes(router)
 	RegisterCategoriesRoutes(router)
@@ -33,6 +34,15 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render Index err: %v\n", err)
+	}
+}
+
+func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
+	err := pages.Catalog().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Catalog err: %v\n", err)
 	}
 }
 

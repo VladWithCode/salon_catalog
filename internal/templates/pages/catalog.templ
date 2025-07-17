@@ -1,0 +1,50 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+
+templ Catalog() {
+@templates.BaseLayout("", nil) {
+<main>
+    <section class="relative z-0 overflow-hidden">
+        <div class="absolute inset-0 z-0 brigthness-50">
+            <img src="/static/assets/event_salon_pic_4.png" alt="Imagen del area de bar del salon de eventos"
+                class="w-full h-full object-cover object-center" />
+        </div>
+        <div class="relative z-10 px-4 pt-32 pb-8 bg-gradient-to-br from-primary/80 to-accent/80">
+            <h1 class="text-3xl text-secondary font-bold tracking-wide">Catalogo</h1>
+        </div>
+    </section>
+    <section class="relative flex z-0 bg-stone-50 p-2">
+        <button class="grow-0 shrink-0 bg-secondary p-3 space-y-1 rounded-xs shadow-xs shadow-stone-800/30">
+            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
+            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
+            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
+        </button>
+        <div class="relative flex grow gap-2 px-4">
+            <button class="absolute top-1/2 left-1 -translate-y-1/2 transition-[opacity] opacity-0 hover:opacity-100">
+                <svg class="h-7 w-7 stroke-current rotate-180">
+                    <use href="/static/assets/chevron.svg#chv"></use>
+                </svg>
+            </button>
+            <button class="absolute top-1/2 right-1 -translate-y-1/2">
+                <svg class="h-7 w-7 stroke-current">
+                    <use href="/static/assets/chevron.svg#chv"></use>
+                </svg>
+            </button>
+            <button
+                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
+                Todos
+            </button>
+            <button
+                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
+                Servicios
+            </button>
+            <button
+                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
+                Todos
+            </button>
+        </div>
+    </section>
+</main>
+}
+}

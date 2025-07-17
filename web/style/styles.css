@@ -11,6 +11,8 @@
     /*--color-secondary: #E8B4B8;*/
     --color-secondary: #F8F2E4;
     --color-accent: #DE7C5A;
+
+    --radius-xs: 0.15rem;
 }
 
 @layer utilities {
