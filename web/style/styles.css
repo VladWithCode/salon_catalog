@@ -19,6 +19,14 @@
     .grid-rows-page {
         grid-template-rows: auto 1fr auto;
     }
+
+    .bg-brand-1 {
+        background: 
+            linear-gradient(to bottom right, --alpha(var(--color-accent) / 80%), --alpha(var(--color-primary) / 80%)),
+            url("/static/assets/bg_repeat_1.png") 0/auto 100% repeat;
+        background-repeat: no-repeat, repeat;
+        background-size: cover, auto 100%;
+    }
 }
 
 @base {
