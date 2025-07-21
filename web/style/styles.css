@@ -27,6 +27,15 @@
         background-repeat: no-repeat, repeat;
         background-size: cover, auto 100%;
     }
+    .bg-brand-1-lg {
+        background:
+            url("/static/assets/bg_repeat_1.png") 0/10rem repeat;
+    }
+    .bg-paper {
+        position: absolute;
+        background: url("/static/assets/bg_texture.jpg"), linear-gradient(var(--color-secondary));
+        background-blend-mode: luminosity, color;
+    }
 }
 
 @base {
