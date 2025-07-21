@@ -14,6 +14,7 @@ func NewRouter() http.Handler {
 
 	router.HandleFunc("GET /{$}", RenderIndex)
 	router.HandleFunc("GET /catalogo", RenderCatalaog)
+	router.HandleFunc("GET /iniciar-sesion", RenderSignIn)
 
 	RegisterImagesRoutes(router)
 	RegisterCategoriesRoutes(router)
@@ -43,6 +44,15 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render Catalog err: %v\n", err)
+	}
+}
+
+func RenderSignIn(w http.ResponseWriter, r *http.Request) {
+	err := pages.SignIn().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render SignIn err: %v\n", err)
 	}
 }
 
