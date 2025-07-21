@@ -26,18 +26,18 @@ templ Header() {
 			class="md:hidden focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-2"
 			aria-label="Toggle menu"
 		>
-			<div class="w-6 h-6 flex flex-col justify-center items-center">
+			<div class="w-6 h-6 flex flex-col justify-center items-center space-y-1.5">
 				<span
 					id="hamburger-line-1"
-					class="block w-6 h-0.5 bg-current transition-all duration-300 ease-in-out"
+					class="block w-6 h-0.5 bg-current"
 				></span>
 				<span
 					id="hamburger-line-2"
-					class="block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 ease-in-out"
+					class="block w-6 h-0.5 bg-current"
 				></span>
 				<span
 					id="hamburger-line-3"
-					class="block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 ease-in-out"
+					class="block w-6 h-0.5 bg-current"
 				></span>
 			</div>
 		</button>
@@ -291,26 +291,28 @@ templ Script() {
 	<script>
     document.addEventListener("DOMContentLoaded", function () {
         // Animations
-        const tl = gsap.timeline();
+        const tl = gsap.timeline({ defaults: { duration: 0.4, ease: "power2.out" } });
         const pageTopObserver = new IntersectionObserver(entries => {
             const ent = entries[0];
 
             if (!ent.isIntersecting) {
+                tl.fromTo("#header", {
+                    y: "-20rem"
+                }, {
+                    y: "0rem",
+                })
                 tl.to("#header", {
                     position: "fixed",
-                    backgroundColor: "oklch(97% 0.001 106.424)",
-                    color: "oklch(0% 0.001 0.001)",
-                })
-                tl.fromTo("#header", {
-                    y: "-100%"
-                }, {
-                    y: "0",
-                }, "<")
+                    backgroundColor: "var(--color-secondary)",
+                    color: "var(--color-dark)",
+                    boxShadow: "var(--shadow-sm)",
+                }, "<+=0.2")
             } else {
                 tl.to("#header", {
                     position: "",
                     backgroundColor: "",
                     color: "",
+                    boxShadow: "",
                 })
             }
         });
