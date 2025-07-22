@@ -20,6 +20,9 @@ func NewRouter() http.Handler {
 	RegisterCategoriesRoutes(router)
 	RegisterProductsRoutes(router)
 
+	// Api
+	router.HandleFunc("POST /sign-in")
+
 	// Serve static files
 	fs := http.FileServer(http.Dir("web/static/"))
 	router.Handle("GET /static/", http.StripPrefix("/static/", fs))
