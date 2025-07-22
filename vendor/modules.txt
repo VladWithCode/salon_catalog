@@ -3,12 +3,11 @@
 github.com/a-h/templ
 github.com/a-h/templ/runtime
 github.com/a-h/templ/safehtml
-# github.com/auth0/go-jwt-middleware/v2 v2.3.0
-## explicit; go 1.23.0
-github.com/auth0/go-jwt-middleware/v2
-github.com/auth0/go-jwt-middleware/v2/internal/oidc
-github.com/auth0/go-jwt-middleware/v2/jwks
-github.com/auth0/go-jwt-middleware/v2/validator
+# github.com/golang-jwt/jwt/v5 v5.2.3
+## explicit; go 1.18
+github.com/golang-jwt/jwt/v5
+# github.com/google/go-cmp v0.7.0
+## explicit; go 1.21
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
@@ -40,7 +39,6 @@ github.com/jackc/puddle/v2/internal/genstack
 github.com/joho/godotenv
 # golang.org/x/crypto v0.37.0
 ## explicit; go 1.23.0
-golang.org/x/crypto/ed25519
 golang.org/x/crypto/pbkdf2
 # golang.org/x/sync v0.13.0
 ## explicit; go 1.23.0
@@ -60,9 +58,3 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 golang.org/x/text/width
-# gopkg.in/go-jose/go-jose.v2 v2.6.3
-## explicit
-gopkg.in/go-jose/go-jose.v2
-gopkg.in/go-jose/go-jose.v2/cipher
-gopkg.in/go-jose/go-jose.v2/json
-gopkg.in/go-jose/go-jose.v2/jwt
