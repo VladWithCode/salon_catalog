@@ -591,6 +591,11 @@
   .self-center {
     align-self: center;
   }
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .overflow-hidden {
     overflow: hidden;
   }
@@ -1272,7 +1277,7 @@
     background: url("/static/assets/bg_repeat_1.png") 0/10rem repeat;
   }
   .bg-paper {
-    background: url("/static/assets/bg_texture.jpg"), linear-gradient(var(--color-secondary));
+    background: url("/static/assets/bg_texture.webp") 1/100% auto repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
     background-blend-mode: luminosity, color;
   }
 }
