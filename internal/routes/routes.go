@@ -56,6 +56,8 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	if a.ID != "" && a.ID != auth.InvalidTokenID {
 		w.Header().Add("HX-Redirect", "/panel")
+		http.Redirect(w, r, "/panel", http.StatusFound)
+		return
 	}
 
 	err := pages.SignIn(
@@ -71,6 +73,8 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	if a.ID != "" && a.ID != auth.InvalidTokenID {
 		w.Header().Add("HX-Redirect", "/panel")
+		http.Redirect(w, r, "/panel", http.StatusFound)
+		return
 	}
 
 	signinPage := pages.SignIn
