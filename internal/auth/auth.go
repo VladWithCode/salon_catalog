@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/vladwithcode/salon_catalog/internal/db"
-	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
 type Auth struct {
@@ -165,11 +163,6 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 }
 
 func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string) {
-	w.Header().Add("HX-Location", "/iniciar-sesion")
-	err := pages.SignIn(&pages.FormState{}).Render(context.Background(), w)
-	if err != nil {
-		fmt.Printf("Reject Unauth err: %v", err)
-		w.WriteHeader(500)
-		w.Write([]byte("Error inesperado"))
-	}
+	w.Header().Add("HX-Redirect", "/iniciar-sesion")
+	http.Redirect(w, r, "/iniciar-sesion", http.StatusFound)
 }
