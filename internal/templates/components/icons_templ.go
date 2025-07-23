@@ -8,6 +8,14 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+const (
+	IconEmail    = "email"
+	IconPassword = "password"
+	IconUser     = "user"
+	IconPhone    = "phone"
+	IconSearch   = "search"
+)
+
 func renderIcon(iconName string, hasError bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -30,7 +38,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch iconName {
-		case "email":
+		case IconEmail:
 			var templ_7745c5c3_Var2 = []any{"h-5 w-5", templ.KV("text-red-400", hasError), templ.KV("text-gray-400", !hasError)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
@@ -53,7 +61,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "password":
+		case IconPassword:
 			var templ_7745c5c3_Var4 = []any{"h-5 w-5", templ.KV("text-red-400", hasError), templ.KV("text-gray-400", !hasError)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
@@ -76,7 +84,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "user":
+		case IconUser:
 			var templ_7745c5c3_Var6 = []any{"h-5 w-5", templ.KV("text-red-400", hasError), templ.KV("text-gray-400", !hasError)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {
@@ -99,7 +107,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "phone":
+		case IconPhone:
 			var templ_7745c5c3_Var8 = []any{"h-5 w-5", templ.KV("text-red-400", hasError), templ.KV("text-gray-400", !hasError)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 			if templ_7745c5c3_Err != nil {
@@ -122,7 +130,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "search":
+		case IconSearch:
 			var templ_7745c5c3_Var10 = []any{"h-5 w-5", templ.KV("text-red-400", hasError), templ.KV("text-gray-400", !hasError)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
 			if templ_7745c5c3_Err != nil {
