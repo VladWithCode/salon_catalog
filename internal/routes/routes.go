@@ -5,8 +5,10 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/vladwithcode/salon_catalog/internal/auth"
+	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
@@ -15,7 +17,7 @@ func NewRouter() http.Handler {
 
 	router.HandleFunc("GET /{$}", RenderIndex)
 	router.HandleFunc("GET /catalogo", RenderCatalaog)
-	router.HandleFunc("GET /iniciar-sesion", RenderSignIn)
+	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
 
 	RegisterImagesRoutes(router)
 	RegisterCategoriesRoutes(router)
@@ -51,8 +53,14 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func RenderSignIn(w http.ResponseWriter, r *http.Request) {
-	err := pages.SignIn().Render(context.Background(), w)
+func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	if a.ID != "" && a.ID != auth.InvalidTokenID {
+		w.Header().Add("HX-Redirect", "/panel")
+	}
+
+	err := pages.SignIn(
+		&pages.FormState{},
+	).Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -61,23 +69,90 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	if a.ID != "" {
-		w.Header().Add("HX-Redirect", "/dashboard")
+	if a.ID != "" && a.ID != auth.InvalidTokenID {
+		w.Header().Add("HX-Redirect", "/panel")
 	}
 
 	signinPage := pages.SignIn
 	err := r.ParseForm()
 	if err != nil {
-		err = signinPage().Render(context.TODO(), w)
+		err = signinPage(&pages.FormState{
+			ServerError: "Error inesperado",
+		}).Render(context.Background(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
-			return
 		}
-
 		return
 	}
 
+	username := r.FormValue("user")
+	password := r.FormValue("password")
+
+	if username == "" || password == "" {
+		err = signinPage(&pages.FormState{
+			UserError:     "El nombre de usuario es requerido",
+			UserValue:     username,
+			PasswordError: "La contraseña es requerida",
+		}).Render(context.Background(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	user, err := db.GetUserByUsername(username)
+	if err != nil {
+		err = signinPage(&pages.FormState{
+			UserError:     "Revisa que el nombre de usuario sea correcto",
+			UserValue:     username,
+			PasswordError: "Revisa que la contraseña sea correcta",
+		}).Render(context.Background(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	err = user.ValidatePass(password)
+	if err != nil {
+		err = signinPage(&pages.FormState{
+			UserError:     "Correo electronico no encontrado",
+			UserValue:     username,
+			PasswordError: "La contraseña es incorrecta",
+		}).Render(context.Background(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	token, err := auth.CreateToken(user)
+	if err != nil {
+		err = signinPage(&pages.FormState{
+			ServerError: "Error inesperado",
+		}).Render(context.Background(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24 * 7),
+		HttpOnly: true,
+		// Secure:   true,
+	})
+
+	w.Header().Add("HX-Redirect", "/panel")
+	w.WriteHeader(200)
+	w.Write([]byte("OK"))
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {
