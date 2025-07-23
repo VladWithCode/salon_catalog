@@ -9,8 +9,17 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 
-func SignIn() templ.Component {
+type FormState struct {
+	UserValue     string
+	UserError     string
+	PasswordValue string
+	PasswordError string
+	ServerError   string
+}
+
+func SignIn(formState *FormState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +52,45 @@ func SignIn() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-0 z-0\"><form hx-post=\"/api/sign-in\" class=\"bg-stone-50 w-4/5 rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6\"><h1 class=\"text-3xl font-bold tracking-wide\">Iniciar Sesión</h1><div class=\"space-y-4\"><div class=\"space-y-2\"><label for=\"password\" class=\"block font-medium\">Contraseña</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"bg-light text-dark border-stone-400 border rounded px-4 py-2 w-full outline-primary\" required></div><button class=\"w-full bg-accent text-lg text-light font-bold py-2 px-4 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-primary\">Iniciar Sesión</button></div></form><div class=\"absolute right-5 bottom-5 text-stone-800/30\"><svg class=\"w-12 h-12 fill-current\"><use href=\"/static/assets/logo.svg#logo\"></use></svg></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-0 z-0\"><form id=\"signin-form\" hx-post=\"/api/sign-in\" hx-select=\"#signin-form\" hx-swap=\"outerHTML\" hx-indicator=\"\" class=\"bg-stone-50 w-4/5 rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if formState.UserError != "" || formState.PasswordError != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " data-invalid=\"true\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "><h1 class=\"text-3xl font-bold tracking-wide\">Iniciar Sesión</h1><div class=\"space-y-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Input(components.InputProps{
+				Name:     "user",
+				Type:     "text",
+				Value:    formState.UserValue,
+				Label:    "Nombre de Usuario",
+				Required: true,
+				Icon:     components.IconUser,
+				Error:    formState.UserError,
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Input(components.InputProps{
+				Name:     "password",
+				Type:     "password",
+				Value:    formState.PasswordValue,
+				Label:    "Contraseña",
+				Required: true,
+				Icon:     components.IconPassword,
+				Error:    formState.PasswordError,
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button class=\"w-full bg-accent text-lg text-light font-bold py-2 px-4 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500\">Iniciar Sesión</button></div></form><div class=\"absolute right-5 bottom-5 text-stone-800/30\"><svg class=\"w-12 h-12 fill-current\"><use href=\"/static/assets/logo.svg#logo\"></use></svg></div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

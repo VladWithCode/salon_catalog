@@ -1,6 +1,4 @@
 package components
-// components/input.templ
-package components
 
 type InputProps struct {
     Name        string
@@ -117,10 +115,10 @@ func getInputClasses(props InputProps) string {
         iconPadding = " pl-10"
     }
     if props.Error != "" {
-        return baseClasses + iconPadding + " border-red-300 bg-red-50 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500"
+        return baseClasses + iconPadding + " input-error"
     }
     if props.Disabled {
-        return baseClasses + iconPadding + " border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
+        return baseClasses + iconPadding + " input-disabled"
     }
-    return baseClasses + iconPadding + " border-gray-300 bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+    return baseClasses + iconPadding + " input-base"
 }

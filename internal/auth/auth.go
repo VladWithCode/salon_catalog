@@ -166,7 +166,7 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 
 func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string) {
 	w.Header().Add("HX-Location", "/iniciar-sesion")
-	err := pages.SignIn().Render(context.Background(), w)
+	err := pages.SignIn(&pages.FormState{}).Render(context.Background(), w)
 	if err != nil {
 		fmt.Printf("Reject Unauth err: %v", err)
 		w.WriteHeader(500)
