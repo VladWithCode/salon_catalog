@@ -1,8 +1,37 @@
 @import "tailwindcss";
 
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+
 @theme {
-    --font-sans: "Plus Jakarta Sans", sans-serif;
-    --font-mono: "Crimson Text", monospace;
+    --font-serif: "Agatho", serif;
+    --font-sans: "Inter", sans-serif;
 
     --color-light: var(--color-stone-100);
     --color-dark: #2C1810;
@@ -32,7 +61,7 @@
             url("/static/assets/bg_repeat_1.png") 0/10rem repeat;
     }
     .bg-paper {
-        background: url("/static/assets/bg_texture.webp") 1/100% auto repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
+        background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
         background-blend-mode: luminosity, color;
     }
 }
