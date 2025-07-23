@@ -156,8 +156,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	})
 
 	w.Header().Add("HX-Redirect", "/panel")
-	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	w.WriteHeader(http.StatusFound)
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {
