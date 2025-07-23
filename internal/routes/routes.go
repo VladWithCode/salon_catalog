@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
@@ -21,7 +22,7 @@ func NewRouter() http.Handler {
 	RegisterProductsRoutes(router)
 
 	// Api
-	router.HandleFunc("POST /sign-in")
+	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("web/static/"))
@@ -57,6 +58,26 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render SignIn err: %v\n", err)
 	}
+}
+
+func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	if a.ID != "" {
+		w.Header().Add("HX-Redirect", "/dashboard")
+	}
+
+	signinPage := pages.SignIn
+	err := r.ParseForm()
+	if err != nil {
+		err = signinPage().Render(context.TODO(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+			return
+		}
+
+		return
+	}
+
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {
