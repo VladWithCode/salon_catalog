@@ -18,6 +18,9 @@ func main() {
 		user = os.Getenv("ADMIN_USERNAME")
 		pass = os.Getenv("ADMIN_PASSWORD")
 	)
+	if user == "" || pass == "" {
+		log.Fatalf("missing ADMIN_USERNAME or ADMIN_PASSWORD")
+	}
 
 	conn, err := db.Connect()
 	if err != nil {
