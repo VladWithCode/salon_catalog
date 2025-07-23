@@ -12,7 +12,7 @@ import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 
 var headHandle = templ.NewOnceHandle()
 
-func BaseLayout(title string, contents templ.Component) templ.Component {
+func BaseLayout(title string, contents templ.Component, isMainPage bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -109,7 +109,7 @@ func BaseLayout(title string, contents templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Header().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.Header(isMainPage).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

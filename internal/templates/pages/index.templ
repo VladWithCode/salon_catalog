@@ -3,9 +3,9 @@ package pages
 import "github.com/vladwithcode/salon_catalog/internal/templates"
 
 templ Index() {
-	@templates.BaseLayout("", nil) {
+	@templates.BaseLayout("", nil, true) {
         @Script()
-		<section class="relative z-0 mb-8">
+		<section id="seccion-hero" class="relative z-0 mb-8">
 			<div class="absolute inset-0 -z-10">
                 <video
                     src="/static/assets/chenacolo_vid.mp4"
@@ -27,7 +27,7 @@ templ Index() {
 					Eventos inolvidables sin importar la ocasión.
 				</p>
 				<a
-					href="#"
+					href="#seccion-contacto"
 					class="text-secondary text-xl text-center font-bold px-8 py-4 border-2 border-accent mt-16 transition-[background,color,font-weight] duration-120 bg-accent shadow shadow-dark/35 hover:bg-secondary hover:text-primary hover:border-current opacity-0 translate-y-6"
 					data-hero-item
 				>
@@ -35,7 +35,7 @@ templ Index() {
 				</a>
 			</div>
 		</section>
-        <section class="px-4 mb-6">
+        <section id="seccion-oferta" class="px-4 mb-6">
 			<h1 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Nuestra Oferta</h1>
 			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Conoce los servicios que tenemos para tu evento.</p>
 			<div class="space-y-4">
@@ -107,7 +107,7 @@ templ Index() {
 				</div>
 			</div>
 		</section>
-		<section class="relative z-0 overflow-hidden">
+		<section id="seccion-catalogo" class="relative z-0 overflow-hidden">
 			<div class="absolute inset-0 z-0">
 				<img
 					src="/static/assets/chenacolo_24.jpeg"
@@ -162,7 +162,7 @@ templ Index() {
 				</div>
 			</div>
 		</section>
-		<section class="py-12 px-4 relative">
+		<section id="seccion-galeria" class="py-12 px-4 relative">
 			<h1 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Galería</h1>
 			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Aquí encontrarás fotos y videos de eventos que hemos organizado.</p>
 			<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -215,14 +215,14 @@ templ Index() {
 				<a class="tracking-normal hover:tracking-wide transition-all" href="#">Ver todas ></a>
 			</p>
 		</section>
-		<section class="py-12 px-4 relative bg-brand-1 text-light">
+		<section id="seccion-nosotros" class="py-12 px-4 relative bg-brand-1 text-light">
 			<h1 class="text-3xl text-center font-bold mb-8">¿Quienes somos?</h1>
 			<p class="text-lg text-center font-bold">
 				Salon eventos es una empresa que se dedica a ofrecer una experiencia de eventos innovadora y personalizada
 				para todas las personas.
 			</p>
 		</section>
-		<section class="py-12 px-4 relative">
+		<section id="seccion-contacto" class="py-12 px-4 relative">
 			<h1 class="text-3xl text-center font-bold mb-4">Contactanos</h1>
 			<p class="text-center mb-8">Si deseas agendar una fecha o recibir más información, contáctanos.</p>
 			<div class="flex flex-col items-center">

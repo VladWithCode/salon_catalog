@@ -1,11 +1,11 @@
 package components
 
-templ Header() {
+templ Header(isMainPage bool) {
 	@Script()
 	<div id="top-observer-target" class="absolute top-[90vh] left-0 right-0 pointer-events-none"></div>
 	<header
 		id="header"
-		class="absolute top-0 left-0 right-0 flex h-12 z-40 flex items-center justify-between text-stone-50 px-4"
+		class="absolute top-0 left-0 right-0 h-12 z-40 flex items-center justify-between text-stone-50 px-4"
 	>
 		<div class="flex items-center">
 			<a href="/" class="flex items-center gap-4">
@@ -82,7 +82,11 @@ templ Header() {
 				<ul class="space-y-2" id="menu-items">
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-hero"
+							} else {
+								href="/"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 hover:text-dark transition-colors group"
 						>
 							<svg
@@ -103,7 +107,11 @@ templ Header() {
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-oferta"
+							} else {
+								href="/servicios"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -124,7 +132,11 @@ templ Header() {
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-catalogo"
+							} else {
+								href="/catalogo"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -140,12 +152,16 @@ templ Header() {
 									d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
 								></path>
 							</svg>
-							<span class="font-medium">Beauty Treatments</span>
+							<span class="font-medium">Catálogo</span>
 						</a>
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-galeria"
+							} else {
+								href="/salon"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20  active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -166,7 +182,11 @@ templ Header() {
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-contacto"
+							} else {
+								href="/reservaciones"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -187,7 +207,11 @@ templ Header() {
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-ubicacion"
+							} else {
+								href="/ubicacion"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -214,7 +238,11 @@ templ Header() {
 					</li>
 					<li class="menu-item">
 						<a
-							href="#"
+							if isMainPage {
+								href="#seccion-contacto"
+							} else {
+								href="/contacto"
+							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
 							<svg
@@ -472,7 +500,7 @@ templ Script() {
         const menuLinks = mobileMenu.querySelectorAll('a');
         menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();
+                //e.preventDefault();
 
                 // Add a subtle click animation
                 gsap.to(link, {

@@ -4,7 +4,7 @@ import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 
 var headHandle = templ.NewOnceHandle()
 
-templ BaseLayout(title string, contents templ.Component) {
+templ BaseLayout(title string, contents templ.Component, isMainPage bool) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -33,7 +33,7 @@ templ BaseLayout(title string, contents templ.Component) {
 		</head>
 		<body>
 			<div class="grid grid-rows-page min-h-screen w-full overflow-x-hidden overflow-y-auto">
-				@components.Header()
+				@components.Header(isMainPage)
 				{ children... }
 				@components.Footer()
 			</div>
