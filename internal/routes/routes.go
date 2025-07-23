@@ -150,8 +150,9 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		Name:     "auth_token",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24 * 7),
+		Path:     "/",
 		HttpOnly: true,
-		// Secure:   true,
+		Secure:   true,
 	})
 
 	w.Header().Add("HX-Redirect", "/panel")
