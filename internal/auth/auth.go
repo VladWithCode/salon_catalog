@@ -31,6 +31,9 @@ type AuthClaims struct {
 	jwt.RegisteredClaims
 }
 
+const DefaultExpirationTime = time.Hour * 24
+const InvalidTokenID = "invalid"
+
 func CreateToken(user *db.User) (string, error) {
 	var (
 		t *jwt.Token
@@ -79,16 +82,19 @@ func PopulateAuth(next AuthedHandler) http.HandlerFunc {
 		var auth = &Auth{}
 		defer next(w, r, auth)
 		if err != nil {
+			auth.ID = InvalidTokenID
 			return
 		}
 
 		tokenStr := strings.Split(cookieToken.String(), "=")
 		if len(tokenStr) < 2 {
+			auth.ID = InvalidTokenID
 			return
 		}
 
 		t, err := ParseToken(tokenStr[1])
 		if err != nil {
+			auth.ID = InvalidTokenID
 			return
 		}
 
@@ -101,6 +107,7 @@ func PopulateAuth(next AuthedHandler) http.HandlerFunc {
 			)
 
 			if !ok1 || !ok2 || !ok3 || !ok4 {
+				auth.ID = InvalidTokenID
 				return
 			}
 
