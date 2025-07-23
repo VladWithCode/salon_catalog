@@ -17,17 +17,14 @@ templ BaseLayout(title string, contents templ.Component) {
 					{ title }
 				}
 			</title>
-            <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
 			@headHandle.Once() {
 				<link rel="dns-prefetch" href={ `//fonts.googleapis.com` }/>
 				<link rel="dns-prefetch" href={ `//fonts.gstatic.com` }/>
 				<link rel="preconnect" href="https://fonts.googleapis.com"/>
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Crimson+Text:wght@400;600&display=swap"
-					rel="stylesheet"
-				/>
 				<link rel="stylesheet" href="/static/css/styles.css"/>
+				<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"/>
 				<script src="/static/js/htmx.js"></script>
 				<script src="/static/js/htmx-response-targets.js"></script>
 				<script src="/static/js/htmx-json-enc.js"></script>
@@ -36,9 +33,9 @@ templ BaseLayout(title string, contents templ.Component) {
 		</head>
 		<body>
 			<div class="grid grid-rows-page min-h-screen w-full overflow-x-hidden overflow-y-auto">
-                @components.Header()
-				{children...}
-                @components.Footer()
+				@components.Header()
+				{ children... }
+				@components.Footer()
 			</div>
 		</body>
 	</html>
