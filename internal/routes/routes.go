@@ -123,9 +123,9 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	err = user.ValidatePass(password)
 	if err != nil {
 		err = signinPage(&pages.FormState{
-			UserError:     "Correo electronico no encontrado",
+			UserError:     "Revisa que el nombre de usuario sea correcto",
 			UserValue:     username,
-			PasswordError: "La contraseña es incorrecta",
+			PasswordError: "Revisa que la contraseña sea correcta",
 		}).Render(context.Background(), w)
 		if err != nil {
 			w.WriteHeader(500)
