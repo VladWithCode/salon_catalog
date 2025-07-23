@@ -18,6 +18,9 @@ type User struct {
 	Email    string `db:"email" json:"email"`
 }
 
+// ValidatePass compares the provided string against the user's password
+// returns an error if the passwords don't match
+// returns nil otherwise
 func (u *User) ValidatePass(pw string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
 
