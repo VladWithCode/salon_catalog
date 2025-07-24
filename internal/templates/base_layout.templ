@@ -32,7 +32,7 @@ templ BaseLayout(title string, contents templ.Component, isMainPage bool) {
 			}
 		</head>
 		<body>
-			<div class="grid grid-rows-page min-h-screen w-full overflow-x-hidden overflow-y-auto">
+			<div class="grid grid-rows-page grid-cols-1 xl:grid-cols-12 min-h-screen w-full overflow-x-hidden overflow-y-auto">
 				@components.Header(isMainPage)
 				{ children... }
 				@components.Footer()
