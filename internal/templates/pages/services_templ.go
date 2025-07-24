@@ -51,26 +51,34 @@ func Services() templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs("https://wa.me/6181556407?text=Hola!+Me+gustaría+conocer+más+sobre+la+planeacion+de+bodas+de+Salón+Chenacolo.")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/services.templ`, Line: 42, Col: 125}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/services.templ`, Line: 43, Col: 125}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex items-center justify-center gap-2 text-lg text-secondary font-bold tracking-wide underline underline-offset-2 bg-green-600 py-4 rounded-xs\"><svg class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/wsp.svg#wsp\"></use></svg> <span class=\"block\">Me interesa saber más ></span></a></section><section id=\"seccion-bodas\" class=\"relative z-0 px-4 py-16 bg-brand-1 space-y-4\"><img src=\"/static/assets/chenacolo_9.jpeg\" alt=\"Imagen de un árbol en el fondo de un jardín\" class=\"w-full aspect-[3/2] object-cover object-center rounded-xs mb-8\"><h2 class=\"relative text-2xl text-secondary font-semibold\"><span class=\"block absolute -top-4 h-2 w-24 bg-current\"></span> Eventos Corporativos</h2><p class=\"tracking-wide text-stone-50/80\">En Salón Chenacolo, convertimos la boda de tus sueños en una realidad inolvidable. Nuestro equipo de expertos se encarga de cada detalle con elegancia y precisión para que tú solo te preocupes por disfrutar tu gran día.</p><a target=\"_blank\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex items-center justify-center gap-2 text-lg text-secondary font-bold tracking-wide underline underline-offset-2 bg-green-600 py-4 rounded-xs\"><svg class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/wsp.svg#wsp\"></use></svg> <span class=\"block\">Me interesa saber más ></span></a></section><section id=\"seccion-bodas\" class=\"relative z-0 px-4 py-16 bg-paper-dark space-y-4 -mb-px\"><img src=\"/static/assets/chenacolo_9.jpeg\" alt=\"Imagen de un árbol en el fondo de un jardín\" class=\"w-full aspect-[3/2] object-cover object-center rounded-xs mb-8\"><h2 class=\"relative text-2xl text-secondary font-semibold\"><span class=\"block absolute -top-4 h-2 w-24 bg-current\"></span> Eventos Corporativos</h2><p class=\"tracking-wide text-stone-50/80\">En Salón Chenacolo, convertimos la boda de tus sueños en una realidad inolvidable. Nuestro equipo de expertos se encarga de cada detalle con elegancia y precisión para que tú solo te preocupes por disfrutar tu gran día.</p><a target=\"_blank\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs("https://wa.me/6181556407?text=Hola!+Me+gustaría+conocer+más+sobre+los+eventos+corporativos+de+Salón+Chenacolo.")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/services.templ`, Line: 68, Col: 127}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/services.templ`, Line: 69, Col: 127}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex items-center justify-center gap-2 text-lg text-secondary font-bold tracking-wide underline underline-offset-2 bg-green-600 py-4 rounded-xs\"><svg class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/wsp.svg#wsp\"></use></svg> <span class=\"block\">Me interesa saber más ></span></a></section></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex items-center justify-center gap-2 text-lg text-secondary font-bold tracking-wide underline underline-offset-2 bg-green-600 py-4 rounded-xs\"><svg class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/wsp.svg#wsp\"></use></svg> <span class=\"block\">Me interesa saber más ></span></a></section>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.CTASection().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -105,7 +113,7 @@ func ServicesScript() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
