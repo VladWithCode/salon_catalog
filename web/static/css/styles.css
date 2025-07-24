@@ -1013,6 +1013,12 @@
   .text-current {
     color: currentcolor;
   }
+  .text-current\/70 {
+    color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, currentcolor 70%, transparent);
+    }
+  }
   .text-current\/80 {
     color: currentcolor;
     @supports (color: color-mix(in lab, red, red)) {
@@ -1060,6 +1066,12 @@
   }
   .text-stone-50 {
     color: var(--color-stone-50);
+  }
+  .text-stone-50\/70 {
+    color: color-mix(in srgb, oklch(98.5% 0.001 106.423) 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-stone-50) 70%, transparent);
+    }
   }
   .text-stone-50\/80 {
     color: color-mix(in srgb, oklch(98.5% 0.001 106.423) 80%, transparent);
