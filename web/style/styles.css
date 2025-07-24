@@ -51,10 +51,10 @@
 
     .bg-brand-1 {
         background: 
-            linear-gradient(to bottom right, --alpha(var(--color-primary) / 70%), --alpha(var(--color-primary) / 70%)),
-            url("/static/assets/bg_repeat_1.png") 0/auto 100% repeat;
+            radial-gradient(circle at 50% 50%, --alpha(var(--color-stone-950) / 60%), --alpha(var(--color-stone-950) / 80%)),
+            url("/static/assets/bg_repeat_1.png");
         background-repeat: no-repeat, repeat;
-        background-size: cover, auto 100%;
+        background-size: cover, 10rem;
     }
     .bg-brand-1-lg {
         background:
