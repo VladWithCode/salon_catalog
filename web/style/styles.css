@@ -64,6 +64,10 @@
         background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
         background-blend-mode: luminosity, color;
     }
+    .bg-paper-dark {
+        background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-primary), var(--color-primary));
+        background-blend-mode: color-burn, color;
+    }
 
     .input-base {
         @apply border-gray-300 bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400;
