@@ -27,18 +27,9 @@ templ Header(isMainPage bool) {
 			aria-label="Toggle menu"
 		>
 			<div class="w-6 h-6 flex flex-col justify-center items-center space-y-1.5">
-				<span
-					id="hamburger-line-1"
-					class="block w-6 h-0.5 bg-current"
-				></span>
-				<span
-					id="hamburger-line-2"
-					class="block w-6 h-0.5 bg-current"
-				></span>
-				<span
-					id="hamburger-line-3"
-					class="block w-6 h-0.5 bg-current"
-				></span>
+				<span id="hamburger-line-1" class="block w-6 h-0.5 bg-current"></span>
+				<span id="hamburger-line-2" class="block w-6 h-0.5 bg-current"></span>
+				<span id="hamburger-line-3" class="block w-6 h-0.5 bg-current"></span>
 			</div>
 		</button>
 	</header>
@@ -114,20 +105,10 @@ templ Header(isMainPage bool) {
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
-							<svg
-								class="w-5 h-5 mr-3 text-primary menu-icon"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-								></path>
-							</svg>
-							<span class="font-medium">Servicios de Eventos</span>
+                            <svg class="w-5 h-5 mr-3 text-primary stroke-current menu-icon">
+                                <use href="/static/assets/briefcase.svg#briefcase"></use>
+                            </svg>
+							<span class="font-medium">Servicios</span>
 						</a>
 					</li>
 					<li class="menu-item">
@@ -136,6 +117,21 @@ templ Header(isMainPage bool) {
 								href="#seccion-catalogo"
 							} else {
 								href="/catalogo"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+                            <svg class="w-5 h-5 mr-3 text-primary fill-current menu-icon">
+                                <use href="/static/assets/glass.svg#glass"></use>
+                            </svg>
+							<span class="font-medium">Catálogo</span>
+						</a>
+					</li>
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-oferta"
+							} else {
+								href="/salon"
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
@@ -149,10 +145,10 @@ templ Header(isMainPage bool) {
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+									d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
 								></path>
 							</svg>
-							<span class="font-medium">Catálogo</span>
+							<span class="font-medium">Salón</span>
 						</a>
 					</li>
 					<li class="menu-item">
@@ -160,7 +156,7 @@ templ Header(isMainPage bool) {
 							if isMainPage {
 								href="#seccion-galeria"
 							} else {
-								href="/salon"
+								href="/galeria"
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20  active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
@@ -319,7 +315,7 @@ templ Script() {
 	<script>
     document.addEventListener("DOMContentLoaded", function () {
         // Animations
-        const tl = gsap.timeline({ defaults: { duration: 0.4, ease: "power2.out" } });
+        const tl = gsap.timeline({defaults: {duration: 0.4, ease: "power2.out"}});
         const pageTopObserver = new IntersectionObserver(entries => {
             const ent = entries[0];
 
