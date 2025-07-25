@@ -2,7 +2,11 @@ package components
 
 templ Header(isMainPage bool) {
 	@Script()
-	<div id="top-observer-target" class="absolute top-[90vh] left-0 right-0 pointer-events-none"></div>
+	<div id="top-observer-target" class={
+       "absolute left-0 right-0 pointer-events-none",
+       templ.KV("top-[20vh]", !isMainPage),
+       templ.KV("top-[90vh]", isMainPage),
+   }></div>
 	<header
 		id="header"
 		class="absolute top-0 left-0 right-0 h-12 z-40 flex items-center justify-between text-stone-50 px-4"
