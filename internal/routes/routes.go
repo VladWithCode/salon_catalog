@@ -24,6 +24,9 @@ func NewRouter() http.Handler {
 	RegisterImagesRoutes(router)
 	RegisterCategoriesRoutes(router)
 	RegisterProductsRoutes(router)
+	RegisterWizardRoutes(router)
+	RegisterCatalogRoutes(router)
+	RegisterCartRoutes(router)
 
 	// Api
 	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))
@@ -58,9 +61,9 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 func RenderServices(w http.ResponseWriter, r *http.Request) {
 	err := pages.Services().Render(context.Background(), w)
 	if err != nil {
+		log.Printf("failed to render Services err: %v\n", err)
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to render Services err: %v\n", err)
 	}
 }
 

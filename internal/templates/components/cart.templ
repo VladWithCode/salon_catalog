@@ -1,0 +1,427 @@
+package components
+
+import "fmt"
+import "github.com/vladwithcode/salon_catalog/internal/db"
+
+templ FloatingCart() {
+    @CartScript()
+    
+    <!-- Floating Cart Button -->
+    <div class="fixed bottom-2 right-4 z-40" id="floating-cart">
+        <button 
+            class="bg-accent text-white rounded-full p-3.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative group"
+            data-cart-toggle
+            hx-get="/cart"
+            hx-target="#cart-sidebar"
+            hx-trigger="click"
+        >
+            <!-- Cart Icon -->
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5H19"/>
+            </svg>
+            
+            <!-- Item Count Badge -->
+            <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 opacity-0 scale-0 transition-all duration-200"
+                 data-cart-count>
+                0
+            </div>
+            
+            <!-- Tooltip -->
+            <div class="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                Ver selección
+            </div>
+        </button>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50"
+         id="cart-sidebar">
+        <!-- Cart content will be loaded here -->
+    </div>
+
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40"
+         id="cart-backdrop"></div>
+}
+
+templ CartSidebar(items []db.CartItem, total int) {
+    <div class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold">Tu Selección</h2>
+                <button class="text-white hover:text-gray-200 transition-colors" data-cart-close>
+                    <div class="p-4">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+            <p class="text-white/90 text-sm mt-1">
+                {fmt.Sprintf("%d", len(items))} elemento(s) seleccionado(s)
+            </p>
+        </div>
+
+        <!-- Cart Items -->
+        <div class="flex-1 overflow-y-auto p-4" data-cart-items>
+            if len(items) == 0 {
+                @EmptyCart()
+            } else {
+                <div class="space-y-4">
+                    for _, item := range items {
+                        @CartItem(item)
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Footer -->
+        if len(items) > 0 {
+            <div class="border-t p-6 bg-gray-50">
+                <!-- Total (if applicable) -->
+                if total > 0 {
+                    <div class="flex justify-between items-center mb-4 text-lg font-semibold">
+                        <span>Total estimado:</span>
+                        <span class="text-accent">${fmt.Sprintf("%.2f", float64(total))}</span>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button 
+                        class="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
+                        hx-post="/event/save-plan"
+                        hx-include="[data-cart-items]"
+                        hx-target="#cart-sidebar"
+                        data-cart-save
+                    >
+                        Guardar Selección
+                    </button>
+                    
+                    <button 
+                        class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                        hx-get="/contact?source=cart"
+                        hx-target="body"
+                        hx-push-url="/contacto"
+                    >
+                        Solicitar Cotización
+                    </button>
+                    
+                    <button 
+                        class="w-full text-gray-600 py-2 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                        hx-post="/cart/clear"
+                        hx-target="#cart-sidebar"
+                        hx-confirm="¿Estás seguro de que quieres limpiar tu selección?"
+                        data-cart-clear
+                    >
+                        Limpiar Todo
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+templ CartItem(item db.CartItem) {
+    <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
+         data-cart-item={item.ID}>
+        
+        <!-- Product Image -->
+        <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+        /*src={item.ImageURL} */
+            <img 
+                src="/static/assets/chenacolo_24.jpeg"
+                alt={item.Name}
+                class="w-full h-full object-cover"
+            />
+        </div>
+
+        <!-- Product Info -->
+        <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-gray-800 truncate">{item.Name}</h4>
+            <p class="text-sm text-gray-600 truncate">{item.Category}</p>
+            
+            if item.Price > 0 {
+                <p class="text-accent font-semibold mt-1">
+                    ${fmt.Sprintf("%.2f", float64(item.Price))}
+                </p>
+            }
+
+            <!-- Source Badge -->
+            <span class={
+                "inline-block px-2 py-1 text-xs font-medium rounded-full mt-2",
+                templ.KV("bg-purple-100 text-purple-800", item.Source == "wizard"),
+                templ.KV("bg-blue-100 text-blue-800", item.Source == "catalog"),
+            }>
+                if item.Source == "wizard" {
+                    Asistente
+                } else {
+                    Catálogo
+                }
+            </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-2">
+            <!-- Quantity (if applicable) -->
+            if item.Quantity > 1 {
+                <div class="flex items-center gap-2">
+                    <button 
+                        class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold"
+                        hx-post="/cart/update-quantity"
+                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ID)}
+                        hx-target="#cart-sidebar"
+                    >
+                        −
+                    </button>
+                    <span class="text-sm font-medium w-8 text-center">{fmt.Sprintf("%d", item.Quantity)}</span>
+                    <button 
+                        class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold"
+                        hx-post="/cart/update-quantity"
+                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ID)}
+                        hx-target="#cart-sidebar"
+                    >
+                        +
+                    </button>
+                </div>
+            }
+
+            <!-- Remove Button -->
+            <button 
+                class="text-red-500 hover:text-red-700 transition-colors p-1"
+                hx-delete={fmt.Sprintf("/cart/remove/%s", item.ID)}
+                hx-target="#cart-sidebar"
+                hx-confirm="¿Remover este elemento?"
+                title="Remover elemento"
+            >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+}
+
+templ EmptyCart() {
+    <div class="flex flex-col items-center justify-center h-full text-center py-12">
+        <div class="text-gray-300 mb-6">
+            <svg class="w-20 h-20 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-500 mb-2">No has seleccionado nada aún</h3>
+        <p class="text-gray-400 mb-6">Explora nuestro catálogo o usa el asistente para comenzar</p>
+        
+        <div class="space-y-3">
+            <button 
+                class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors"
+                data-cart-close
+                data-start-wizard
+            >
+                Usar Asistente
+            </button>
+            <button 
+                class="block px-6 py-2 text-primary hover:text-primary/80 transition-colors font-medium"
+                data-cart-close
+                data-browse-catalog
+            >
+                Ver Catálogo
+            </button>
+        </div>
+    </div>
+}
+
+templ CartScript() {
+    <script>
+        class CartManager {
+            constructor() {
+                this.isOpen = false;
+                this.bindEvents();
+                this.updateCartCount();
+            }
+
+            bindEvents() {
+                // Toggle cart
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('[data-cart-toggle]') || e.target.closest('[data-cart-toggle]')) {
+                        e.preventDefault();
+                        this.toggleCart();
+                    }
+
+                    if (e.target.matches('[data-cart-close]') || e.target.closest('[data-cart-close]')) {
+                        this.closeCart();
+                    }
+
+                    if (e.target.matches('#cart-backdrop')) {
+                        this.closeCart();
+                    }
+
+                    // Handle empty cart actions
+                    if (e.target.matches('[data-start-wizard]')) {
+                        this.closeCart();
+                        // Trigger wizard modal
+                        document.querySelector('[data-wizard-trigger]')?.click();
+                    }
+
+                    if (e.target.matches('[data-browse-catalog]')) {
+                        this.closeCart();
+                        // Trigger browse mode
+                        document.querySelector('[data-browse-trigger]')?.click();
+                    }
+                });
+
+                // HTMX events
+                document.body.addEventListener('htmx:afterRequest', (e) => {
+                    if (e.detail.target.id === 'cart-sidebar') {
+                        this.updateCartCount();
+                        this.animateCartUpdate();
+                    }
+                });
+
+                // Handle wizard completion
+                document.body.addEventListener('htmx:afterRequest', (e) => {
+                    if (e.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
+                        this.updateCartCount();
+                        this.showCartNotification();
+                    }
+                });
+            }
+
+            toggleCart() {
+                if (this.isOpen) {
+                    this.closeCart();
+                } else {
+                    this.openCart();
+                }
+            }
+
+            openCart() {
+                const sidebar = document.getElementById('cart-sidebar');
+                const backdrop = document.getElementById('cart-backdrop');
+                
+                this.isOpen = true;
+                
+                // Show backdrop
+                backdrop.classList.remove('pointer-events-none');
+                gsap.to(backdrop, { opacity: 1, duration: 0.3 });
+                
+                // Slide in sidebar
+                gsap.to(sidebar, { 
+                    x: 0, 
+                    duration: 0.4, 
+                    ease: "power2.out" 
+                });
+
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeCart() {
+                const sidebar = document.getElementById('cart-sidebar');
+                const backdrop = document.getElementById('cart-backdrop');
+                
+                this.isOpen = false;
+                
+                // Hide backdrop
+                gsap.to(backdrop, { 
+                    opacity: 0, 
+                    duration: 0.3,
+                    onComplete: () => {
+                        backdrop.classList.add('pointer-events-none');
+                    }
+                });
+                
+                // Slide out sidebar
+                gsap.to(sidebar, { 
+                    x: '100%', 
+                    duration: 0.4, 
+                    ease: "power2.in" 
+                });
+
+                // Restore body scroll
+                document.body.style.overflow = '';
+            }
+
+            updateCartCount() {
+                const cartItems = document.querySelectorAll('[data-cart-item]');
+                const countBadge = document.querySelector('[data-cart-count]');
+                const count = cartItems.length;
+
+                countBadge.textContent = count;
+
+                if (count > 0) {
+                    gsap.fromTo(countBadge, 
+                        { scale: 1.5 },
+                        { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                    );
+                    countBadge.classList.remove('opacity-0', 'scale-0');
+                    countBadge.classList.add('opacity-100', 'scale-100');
+                } else {
+                    countBadge.classList.add('opacity-0', 'scale-0');
+                    countBadge.classList.remove('opacity-100', 'scale-100');
+                }
+            }
+
+            animateCartUpdate() {
+                const cartItems = document.querySelectorAll('[data-cart-item]');
+                
+                gsap.fromTo(cartItems, 
+                    { opacity: 0, x: 20 },
+                    { 
+                        opacity: 1, 
+                        x: 0, 
+                        duration: 0.3, 
+                        stagger: 0.05,
+                        ease: "power2.out" 
+                    }
+                );
+            }
+
+            showCartNotification() {
+                // Create temporary notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';
+                notification.textContent = 'Elementos añadidos al carrito';
+                document.body.appendChild(notification);
+
+                // Animate in and out
+                gsap.timeline()
+                    .to(notification, { opacity: 1, y: 0, duration: 0.3 })
+                    .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })
+                    .call(() => notification.remove());
+            }
+
+            // Public method to add items programmatically
+            addToCart(productId, source = 'catalog') {
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        source: source
+                    })
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('cart-sidebar').innerHTML = html;
+                    this.updateCartCount();
+                    this.showCartNotification();
+                });
+            }
+        }
+
+        // Initialize cart manager
+        let cartManager;
+        document.addEventListener('DOMContentLoaded', function() {
+            cartManager = new CartManager();
+        });
+
+        // Export for wizard integration
+        window.cartManager = cartManager;
+    </script>
+}

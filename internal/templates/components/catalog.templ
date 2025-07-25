@@ -1,0 +1,341 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal/db"
+import "fmt"
+
+func getTotalProductCount(categories []db.CatalogCtg) int {
+    total := 0
+    for _, category := range categories {
+        total += category.ProductCount
+    }
+    return total
+}
+
+templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
+    <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+        <!-- All Categories -->
+        <button 
+            class={
+                "px-4 py-2 rounded-full font-medium whitespace-nowrap transition-colors flex-shrink-0",
+                templ.KV("bg-accent text-white", activeCategory == ""),
+                templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != ""),
+            }
+            hx-get="/catalog/products"
+            hx-target="#products-grid"
+            hx-swap="innerHTML"
+            hx-indicator="#browse-spinner"
+            data-category-filter=""
+        >
+            Todos ({getTotalProductCount(categories)})
+        </button>
+
+        <!-- Category Filters -->
+        for _, category := range categories {
+            <button 
+                class={
+                    "px-4 py-2 rounded-full font-medium whitespace-nowrap transition-colors flex-shrink-0",
+                    templ.KV("bg-accent text-white", activeCategory == category.ID),
+                    templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != category.ID),
+                }
+                hx-get={fmt.Sprintf("/catalog/products?category=%s", category.ID)}
+                hx-target="#products-grid"
+                hx-swap="innerHTML"
+                hx-indicator="#browse-spinner"
+                data-category-filter={category.ID}
+            >
+                {category.Name} ({category.ProductCount})
+            </button>
+        }
+    </div>
+    <!-- Loading Indicator -->
+    /* <div id="loading-indicator" class="htmx-indicator">
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+            <span class="ml-3 text-gray-600">Cargando productos...</span>
+        </div>
+    </div> */
+}
+
+templ ProductGrid(products []db.CatalogProd, hasMore bool, page int) {
+    <div class="space-y-6" id="products-grid-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-products-container>
+            for _, product := range products {
+                @ProductCard(product)
+            }
+        </div>
+        <!-- Load More / Pagination -->
+        if hasMore {
+            <div class="text-center mt-8">
+                <button 
+                    class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                    hx-get={fmt.Sprintf("/catalog/products?page=%d", page+1)}
+                    hx-target="#products-grid"
+                    hx-swap="beforeend"
+                    hx-indicator="#load-more-indicator"
+                    data-load-more
+                >
+                    <span class="htmx-indicator" id="load-more-indicator">
+                        <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    </span>
+                    Cargar más productos
+                </button>
+            </div>
+        }
+    </div>
+}
+
+templ ProductCard(product db.CatalogProd) {
+    <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 group opacity-0 translate-y-6"
+         data-product-id={product.ID}>
+        
+        <!-- Product Image -->
+        <div class="aspect-square overflow-hidden bg-gray-100 relative">
+        /*src={"/static/uploads", product.ImageURL} */
+            <img 
+                src="/static/assets/chenacolo_24.jpeg"
+                alt={product.Name}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+            />
+            
+            <!-- Quick Actions Overlay -->
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div class="space-x-2">
+                    <button 
+                        class="p-2 bg-white rounded-full text-primary hover:bg-gray-100 transition-colors"
+                        hx-get={fmt.Sprintf("/catalog/product/%s", product.ID)}
+                        hx-target="#product-modal"
+                        title="Ver detalles"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                    
+                    <button 
+                        class="p-2 bg-accent rounded-full text-white hover:bg-accent/90 transition-colors"
+                        hx-post="/cart/add"
+                        hx-vals={fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID)}
+                        hx-target="#cart-sidebar"
+                        title="Añadir a selección"
+                        data-add-to-cart
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Badge -->
+            <div class="absolute top-3 left-3">
+                <span class="px-2 py-1 bg-white/90 text-xs font-medium text-gray-700 rounded-full">
+                    {product.Category}
+                </span>
+            </div>
+
+            <!-- Availability Badge -->
+            if !product.Available {
+                <div class="absolute top-3 right-3">
+                    <span class="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
+                        No disponible
+                    </span>
+                </div>
+            }
+        </div>
+
+        <!-- Product Info -->
+        <div class="p-4">
+            <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">{product.Name}</h3>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{product.Description}</p>
+            
+            <!-- Price -->
+            if product.Price > 0 {
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-lg font-bold text-accent">
+                        ${fmt.Sprintf("%.2fMXN", float64(product.Price))}
+                    </span>
+                    if product.PriceType != "" {
+                        <span class="text-xs text-gray-500">
+                            {product.PriceType}
+                        </span>
+                    }
+                </div>
+            }
+
+            <!-- Action Button -->
+            <button 
+                class={
+                    "w-full py-2 px-4 rounded-lg font-medium transition-colors",
+                    templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
+                    templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
+                }
+                if product.Available {
+                    hx-post="/cart/add"
+                    hx-vals={fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID)}
+                    hx-target="#cart-sidebar"
+                    data-add-to-cart
+                }
+                disabled?={!product.Available}
+            >
+                if product.Available {
+                    Añadir a Selección
+                } else {
+                    No Disponible
+                }
+            </button>
+        </div>
+    </div>
+}
+
+templ ProductModal(product db.CatalogProd) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" id="product-modal-overlay">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+             data-product-modal>
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">{product.Name}</h2>
+                    <span class="text-sm text-gray-500">{product.Category}</span>
+                </div>
+                <button 
+                    class="text-gray-400 hover:text-gray-600 transition-colors"
+                    data-close-modal
+                >
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="flex flex-col lg:flex-row max-h-[calc(90vh-140px)]">
+                <!-- Images -->
+                <div class="lg:w-1/2 p-6">
+                    <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                        <img 
+                            src={product.ImageURL} 
+                            alt={product.Name}
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                    
+                    <!-- Thumbnail Gallery (if multiple images) -->
+                    if len(product.Images) > 1 {
+                        <div class="grid grid-cols-4 gap-2">
+                            for _, image := range product.Images {
+                                <div class="aspect-square bg-gray-100 rounded cursor-pointer overflow-hidden hover:opacity-75 transition-opacity">
+                                    <img 
+                                        src={image} 
+                                        alt="Vista adicional"
+                                        class="w-full h-full object-cover"
+                                    />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Details -->
+                <div class="lg:w-1/2 p-6 overflow-y-auto">
+                    <div class="space-y-6">
+                        <!-- Description -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Descripción</h3>
+                            <p class="text-gray-600 leading-relaxed">{product.LongDescription}</p>
+                        </div>
+
+                        <!-- Specifications -->
+                        if len(product.Specifications) > 0 {
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3">Especificaciones</h3>
+                                <div class="space-y-2">
+                                    for _, spec := range product.Specifications {
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="font-medium text-gray-700">{spec.Name}:</span>
+                                            <span class="text-gray-600">{spec.Value}</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Price -->
+                        if product.Price > 0 {
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-bold text-accent">
+                                        ${fmt.Sprintf("%.2f", float64(product.Price))}
+                                    </span>
+                                    if product.PriceType != "" {
+                                        <span class="text-sm text-gray-500">
+                                            {product.PriceType}
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Actions -->
+                        <div class="space-y-3">
+                            <button 
+                                class={
+                                    "w-full py-3 px-6 rounded-lg font-semibold transition-colors",
+                                    templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
+                                    templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
+                                }
+                                if product.Available {
+                                    hx-post="/cart/add"
+                                    hx-vals={fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID)}
+                                    hx-target="#cart-sidebar"
+                                    data-add-to-cart
+                                }
+                                disabled?={!product.Available}
+                            >
+                                if product.Available {
+                                    Añadir a Selección
+                                } else {
+                                    No Disponible
+                                }
+                            </button>
+                            
+                            <button 
+                                class="w-full py-3 px-6 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                                data-close-modal
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ SearchBar() {
+    <div class="relative max-w-md mx-auto">
+        <input 
+            type="text"
+            placeholder="Buscar productos..."
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+            hx-get="/catalog/products"
+            hx-target="#products-grid"
+            hx-swap="innerHTML"
+            hx-trigger="keyup changed delay:300ms"
+            hx-indicator="#search-indicator"
+            name="search"
+            data-search-input
+        />
+        <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+        <div id="search-indicator" class="htmx-indicator absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
+        </div>
+    </div>
+}

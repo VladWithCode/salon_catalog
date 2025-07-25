@@ -1,0 +1,266 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal/db"
+import "fmt"
+
+templ WizardModal(categories []db.WizardCategory, currentStep int) {
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" data-wizard-container>
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-accent p-6 text-white relative">
+                <button 
+                    class="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
+                    data-close-wizard
+                >
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <h2 class="text-2xl font-bold mb-2">Asistente de Planeación</h2>
+                <p class="text-white/90">Te ayudamos a crear el evento perfecto paso a paso</p>
+                
+                <!-- Progress Bar -->
+                <div class="mt-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium">Progreso</span>
+                        <span class="text-sm font-medium" data-progress-text>
+                            Paso {currentStep + 1} de {len(categories)}
+                        </span>
+                    </div>
+                    <div class="w-full bg-white/20 rounded-full h-2">
+                        <div 
+                            class="bg-white h-2 rounded-full transition-all duration-500"
+                            style={templ.KV("width", fmt.Sprintf("%.1f%%", float64(currentStep+1)/float64(len(categories))*100))}
+                            data-progress-bar
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex h-[calc(90vh-180px)]">
+                <!-- Steps Sidebar -->
+                <div class="w-1/4 bg-gray-50 p-4 border-r overflow-y-auto">
+                    <h3 class="font-semibold text-gray-700 mb-4">Pasos</h3>
+                    <div class="space-y-2">
+                        for i, category := range categories {
+                            <div class={
+                                "flex items-center p-3 rounded-lg transition-colors cursor-pointer",
+                                templ.KV("bg-accent text-white", i == currentStep),
+                                templ.KV("bg-white hover:bg-gray-100", i != currentStep),
+                                templ.KV("opacity-50", i > currentStep),
+                            }>
+                                <div class={
+                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3",
+                                    templ.KV("bg-white text-accent", i == currentStep),
+                                    templ.KV("bg-gray-300 text-gray-600", i != currentStep && i > currentStep),
+                                    templ.KV("bg-green-500 text-white", i < currentStep),
+                                }>
+                                    if i < currentStep {
+                                        ✓
+                                    } else {
+                                        {fmt.Sprintf("%d", i+1)}
+                                    }
+                                </div>
+                                <span class="text-sm font-medium">{category.Name}</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="flex-1 flex flex-col">
+                    <div class="flex-1 overflow-y-auto" id="wizard-step-content">
+                        if currentStep < len(categories) {
+                            @WizardStep(categories[currentStep], currentStep)
+                        }
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="p-6 border-t bg-gray-50 flex justify-between items-center">
+                        <button 
+                            class={
+                                "px-6 py-2 rounded-lg font-medium transition-colors",
+                                templ.KV("bg-gray-200 text-gray-400 cursor-not-allowed", currentStep == 0),
+                                templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", currentStep > 0),
+                            }
+                            if currentStep > 0 {
+                                hx-get={fmt.Sprintf("/wizard/step/%s", categories[currentStep-1].ID)}
+                                hx-target="#wizard-modal"
+                                hx-include="[data-wizard-selections]"
+                            }
+                            disabled?={currentStep == 0}
+                        >
+                            ← Anterior
+                        </button>
+
+                        <div class="flex gap-3">
+                            <button 
+                                class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                                data-close-wizard
+                            >
+                                Cancelar
+                            </button>
+                            
+                            if currentStep < len(categories)-1 {
+                                <button 
+                                    class="px-6 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-colors"
+                                    hx-post={fmt.Sprintf("/wizard/step/%s", categories[currentStep].ID)}
+                                    hx-target="#wizard-modal"
+                                    hx-include="[data-wizard-selections]"
+                                    data-next-step
+                                >
+                                    Siguiente →
+                                </button>
+                            } else {
+                                <button 
+                                    class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                                    hx-post="/event/save-plan"
+                                    hx-include="[data-wizard-selections]"
+                                    data-finish-wizard
+                                >
+                                    Finalizar Planeación
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ WizardStep(category db.WizardCategory, stepIndex int) {
+    <div class="p-6" data-wizard-step={fmt.Sprintf("%d", stepIndex)}>
+        <div class="mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">{category.Name}</h3>
+            <p class="text-gray-600">{category.Description}</p>
+            if category.Required {
+                <span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+                    Requerido
+                </span>
+            }
+        </div>
+
+        <!-- Selection Type Indicator -->
+        <div class="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+            <p class="text-sm text-blue-800">
+                if category.MultiSelect {
+                    <strong>Selección múltiple:</strong> Puedes elegir varios elementos
+                } else {
+                    <strong>Selección única:</strong> Elige solo una opción
+                }
+            </p>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            for _, product := range category.Products {
+                @WizardProductCard(product, category.MultiSelect, stepIndex)
+            }
+        </div>
+
+        <!-- Selected Items Summary -->
+        <div class="mt-8 p-4 bg-gray-50 rounded-lg" id={fmt.Sprintf("selected-summary-%d", stepIndex)}>
+            <h4 class="font-semibold text-gray-700 mb-2">Seleccionados:</h4>
+            <div class="text-sm text-gray-600" data-selected-items>
+                Ningún elemento seleccionado
+            </div>
+        </div>
+    </div>
+}
+
+templ WizardProductCard(product db.WizardProduct, multiSelect bool, stepIndex int) {
+    <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-transparent transition-all duration-200 hover:shadow-lg group"
+         data-product-card={product.ID}>
+        
+        <!-- Product Image -->
+        <div class="aspect-square overflow-hidden bg-gray-100 relative">
+            <img 
+                src={product.ImageURL} 
+                alt={product.Name}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            
+            <!-- Selection Overlay -->
+            <div class="absolute inset-0 bg-accent/90 opacity-0 flex items-center justify-center transition-opacity duration-200"
+                 data-selection-overlay>
+                <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="p-4">
+            <h4 class="font-semibold text-gray-800 mb-1">{product.Name}</h4>
+            <p class="text-sm text-gray-600 mb-2">{product.Description}</p>
+            
+            if product.Price > 0 {
+                <div class="text-accent font-bold">
+                    ${fmt.Sprintf("%.2f", product.Price)}
+                </div>
+            }
+
+            <!-- Selection Input -->
+            <div class="mt-3">
+                if multiSelect {
+                    <label class="flex items-center cursor-pointer">
+                        <input 
+                            type="checkbox"
+                            name={fmt.Sprintf("step_%d_products", stepIndex)}
+                            value={product.ID}
+                            data-wizard-selections
+                            class="sr-only"
+                            data-product-checkbox
+                        />
+                        <div class="w-full text-center py-2 px-4 border-2 border-gray-300 rounded-lg font-medium transition-colors hover:border-accent"
+                             data-selection-button>
+                            Seleccionar
+                        </div>
+                    </label>
+                } else {
+                    <label class="flex items-center cursor-pointer">
+                        <input 
+                            type="radio"
+                            name={fmt.Sprintf("step_%d_product", stepIndex)}
+                            value={product.ID}
+                            data-wizard-selections
+                            class="sr-only"
+                            data-product-radio
+                        />
+                        <div class="w-full text-center py-2 px-4 border-2 border-gray-300 rounded-lg font-medium transition-colors hover:border-accent"
+                             data-selection-button>
+                            Seleccionar
+                        </div>
+                    </label>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+// Wizard JavaScript Component
+templ WizardScript() {
+    <script>
+        // Only wizard-specific utilities that need to run immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle form validation before step progression
+            document.body.addEventListener('htmx:configRequest', function(e) {
+                if (e.detail.path.includes('/wizard/step/')) {
+                    const currentStep = document.querySelector('[data-wizard-step]');
+                    if (currentStep) {
+                        const required = currentStep.dataset.required === 'true';
+                        const selected = currentStep.querySelectorAll('input:checked');
+                        
+                        if (required && selected.length === 0) {
+                            e.preventDefault();
+                            alert('Debes seleccionar al menos una opción para continuar');
+                            return false;
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

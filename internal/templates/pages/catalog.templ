@@ -1,51 +1,525 @@
 package pages
 
-import "github.com/vladwithcode/salon_catalog/internal/templates"
+import (
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
 
+// import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 templ Catalog() {
-@templates.BaseLayout("", nil, false) {
-<main>
-    <section class="relative z-0 overflow-hidden">
-        <div class="absolute inset-0 z-0 brigthness-50">
-            <img src="/static/assets/event_salon_pic_4.png" alt="Imagen del area de bar del salon de eventos"
-                class="w-full h-full object-cover object-center" />
-        </div>
-        <div class="relative z-10 px-4 pt-32 pb-8 bg-gradient-to-br from-primary/80 to-accent/80">
-            <h1 class="text-4xl text-secondary font-bold tracking-wide">Catálogo</h1>
-        </div>
-    </section>
-    <section class="relative flex z-0 bg-stone-50 p-2">
-        <h2 class="sr-only">Fitlros de Busqueda</h2>
-        <button class="grow-0 shrink-0 bg-secondary p-3 space-y-1 rounded-xs shadow-xs shadow-stone-800/30">
-            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
-            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
-            <div class="h-0.5 w-5 bg-current rounded-lg"></div>
-        </button>
-        <div class="relative flex grow gap-2 px-4">
-            <button class="absolute top-1/2 left-1 -translate-y-1/2 transition-[opacity] opacity-0 hover:opacity-100">
-                <svg class="h-7 w-7 stroke-current rotate-180">
-                    <use href="/static/assets/chevron.svg#chv"></use>
+	@templates.BaseLayout("Catálogo - Villa Chenacolo", nil, false) {
+		@CatalogScript()
+        <div class="fixed bottom-20 right-4 z-40">
+            <button id="scroll-top-btn" class="bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M5 15l7-7 7 7"></path>
                 </svg>
             </button>
-            <button class="absolute top-1/2 right-1 -translate-y-1/2">
-                <svg class="h-7 w-7 stroke-current">
-                    <use href="/static/assets/chevron.svg#chv"></use>
-                </svg>
-            </button>
-            <button
-                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
-                Todos
-            </button>
-            <button
-                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
-                Servicios
-            </button>
-            <button
-                class="text-sm font-extrabold tracking-wide uppercase px-3 py-1 bg-secondary rounded-xs shadow-xs shadow-stone-800/20">
-                Equipo
-            </button>
         </div>
-    </section>
-</main>
+        <div id="scroll-top-btn-threshold" class="absolute top-[20vh] inset-x-0 h-0 w-full"></div>
+		<!-- Hero Section -->
+		<section class="relative h-[40vh] overflow-hidden">
+			<div class="absolute inset-0">
+				<img src="/static/assets/chenacolo_18.jpeg" alt="Catálogo de equipos" class="w-full h-full object-cover"/>
+			</div>
+			<div class="bg-gradient-to-br from-primary/70 to-accent/70 absolute inset-0 flex items-center justify-center">
+				<h1 class="text-4xl font-bold text-white text-center px-4">Catálogo</h1>
+			</div>
+		</section>
+		<!-- Wizard vs Browse Choice -->
+		<section class="py-8 px-4 bg-stone-50" id="catalog-intro">
+			<div class="max-w-4xl mx-auto text-center">
+				<h2 class="text-2xl font-bold mb-4">¿Cómo quieres planear tu evento?</h2>
+				<div class="grid md:grid-cols-2 gap-6 mt-8">
+					<!-- Wizard Option -->
+					<div
+						class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent hover:border-accent transition-colors"
+					>
+						<div class="text-accent mb-4">
+							<svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+						</div>
+						<h3 class="text-xl font-bold mb-2">Asistente de Planeación</h3>
+						<p class="text-gray-600 mb-4">Te guiamos paso a paso para crear el evento perfecto</p>
+						<button
+							class="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
+							hx-get="/wizard/categories"
+							hx-target="#wizard-modal"
+							hx-trigger="click"
+							data-wizard-trigger
+						>
+							Usar Asistente
+						</button>
+					</div>
+					<!-- Browse Option -->
+					<div
+						class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent hover:border-primary transition-colors"
+					>
+						<div class="text-primary mb-4">
+							<svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
+								></path>
+							</svg>
+						</div>
+						<h3 class="text-xl font-bold mb-2">Explorar Catálogo</h3>
+						<p class="text-gray-600 mb-4">Navega libremente por todos nuestros productos</p>
+						<button
+							class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+							data-browse-trigger
+						>
+							Ver Catálogo
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+        <div id="catalog-browse" class="relative hidden">
+            <div id="browse-spinner" class="absolute inset-0 z-10 bg-secondary/70 htmx-indicator pointer-events-none">
+                <div class="h-[60vh] py-16 px-4 flex items-center justify-center gap-4">
+                    <div class="h-10 w-10 border-b-6 border-accent animate-spin rounded-full"></div>
+                    <span class="font-bold text-xl text-primary">Cargando productos...</span>
+                </div>
+            </div>
+            <!-- Search Bar -->
+            <section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
+                <div class="max-w-6xl mx-auto">
+                    @components.SearchBar()
+                </div>
+            </section>
+            <!-- Category Filters -->
+            <div class="h-px w-screen" id="scroll-filters-threshold"></div>
+            <section class="relative py-4 px-4 bg-white z-20" id="catalog-filters" data-active-category="">
+                <div class="max-w-6xl mx-auto">
+                    <div
+                        hx-get="/catalog/categories"
+                        hx-trigger="load"
+                        hx-target="this"
+                        hx-swap="innerHTML"
+                        data-ctg-filters-container
+                    >
+                        <p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
+                            <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
+                            Cargando categorías...
+                        </p>
+                        <!-- Categories loaded here -->
+                    </div>
+                </div>
+            </section>
+            <!-- Products Grid -->
+            <section class="relative py-8 px-4" id="catalog-products">
+                <div class="max-w-6xl mx-auto">
+                    <div id="products-grid">
+                        <div hx-get="/catalog/products" hx-trigger="load" hx-target="this" hx-swap="outerHTML">
+                        <!-- Products loaded here -->
+                            <p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
+                                <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
+                                Cargando productos...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+		<!-- Product Modal Container -->
+		<div id="product-modal"></div>
+		<!-- Floating Cart -->
+		@components.FloatingCart()
+		<!-- Wizard Modal -->
+		<div id="wizard-modal" class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 pointer-events-none">
+			<!-- Wizard content loaded here -->
+		</div>
+	}
 }
+
+templ CatalogScript() {
+	<script>
+    let wizardManager;
+    let currentAnimations = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const scrollTopBtn = document.getElementById('scroll-top-btn');
+        const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');
+        const obsv = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    gsap.to(scrollTopBtn, {
+                        opacity: 1,
+                        duration: 0.3,
+                        ease: "power2.out",
+                        pointerEvents: "auto",
+                    });
+                } else {
+                    gsap.to(scrollTopBtn, {
+                        opacity: 0,
+                        duration: 0.3,
+                        ease: "power2.out",
+                        pointerEvents: "none",
+                    });
+                }
+            });
+        }, {
+            threshold: 0.25
+        });
+        obsv.observe(scrollTopBtnThreshold);
+        scrollTopBtn.addEventListener('click', function (e) {
+            window.scrollTo(0, 0);
+        });
+
+        const browseBtn = document.querySelector('[data-browse-trigger]');
+        const wizardTriggers = document.querySelectorAll('[data-wizard-trigger]');
+        const catalogBrowse = document.getElementById('catalog-browse');
+        const catalogSearch = document.getElementById('catalog-search');
+        const catalogFilters = document.getElementById('catalog-filters');
+        const catalogProducts = document.getElementById('catalog-products');
+        const catalogIntro = document.getElementById('catalog-intro');
+
+        catalogFilters.addEventListener('click', function (e) {
+            if (e.target.matches('[data-category-filter]')) {
+                window.scrollTo(0, 0);
+                catalogFilters.dataset.activeCategory = e.target.dataset.categoryFilter;
+            }
+        });
+
+        const ctgFiltersObsv = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    gsap.to(catalogFilters, {
+                        position: "fixed",
+                        top: "3rem",
+                        left: 0,
+                        right: 0,
+                    });
+                } else {
+                    gsap.to(catalogFilters, {
+                        position: "",
+                        top: "",
+                        left: "",
+                        right: "",
+                    });
+                }
+            });
+        });
+        ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));
+
+        // Wizard modal animations
+        document.body.addEventListener('htmx:afterRequest', function (e) {
+            if (e.detail.target.id === 'wizard-modal') {
+                wizardManager = new WizardManager();
+                showWizardModal();
+            }
+        });
+
+        function showWizardModal() {
+            const modal = document.getElementById('wizard-modal');
+            modal.classList.remove('hidden');
+            gsap.to(modal, {
+                opacity: 1,
+                duration: 0.3,
+                onComplete: () => {
+                    modal.classList.remove('pointer-events-none');
+                }
+            });
+        }
+
+        // Close wizard modal
+        document.addEventListener('click', function (e) {
+            if (e.target.matches('[data-close-wizard]')) {
+                closeWizardModal();
+            }
+        });
+
+        function closeWizardModal() {
+            const modal = document.getElementById('wizard-modal');
+            modal.classList.add('pointer-events-none');
+            gsap.to(modal, {
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                    modal.classList.add('hidden');
+                    modal.innerHTML = '';
+                }
+            });
+        }
+
+        // Browse catalog functionality - UPDATED
+        browseBtn.addEventListener('click', function () {
+            gsap.to(catalogIntro, {
+                opacity: 0,
+                y: -20,
+                duration: 0.3,
+                onComplete: () => {
+                    catalogIntro.style.display = 'none';
+                    catalogBrowse.style.display = 'block';
+
+                    gsap.fromTo([catalogSearch, catalogFilters, catalogProducts],
+                        {opacity: 0, y: 20},
+                        {opacity: 1, y: 0, duration: 0.4, stagger: 0.1}
+                    );
+                }
+            });
+            window.scrollTo(0, 0);
+        });
+
+        // Product modal management
+        document.body.addEventListener('htmx:afterSwap', function (e) {
+            if (e.detail.target.id === 'product-modal') {
+                showProductModal();
+            }
+        });
+
+        function showProductModal() {
+            const modal = document.getElementById('product-modal');
+            gsap.fromTo(modal,
+                {opacity: 0, scale: 0.9},
+                {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)"}
+            );
+        }
+
+        // Close product modal
+        document.addEventListener('click', function (e) {
+            if (e.target.matches('[data-close-modal]') ||
+                e.target.matches('#product-modal-overlay')) {
+                closeProductModal();
+            }
+        });
+
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            gsap.to(modal, {
+                opacity: 0,
+                scale: 0.9,
+                duration: 0.2,
+                onComplete: () => {
+                    modal.innerHTML = '';
+                }
+            });
+        }
+
+        // Animate product cards on load
+        document.body.addEventListener('htmx:beforeSwap', function (e) {
+            // Kill any existing animations first
+            currentAnimations.forEach(anim => anim.kill());
+            currentAnimations = [];
+
+            // Handle different swap targets
+            if (e.detail.target.id === 'products-grid' ||
+                e.detail.target.closest('#products-grid')) {
+                // Small delay to ensure DOM is ready
+                setTimeout(() => animateProducts(), 50);
+            }
+
+            //if (e.detail.target.id === 'product-modal') {
+            //    showProductModal();
+            //}
+        });
+
+        function animateProducts() {
+            const container = document.querySelector('[data-products-container]');
+            const products = document.querySelectorAll('[data-product-id]');
+
+            if (!container || products.length === 0) return;
+
+            // Clear previous animations
+            gsap.killTweensOf(products);
+            gsap.killTweensOf(container);
+
+            // Set initial state
+            gsap.set(products, {opacity: 0, y: 30});
+            gsap.set(container, {opacity: 1});
+
+            // Animate products in
+            const tl = gsap.timeline();
+            const anim = tl.to(products, {
+                opacity: 1,
+                y: 0,
+                duration: 0.4,
+                stagger: 0.05,
+                ease: "power2.out"
+            });
+
+            currentAnimations.push(anim);
+        }
+
+        // Handle category filter states
+        document.body.addEventListener('htmx:beforeRequest', function (e) {
+            // Update active filter state immediately for better UX
+            if (e.detail.elt.matches('[data-category-filter]')) {
+                // Remove active state from all filters
+                document.querySelectorAll('[data-category-filter]').forEach(btn => {
+                    btn.className = btn.className
+                        .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+                });
+
+                // Add active state to clicked filter  
+                e.detail.elt.className = e.detail.elt.className
+                    .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
+            }
+        });
+
+        // Handle request errors
+        document.body.addEventListener('htmx:responseError', function (e) {
+            if (e.detail.elt.matches('[data-category-filter]')) {
+                // Revert filter state on error
+                updateFilterStates();
+            }
+        });
+
+        function updateFilterStates() {
+            // This would be called to restore proper active states
+            // Could read from URL params or data attributes
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeCategory = urlParams.get('category') || '';
+
+            document.querySelectorAll('[data-category-filter]').forEach(btn => {
+                const filterCategory = btn.dataset.categoryFilter || '';
+
+                if (filterCategory === activeCategory) {
+                    btn.className = btn.className
+                        .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
+                } else {
+                    btn.className = btn.className
+                        .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+                }
+            });
+        }
+
+        // Search input handling with animation
+        document.body.addEventListener('htmx:configRequest', function (e) {
+            if (e.detail.elt.matches('[data-search-input]')) {
+                const activeCtg = catalogFilters.dataset.activeCategory;
+                e.detail.parameters.set('category', activeCtg);
+            } else if (e.detail.elt.matches('[data-category-filter]')) {
+                const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;
+                e.detail.parameters.set('search', activeSearch);
+            }
+        });
+
+        document.body.addEventListener('htmx:beforeRequest', function (e) {
+            if (e.detail.elt.matches('[data-search-input]')) {
+                // Fade out current products
+                const container = document.querySelector('[data-products-container]');
+                if (container) {
+                    gsap.to(container, {opacity: 0.5, duration: 0.2});
+                }
+                catalogSearch.dataset.activeSearch = e.detail.elt.value;
+            }
+        });
+
+        // Cart
+        // Add to cart success animation
+        document.body.addEventListener('htmx:afterRequest', function (e) {
+            if (e.detail.target.id === 'cart-sidebar' &&
+                e.detail.elt.matches('[data-add-to-cart]')) {
+                animateAddToCart(e.detail.elt);
+            }
+        });
+
+        function animateAddToCart(button) {
+            // Animate button
+            gsap.timeline()
+                .to(button, {scale: 0.95, duration: 0.1})
+                .to(button, {scale: 1, duration: 0.1})
+                .set(button, {
+                    innerHTML: '✓ Añadido',
+                    className: button.className.replace('bg-accent', 'bg-green-500')
+                })
+                .to(button, {scale: 1.05, duration: 0.1})
+                .to(button, {scale: 1, duration: 0.1})
+                .delay(1)
+                .set(button, {
+                    innerHTML: 'Añadir a Selección',
+                    className: button.className.replace('bg-green-500', 'bg-accent')
+                });
+        }
+    });
+
+    // Wizard Manager Class
+    class WizardManager {
+        constructor() {
+            this.initializeSelections();
+            this.bindEvents();
+        }
+
+        initializeSelections() {
+            document.querySelectorAll('[data-product-checkbox], [data-product-radio]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    this.handleSelection(e.target);
+                });
+            });
+        }
+
+        handleSelection(input) {
+            const card = input.closest('[data-product-card]');
+            const overlay = card.querySelector('[data-selection-overlay]');
+            const button = card.querySelector('[data-selection-button]');
+
+            if (input.checked) {
+                card.classList.add('border-accent', 'bg-accent/5');
+                overlay.classList.remove('opacity-0');
+                button.textContent = 'Seleccionado';
+                button.classList.add('bg-accent', 'text-white', 'border-accent');
+
+                if (input.type === 'radio') {
+                    this.deselectOthersInGroup(input);
+                }
+            } else {
+                card.classList.remove('border-accent', 'bg-accent/5');
+                overlay.classList.add('opacity-0');
+                button.textContent = 'Seleccionar';
+                button.classList.remove('bg-accent', 'text-white', 'border-accent');
+            }
+
+            this.updateSelectedSummary();
+            this.animateSelection(card);
+        }
+
+        deselectOthersInGroup(selectedInput) {
+            document.querySelectorAll(`[name="${selectedInput.name}"]`).forEach(input => {
+                if (input !== selectedInput && input.checked) {
+                    input.checked = false;
+                    this.handleSelection(input);
+                }
+            });
+        }
+
+        updateSelectedSummary() {
+            const currentStep = document.querySelector('[data-wizard-step]');
+            const stepIndex = currentStep.dataset.wizardStep;
+            const summaryContainer = document.querySelector(`[data-selected-items]`);
+
+            const selected = document.querySelectorAll(`[name*="step_${stepIndex}"][checked], [name*="step_${stepIndex}"]:checked`);
+
+            if (selected.length === 0) {
+                summaryContainer.textContent = 'Ningún elemento seleccionado';
+            } else {
+                const items = Array.from(selected).map(input => {
+                    const card = input.closest('[data-product-card]');
+                    const name = card.querySelector('h4').textContent;
+                    return name;
+                });
+                summaryContainer.textContent = items.join(', ');
+            }
+        }
+
+        animateSelection(card) {
+            gsap.fromTo(card,
+                {scale: 1},
+                {scale: 1.05, duration: 0.1, yoyo: true, repeat: 1}
+            );
+        }
+
+        bindEvents() {
+            // Handle wizard step navigation
+            document.body.addEventListener('htmx:afterSwap', (e) => {
+                if (e.detail.target.id === 'wizard-step-content' ||
+                    e.detail.target.closest('#wizard-modal')) {
+                    // Re-initialize selections when step changes
+                    setTimeout(() => this.initializeSelections(), 50);
+                }
+            });
+        }
+    }
+</script>
 }

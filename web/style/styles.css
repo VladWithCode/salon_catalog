@@ -78,6 +78,17 @@
     .input-disabled {
         @apply border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed;
     }
+
+    .htmx-indicator{
+        opacity:0;
+        transition: opacity 300ms ease-in;
+    }
+    .htmx-request .htmx-indicator{
+        opacity:1;
+    }
+    .htmx-request.htmx-indicator{
+        opacity:1;
+    }
 }
 
 @base {
