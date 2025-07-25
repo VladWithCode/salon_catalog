@@ -1,0 +1,6 @@
+insert into categories (id, name, description, slug) values ('1733f7f7-8d2e-41a9-9bda-a1f4ef48e003', 'Food - Grains', 'Cras in purus eu magna vulputate luctus.', 'food-grains');
+insert into categories (id, name, description, slug) values ('f4d9c81f-3e6a-42a0-969c-3464402b9a2b', 'Food - Marinades', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.', 'food-marinades');
+insert into categories (id, name, description, slug) values ('faf91efb-286b-4daf-ab1c-63e5adac5dcc', 'Food - Snacks', 'Donec diam neque, vestibulum eget, vulputate ut, ultrices vel, augue.', 'food-snacks');
+insert into categories (id, name, description, slug) values ('6bd76388-5a3b-49ef-9568-83c124215efb', 'Automotive', 'In eleifend quam a odio. In hac habitasse platea dictumst.', 'automotive');
+insert into categories (id, name, description, slug) values ('4d0261ce-e686-41dd-b777-d5d44dcfbd35', 'Kitchen', 'Nunc rhoncus dui vel sem.', 'kitchen');
+insert into categories (id, name, description, slug) values ('a4e3ba7e-1f38-47b6-84f5-5f32a520ffd0', 'Accessories', 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla dapibus dolor vel est. Donec odio justo, sollicitudin ut, suscipit a, feugiat et, eros.', 'accessories');
