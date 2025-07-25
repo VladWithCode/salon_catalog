@@ -8,7 +8,8 @@ CREATE TABLE products (
     main_img UUID REFERENCES images(id) ON DELETE SET NULL,
     price INT DEFAULT 0 NOT NULL,
     features JSONB NOT NULL,
-    category UUID REFERENCES categories(id) ON DELETE RESTRICT
+    category UUID REFERENCES categories(id) ON DELETE RESTRICT,
+    available BOOLEAN NOT NULL DEFAULT TRUE
 );
 -- +goose StatementEnd
 
