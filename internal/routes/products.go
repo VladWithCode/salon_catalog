@@ -116,12 +116,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	if data.Description != "" {
 		prod.Description = data.Description
 	}
-	if data.Price != 0 {
-		prod.Price = data.Price
-	}
-	if data.Features != nil {
-		prod.Features = data.Features
-	}
 	if data.Category != "" {
 		prod.Category = data.Category
 	}

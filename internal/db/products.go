@@ -10,16 +10,14 @@ import (
 )
 
 type Product struct {
-	ID          string            `db:"id" json:"id"`
-	Name        string            `db:"name" json:"name"`
-	Slug        string            `db:"slug" json:"slug"`
-	Description string            `db:"description" json:"description"`
-	MainImg     string            `db:"main_img" json:"mainImg"`
-	Gallery     []string          `db:"gallery" json:"gallery"`
-	Price       int               `db:"price" json:"price"`
-	Features    map[string]string `db:"features" json:"features"`
-	Category    string            `db:"category" json:"category"`
-	CategoryID  string            `db:"category_id" json:"categoryId"`
+	ID          string   `db:"id" json:"id"`
+	Name        string   `db:"name" json:"name"`
+	Slug        string   `db:"slug" json:"slug"`
+	Description string   `db:"description" json:"description"`
+	MainImg     string   `db:"main_img" json:"mainImg"`
+	Gallery     []string `db:"gallery" json:"gallery"`
+	Category    string   `db:"category" json:"category"`
+	CategoryID  string   `db:"category_id" json:"categoryId"`
 }
 
 func CreateProduct(product *Product) error {
@@ -42,15 +40,13 @@ func CreateProduct(product *Product) error {
 	}
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description, price, main_img, category, features) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		`INSERT INTO products (id, name, slug, description, main_img, category, features) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		id.String(),
 		product.Name,
 		product.Slug,
 		product.Description,
-		product.Price,
 		mainImg,
 		product.Category,
-		product.Features,
 	)
 	if err != nil {
 		return err
@@ -75,7 +71,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 		ctx,
 		`SELECT 
 			prod.id, prod.name, prod.slug, prod.description,
-			prod.price, prod.features,
+			prod.features,
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
@@ -86,15 +82,13 @@ func FindProductBySlug(slug string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.features, main.filename, ctg.name, ctg.id`,
 		slug,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
-		&product.Price,
-		&product.Features,
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
@@ -133,7 +127,7 @@ func FindProductByID(id string) (*Product, error) {
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.slug, prod.description, prod.price,
+			prod.id, prod.name, prod.slug, prod.description,
 			prod.features, 
 			ctg.name AS category,
 			ctg.id AS category_id,
@@ -145,15 +139,13 @@ func FindProductByID(id string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.price, prod.features, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.features, main.filename, ctg.name, ctg.id`,
 		id,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
-		&product.Price,
-		&product.Features,
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
@@ -188,7 +180,7 @@ func FindAllProducts() ([]*Product, error) {
 	rows, err := conn.Query(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.slug, prod.description, prod.price,
+			prod.id, prod.name, prod.slug, prod.description,
 			prod.features, 
 			ctg.name AS category,
 			ctg.id AS category_id,
@@ -211,8 +203,6 @@ func FindAllProducts() ([]*Product, error) {
 			&product.Name,
 			&product.Slug,
 			&product.Description,
-			&product.Price,
-			&product.Features,
 			&product.Category,
 			&product.CategoryID,
 			&mainImg,
@@ -246,13 +236,11 @@ func UpdateProduct(product *Product) error {
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE products SET
-			name = $1, slug = $2, description = $3, price = $4, features = $5, category = $6, main_img = $7
+			name = $1, slug = $2, description = $3, features = $5, category = $6, main_img = $7
 		WHERE id = $8`,
 		product.Name,
 		product.Slug,
 		product.Description,
-		product.Price,
-		product.Features,
 		product.Category,
 		mainImg,
 		product.ID,

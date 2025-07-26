@@ -23,8 +23,6 @@ type CatalogProd struct {
 	CategoryID      string          `json:"category_id"`
 	ImageURL        string          `json:"image_url"`
 	Images          []string        `json:"images"`
-	Price           int             `json:"price"`
-	PriceType       string          `json:"price_type"` // "por día", "por evento", etc.
 	Available       bool            `json:"available"`
 	Specifications  []Specification `json:"specifications"`
 }
@@ -90,7 +88,7 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 		ctx,
 		`SELECT 
 			id, name, description, long_description, category_id, category_name, 
-			image_url, price, price_type, available, images, specifications 
+			image_url, available, images, specifications 
 		FROM catalog_products WHERE id = $1`,
 		id,
 	).Scan(
@@ -101,8 +99,6 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 		&product.CategoryID,
 		&product.Category,
 		&product.ImageURL,
-		&product.Price,
-		&product.PriceType,
 		&product.Available,
 		&imagesJSON,
 		&specsJSON,
@@ -135,7 +131,7 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 	// Build query conditionally
 	query := `SELECT 
 		id, name, description, long_description, category_id, category_name, 
-		image_url, price, price_type, available, images, specifications 
+		image_url, available, images, specifications 
 		FROM catalog_products WHERE 1=1`
 
 	var args []any
@@ -184,8 +180,6 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 			&product.CategoryID,
 			&product.Category,
 			&product.ImageURL,
-			&product.Price,
-			&product.PriceType,
 			&product.Available,
 			&imagesJSON, // Scan JSON as bytes first
 			&specsJSON,  // Scan JSON as bytes first

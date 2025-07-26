@@ -45,7 +45,7 @@ templ FloatingCart() {
          id="cart-backdrop"></div>
 }
 
-templ CartSidebar(items []db.CartItem, total int) {
+templ CartSidebar(items []db.CartItem) {
     <div class="flex flex-col h-full">
         <!-- Header -->
         <div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
@@ -80,14 +80,6 @@ templ CartSidebar(items []db.CartItem, total int) {
         <!-- Footer -->
         if len(items) > 0 {
             <div class="border-t p-6 bg-gray-50">
-                <!-- Total (if applicable) -->
-                if total > 0 {
-                    <div class="flex justify-between items-center mb-4 text-lg font-semibold">
-                        <span>Total estimado:</span>
-                        <span class="text-accent">${fmt.Sprintf("%.2f", float64(total))}</span>
-                    </div>
-                }
-
                 <!-- Action Buttons -->
                 <div class="space-y-3">
                     <button 
@@ -143,12 +135,6 @@ templ CartItem(item db.CartItem) {
             <h4 class="font-semibold text-gray-800 truncate">{item.Name}</h4>
             <p class="text-sm text-gray-600 truncate">{item.Category}</p>
             
-            if item.Price > 0 {
-                <p class="text-accent font-semibold mt-1">
-                    ${fmt.Sprintf("%.2f", float64(item.Price))}
-                </p>
-            }
-
             <!-- Source Badge -->
             <span class={
                 "inline-block px-2 py-1 text-xs font-medium rounded-full mt-2",

@@ -19,12 +19,7 @@ func RegisterCartRoutes(router *customServeMux) {
 }
 
 func GetCart(w http.ResponseWriter, r *http.Request) {
-	var total int
-	for _, item := range cart {
-		total += item.Quantity * item.Price
-	}
-
-	err := components.CartSidebar(cart, total).Render(r.Context(), w)
+	err := components.CartSidebar(cart).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -69,19 +64,13 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 			Name:      prod.Name,
 			Category:  prod.Category,
 			ImageURL:  prod.ImageURL,
-			Price:     prod.Price,
 			Quantity:  1,
 		}
 
 		cart = append(cart, cartItem)
 	}
 
-	total := 0
-	for _, item := range cart {
-		total += item.Quantity * item.Price
-	}
-
-	err = components.CartSidebar(cart, total).Render(r.Context(), w)
+	err = components.CartSidebar(cart).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -124,12 +113,7 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 	}
 	cart = newCart
 
-	total := 0
-	for _, item := range cart {
-		total += item.Quantity * item.Price
-	}
-
-	err := components.CartSidebar(cart, total).Render(r.Context(), w)
+	err := components.CartSidebar(cart).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -139,9 +123,8 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 
 func ClearCart(w http.ResponseWriter, r *http.Request) {
 	cart = make([]db.CartItem, 0)
-	total := 0
 
-	err := components.CartSidebar(cart, total).Render(r.Context(), w)
+	err := components.CartSidebar(cart).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))

@@ -22,8 +22,6 @@ SELECT
     p.category as category_id,
     c.name as category_name,
     COALESCE(main_img, '') as image_url,
-    p.price,
-    'por evento' as price_type, -- Default value, you may want to add this as a column
     p.available,
     -- Aggregate gallery images as JSON array
     COALESCE(
