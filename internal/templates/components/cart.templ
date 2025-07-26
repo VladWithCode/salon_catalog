@@ -225,61 +225,17 @@ templ CartScript() {
         class CartManager {
             constructor() {
                 this.isOpen = false;
-                this.bindEvents();
+                this.registerEvents();
                 this.updateCartCount();
             }
 
-            bindEvents() {
-                // Toggle cart
-                document.addEventListener('click', (e) => {
-                    if (e.target.matches('[data-cart-toggle]') || e.target.closest('[data-cart-toggle]')) {
-                        e.preventDefault();
-                        this.toggleCart();
-                    }
-
-                    if (e.target.matches('[data-cart-close]') || e.target.closest('[data-cart-close]')) {
-                        this.closeCart();
-                    }
-
-                    if (e.target.matches('#cart-backdrop')) {
-                        this.closeCart();
-                    }
-
-                    // Handle empty cart actions
-                    if (e.target.matches('[data-start-wizard]')) {
-                        this.closeCart();
-                        // Trigger wizard modal
-                        document.querySelector('[data-wizard-trigger]')?.click();
-                    }
-
-                    if (e.target.matches('[data-browse-catalog]')) {
-                        this.closeCart();
-                        // Trigger browse mode
-                        document.querySelector('[data-browse-trigger]')?.click();
-                    }
-                });
-
-                // HTMX events
-                document.body.addEventListener('htmx:afterRequest', (e) => {
-                    if (e.detail.xhr.status !== 200) {
-                        return;
-                    }
-                    if (e.detail.target.id === 'cart-sidebar') {
-                        this.updateCartCount();
-                        this.animateCartUpdate();
-                    }
-                });
-
-                // Handle wizard completion
-                document.body.addEventListener('htmx:afterRequest', (e) => {
-                    if (e.detail.xhr.status !== 200) {
-                        return;
-                    }
-                    if (e.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
-                        this.updateCartCount();
-                        this.showCartNotification();
-                    }
-                });
+            registerEvents() {
+                // Register with global event manager
+                window.eventManager
+                    .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))
+                    .registerClick('cart-toggle', (e) => this.toggleCart(e))
+                    .registerClick('cart-close', (e) => this.closeCart())
+                    .registerClick('cart-backdrop', (e) => this.closeCart());
             }
 
             toggleCart() {
@@ -287,6 +243,19 @@ templ CartScript() {
                     this.closeCart();
                 } else {
                     this.openCart();
+                }
+            }
+
+            onCartUpdate(event) {
+                this.updateCartCount();
+                this.animateCartUpdate();
+                
+                if (event.detail.xhr.status !== 200) {
+                    return;
+                }
+                // Check if this was triggered by add to cart
+                if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
+                    this.showCartNotification();
                 }
             }
 
