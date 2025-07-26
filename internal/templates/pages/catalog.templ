@@ -9,21 +9,21 @@ import (
 templ Catalog() {
 	@templates.BaseLayout("Catálogo - Villa Chenacolo", nil, false) {
 		@CatalogScript()
-        <div class="fixed bottom-20 right-4 z-40">
-            <button id="scroll-top-btn" class="bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none">
-                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M5 15l7-7 7 7"></path>
-                </svg>
-            </button>
-        </div>
-        <div id="scroll-top-btn-threshold" class="absolute top-[20vh] inset-x-0 h-0 w-full"></div>
+		<div class="fixed bottom-20 right-4 z-40">
+			<button id="scroll-top-btn" class="bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none">
+				<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M5 15l7-7 7 7"></path>
+				</svg>
+			</button>
+		</div>
+		<div id="scroll-top-btn-threshold" class="absolute top-[20vh] inset-x-0 h-0 w-full"></div>
 		<!-- Hero Section -->
-		<section class="relative h-[40vh] overflow-hidden">
+		<section class="relative  overflow-hidden">
 			<div class="absolute inset-0">
 				<img src="/static/assets/chenacolo_18.jpeg" alt="Catálogo de equipos" class="w-full h-full object-cover"/>
 			</div>
-			<div class="bg-gradient-to-br from-primary/70 to-accent/70 absolute inset-0 flex items-center justify-center">
-				<h1 class="text-4xl font-bold text-white text-center px-4">Catálogo</h1>
+			<div class="bg-gradient-to-br from-primary/70 to-accent/70 relative pt-32 pb-20 z-10">
+				<h1 class="text-4xl leading-tight font-bold text-white px-4">Catálogo<br/>Chenacolo</h1>
 			</div>
 		</section>
 		<!-- Wizard vs Browse Choice -->
@@ -75,53 +75,53 @@ templ Catalog() {
 				</div>
 			</div>
 		</section>
-        <div id="catalog-browse" class="relative hidden">
-            <div id="browse-spinner" class="absolute inset-0 z-10 bg-secondary/70 htmx-indicator pointer-events-none">
-                <div class="h-[60vh] py-16 px-4 flex items-center justify-center gap-4">
-                    <div class="h-10 w-10 border-b-6 border-accent animate-spin rounded-full"></div>
-                    <span class="font-bold text-xl text-primary">Cargando productos...</span>
-                </div>
-            </div>
-            <!-- Search Bar -->
-            <section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
-                <div class="max-w-6xl mx-auto">
-                    @components.SearchBar()
-                </div>
-            </section>
-            <!-- Category Filters -->
-            <div class="h-px w-screen" id="scroll-filters-threshold"></div>
-            <section class="relative py-4 px-4 bg-white z-20" id="catalog-filters" data-active-category="">
-                <div class="max-w-6xl mx-auto">
-                    <div
-                        hx-get="/catalog/categories"
-                        hx-trigger="load"
-                        hx-target="this"
-                        hx-swap="innerHTML"
-                        data-ctg-filters-container
-                    >
-                        <p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
-                            <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
-                            Cargando categorías...
-                        </p>
-                        <!-- Categories loaded here -->
-                    </div>
-                </div>
-            </section>
-            <!-- Products Grid -->
-            <section class="relative py-8 px-4" id="catalog-products">
-                <div class="max-w-6xl mx-auto">
-                    <div id="products-grid">
-                        <div hx-get="/catalog/products" hx-trigger="load" hx-target="this" hx-swap="outerHTML">
-                        <!-- Products loaded here -->
-                            <p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
-                                <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
-                                Cargando productos...
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+		<div id="catalog-browse" class="relative hidden">
+			<div id="browse-spinner" class="absolute inset-0 z-10 bg-secondary/70 htmx-indicator pointer-events-none">
+				<div class="h-[60vh] py-16 px-4 flex items-center justify-center gap-4">
+					<div class="h-10 w-10 border-b-6 border-accent animate-spin rounded-full"></div>
+					<span class="font-bold text-xl text-primary">Cargando productos...</span>
+				</div>
+			</div>
+			<!-- Search Bar -->
+			<section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
+				<div class="max-w-6xl mx-auto">
+					@components.SearchBar()
+				</div>
+			</section>
+			<!-- Category Filters -->
+			<div class="h-px w-screen" id="scroll-filters-threshold"></div>
+			<section class="relative py-4 px-4 bg-white z-20" id="catalog-filters" data-active-category="">
+				<div class="max-w-6xl mx-auto">
+					<div
+						hx-get="/catalog/categories"
+						hx-trigger="load"
+						hx-target="this"
+						hx-swap="innerHTML"
+						data-ctg-filters-container
+					>
+						<p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
+							<span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
+							Cargando categorías...
+						</p>
+						<!-- Categories loaded here -->
+					</div>
+				</div>
+			</section>
+			<!-- Products Grid -->
+			<section class="relative py-8 px-4" id="catalog-products">
+				<div class="max-w-6xl mx-auto">
+					<div id="products-grid">
+						<div hx-get="/catalog/products" hx-trigger="load" hx-target="this" hx-swap="outerHTML">
+							<!-- Products loaded here -->
+							<p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
+								<span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
+								Cargando productos...
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
 		<!-- Product Modal Container -->
 		<div id="product-modal"></div>
 		<!-- Floating Cart -->
@@ -317,7 +317,7 @@ templ CatalogScript() {
             //    showProductModal();
             //}
         });
-        document.body.addEventListener('htmx:afterRequest', function(e) {
+        document.body.addEventListener('htmx:afterRequest', function (e) {
             if (e.detail.target.id === 'products-grid') {
                 gsap.set('[data-add-item-spinner]', {height: '0%'});
             }
@@ -417,7 +417,7 @@ templ CatalogScript() {
 
         // Cart
         // Add to cart success animation
-        document.body.addEventListener('htmx:beforeRequest', function(e) {
+        document.body.addEventListener('htmx:beforeRequest', function (e) {
             if (e.detail.target.id === 'cart-sidebar') {
                 if (e.detail.elt.matches('[data-add-to-cart]')) {
                     startAddItemLoad(e.detail.elt);
@@ -456,8 +456,8 @@ templ CatalogScript() {
         function stopAddItemLoad(button, success) {
             const btnLabel = button.querySelector('[data-add-item-label]');
             const btnSpinner = button.querySelector('[data-add-item-spinner]');
-            const feedback = success 
-                ? button.querySelector('[data-add-item-success]') 
+            const feedback = success
+                ? button.querySelector('[data-add-item-success]')
                 : button.querySelector('[data-add-item-error]');
 
             // Animate button
