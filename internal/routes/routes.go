@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
@@ -50,7 +51,25 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
-	err := pages.Catalog().Render(context.Background(), w)
+	cartID, err := uuid.NewV7()
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to generate cart id err: %v\n", err)
+		return
+	}
+
+	_, err = r.Cookie("cart_id")
+	if err != nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:    "cart_id",
+			Value:   cartID.String(),
+			Expires: time.Now().Add(time.Hour * 24 * 30),
+			Path:    "/",
+			Secure:  true,
+		})
+	}
+	err = pages.Catalog().Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
