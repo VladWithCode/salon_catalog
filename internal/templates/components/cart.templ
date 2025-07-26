@@ -126,7 +126,7 @@ templ CartSidebar(items []db.CartItem, total int) {
 
 templ CartItem(item db.CartItem) {
     <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
-         data-cart-item={item.ID}>
+         data-cart-item={item.ProductID}>
         
         <!-- Product Image -->
         <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
@@ -171,7 +171,7 @@ templ CartItem(item db.CartItem) {
                     <button 
                         class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold"
                         hx-post="/cart/update-quantity"
-                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ID)}
+                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ProductID)}
                         hx-target="#cart-sidebar"
                     >
                         −
@@ -180,7 +180,7 @@ templ CartItem(item db.CartItem) {
                     <button 
                         class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold"
                         hx-post="/cart/update-quantity"
-                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ID)}
+                        hx-vals={fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ProductID)}
                         hx-target="#cart-sidebar"
                     >
                         +
@@ -191,7 +191,7 @@ templ CartItem(item db.CartItem) {
             <!-- Remove Button -->
             <button 
                 class="text-red-500 hover:text-red-700 transition-colors p-1"
-                hx-delete={fmt.Sprintf("/cart/remove/%s", item.ID)}
+                hx-delete={fmt.Sprintf("/cart/remove/%s", item.ProductID)}
                 hx-target="#cart-sidebar"
                 hx-confirm="¿Remover este elemento?"
                 title="Remover elemento"

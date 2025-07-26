@@ -1,7 +1,14 @@
 package db
 
+import "time"
+
+type Cart struct {
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type CartItem struct {
-	ID        string `json:"id"`
 	ProductID string `json:"product_id"`
 	Name      string `json:"name"`
 	Category  string `json:"category"`

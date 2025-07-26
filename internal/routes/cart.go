@@ -46,7 +46,7 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 	var itemPtr *db.CartItem
 
 	for _, item := range cart {
-		if item.ID == productID {
+		if item.ProductID == productID {
 			itemPtr = &item
 			break
 		}
@@ -64,7 +64,6 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 		}
 
 		cartItem := db.CartItem{
-			ID:        productID,
 			ProductID: productID,
 			Source:    source,
 			Name:      prod.Name,
@@ -96,7 +95,7 @@ func UpdateCartQuantity(w http.ResponseWriter, r *http.Request) {
 	var item *db.CartItem
 
 	for i, cartItem := range cart {
-		if cartItem.ID == id {
+		if cartItem.ProductID == id {
 			item = &cart[i]
 			break
 		}
@@ -119,7 +118,7 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	newCart := make([]db.CartItem, 0, len(cart))
 	for _, item := range cart {
-		if item.ID != id {
+		if item.ProductID != id {
 			newCart = append(newCart, item)
 		}
 	}
