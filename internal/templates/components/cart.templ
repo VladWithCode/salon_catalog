@@ -275,6 +275,9 @@ templ CartScript() {
 
                 // HTMX events
                 document.body.addEventListener('htmx:afterRequest', (e) => {
+                    if (e.detail.xhr.status !== 200) {
+                        return;
+                    }
                     if (e.detail.target.id === 'cart-sidebar') {
                         this.updateCartCount();
                         this.animateCartUpdate();
@@ -283,6 +286,9 @@ templ CartScript() {
 
                 // Handle wizard completion
                 document.body.addEventListener('htmx:afterRequest', (e) => {
+                    if (e.detail.xhr.status !== 200) {
+                        return;
+                    }
                     if (e.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
                         this.updateCartCount();
                         this.showCartNotification();
