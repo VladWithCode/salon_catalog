@@ -1,3 +1,4 @@
+// Package internal contains utility functions for the application
 package internal
 
 import (

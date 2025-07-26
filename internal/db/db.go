@@ -1,3 +1,6 @@
+// Package db provides a connection pool to the database
+// as well as functions to interact with the database
+// per database tables and views.
 package db
 
 import (

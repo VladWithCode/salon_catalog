@@ -1,3 +1,4 @@
+// Package auth contains functions pertaining to user authentication
 package auth
 
 import (
