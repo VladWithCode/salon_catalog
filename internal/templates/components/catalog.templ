@@ -167,7 +167,7 @@ templ ProductCard(product db.CatalogProd) {
             <!-- Action Button -->
             <button 
                 class={
-                    "w-full py-2 px-4 rounded-lg font-medium transition-colors",
+                    "grid grid-cols-1 grid-rows-1 place-items-center w-full py-2 rounded-lg font-medium transition-colors cart-item-add-btn relative",
                     templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
                     templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
                 }
@@ -179,11 +179,31 @@ templ ProductCard(product db.CatalogProd) {
                 }
                 disabled?={!product.Available}
             >
-                if product.Available {
-                    Añadir a Selección
-                } else {
-                    No Disponible
-                }
+                <div
+                    class="absolute inset-0 flex items-center justify-center bg-red-500 rounded-lg text-white text-xl opacity-0 z-10"
+                    data-add-item-error>
+                    ✗  Error al añadir al carrito
+                </div>
+                <div
+                    class="absolute inset-0 flex items-center justify-center bg-green-500 rounded-lg text-white text-xl opacity-0 z-10"
+                    data-add-item-success>
+                    ✓  Añadido al carrito
+                </div>
+                <div 
+                    class="flex items-center col-start-1 row-start-1 place-self-center overflow-hidden z-0" 
+                    data-add-item-label>
+                    if product.Available {
+                        Añadir a Selección
+                    } else {
+                        No Disponible
+                    }
+                </div>
+                <div
+                    class="col-start-1 row-start-1 place-self-center overflow-hidden"
+                    style="height: 0%;"
+                    data-add-item-spinner>
+                    @LoadingIcon("h-8")
+                </div>
             </button>
         </div>
     </div>

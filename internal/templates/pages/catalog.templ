@@ -299,6 +299,9 @@ templ CatalogScript() {
 
         // Animate product cards on load
         document.body.addEventListener('htmx:beforeSwap', function (e) {
+            if (e.detail.xhr.status !== 200) {
+                return;
+            }
             // Kill any existing animations first
             currentAnimations.forEach(anim => anim.kill());
             currentAnimations = [];
@@ -313,6 +316,11 @@ templ CatalogScript() {
             //if (e.detail.target.id === 'product-modal') {
             //    showProductModal();
             //}
+        });
+        document.body.addEventListener('htmx:afterRequest', function(e) {
+            if (e.detail.target.id === 'products-grid') {
+                gsap.set('[data-add-item-spinner]', {height: '0%'});
+            }
         });
 
         function animateProducts() {
@@ -409,29 +417,68 @@ templ CatalogScript() {
 
         // Cart
         // Add to cart success animation
+        document.body.addEventListener('htmx:beforeRequest', function(e) {
+            if (e.detail.target.id === 'cart-sidebar') {
+                if (e.detail.elt.matches('[data-add-to-cart]')) {
+                    startAddItemLoad(e.detail.elt);
+                } else if (e.detail.elt.closest('[data-add-to-cart]')) {
+                    startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));
+                }
+            }
+        });
         document.body.addEventListener('htmx:afterRequest', function (e) {
-            if (e.detail.target.id === 'cart-sidebar' &&
-                e.detail.elt.matches('[data-add-to-cart]')) {
-                animateAddToCart(e.detail.elt);
+            let success = e.detail.xhr.status === 200;
+            if (e.detail.target.id === 'cart-sidebar') {
+                if (e.detail.elt.matches('[data-add-to-cart]')) {
+                    stopAddItemLoad(e.detail.elt, success);
+                } else if (e.detail.elt.closest('[data-add-to-cart]')) {
+                    stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);
+                }
             }
         });
 
-        function animateAddToCart(button) {
+        function startAddItemLoad(button) {
+            const btnLabel = button.querySelector('[data-add-item-label]');
+            const btnSpinner = button.querySelector('[data-add-item-spinner]');
+
+            gsap.to(btnLabel, {
+                height: '0%',
+                duration: 0.3,
+                ease: 'power2.out',
+            });
+            gsap.to(btnSpinner, {
+                height: '',
+                duration: 0.3,
+                ease: 'power2.out',
+            }, "-=0.15");
+        }
+
+        function stopAddItemLoad(button, success) {
+            const btnLabel = button.querySelector('[data-add-item-label]');
+            const btnSpinner = button.querySelector('[data-add-item-spinner]');
+            const feedback = success 
+                ? button.querySelector('[data-add-item-success]') 
+                : button.querySelector('[data-add-item-error]');
+
             // Animate button
-            gsap.timeline()
-                .to(button, {scale: 0.95, duration: 0.1})
-                .to(button, {scale: 1, duration: 0.1})
-                .set(button, {
-                    innerHTML: '✓ Añadido',
-                    className: button.className.replace('bg-accent', 'bg-green-500')
-                })
-                .to(button, {scale: 1.05, duration: 0.1})
-                .to(button, {scale: 1, duration: 0.1})
-                .delay(1)
-                .set(button, {
-                    innerHTML: 'Añadir a Selección',
-                    className: button.className.replace('bg-green-500', 'bg-accent')
+            gsap.to(feedback, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+            });
+            setTimeout(() => {
+                gsap.set(btnLabel, {
+                    height: '',
                 });
+                gsap.set(btnSpinner, {
+                    height: '0%',
+                });
+                gsap.to(feedback, {
+                    opacity: 0,
+                    duration: 0.3,
+                    ease: 'power2.out',
+                });
+            }, 1500);
         }
     });
 

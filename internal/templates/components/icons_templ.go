@@ -181,7 +181,7 @@ func renderIcon(iconName string, hasError bool) templ.Component {
 	})
 }
 
-func LoadingIcon() templ.Component {
+func LoadingIcon(class string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -202,7 +202,25 @@ func LoadingIcon() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle fill=\"#FF156D\" stroke=\"#FF156D\" stroke-width=\"15\" r=\"15\" cx=\"40\" cy=\"65\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"2\" values=\"65;135;65;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"-.4\"></animate></circle> <circle fill=\"#FF156D\" stroke=\"#FF156D\" stroke-width=\"15\" r=\"15\" cx=\"100\" cy=\"65\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"2\" values=\"65;135;65;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"-.2\"></animate></circle> <circle fill=\"#FF156D\" stroke=\"#FF156D\" stroke-width=\"15\" r=\"15\" cx=\"160\" cy=\"65\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"2\" values=\"65;135;65;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"0\"></animate></circle></svg>")
+		var templ_7745c5c3_Var15 = []any{"aspect-3/1 ", class}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var15...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<svg class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var15).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/icons.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 100\"><circle fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"15\" r=\"15\" cx=\"75\" cy=\"50\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"1.5\" values=\"35;65;35;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"-.4\"></animate></circle> <circle fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"15\" r=\"15\" cx=\"150\" cy=\"50\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"1.5\" values=\"35;65;35;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"-.2\"></animate></circle> <circle fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"15\" r=\"15\" cx=\"225\" cy=\"50\"><animate attributeName=\"cy\" calcMode=\"spline\" dur=\"1.5\" values=\"35;65;35;\" keySplines=\".5 0 .5 1;.5 0 .5 1\" repeatCount=\"indefinite\" begin=\"0\"></animate></circle></svg>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
