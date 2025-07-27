@@ -9,10 +9,11 @@ import (
 )
 
 type Wizard struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	EventKindID string `json:"event_kind_id"`
-	EventKind   string `json:"event_kind"`
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	EventKindID string        `json:"event_kind_id"`
+	EventKind   string        `json:"event_kind"`
+	Steps       []*WizardStep `json:"steps"`
 }
 
 type WizardStep struct {
@@ -27,7 +28,7 @@ type WizardStep struct {
 	CategoryIDs string `json:"category_ids"`
 }
 
-func CreateWizard(wizard *Wizard) error {
+func CreateWizard(wizard *Wizard, steps []*WizardStep) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -35,24 +36,56 @@ func CreateWizard(wizard *Wizard) error {
 		return err
 	}
 	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
 	id, err := uuid.NewV7()
 	if err != nil {
 		return ErrUUIDFail
 	}
-
 	args := pgx.NamedArgs{
 		"id":            id.String(),
 		"name":          wizard.Name,
 		"event_kind_id": wizard.EventKindID,
 	}
-	_, err = conn.Exec(
+	_, err = tx.Exec(
 		ctx,
 		`INSERT INTO wizards (
 			id, name, event_kind_id
 		) VALUES (@id, @name, @event_kind_id)`,
 		args,
 	)
+	if err != nil {
+		return err
+	}
+
+	for _, step := range steps {
+		_, err = tx.Exec(
+			ctx,
+			`INSERT INTO wizard_steps (
+				id, wizard_id, name, description, required, multi_select, min_selected, max_selected, category_ids
+			) VALUES (@id, @wizard_id, @name, @description, @required, @multi_select, @min_selected, @max_selected, @category_ids)`,
+			pgx.NamedArgs{
+				"id":           step.ID,
+				"wizard_id":    step.WizardID,
+				"name":         step.Name,
+				"description":  step.Description,
+				"required":     step.Required,
+				"multi_select": step.MultiSelect,
+				"min_selected": step.MinSelected,
+				"max_selected": step.MaxSelected,
+				"category_ids": step.CategoryIDs,
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -75,10 +108,9 @@ func FindWizardByID(id string) (*Wizard, error) {
 		ctx,
 		`SELECT 
 			w.id, w.name, w.event_kind_id, 
-			ek.name AS event_kind, ekd.name AS event_kind_details
+			ek.name AS event_kind,
 		FROM wizards w
 			LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
-			LEFT JOIN event_kinds_details ekd ON w.event_kind_id = ekd.id
 		WHERE w.id = $1`,
 		id,
 	).Scan(
@@ -86,7 +118,6 @@ func FindWizardByID(id string) (*Wizard, error) {
 		&wizard.Name,
 		&wizard.EventKindID,
 		&eventKindDetails.Name,
-		&eventKindDetails.Description,
 	)
 	if err != nil {
 		return nil, err
@@ -128,7 +159,6 @@ func FindAllWizards() ([]*Wizard, error) {
 			&wizard.Name,
 			&wizard.EventKindID,
 			&eventKindDetails.Name,
-			&eventKindDetails.Description,
 		)
 		if err != nil {
 			return nil, err
@@ -160,6 +190,27 @@ func UpdateWizard(wizard *Wizard) error {
 			name = @name, event_kind_id = @event_kind_id
 		WHERE id = @id`,
 		args,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteWizard(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(
+		ctx,
+		`DELETE FROM wizards WHERE id = $1`,
+		id,
 	)
 	if err != nil {
 		return err
