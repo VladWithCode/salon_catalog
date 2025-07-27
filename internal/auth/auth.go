@@ -164,6 +164,9 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 }
 
 func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string) {
-	w.Header().Add("HX-Redirect", "/iniciar-sesion")
-	http.Redirect(w, r, "/iniciar-sesion", http.StatusFound)
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Add("HX-Redirect", "/iniciar-sesion")
+	} else {
+		http.Redirect(w, r, "/iniciar-sesion", http.StatusFound)
+	}
 }
