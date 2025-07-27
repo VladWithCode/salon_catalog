@@ -2,6 +2,7 @@
 package internal
 
 import (
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -20,4 +21,13 @@ func Slugify(s string) string {
 	)
 
 	return s
+}
+
+func HandleRedirect(toRoute string, code int, w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Add("HX-Redirect", toRoute)
+		w.WriteHeader(code)
+	} else {
+		http.Redirect(w, r, toRoute, code)
+	}
 }

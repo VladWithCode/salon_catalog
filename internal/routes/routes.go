@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
@@ -98,8 +99,7 @@ func RenderSalon(w http.ResponseWriter, r *http.Request) {
 
 func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	if a.ID != "" && a.ID != auth.InvalidTokenID {
-		w.Header().Add("HX-Redirect", "/panel")
-		http.Redirect(w, r, "/panel", http.StatusFound)
+		internal.HandleRedirect("/panel", http.StatusFound, w, r)
 		return
 	}
 
@@ -115,8 +115,7 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	if a.ID != "" && a.ID != auth.InvalidTokenID {
-		w.Header().Add("HX-Redirect", "/panel")
-		w.WriteHeader(http.StatusFound)
+		internal.HandleRedirect("/panel", http.StatusFound, w, r)
 		return
 	}
 

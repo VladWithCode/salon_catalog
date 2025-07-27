@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 )
 
@@ -164,9 +165,5 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 }
 
 func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string) {
-	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Add("HX-Redirect", "/iniciar-sesion")
-	} else {
-		http.Redirect(w, r, "/iniciar-sesion", http.StatusFound)
-	}
+	internal.HandleRedirect("/iniciar-sesion", http.StatusFound, w, r)
 }
