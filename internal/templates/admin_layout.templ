@@ -2,39 +2,47 @@ package templates
 
 import "github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 
-templ AdminLayout(title string) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>
-				if title == "" {
-					Panel de Administración | Chenacolo
-				} else {
-					{ title }
-				}
-			</title>
-			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
-			@headHandle.Once() {
-				<link rel="dns-prefetch" href={ `//fonts.googleapis.com` }/>
-				<link rel="dns-prefetch" href={ `//fonts.gstatic.com` }/>
-				<link rel="preconnect" href="https://fonts.googleapis.com"/>
-				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-				<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"/>
-				<link rel="stylesheet" href="/static/css/styles.css"/>
-				<script src="/static/js/htmx.js"></script>
-				<script src="/static/js/htmx-response-targets.js"></script>
-				<script src="/static/js/htmx-json-enc.js"></script>
-				<script src="/static/js/gsap.js"></script>
-			}
-		</head>
-		<body>
-            <div class="flex w-screen h-screen overflow-hidden z-0 p-0.5">
-                @dashboard.DashboardSidebar()
-                @dashboard.DashboardHeader()
-                { children... }
-            </div>
-        </body>
-	</html>
+templ AdminLayout(title string, headerTitle string) {
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        if title == "" {
+        Panel de Administración | Chenacolo
+        } else {
+        { title }
+        }
+    </title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    @headHandle.Once() {
+    <link rel="dns-prefetch" href={ `//fonts.googleapis.com` } />
+    <link rel="dns-prefetch" href={ `//fonts.gstatic.com` } />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <script src="/static/js/htmx.js"></script>
+    <script src="/static/js/htmx-response-targets.js"></script>
+    <script src="/static/js/htmx-json-enc.js"></script>
+    <script src="/static/js/gsap.js"></script>
+    <script src="/static/js/eventManager.js" defer></script>
+    }
+</head>
+
+<body>
+    <div class="flex w-screen h-screen overflow-hidden z-0 p-0.5">
+        @dashboard.DashboardSidebar()
+        <div class="flex-1 h-screen flex flex-col gap-2 overflow-hidden">
+            @dashboard.DashboardHeader(headerTitle)
+            { children... }
+        </div>
+    </div>
+</body>
+
+</html>
 }
