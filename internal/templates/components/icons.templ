@@ -97,6 +97,18 @@ templ renderIcon(iconName string, hasError bool) {
 	}
 }
 
+templ ChevronIcon(class string, dataAttr templ.Attributes) {
+    <svg class={
+           "aspect-square",
+            class,
+        } 
+        fill="none" stroke="currentColor"
+        viewBox="0 0 24 24"
+        {dataAttr...}>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+}
+
 templ LoadingIcon(class string) {
 	<svg class={"aspect-3/1 ", class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100">
 		<circle fill="currentColor" stroke="currentColor" stroke-width="15" r="15" cx="75" cy="50">

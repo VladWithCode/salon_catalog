@@ -1,5 +1,7 @@
 package dashboard
 
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
 templ DashboardSidebar() {
 @sidebarScript()
 <div id="sidebar-dropshadow" class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden"
@@ -44,10 +46,12 @@ templ DashboardSidebar() {
                         </svg>
                         Productos
                     </div>
-                    <svg class="w-4 h-4 transition-transform nav-chevron -rotate-90" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24" data-nav-section-chevron>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+                    @components.ChevronIcon(
+                        "-rotate-90 w-4",
+                        templ.Attributes{
+                            "data-nav-section-chevron": true,
+                        },
+                    )
                 </button>
                 <div class="nav-submenu ml-8 space-y-1 h-0 overflow-hidden" data-nav-section-submenu>
                     <a href="/panel/productos" class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">
@@ -73,10 +77,12 @@ templ DashboardSidebar() {
                         </svg>
                         Asistente de Eventos
                     </div>
-                    <svg class="w-4 h-4 transition-transform nav-chevron -rotate-90" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24" data-nav-section-chevron>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+                    @components.ChevronIcon(
+                        "-rotate-90 w-4",
+                        templ.Attributes{
+                            "data-nav-section-chevron": true,
+                        },
+                    )
                 </button>
                 <div class="nav-submenu ml-8 space-y-1 h-0 overflow-hidden" data-nav-section-submenu>
                     <a href="/panel/asistente" class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">
