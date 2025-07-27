@@ -141,7 +141,7 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 
 		if claims, ok := t.Claims.(jwt.MapClaims); ok && t.Valid {
 			var (
-				id, ok1       = claims["Id"].(string)
+				id, ok1       = claims["ID"].(string)
 				username, ok2 = claims["Username"].(string)
 				role, ok3     = claims["Role"].(string)
 				fullname, ok4 = claims["Fullname"].(string)
