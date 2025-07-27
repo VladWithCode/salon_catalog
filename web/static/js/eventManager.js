@@ -112,31 +112,13 @@ class EventManager {
     }
 
     handleClicks(event) {
-        const target = event.target;
+        const target = event.target.matches('[data-click-handler-selector]') 
+            ? event.target 
+            : event.target.closest('[data-click-handler-selector]');
 
-        // Route click events based on data attributes
-        if (target.matches('[data-cart-toggle]') || target.closest('[data-cart-toggle]')) {
-            this.triggerHandler('click', 'cart-toggle', event);
-        }
-
-        if (target.matches('[data-cart-close]') || target.closest('[data-cart-close]')) {
-            this.triggerHandler('click', 'cart-close', event);
-        }
-
-        if (target.matches('[data-close-modal]') || target.closest('[data-close-modal]')) {
-            this.triggerHandler('click', 'close-modal', event);
-        }
-
-        if (target.matches('[data-close-wizard]') || target.closest('[data-close-wizard]')) {
-            this.triggerHandler('click', 'close-wizard', event);
-        }
-
-        if (target.matches('[data-browse-trigger]')) {
-            this.triggerHandler('click', 'browse-trigger', event);
-        }
-
-        if (target.matches('#cart-backdrop')) {
-            this.triggerHandler('click', 'cart-backdrop', event);
+        if (target) {
+            const handlerSelector = target.dataset.clickHandlerSelector;
+            this.triggerHandler('click', handlerSelector, event);
         }
     }
 
