@@ -18,7 +18,9 @@ class EventManager {
         if (!this.handlers[eventType]) {
             this.handlers[eventType] = new Map();
         }
-        this.handlers[eventType].set(targetSelector, handler);
+        const currentHandlers = this.handlers[eventType].get(targetSelector) ?? [];
+
+        this.handlers[eventType].set(targetSelector, [...currentHandlers, handler]);
         return this; // Allow chaining
     }
 
@@ -60,14 +62,16 @@ class EventManager {
     }
 
     routeEvent(eventType, event) {
-        const handlers = this.handlers[eventType];
-        if (!handlers) return;
+        const handlerMap = this.handlers[eventType];
+        if (!handlerMap) return;
 
         // Try to match handlers by target ID, class, or selector
-        for (const [selector, handler] of handlers) {
+        for (const [selector, handlers] of handlerMap) {
             if (this.matchesSelector(event, selector)) {
                 try {
-                    handler(event);
+                    for (const handler of handlers) {
+                        handler(event);
+                    }
                 } catch (error) {
                     console.error(`Error in ${eventType} handler for ${selector}:`, error);
                 }
@@ -116,9 +120,14 @@ class EventManager {
             ? event.target 
             : event.target.closest('[data-click-handler-selector]');
 
-        if (target) {
-            const handlerSelector = target.dataset.clickHandlerSelector;
-            this.triggerHandler('click', handlerSelector, event);
+        if (!target) {
+            return;
+        }
+
+        const handlerSelector = target.dataset.clickHandlerSelector;
+        const selectors = handlerSelector.split(',');
+        for (const selector of selectors) {
+            this.triggerHandler('click', selector, event);
         }
     }
 
