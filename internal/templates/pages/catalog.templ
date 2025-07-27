@@ -143,7 +143,6 @@ templ Catalog() {
 
 templ CatalogScript() {
 	<script>
-    let wizardManager;
     let currentAnimations = [];
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -395,91 +394,6 @@ templ CatalogScript() {
         ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));
     });
 
-    // Wizard Manager Class
-    class WizardManager {
-        constructor() {
-            this.initializeSelections();
-            this.bindEvents();
-        }
-
-        initializeSelections() {
-            document.querySelectorAll('[data-product-checkbox], [data-product-radio]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    this.handleSelection(e.target);
-                });
-            });
-        }
-
-        handleSelection(input) {
-            const card = input.closest('[data-product-card]');
-            const overlay = card.querySelector('[data-selection-overlay]');
-            const button = card.querySelector('[data-selection-button]');
-
-            if (input.checked) {
-                card.classList.add('border-accent', 'bg-accent/5');
-                overlay.classList.remove('opacity-0');
-                button.textContent = 'Seleccionado';
-                button.classList.add('bg-accent', 'text-white', 'border-accent');
-
-                if (input.type === 'radio') {
-                    this.deselectOthersInGroup(input);
-                }
-            } else {
-                card.classList.remove('border-accent', 'bg-accent/5');
-                overlay.classList.add('opacity-0');
-                button.textContent = 'Seleccionar';
-                button.classList.remove('bg-accent', 'text-white', 'border-accent');
-            }
-
-            this.updateSelectedSummary();
-            this.animateSelection(card);
-        }
-
-        deselectOthersInGroup(selectedInput) {
-            document.querySelectorAll(`[name="${selectedInput.name}"]`).forEach(input => {
-                if (input !== selectedInput && input.checked) {
-                    input.checked = false;
-                    this.handleSelection(input);
-                }
-            });
-        }
-
-        updateSelectedSummary() {
-            const currentStep = document.querySelector('[data-wizard-step]');
-            const stepIndex = currentStep.dataset.wizardStep;
-            const summaryContainer = document.querySelector(`[data-selected-items]`);
-
-            const selected = document.querySelectorAll(`[name*="step_${stepIndex}"][checked], [name*="step_${stepIndex}"]:checked`);
-
-            if (selected.length === 0) {
-                summaryContainer.textContent = 'Ningún elemento seleccionado';
-            } else {
-                const items = Array.from(selected).map(input => {
-                    const card = input.closest('[data-product-card]');
-                    const name = card.querySelector('h4').textContent;
-                    return name;
-                });
-                summaryContainer.textContent = items.join(', ');
-            }
-        }
-
-        animateSelection(card) {
-            gsap.fromTo(card,
-                {scale: 1},
-                {scale: 1.05, duration: 0.1, yoyo: true, repeat: 1}
-            );
-        }
-
-        bindEvents() {
-            // Handle wizard step navigation
-            document.body.addEventListener('htmx:afterSwap', (e) => {
-                if (e.detail.target.id === 'wizard-step-content' ||
-                    e.detail.target.closest('#wizard-modal')) {
-                    // Re-initialize selections when step changes
-                    setTimeout(() => this.initializeSelections(), 50);
-                }
-            });
-        }
-    }
+    
 </script>
 }
