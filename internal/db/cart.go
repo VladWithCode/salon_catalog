@@ -17,3 +17,10 @@ type CartItem struct {
 	Source    string `json:"source"`               // "wizard" or "catalog"
 	StepIndex int    `json:"step_index,omitempty"` // For wizard items
 }
+
+type CartItemSource string
+
+const (
+	CartItemSourceWizard  CartItemSource = "asistente"
+	CartItemSourceCatalog CartItemSource = "catálogo"
+)
