@@ -122,6 +122,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	signinPage := pages.SignIn
 	err := r.ParseForm()
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		err = signinPage(&pages.FormState{
 			ServerError: "Error inesperado",
 		}).Render(context.Background(), w)
@@ -136,6 +137,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		err = signinPage(&pages.FormState{
 			UserError:     "El nombre de usuario es requerido",
 			UserValue:     username,
@@ -150,6 +152,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 	user, err := db.GetUserByUsername(username)
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		err = signinPage(&pages.FormState{
 			UserError:     "Revisa que el nombre de usuario sea correcto",
 			UserValue:     username,
@@ -164,6 +167,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 	err = user.ValidatePass(password)
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		err = signinPage(&pages.FormState{
 			UserError:     "Revisa que el nombre de usuario sea correcto",
 			UserValue:     username,
@@ -178,6 +182,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 	token, err := auth.CreateToken(user)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		err = signinPage(&pages.FormState{
 			ServerError: "Error inesperado",
 		}).Render(context.Background(), w)
