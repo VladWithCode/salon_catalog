@@ -199,11 +199,10 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		Expires:  time.Now().Add(time.Hour * 24 * 7),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		// Secure:   true,
 	})
 
-	w.Header().Add("HX-Redirect", "/panel")
-	w.WriteHeader(http.StatusFound)
+	internal.HandleRedirect("/panel", http.StatusFound, w, r)
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {
