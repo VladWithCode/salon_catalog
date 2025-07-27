@@ -29,6 +29,10 @@ class EventManager {
             this.routeEvent('afterSwap', e);
         });
 
+        document.body.addEventListener('htmx:beforeSwap', (e) => {
+            this.routeEvent('beforeSwap', e);
+        });
+
         // HTMX Before Request Handler  
         document.body.addEventListener('htmx:beforeRequest', (e) => {
             this.routeEvent('beforeRequest', e);
@@ -85,7 +89,7 @@ class EventManager {
                 return target?.id === 'cart-sidebar';
 
             case 'products-grid':
-                return target?.id === 'products-grid' || target?.closest('#products-grid');
+                return target?.id === 'products' || event.detail.requestConfig.elt.closest('#products');
 
             case 'category-filter':
                 return event.detail?.elt?.matches?.('[data-category-filter]') ||
