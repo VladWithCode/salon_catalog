@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/vladwithcode/salon_catalog/internal/db"
 import "fmt"
 
-func WizardModal(categories []db.WizardCategory, currentStep int) templ.Component {
+func WizardModal(steps []db.WizardStep, currentStep int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -50,9 +50,9 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(len(categories))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(len(steps))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 27, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 27, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -63,9 +63,9 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.KV("width", fmt.Sprintf("%.1f%%", float64(currentStep+1)/float64(len(categories))*100)))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.KV("width", fmt.Sprintf("%.1f%%", float64(currentStep+1)/float64(len(steps))*100)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 33, Col: 128}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 33, Col: 123}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -75,7 +75,7 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for i, category := range categories {
+		for i, step := range steps {
 			var templ_7745c5c3_Var5 = []any{"flex items-center p-3 rounded-lg transition-colors cursor-pointer",
 				templ.KV("bg-accent text-white", i == currentStep),
 				templ.KV("bg-white hover:bg-gray-100", i != currentStep),
@@ -149,9 +149,9 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(step.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 65, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 65, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -166,8 +166,8 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if currentStep < len(categories) {
-			templ_7745c5c3_Err = WizardStep(categories[currentStep], currentStep).Render(ctx, templ_7745c5c3_Buffer)
+		if currentStep < len(steps) {
+			templ_7745c5c3_Err = WizardStep(steps[currentStep], currentStep).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -207,9 +207,9 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/wizard/step/%s", categories[currentStep-1].ID))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/wizard/step/%s", steps[currentStep-1].ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 88, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 88, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -230,15 +230,15 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if currentStep < len(categories)-1 {
+		if currentStep < len(steps)-1 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button class=\"px-6 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-colors\" hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/wizard/step/%s", categories[currentStep].ID))
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/wizard/step/%s", steps[currentStep].ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 108, Col: 103}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 108, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -262,7 +262,7 @@ func WizardModal(categories []db.WizardCategory, currentStep int) templ.Componen
 	})
 }
 
-func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
+func WizardStep(step db.WizardStep, stepIndex int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -301,9 +301,9 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(step.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 136, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 136, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -314,9 +314,9 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(category.Description)
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(step.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 137, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 137, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -326,7 +326,7 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if category.Required {
+		if step.Required {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<span class=\"inline-block mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded\">Requerido</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -336,7 +336,7 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if category.MultiSelect {
+		if step.MultiSelect {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<strong>Selección múltiple:</strong> Puedes elegir varios elementos")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -347,30 +347,20 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</p></div><!-- Products Grid --><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, product := range category.Products {
-			templ_7745c5c3_Err = WizardProductCard(product, category.MultiSelect, stepIndex).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div><!-- Selected Items Summary --><div class=\"mt-8 p-4 bg-gray-50 rounded-lg\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</p></div><!-- Products Grid --><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\"></div><!-- Selected Items Summary --><div class=\"mt-8 p-4 bg-gray-50 rounded-lg\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("selected-summary-%d", stepIndex))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 164, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 162, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"><h4 class=\"font-semibold text-gray-700 mb-2\">Seleccionados:</h4><div class=\"text-sm text-gray-600\" data-selected-items>Ningún elemento seleccionado</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"><h4 class=\"font-semibold text-gray-700 mb-2\">Seleccionados:</h4><div class=\"text-sm text-gray-600\" data-selected-items>Ningún elemento seleccionado</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -378,7 +368,7 @@ func WizardStep(category db.WizardCategory, stepIndex int) templ.Component {
 	})
 }
 
-func WizardProductCard(product db.WizardProduct, multiSelect bool, stepIndex int) templ.Component {
+func WizardScript() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -399,169 +389,7 @@ func WizardProductCard(product db.WizardProduct, multiSelect bool, stepIndex int
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"bg-white rounded-lg shadow-md overflow-hidden border-2 border-transparent transition-all duration-200 hover:shadow-lg group\" data-product-card=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 175, Col: 38}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"><!-- Product Image --><div class=\"aspect-square overflow-hidden bg-gray-100 relative\"><img src=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(product.ImageURL)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 180, Col: 37}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" alt=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 181, Col: 33}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-300\"><!-- Selection Overlay --><div class=\"absolute inset-0 bg-accent/90 opacity-0 flex items-center justify-center transition-opacity duration-200\" data-selection-overlay><svg class=\"w-12 h-12 text-white\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\" clip-rule=\"evenodd\"></path></svg></div></div><!-- Product Info --><div class=\"p-4\"><h4 class=\"font-semibold text-gray-800 mb-1\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 196, Col: 70}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</h4><p class=\"text-sm text-gray-600 mb-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(product.Description)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 197, Col: 70}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</p><!-- Selection Input --><div class=\"mt-3\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if multiSelect {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<label class=\"flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("step_%d_products", stepIndex))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 205, Col: 76}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var27 string
-			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 206, Col: 45}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" data-wizard-selections class=\"sr-only\" data-product-checkbox><div class=\"w-full text-center py-2 px-4 border-2 border-gray-300 rounded-lg font-medium transition-colors hover:border-accent\" data-selection-button>Seleccionar</div></label>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<label class=\"flex items-center cursor-pointer\"><input type=\"radio\" name=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("step_%d_product", stepIndex))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 220, Col: 75}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var29 string
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 221, Col: 45}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" data-wizard-selections class=\"sr-only\" data-product-radio><div class=\"w-full text-center py-2 px-4 border-2 border-gray-300 rounded-lg font-medium transition-colors hover:border-accent\" data-selection-button>Seleccionar</div></label>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// Wizard JavaScript Component
-func WizardScript() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var30 == nil {
-			templ_7745c5c3_Var30 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<script>\n        // Only wizard-specific utilities that need to run immediately\n        document.addEventListener('DOMContentLoaded', function() {\n            // Handle form validation before step progression\n            document.body.addEventListener('htmx:configRequest', function(e) {\n                if (e.detail.path.includes('/wizard/step/')) {\n                    const currentStep = document.querySelector('[data-wizard-step]');\n                    if (currentStep) {\n                        const required = currentStep.dataset.required === 'true';\n                        const selected = currentStep.querySelectorAll('input:checked');\n                        \n                        if (required && selected.length === 0) {\n                            e.preventDefault();\n                            alert('Debes seleccionar al menos una opción para continuar');\n                            return false;\n                        }\n                    }\n                }\n            });\n        });\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<script>\n        document.addEventListener('DOMContentLoaded', function() {\n\n        });\n\n        class WizardManager {\n            constructor() {\n                this.initializeSelections();\n                this.bindEvents();\n            }\n\n            initializeSelections() {\n                document.querySelectorAll('[data-product-checkbox], [data-product-radio]').forEach(input => {\n                    input.addEventListener('change', (e) => {\n                        this.handleSelection(e.target);\n                    });\n                });\n            }\n\n            handleSelection(input) {\n                const card = input.closest('[data-product-card]');\n                const overlay = card.querySelector('[data-selection-overlay]');\n                const button = card.querySelector('[data-selection-button]');\n\n                if (input.checked) {\n                    card.classList.add('border-accent', 'bg-accent/5');\n                    overlay.classList.remove('opacity-0');\n                    button.textContent = 'Seleccionado';\n                    button.classList.add('bg-accent', 'text-white', 'border-accent');\n\n                    if (input.type === 'radio') {\n                        this.deselectOthersInGroup(input);\n                    }\n                } else {\n                    card.classList.remove('border-accent', 'bg-accent/5');\n                    overlay.classList.add('opacity-0');\n                    button.textContent = 'Seleccionar';\n                    button.classList.remove('bg-accent', 'text-white', 'border-accent');\n                }\n\n                this.updateSelectedSummary();\n                this.animateSelection(card);\n            }\n\n            deselectOthersInGroup(selectedInput) {\n                document.querySelectorAll(`[name=\"${selectedInput.name}\"]`).forEach(input => {\n                    if (input !== selectedInput && input.checked) {\n                        input.checked = false;\n                        this.handleSelection(input);\n                    }\n                });\n            }\n\n            updateSelectedSummary() {\n                const currentStep = document.querySelector('[data-wizard-step]');\n                const stepIndex = currentStep.dataset.wizardStep;\n                const summaryContainer = document.querySelector(`[data-selected-items]`);\n\n                const selected = document.querySelectorAll(`[name*=\"step_${stepIndex}\"][checked], [name*=\"step_${stepIndex}\"]:checked`);\n\n                if (selected.length === 0) {\n                    summaryContainer.textContent = 'Ningún elemento seleccionado';\n                } else {\n                    const items = Array.from(selected).map(input => {\n                        const card = input.closest('[data-product-card]');\n                        const name = card.querySelector('h4').textContent;\n                        return name;\n                    });\n                    summaryContainer.textContent = items.join(', ');\n                }\n            }\n\n            animateSelection(card) {\n                gsap.fromTo(card,\n                    {scale: 1},\n                    {scale: 1.05, duration: 0.1, yoyo: true, repeat: 1}\n                );\n            }\n\n            bindEvents() {\n                // Handle wizard step navigation\n                document.body.addEventListener('htmx:afterSwap', (e) => {\n                    if (e.detail.target.id === 'wizard-step-content' ||\n                        e.detail.target.closest('#wizard-modal')) {\n                        // Re-initialize selections when step changes\n                        setTimeout(() => this.initializeSelections(), 50);\n                    }\n                });\n            }\n        }\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

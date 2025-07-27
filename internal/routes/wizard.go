@@ -5,7 +5,12 @@ import (
 )
 
 func RegisterWizardRoutes(router *customServeMux) {
-	router.HandleFunc("GET /wizard/categories", GetWizardCategories)
+	router.HandleFunc("GET /api/wizard", InitWizard)
+	router.HandleFunc("GET /api/wizard/categories", GetWizardCategories)
+}
+
+func InitWizard(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func GetWizardCategories(w http.ResponseWriter, r *http.Request) {
