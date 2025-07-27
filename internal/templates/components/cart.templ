@@ -10,6 +10,7 @@ templ FloatingCart() {
     <div class="fixed bottom-2 right-4 z-40" id="floating-cart">
         <button 
             class="bg-accent text-white rounded-full p-3.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative group"
+            data-click-handler-selector="cart-toggle"
             data-cart-toggle
             hx-get="/cart"
             hx-target="#cart-sidebar"
@@ -42,7 +43,9 @@ templ FloatingCart() {
 
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40"
-         id="cart-backdrop"></div>
+         id="cart-backdrop"
+         data-click-handler-selector="cart-backdrop"
+         data-cart-close></div>
 }
 
 templ CartSidebar(items []db.CartItem) {
@@ -51,7 +54,10 @@ templ CartSidebar(items []db.CartItem) {
         <div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-bold">Tu Selección</h2>
-                <button class="text-white hover:text-gray-200 transition-colors" data-cart-close>
+                <button 
+                class="text-white hover:text-gray-200 transition-colors"
+                data-click-handler-selector="cart-close"
+                data-cart-close>
                     <div class="p-4">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -82,7 +88,7 @@ templ CartSidebar(items []db.CartItem) {
             <div class="border-t p-6 bg-gray-50">
                 <!-- Action Buttons -->
                 <div class="space-y-3">
-                    <button 
+                    /* <button 
                         class="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
                         hx-post="/event/save-plan"
                         hx-include="[data-cart-items]"
@@ -90,7 +96,7 @@ templ CartSidebar(items []db.CartItem) {
                         data-cart-save
                     >
                         Guardar Selección
-                    </button>
+                    </button> */
                     
                     <button 
                         class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
@@ -205,6 +211,7 @@ templ EmptyCart() {
             <button 
                 class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors"
                 data-cart-close
+                data-click-handler-selector="wizard-trigger"
                 data-start-wizard
             >
                 Usar Asistente
@@ -212,6 +219,7 @@ templ EmptyCart() {
             <button 
                 class="block px-6 py-2 text-primary hover:text-primary/80 transition-colors font-medium"
                 data-cart-close
+                data-click-handler-selector="browse-trigger,cart-close"
                 data-browse-catalog
             >
                 Ver Catálogo
@@ -235,7 +243,8 @@ templ CartScript() {
                     .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))
                     .registerClick('cart-toggle', (e) => this.toggleCart(e))
                     .registerClick('cart-close', (e) => this.closeCart())
-                    .registerClick('cart-backdrop', (e) => this.closeCart());
+                    .registerClick('cart-backdrop', (e) => this.closeCart())
+                    .registerClick('browse-catalog', (e) => this.closeCart());
             }
 
             toggleCart() {
@@ -264,12 +273,9 @@ templ CartScript() {
                 const backdrop = document.getElementById('cart-backdrop');
                 
                 this.isOpen = true;
-                
-                // Show backdrop
+
                 backdrop.classList.remove('pointer-events-none');
                 gsap.to(backdrop, { opacity: 1, duration: 0.3 });
-                
-                // Slide in sidebar
                 gsap.to(sidebar, { 
                     x: 0, 
                     duration: 0.4, 

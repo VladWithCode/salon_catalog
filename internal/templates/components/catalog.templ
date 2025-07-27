@@ -21,9 +21,10 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
                 templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != ""),
             }
             hx-get="/catalog/products"
-            hx-target="#products-grid"
+            hx-target="#products"
             hx-swap="innerHTML"
-            hx-indicator="#browse-spinner"
+            hx-indicator="[data-products-spinner]"
+            data-click-handler-selector="category-filter"
             data-category-filter=""
         >
             Todos ({getTotalProductCount(categories)})
@@ -38,9 +39,10 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
                     templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != category.ID),
                 }
                 hx-get={fmt.Sprintf("/catalog/products?category=%s", category.ID)}
-                hx-target="#products-grid"
+                hx-target="#products"
                 hx-swap="innerHTML"
-                hx-indicator="#browse-spinner"
+                hx-indicator="[data-products-spinner]"
+                data-click-handler-selector="category-filter"
                 data-category-filter={category.ID}
             >
                 {category.Name} ({category.ProductCount})
@@ -312,10 +314,10 @@ templ SearchBar() {
             placeholder="Buscar productos..."
             class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             hx-get="/catalog/products"
-            hx-target="#products-grid"
+            hx-target="#products"
             hx-swap="innerHTML"
             hx-trigger="keyup changed delay:300ms"
-            hx-indicator="#search-indicator"
+            hx-indicator="[data-products-spinner]"
             name="search"
             data-search-input
         />

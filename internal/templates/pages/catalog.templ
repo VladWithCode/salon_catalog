@@ -67,6 +67,7 @@ templ Catalog() {
 						<p class="text-gray-600 mb-4">Navega libremente por todos nuestros productos</p>
 						<button
 							class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+							data-click-handler-selector="browse-trigger"
 							data-browse-trigger
 						>
 							Ver Catálogo
@@ -90,7 +91,7 @@ templ Catalog() {
 			</section>
 			<!-- Category Filters -->
 			<div class="h-px w-screen" id="scroll-filters-threshold"></div>
-			<section class="relative py-4 px-4 bg-white z-20" id="catalog-filters" data-active-category="">
+			<section class="relative py-4 px-4 bg-white z-20" id="category-filters" data-active-category="">
 				<div class="max-w-6xl mx-auto">
 					<div
 						hx-get="/catalog/categories"
@@ -108,17 +109,24 @@ templ Catalog() {
 				</div>
 			</section>
 			<!-- Products Grid -->
-			<section class="relative py-8 px-4" id="catalog-products">
-				<div class="max-w-6xl mx-auto">
-					<div id="products-grid">
-						<div hx-get="/catalog/products" hx-trigger="load" hx-target="this" hx-swap="outerHTML">
-							<!-- Products loaded here -->
-							<p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
-								<span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
-								Cargando productos...
-							</p>
-						</div>
+			<section class="grid" id="catalog-products">
+				<div
+					data-products-spinner
+					class="relative col-start-1 row-start-1 inset-0 max-h-full bg-secondary/90 opacity-0 pointer-events-auto transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
+				>
+					<div class="flex flex-col items-center pt-8 gap-4 py-24 text-xl font-bold text-primary">
+						@components.LoadingIcon("h-20")
+						<p class="text-lg">Cargando productos...</p>
 					</div>
+				</div>
+				<div id="products" class="max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto">
+					<div
+						hx-get="/catalog/products"
+						hx-trigger="load"
+						hx-target="this"
+						hx-swap="outerHTML"
+						hx-indicator="[data-products-spinner]"
+					></div>
 				</div>
 			</section>
 		</div>
@@ -139,6 +147,204 @@ templ CatalogScript() {
     let currentAnimations = [];
 
     document.addEventListener('DOMContentLoaded', function () {
+        window.eventManager
+            .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)
+            .register('afterSwap', 'product-modal', handleProductModal)
+            .register('beforeRequest', 'category-filter', handleCategoryFilterBeforeRequest)
+            .register('beforeRequest', 'search-input', handleSearchBeforeRequest)
+            .register('afterRequest', 'add-to-cart', handleCartAfterRequest)
+            .register('configRequest', 'search-input', handleCatalogSearchConfigRequest)
+            .register('configRequest', 'category-filter', handleCatalogCtgFilterConfigRequest)
+            .registerClick('browse-trigger', handleBrowseTrigger)
+            .registerClick('close-modal', closeProductModal)
+            .registerClick('category-filter', handleCategoryFilterClick);
+
+        function handleCategoryFilterClick(e) {
+            window.scrollTo(0, 0);
+            document.getElementById('category-filters').dataset.activeCategory = e.target.dataset.categoryFilter;
+        }
+        function handleBrowseTrigger(e) {
+            gsap.to('#catalog-intro', {
+                opacity: 0,
+                y: -20,
+                duration: 0.3,
+            });
+            gsap.set('#catalog-intro', {display: 'none'});
+            gsap.set('#catalog-browse', {display: 'block'})
+            gsap.fromTo(['#catalog-search', '#category-filters', '#catalog-products'],
+                {opacity: 0, y: 20},
+                {opacity: 1, y: 0, duration: 0.4, stagger: 0.1}
+            );
+            window.scrollTo(0, 0);
+        }
+
+        function handleProductsBeforeSwap(e) {
+            if (e.detail.xhr.status !== 200) {
+                return;
+            }
+
+            // Prevent animation overlap
+            currentAnimations.forEach(anim => anim.kill());
+            currentAnimations = [];
+
+            setTimeout(() => animateProducts(), 50);
+        }
+        function animateProducts() {
+            const container = document.querySelector('[data-products-container]');
+            const products = document.querySelectorAll('[data-product-id]');
+
+            if (!container || products.length === 0) return;
+
+            // Clear previous animations
+            gsap.killTweensOf(products);
+            gsap.killTweensOf(container);
+
+            // Set initial state
+            gsap.set(products, {opacity: 0, y: 30});
+            gsap.set(container, {opacity: 1});
+
+            // Animate products in
+            const tl = gsap.timeline();
+            const anim = tl.to(products, {
+                opacity: 1,
+                y: 0,
+                duration: 0.4,
+                stagger: 0.05,
+                ease: "power2.out"
+            });
+
+            currentAnimations.push(anim);
+        }
+
+        function handleCategoryFilterBeforeRequest(e) {
+            // Remove active state from all filters
+            document.querySelectorAll('[data-category-filter]').forEach(btn => {
+                btn.className = btn.className
+                    .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+            });
+
+            // Add active state to clicked filter  
+            e.detail.elt.className = e.detail.elt.className
+                .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
+        }
+
+        function handleCatalogSearchConfigRequest(e) {
+            const activeCtg = document.querySelector('[data-active-category]').dataset.activeCategory;
+            e.detail.parameters.set('category', activeCtg);
+        }
+        function handleCatalogCtgFilterConfigRequest(e) {
+            const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;
+            e.detail.parameters.set('search', activeSearch);
+        }
+
+        function handleSearchBeforeRequest(e) {
+            const container = document.querySelector('[data-products-container]');
+            if (container) {
+                gsap.to(container, {opacity: 0.5, duration: 0.2});
+            }
+            document.getElementById('catalog-search').dataset.activeSearch = e.detail.elt.value;
+        }
+
+        function handleCartBeforeRequest(e) {
+            if (e.detail.elt.matches('[data-add-to-cart]')) {
+                startAddItemLoad(e.detail.elt);
+            } else if (e.detail.elt.closest('[data-add-to-cart]')) {
+                startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));
+            }
+        }
+
+        function handleCartAfterRequest(e) {
+            let success = e.detail.xhr.status === 200;
+
+            if (e.detail.elt.matches('[data-add-to-cart]')) {
+                stopAddItemLoad(e.detail.elt, success);
+            } else if (e.detail.elt.closest('[data-add-to-cart]')) {
+                stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);
+            }
+        }
+
+        function showWizardModal() {
+            const modal = document.getElementById('wizard-modal');
+            modal.classList.remove('hidden');
+            gsap.to(modal, {
+                opacity: 1,
+                duration: 0.3,
+                onComplete: () => {
+                    modal.classList.remove('pointer-events-none');
+                }
+            });
+        }
+        function closeWizardModal() {
+            const modal = document.getElementById('wizard-modal');
+            modal.classList.add('pointer-events-none');
+            gsap.to(modal, {
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                    modal.classList.add('hidden');
+                    modal.innerHTML = '';
+                }
+            });
+        }
+
+        function handleProductModal(e) {
+            const modal = document.getElementById('product-modal');
+            gsap.fromTo(modal,
+                {opacity: 0, scale: 0.9},
+                {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)"}
+            );
+        }
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            gsap.to(modal, {
+                opacity: 0,
+                scale: 0.9,
+                duration: 0.2,
+                onComplete: () => {
+                    modal.innerHTML = '';
+                }
+            });
+        }
+
+        function startAddItemLoad(button) {
+            gsap.to('[data-add-item-label]', {
+                height: '0%',
+                duration: 0.3,
+                ease: 'power2.out',
+            });
+            gsap.to('[data-add-item-spinner]', {
+                height: '',
+                duration: 0.3,
+                ease: 'power2.out',
+            }, "-=0.15");
+        }
+
+        function stopAddItemLoad(button, success) {
+            const feedback = success
+                ? button.querySelector('[data-add-item-success]')
+                : button.querySelector('[data-add-item-error]');
+
+            // Animate button
+            gsap.to(feedback, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+            });
+            setTimeout(() => {
+                gsap.set('[data-add-item-label]', {
+                    height: '',
+                });
+                gsap.set('[data-add-item-spinner]', {
+                    height: '0%',
+                });
+                gsap.to(feedback, {
+                    opacity: 0,
+                    duration: 0.3,
+                    ease: 'power2.out',
+                });
+            }, 1500);
+        }
+
         const scrollTopBtn = document.getElementById('scroll-top-btn');
         const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');
         const obsv = new IntersectionObserver(function (entries, observer) {
@@ -167,32 +373,17 @@ templ CatalogScript() {
             window.scrollTo(0, 0);
         });
 
-        const browseBtn = document.querySelector('[data-browse-trigger]');
-        const wizardTriggers = document.querySelectorAll('[data-wizard-trigger]');
-        const catalogBrowse = document.getElementById('catalog-browse');
-        const catalogSearch = document.getElementById('catalog-search');
-        const catalogFilters = document.getElementById('catalog-filters');
-        const catalogProducts = document.getElementById('catalog-products');
-        const catalogIntro = document.getElementById('catalog-intro');
-
-        catalogFilters.addEventListener('click', function (e) {
-            if (e.target.matches('[data-category-filter]')) {
-                window.scrollTo(0, 0);
-                catalogFilters.dataset.activeCategory = e.target.dataset.categoryFilter;
-            }
-        });
-
         const ctgFiltersObsv = new IntersectionObserver(function (entries, observer) {
             entries.forEach(entry => {
                 if (!entry.isIntersecting) {
-                    gsap.to(catalogFilters, {
+                    gsap.to('#category-filters', {
                         position: "fixed",
                         top: "3rem",
                         left: 0,
                         right: 0,
                     });
                 } else {
-                    gsap.to(catalogFilters, {
+                    gsap.to('#category-filters', {
                         position: "",
                         top: "",
                         left: "",
@@ -202,284 +393,6 @@ templ CatalogScript() {
             });
         });
         ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));
-
-        // Wizard modal animations
-        document.body.addEventListener('htmx:afterRequest', function (e) {
-            if (e.detail.target.id === 'wizard-modal') {
-                wizardManager = new WizardManager();
-                showWizardModal();
-            }
-        });
-
-        function showWizardModal() {
-            const modal = document.getElementById('wizard-modal');
-            modal.classList.remove('hidden');
-            gsap.to(modal, {
-                opacity: 1,
-                duration: 0.3,
-                onComplete: () => {
-                    modal.classList.remove('pointer-events-none');
-                }
-            });
-        }
-
-        // Close wizard modal
-        document.addEventListener('click', function (e) {
-            if (e.target.matches('[data-close-wizard]')) {
-                closeWizardModal();
-            }
-        });
-
-        function closeWizardModal() {
-            const modal = document.getElementById('wizard-modal');
-            modal.classList.add('pointer-events-none');
-            gsap.to(modal, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => {
-                    modal.classList.add('hidden');
-                    modal.innerHTML = '';
-                }
-            });
-        }
-
-        // Browse catalog functionality - UPDATED
-        browseBtn.addEventListener('click', function () {
-            gsap.to(catalogIntro, {
-                opacity: 0,
-                y: -20,
-                duration: 0.3,
-                onComplete: () => {
-                    catalogIntro.style.display = 'none';
-                    catalogBrowse.style.display = 'block';
-
-                    gsap.fromTo([catalogSearch, catalogFilters, catalogProducts],
-                        {opacity: 0, y: 20},
-                        {opacity: 1, y: 0, duration: 0.4, stagger: 0.1}
-                    );
-                }
-            });
-            window.scrollTo(0, 0);
-        });
-
-        // Product modal management
-        document.body.addEventListener('htmx:afterSwap', function (e) {
-            if (e.detail.target.id === 'product-modal') {
-                showProductModal();
-            }
-        });
-
-        function showProductModal() {
-            const modal = document.getElementById('product-modal');
-            gsap.fromTo(modal,
-                {opacity: 0, scale: 0.9},
-                {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)"}
-            );
-        }
-
-        // Close product modal
-        document.addEventListener('click', function (e) {
-            if (e.target.matches('[data-close-modal]') ||
-                e.target.matches('#product-modal-overlay')) {
-                closeProductModal();
-            }
-        });
-
-        function closeProductModal() {
-            const modal = document.getElementById('product-modal');
-            gsap.to(modal, {
-                opacity: 0,
-                scale: 0.9,
-                duration: 0.2,
-                onComplete: () => {
-                    modal.innerHTML = '';
-                }
-            });
-        }
-
-        // Animate product cards on load
-        document.body.addEventListener('htmx:beforeSwap', function (e) {
-            if (e.detail.xhr.status !== 200) {
-                return;
-            }
-            // Kill any existing animations first
-            currentAnimations.forEach(anim => anim.kill());
-            currentAnimations = [];
-
-            // Handle different swap targets
-            if (e.detail.target.id === 'products-grid' ||
-                e.detail.target.closest('#products-grid')) {
-                // Small delay to ensure DOM is ready
-                setTimeout(() => animateProducts(), 50);
-            }
-
-            //if (e.detail.target.id === 'product-modal') {
-            //    showProductModal();
-            //}
-        });
-        document.body.addEventListener('htmx:afterRequest', function (e) {
-            if (e.detail.target.id === 'products-grid') {
-                gsap.set('[data-add-item-spinner]', {height: '0%'});
-            }
-        });
-
-        function animateProducts() {
-            const container = document.querySelector('[data-products-container]');
-            const products = document.querySelectorAll('[data-product-id]');
-
-            if (!container || products.length === 0) return;
-
-            // Clear previous animations
-            gsap.killTweensOf(products);
-            gsap.killTweensOf(container);
-
-            // Set initial state
-            gsap.set(products, {opacity: 0, y: 30});
-            gsap.set(container, {opacity: 1});
-
-            // Animate products in
-            const tl = gsap.timeline();
-            const anim = tl.to(products, {
-                opacity: 1,
-                y: 0,
-                duration: 0.4,
-                stagger: 0.05,
-                ease: "power2.out"
-            });
-
-            currentAnimations.push(anim);
-        }
-
-        // Handle category filter states
-        document.body.addEventListener('htmx:beforeRequest', function (e) {
-            // Update active filter state immediately for better UX
-            if (e.detail.elt.matches('[data-category-filter]')) {
-                // Remove active state from all filters
-                document.querySelectorAll('[data-category-filter]').forEach(btn => {
-                    btn.className = btn.className
-                        .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
-                });
-
-                // Add active state to clicked filter  
-                e.detail.elt.className = e.detail.elt.className
-                    .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
-            }
-        });
-
-        // Handle request errors
-        document.body.addEventListener('htmx:responseError', function (e) {
-            if (e.detail.elt.matches('[data-category-filter]')) {
-                // Revert filter state on error
-                updateFilterStates();
-            }
-        });
-
-        function updateFilterStates() {
-            // This would be called to restore proper active states
-            // Could read from URL params or data attributes
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeCategory = urlParams.get('category') || '';
-
-            document.querySelectorAll('[data-category-filter]').forEach(btn => {
-                const filterCategory = btn.dataset.categoryFilter || '';
-
-                if (filterCategory === activeCategory) {
-                    btn.className = btn.className
-                        .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
-                } else {
-                    btn.className = btn.className
-                        .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
-                }
-            });
-        }
-
-        // Search input handling with animation
-        document.body.addEventListener('htmx:configRequest', function (e) {
-            if (e.detail.elt.matches('[data-search-input]')) {
-                const activeCtg = catalogFilters.dataset.activeCategory;
-                e.detail.parameters.set('category', activeCtg);
-            } else if (e.detail.elt.matches('[data-category-filter]')) {
-                const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;
-                e.detail.parameters.set('search', activeSearch);
-            }
-        });
-
-        document.body.addEventListener('htmx:beforeRequest', function (e) {
-            if (e.detail.elt.matches('[data-search-input]')) {
-                // Fade out current products
-                const container = document.querySelector('[data-products-container]');
-                if (container) {
-                    gsap.to(container, {opacity: 0.5, duration: 0.2});
-                }
-                catalogSearch.dataset.activeSearch = e.detail.elt.value;
-            }
-        });
-
-        // Cart
-        // Add to cart success animation
-        document.body.addEventListener('htmx:beforeRequest', function (e) {
-            if (e.detail.target.id === 'cart-sidebar') {
-                if (e.detail.elt.matches('[data-add-to-cart]')) {
-                    startAddItemLoad(e.detail.elt);
-                } else if (e.detail.elt.closest('[data-add-to-cart]')) {
-                    startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));
-                }
-            }
-        });
-        document.body.addEventListener('htmx:afterRequest', function (e) {
-            let success = e.detail.xhr.status === 200;
-            if (e.detail.target.id === 'cart-sidebar') {
-                if (e.detail.elt.matches('[data-add-to-cart]')) {
-                    stopAddItemLoad(e.detail.elt, success);
-                } else if (e.detail.elt.closest('[data-add-to-cart]')) {
-                    stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);
-                }
-            }
-        });
-
-        function startAddItemLoad(button) {
-            const btnLabel = button.querySelector('[data-add-item-label]');
-            const btnSpinner = button.querySelector('[data-add-item-spinner]');
-
-            gsap.to(btnLabel, {
-                height: '0%',
-                duration: 0.3,
-                ease: 'power2.out',
-            });
-            gsap.to(btnSpinner, {
-                height: '',
-                duration: 0.3,
-                ease: 'power2.out',
-            }, "-=0.15");
-        }
-
-        function stopAddItemLoad(button, success) {
-            const btnLabel = button.querySelector('[data-add-item-label]');
-            const btnSpinner = button.querySelector('[data-add-item-spinner]');
-            const feedback = success
-                ? button.querySelector('[data-add-item-success]')
-                : button.querySelector('[data-add-item-error]');
-
-            // Animate button
-            gsap.to(feedback, {
-                opacity: 1,
-                duration: 0.3,
-                ease: 'power2.out',
-            });
-            setTimeout(() => {
-                gsap.set(btnLabel, {
-                    height: '',
-                });
-                gsap.set(btnSpinner, {
-                    height: '0%',
-                });
-                gsap.to(feedback, {
-                    opacity: 0,
-                    duration: 0.3,
-                    ease: 'power2.out',
-                });
-            }, 1500);
-        }
     });
 
     // Wizard Manager Class
