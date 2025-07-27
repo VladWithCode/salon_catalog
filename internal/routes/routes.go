@@ -22,6 +22,7 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /salon", RenderSalon)
 	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
 
+	RegisterDashboardRoutes(router)
 	RegisterImagesRoutes(router)
 	RegisterCategoriesRoutes(router)
 	RegisterProductsRoutes(router)

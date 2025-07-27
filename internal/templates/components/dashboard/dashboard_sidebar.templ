@@ -1,0 +1,19 @@
+package dashboard
+
+templ DashboardSidebar() {
+<div id="dashsidebar-dropshadow" class="fixed inset-0 z-50 bg-dark/30 lg:hidden"></div>
+<aside id="dashsidebar" class="fixed inset-y-0 left-0 w-72 bg-secondary z-50 lg:block lg:static">
+    <div class="relative flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent">
+            <h1 class="text-xl font-semibold text-sidebar-foreground">Admin Panel</h1>
+            <button id="closeSidebar" class="lg:hidden text-sidebar-foreground hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</aside>
+}

@@ -1,6 +1,8 @@
 package templates
 
-templ AdminLayout(title string, contents templ.Component) {
+import "github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
+
+templ AdminLayout(title string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -27,6 +29,12 @@ templ AdminLayout(title string, contents templ.Component) {
 				<script src="/static/js/gsap.js"></script>
 			}
 		</head>
-		<body></body>
+		<body>
+            <div class="flex w-screen h-screen overflow-hidden z-0 p-0.5">
+                @dashboard.DashboardSidebar()
+                @dashboard.DashboardHeader()
+                { children... }
+            </div>
+        </body>
 	</html>
 }
