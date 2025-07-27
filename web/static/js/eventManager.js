@@ -111,7 +111,9 @@ class EventManager {
 
             default:
                 // Fallback to CSS selector matching
-                return target?.matches?.(selector) || target?.closest?.(selector);
+                return target?.matches?.(selector) 
+                    || event.detail.elt?.closest?.(selector)
+                    || event.detail.requestConfig?.elt?.closest?.(selector);
         }
     }
 
