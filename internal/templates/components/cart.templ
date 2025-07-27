@@ -36,7 +36,7 @@ templ FloatingCart() {
     </div>
 
     <!-- Cart Sidebar -->
-    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50"
+    <div class="fixed inset-y-0 right-0 w-96 max-w-[90vw] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50"
          id="cart-sidebar">
         <!-- Cart content will be loaded here -->
     </div>
@@ -49,7 +49,7 @@ templ FloatingCart() {
 }
 
 templ CartSidebar(items []db.CartItem) {
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full w-full">
         <!-- Header -->
         <div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
             <div class="flex items-center justify-between">
