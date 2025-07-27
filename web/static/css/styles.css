@@ -666,8 +666,14 @@
   .max-w-\[24ch\] {
     max-width: 24ch;
   }
+  .max-w-\[90vw\] {
+    max-width: 90vw;
+  }
   .max-w-md {
     max-width: var(--container-md);
+  }
+  .max-w-screen {
+    max-width: 100vw;
   }
   .max-w-sm {
     max-width: var(--container-sm);
