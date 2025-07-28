@@ -2,8 +2,10 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
@@ -44,7 +46,15 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProductsTable(w http.ResponseWriter, r *http.Request) {
-	prods, err := db.FindAllProducts()
+	params, err := parseProductFilterParams(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to parse request body"))
+		log.Printf("failed to parse request body: %v\n", err)
+		return
+	}
+	fmt.Printf("params: %+v\n", params)
+	prods, err := db.FilterProducts(*params)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to find products"))
@@ -232,4 +242,15 @@ func DeleteProductImages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func parseProductFilterParams(r *http.Request) (*db.ProductFilterParams, error) {
+	params := &db.ProductFilterParams{}
+	params.Search = r.URL.Query().Get("search")
+	params.Category = r.URL.Query().Get("category")
+	params.Sort = r.URL.Query().Get("sort")
+	params.Page, _ = strconv.Atoi(r.FormValue("page"))
+	params.Limit, _ = strconv.Atoi(r.FormValue("limit"))
+
+	return params, nil
 }

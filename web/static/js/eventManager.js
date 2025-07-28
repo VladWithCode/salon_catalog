@@ -80,7 +80,10 @@ class EventManager {
     }
 
     matchesSelector(event, selector) {
-        const target = event.detail?.target || event.target;
+        const target = event.detail?.target 
+            || event.detail.elt 
+            || event.detail.requestConfig?.elt
+            || event.target;
 
         switch (selector) {
             case 'wizard-modal':

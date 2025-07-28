@@ -79,6 +79,19 @@
         @apply border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed;
     }
 
+    .products-table-indicator {
+        scale: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition-property: scale, opacity;
+        transition-duration: 300ms;
+    }
+    .products-table-indicator.htmx-request {
+        scale: 1;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
     .htmx-indicator{
         opacity:0;
         transition: opacity 300ms ease-in;

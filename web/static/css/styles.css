@@ -954,9 +954,6 @@
   .border-blue-400 {
     border-color: var(--color-blue-400);
   }
-  .border-gray-100 {
-    border-color: var(--color-gray-100);
-  }
   .border-gray-200 {
     border-color: var(--color-gray-200);
   }
@@ -2325,6 +2322,18 @@
     border-color: var(--color-gray-200);
     background-color: var(--color-gray-50);
     color: var(--color-gray-500);
+  }
+  .products-table-indicator {
+    scale: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition-property: scale, opacity;
+    transition-duration: 300ms;
+  }
+  .products-table-indicator.htmx-request {
+    scale: 1;
+    opacity: 1;
+    pointer-events: auto;
   }
   .htmx-indicator {
     opacity: 0;
