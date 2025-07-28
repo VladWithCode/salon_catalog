@@ -98,7 +98,7 @@ func RenderSalon(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	if a.ID != "" && a.ID != auth.InvalidTokenID {
+	if a.ID != "" && a.ID != auth.InvalidTokenID && a.ID != auth.ExpiredTokenID {
 		internal.HandleRedirect("/panel", http.StatusFound, w, r)
 		return
 	}
@@ -114,7 +114,7 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	if a.ID != "" && a.ID != auth.InvalidTokenID {
+	if a.ID != "" && a.ID != auth.InvalidTokenID && a.ID != auth.ExpiredTokenID {
 		internal.HandleRedirect("/panel", http.StatusFound, w, r)
 		return
 	}

@@ -2,6 +2,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -33,6 +34,7 @@ type AuthClaims struct {
 
 const DefaultExpirationTime = time.Hour * 24
 const InvalidTokenID = "invalid"
+const ExpiredTokenID = "expired"
 
 func CreateToken(user *db.User) (string, error) {
 	var (
@@ -94,6 +96,10 @@ func PopulateAuth(next AuthedHandler) http.HandlerFunc {
 
 		t, err := ParseToken(tokenStr[1])
 		if err != nil {
+			if errors.Is(err, jwt.ErrTokenExpired) {
+				auth.ID = ExpiredTokenID
+				return
+			}
 			auth.ID = InvalidTokenID
 			return
 		}
