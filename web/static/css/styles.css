@@ -83,6 +83,7 @@
     --leading-tight: 1.25;
     --leading-relaxed: 1.625;
     --radius-xs: 0.15rem;
+    --radius-sm: 0.25rem;
     --radius-md: 0.375rem;
     --radius-lg: 0.5rem;
     --radius-xl: 0.75rem;
@@ -940,6 +941,9 @@
   .rounded-md {
     border-radius: var(--radius-md);
   }
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
   .rounded-xl {
     border-radius: var(--radius-xl);
   }
@@ -1069,6 +1073,12 @@
   }
   .bg-current {
     background-color: currentcolor;
+  }
+  .bg-current\/20 {
+    background-color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, currentcolor 20%, transparent);
+    }
   }
   .bg-dark {
     background-color: var(--color-dark);
@@ -1473,6 +1483,18 @@
   .text-current {
     color: currentcolor;
   }
+  .text-current\/20 {
+    color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, currentcolor 20%, transparent);
+    }
+  }
+  .text-current\/60 {
+    color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, currentcolor 60%, transparent);
+    }
+  }
   .text-current\/70 {
     color: currentcolor;
     @supports (color: color-mix(in lab, red, red)) {
@@ -1547,6 +1569,12 @@
   }
   .text-secondary {
     color: var(--color-secondary);
+  }
+  .text-secondary\/90 {
+    color: color-mix(in srgb, #F8F2E4 90%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-secondary) 90%, transparent);
+    }
   }
   .text-slate-600 {
     color: var(--color-slate-600);
@@ -1772,6 +1800,11 @@
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
+  .transition-\[height\] {
+    transition-property: height;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
   .transition-\[opacity\] {
     transition-property: opacity;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -1801,6 +1834,10 @@
     transition-property: transform, translate, scale, rotate;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .duration-100 {
+    --tw-duration: 100ms;
+    transition-duration: 100ms;
   }
   .duration-120 {
     --tw-duration: 120ms;

@@ -1,9 +1,9 @@
 package dashboard
 
 templ DashboardHeader(headerTitle string) {
-<header class="bg-secondary rounded-xs shadow-sm shadow-stone-950/15">
+<header class="bg-primary text-secondary rounded-xs shadow-sm shadow-stone-950/15">
     <div class="flex items-center gap-4 overflow-hidden h-12 px-4">
-        <button id="header-sidebar-toggle" class="lg:hidden text-accent hover:text-gray-700" 
+        <button id="header-sidebar-toggle" class="text-current/80 lg:hidden hover:text-gray-700" 
             data-click-handler-selector="sidebar-toggle"
             data-sidebar-toggle>
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,7 +11,7 @@ templ DashboardHeader(headerTitle string) {
                 </path>
             </svg>
         </button>
-        <h1 class="text-xl font-semibold text-primary">
+        <h1 class="text-xl font-semibold">
             if headerTitle == "" {
             Panel de Administración
             } else {
