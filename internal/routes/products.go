@@ -12,7 +12,7 @@ import (
 
 func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /api/products", GetProducts)
-	router.HandleFunc("GET /api/products/table", GetProductsDashboard)
+	router.HandleFunc("GET /api/products/table", GetProductsTable)
 	router.HandleFunc("GET /api/products/{slug}", GetProductBySlug)
 
 	router.HandleFunc("POST /api/products", CreateProduct)
