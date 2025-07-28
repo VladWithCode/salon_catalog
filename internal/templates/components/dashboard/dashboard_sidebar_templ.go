@@ -48,7 +48,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu><a href=\"/panel/productos\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Ver Productos</a> <a href=\"/panel/productos/nuevo\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Crear Producto</a> <a href=\"/panel/products/categorias\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Categorias</a> <a href=\"/panel/products/\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Inventory</a></div></div><!-- Orders Section --><div class=\"space-y-1\" data-nav-section><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z\"></path></svg> Asistente de Eventos</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu><a href=\"/panel/productos\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Ver Productos</a> <a href=\"/panel/productos/nuevo\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Crear Producto</a> <a href=\"/panel/products/categorias\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Categorias</a> <a href=\"/panel/products/\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Inventory</a></div></div><!-- Orders Section --><div class=\"space-y-1\" data-nav-section><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\"><svg class=\"w-5 h-5 mr-3 fill-current\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg> Asistente de Eventos</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func DashboardSidebar() templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(0)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 142, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 141, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

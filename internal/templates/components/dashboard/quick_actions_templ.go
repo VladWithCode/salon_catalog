@@ -43,47 +43,27 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.PlusIcon("w-5 h-5 text-blue-600", templ.Attributes{
-			"data-click-handler-selector": "add-product",
-			"data-add-product":            true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.PlusIcon("w-5 h-5 text-blue-600", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><p class=\"font-medium text-gray-900\">Add Product</p><p class=\"text-sm text-gray-600\">Create new product</p></div></a> <a href=\"/panel/quotes/create\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><p class=\"font-medium text-gray-900\">Nuevo producto</p><p class=\"text-sm text-gray-600\">Crear nuevo producto</p></div></a> <a href=\"/panel/quotes/create\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4\"><svg class=\"w-5 h-5\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg></div><div><p class=\"font-medium text-gray-900\">Nuevo asistente</p><p class=\"text-sm text-gray-600\">Crear nuevo asistente de planeación</p></div></a> <a href=\"/panel/contacts\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.SheetIcon("w-5 h-5 text-yellow-600", templ.Attributes{
-			"data-click-handler-selector": "add-quote",
-			"data-add-quote":              true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.EmailIcon("w-5 h-5 text-green-600", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">New Quote</p><p class=\"text-sm text-gray-600\">Generate quote</p></div></a> <a href=\"/panel/contacts\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a> <a href=\"/panel/analytics\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.EmailIcon("w-5 h-5 text-green-600", templ.Attributes{
-			"data-click-handler-selector": "add-contact",
-			"data-add-contact":            true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.GraphIcon("w-5 h-5 text-purple-600", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div><p class=\"font-medium text-gray-900\">View Messages</p><p class=\"text-sm text-gray-600\">Check contacts</p></div></a> <a href=\"/panel/analytics\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.GraphIcon("w-5 h-5 text-purple-600", templ.Attributes{
-			"data-click-handler-selector": "add-analytics",
-			"data-add-analytics":          true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div><p class=\"font-medium text-gray-900\">Ver reportes</p><p class=\"text-sm text-gray-600\">Panel de analíticas</p></div></a></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div><p class=\"font-medium text-gray-900\">Ver reportes</p><p class=\"text-sm text-gray-600\">Panel de analíticas</p></div></a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

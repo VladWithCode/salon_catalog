@@ -42,49 +42,39 @@ templ QuickActions() {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg> */
-                @components.PlusIcon("w-5 h-5 text-blue-600", templ.Attributes{
-                    "data-click-handler-selector": "add-product",
-                    "data-add-product": true,
-                })
+                @components.PlusIcon("w-5 h-5 text-blue-600", nil)
             </div>
             <div>
-                <p class="font-medium text-gray-900">Add Product</p>
-                <p class="text-sm text-gray-600">Create new product</p>
+                <p class="font-medium text-gray-900">Nuevo producto</p>
+                <p class="text-sm text-gray-600">Crear nuevo producto</p>
             </div>
         </a>
         <a href="/panel/quotes/create"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                @components.SheetIcon("w-5 h-5 text-yellow-600", templ.Attributes{
-                    "data-click-handler-selector": "add-quote",
-                    "data-add-quote": true,
-                })
+                <svg class="w-5 h-5">
+                    <use href="/static/assets/wizard.svg#wizard"></use>
+                </svg>
             </div>
             <div>
-                <p class="font-medium text-gray-900">New Quote</p>
-                <p class="text-sm text-gray-600">Generate quote</p>
+                <p class="font-medium text-gray-900">Nuevo asistente</p>
+                <p class="text-sm text-gray-600">Crear nuevo asistente de planeación</p>
             </div>
         </a>
         <a href="/panel/contacts"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                @components.EmailIcon("w-5 h-5 text-green-600", templ.Attributes{
-                    "data-click-handler-selector": "add-contact",
-                    "data-add-contact": true,
-                })
+                @components.EmailIcon("w-5 h-5 text-green-600", nil)
             </div>
             <div>
-                <p class="font-medium text-gray-900">View Messages</p>
-                <p class="text-sm text-gray-600">Check contacts</p>
+                <p class="font-medium text-gray-900">Ver mensajes</p>
+                <p class="text-sm text-gray-600">Solicitudes de contacto</p>
             </div>
         </a>
         <a href="/panel/analytics"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                @components.GraphIcon("w-5 h-5 text-purple-600", templ.Attributes{
-                    "data-click-handler-selector": "add-analytics",
-                    "data-add-analytics": true,
-                })
+                @components.GraphIcon("w-5 h-5 text-purple-600", nil)
             </div>
             <div>
                 <p class="font-medium text-gray-900">Ver reportes</p>
