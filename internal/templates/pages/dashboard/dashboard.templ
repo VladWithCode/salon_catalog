@@ -1,9 +1,10 @@
 package dashboard
 
 import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 
 templ Dashboard() {
 @templates.AdminLayout("Panel de Administración", "") {
-<h1 class="text-4xl font-bold tracking-tight">Dashboard</h1>
+    @dashboard.QuickActions()
 }
 }

@@ -1010,6 +1010,12 @@
       border-color: color-mix(in oklab, var(--color-primary) 50%, transparent);
     }
   }
+  .border-primary\/70 {
+    border-color: color-mix(in srgb, #5C4033 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-primary) 70%, transparent);
+    }
+  }
   .border-slate-700 {
     border-color: var(--color-slate-700);
   }
@@ -1353,6 +1359,9 @@
   }
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
+  }
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
   }
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
@@ -2137,6 +2146,11 @@
   .focus\:ring-white {
     &:focus {
       --tw-ring-color: var(--color-white);
+    }
+  }
+  .focus\:outline-accent {
+    &:focus {
+      outline-color: var(--color-accent);
     }
   }
   .focus\:outline-none {
