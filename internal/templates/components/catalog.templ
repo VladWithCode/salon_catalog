@@ -255,21 +255,6 @@ templ ProductModal(product db.CatalogProd) {
                             <p class="text-gray-600 leading-relaxed">{product.LongDescription}</p>
                         </div>
 
-                        <!-- Specifications -->
-                        if len(product.Specifications) > 0 {
-                            <div>
-                                <h3 class="text-lg font-semibold mb-3">Especificaciones</h3>
-                                <div class="space-y-2">
-                                    for _, spec := range product.Specifications {
-                                        <div class="flex justify-between py-2 border-b border-gray-100">
-                                            <span class="font-medium text-gray-700">{spec.Name}:</span>
-                                            <span class="text-gray-600">{spec.Value}</span>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-
                         <!-- Actions -->
                         <div class="space-y-3">
                             <button 

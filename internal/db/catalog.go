@@ -15,16 +15,15 @@ type CatalogCtg struct {
 }
 
 type CatalogProd struct {
-	ID              string          `json:"id"`
-	Name            string          `json:"name"`
-	Description     string          `json:"description"`
-	LongDescription string          `json:"long_description"`
-	Category        string          `json:"category"`
-	CategoryID      string          `json:"category_id"`
-	ImageURL        string          `json:"image_url"`
-	Images          []string        `json:"images"`
-	Available       bool            `json:"available"`
-	Specifications  []Specification `json:"specifications"`
+	ID              string   `json:"id"`
+	Name            string   `json:"name"`
+	Description     string   `json:"description"`
+	LongDescription string   `json:"long_description"`
+	Category        string   `json:"category"`
+	CategoryID      string   `json:"category_id"`
+	ImageURL        string   `json:"image_url"`
+	Images          []string `json:"images"`
+	Available       bool     `json:"available"`
 }
 
 type Specification struct {
@@ -82,13 +81,12 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 	var (
 		product    CatalogProd
 		imagesJSON []byte
-		specsJSON  []byte
 	)
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
 			id, name, description, long_description, category_id, category_name, 
-			image_url, available, images, specifications 
+			image_url, available, images
 		FROM catalog_products WHERE id = $1`,
 		id,
 	).Scan(
@@ -101,7 +99,6 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 		&product.ImageURL,
 		&product.Available,
 		&imagesJSON,
-		&specsJSON,
 	)
 	if err != nil {
 		return nil, err
@@ -109,10 +106,6 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 
 	if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal images: %w", err)
-	}
-
-	if err = json.Unmarshal(specsJSON, &product.Specifications); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal specifications: %w", err)
 	}
 
 	return &product, nil
@@ -131,7 +124,7 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 	// Build query conditionally
 	query := `SELECT 
 		id, name, description, long_description, category_id, category_name, 
-		image_url, available, images, specifications 
+		image_url, available, images
 		FROM catalog_products WHERE 1=1`
 
 	var args []any
@@ -170,7 +163,7 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 	var products []*CatalogProd
 	for rows.Next() {
 		var product CatalogProd
-		var imagesJSON, specsJSON []byte
+		var imagesJSON []byte
 
 		err = rows.Scan(
 			&product.ID,
@@ -182,7 +175,6 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 			&product.ImageURL,
 			&product.Available,
 			&imagesJSON, // Scan JSON as bytes first
-			&specsJSON,  // Scan JSON as bytes first
 		)
 		if err != nil {
 			return nil, err
@@ -191,10 +183,6 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 		// Unmarshal JSON fields
 		if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
-		}
-
-		if err = json.Unmarshal(specsJSON, &product.Specifications); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal specifications: %w", err)
 		}
 
 		products = append(products, &product)
