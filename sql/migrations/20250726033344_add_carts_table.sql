@@ -19,7 +19,7 @@ CREATE TRIGGER cart_items_set_updated_at BEFORE UPDATE ON cart_items
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TRIGGER carts_set_updated_at ON carts;
+DROP TRIGGER cart_items_set_updated_at ON cart_items;
 
 DROP TABLE cart_items;
 

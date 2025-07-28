@@ -21,7 +21,7 @@ SELECT
     p.description as long_description, -- You may want to add a separate long_description column later
     p.category as category_id,
     c.name as category_name,
-    COALESCE(main_img, '') as image_url,
+    COALESCE(main_img.filename, '') as image_url,
     p.available,
     -- Aggregate gallery images as JSON array
     COALESCE(
@@ -32,20 +32,7 @@ SELECT
             WHERE ip.product_id = p.id
         ),
         '[]'::json
-    ) as images,
-    -- Transform features JSONB to specifications array format
-    COALESCE(
-        (
-            SELECT json_agg(
-                json_build_object(
-                    'name', key,
-                    'value', value::text
-                )
-            )
-            FROM jsonb_each_text(p.features)
-        ),
-        '[]'::json
-    ) as specifications
+    ) as images
 FROM products p
 LEFT JOIN categories c ON p.category = c.id
 LEFT JOIN images main_img ON p.main_img = main_img.id
