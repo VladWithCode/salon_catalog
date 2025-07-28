@@ -3,7 +3,7 @@
 CREATE TABLE carts (
     id UUID PRIMARY KEY,
 
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE cart_items (
@@ -15,7 +15,7 @@ CREATE TABLE cart_items (
 
 CREATE TRIGGER cart_items_set_updated_at BEFORE UPDATE ON cart_items
     FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
---- +goose StatementEnd
+-- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
