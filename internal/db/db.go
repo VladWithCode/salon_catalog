@@ -41,3 +41,17 @@ func Connect() (*pgxpool.Pool, error) {
 func GetConn() (*pgxpool.Conn, error) {
 	return dbPool.Acquire(context.Background())
 }
+
+type PaginationData struct {
+	CurrentPage  int   `json:"current_page"`
+	TotalPages   int   `json:"total_pages"`
+	TotalItems   int   `json:"total_items"`
+	ItemsPerPage int   `json:"items_per_page"`
+	StartItem    int   `json:"start_item"`
+	EndItem      int   `json:"end_item"`
+	HasPrevious  bool  `json:"has_previous"`
+	HasNext      bool  `json:"has_next"`
+	PreviousPage int   `json:"previous_page"`
+	NextPage     int   `json:"next_page"`
+	Pages        []int `json:"pages"`
+}

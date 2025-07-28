@@ -20,6 +20,28 @@ type Product struct {
 	CategoryID  string   `db:"category_id" json:"categoryId"`
 }
 
+type ProductFilterParams struct {
+	Search   string  `json:"search"`
+	Category string  `json:"category"`
+	Status   string  `json:"status"`
+	PriceMin float64 `json:"price_min"`
+	PriceMax float64 `json:"price_max"`
+	StockMin int     `json:"stock_min"`
+	Sort     string  `json:"sort"`
+	Page     int     `json:"page"`
+	Limit    int     `json:"limit"`
+}
+
+type FilterProductsResult struct {
+	Products    []*CatalogProd `json:"products"`
+	Total       int            `json:"total"`
+	Page        int            `json:"page"`
+	Limit       int            `json:"limit"`
+	TotalPages  int            `json:"total_pages"`
+	HasNext     bool           `json:"has_next"`
+	HasPrevious bool           `json:"has_previous"`
+}
+
 func CreateProduct(product *Product) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
