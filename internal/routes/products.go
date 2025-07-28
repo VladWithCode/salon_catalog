@@ -12,6 +12,7 @@ import (
 
 func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /api/products", GetProducts)
+	router.HandleFunc("GET /api/products/table", GetProductsDashboard)
 	router.HandleFunc("GET /api/products/{slug}", GetProductBySlug)
 
 	router.HandleFunc("POST /api/products", CreateProduct)
@@ -22,6 +23,27 @@ func RegisterProductsRoutes(router *customServeMux) {
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
+	prods, err := db.FindAllProducts()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to find products"))
+		log.Printf("failed to find products: %v\n", err)
+		return
+	}
+
+	data, err := json.Marshal(prods)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to marshal products"))
+		log.Printf("failed to marshal products: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+func GetProductsTable(w http.ResponseWriter, r *http.Request) {
 	prods, err := db.FindAllProducts()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
