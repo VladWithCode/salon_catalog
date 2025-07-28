@@ -97,6 +97,12 @@ templ renderIcon(iconName string, hasError bool) {
 	}
 }
 
+templ BarsIcon(class string, dataAttr templ.Attributes) {
+    <svg class={"aspect-square", class} fill="none" stroke="currentColor" viewBox="0 0 24 24" { dataAttr... }>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+}
+
 templ GraphIcon(class string, dataAttr templ.Attributes) {
     <svg class={ "aspect-square" , class, } fill="none" stroke="currentColor" viewBox="0 0 24 24" { dataAttr... }>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
