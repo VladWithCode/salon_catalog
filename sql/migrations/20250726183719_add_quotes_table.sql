@@ -1,11 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE event_kinds (
-    id UUID PRIMARY KEY,
-    name VARCHAR(256) UNIQUE NOT NULL,
-    description VARCHAR(512)
-);
-
 CREATE TABLE quotes (
     id UUID PRIMARY KEY,
     customer_name VARCHAR(256) NOT NULL,
@@ -30,5 +24,4 @@ CREATE TRIGGER quotes_set_updated_at BEFORE UPDATE ON quotes
 DROP TRIGGER quotes_set_updated_at ON quotes;
 
 DROP TABLE quotes;
-DROP TABLE event_kinds;
 -- +goose StatementEnd

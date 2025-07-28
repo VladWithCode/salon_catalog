@@ -4,16 +4,24 @@ CREATE TABLE carts (
     id UUID PRIMARY KEY,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+);
+
+CREATE TABLE cart_items (
+    cart_id UUID REFERENCES carts(id) ON DELETE CASCADE,
+    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TRIGGER carts_set_updated_at BEFORE UPDATE ON carts
+CREATE TRIGGER cart_items_set_updated_at BEFORE UPDATE ON cart_items
     FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
--- +goose StatementEnd
+--- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 DROP TRIGGER carts_set_updated_at ON carts;
+
+DROP TABLE cart_items;
 
 DROP TABLE carts;
 -- +goose StatementEnd
