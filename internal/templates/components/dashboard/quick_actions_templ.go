@@ -39,7 +39,7 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"h-px border-t border-primary/70 pb-2\"></div><div id=\"quick-actions-list\" class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden h-0\" data-quick-actions-open=\"false\"><a href=\"/panel/products/create\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"h-px border-t border-primary/70 pb-2\"></div><div id=\"quick-actions-list\" class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden h-0\" data-quick-actions-open=\"false\"><a href=\"/panel/productos/nuevo\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,7 +47,7 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><p class=\"font-medium text-gray-900\">Nuevo producto</p><p class=\"text-sm text-gray-600\">Crear nuevo producto</p></div></a> <a href=\"/panel/quotes/create\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4\"><svg class=\"w-5 h-5\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg></div><div><p class=\"font-medium text-gray-900\">Nuevo asistente</p><p class=\"text-sm text-gray-600\">Crear nuevo asistente de planeación</p></div></a> <a href=\"/panel/contacts\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><p class=\"font-medium text-gray-900\">Nuevo producto</p><p class=\"text-sm text-gray-600\">Crear nuevo producto</p></div></a> <a href=\"/panel/asistente/nuevo\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4\"><svg class=\"w-5 h-5\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg></div><div><p class=\"font-medium text-gray-900\">Nuevo asistente</p><p class=\"text-sm text-gray-600\">Crear nuevo asistente de planeación</p></div></a> <a href=\"/panel/mensajes\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -55,7 +55,7 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a> <a href=\"/panel/analytics\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a> <a href=\"/panel/reportes\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

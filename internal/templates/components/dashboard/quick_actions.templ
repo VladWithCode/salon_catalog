@@ -35,7 +35,7 @@ templ QuickActions() {
     </button>
     <div class="h-px border-t border-primary/70 pb-2"></div>
     <div id="quick-actions-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden h-0" data-quick-actions-open="false">
-        <a href="/panel/products/create"
+        <a href="/panel/productos/nuevo"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
                 /*<svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@ templ QuickActions() {
                 <p class="text-sm text-gray-600">Crear nuevo producto</p>
             </div>
         </a>
-        <a href="/panel/quotes/create"
+        <a href="/panel/asistente/nuevo"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
                 <svg class="w-5 h-5">
@@ -61,7 +61,7 @@ templ QuickActions() {
                 <p class="text-sm text-gray-600">Crear nuevo asistente de planeación</p>
             </div>
         </a>
-        <a href="/panel/contacts"
+        <a href="/panel/mensajes"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
                 @components.EmailIcon("w-5 h-5 text-green-600", nil)
@@ -71,7 +71,7 @@ templ QuickActions() {
                 <p class="text-sm text-gray-600">Solicitudes de contacto</p>
             </div>
         </a>
-        <a href="/panel/analytics"
+        <a href="/panel/reportes"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
                 @components.GraphIcon("w-5 h-5 text-purple-600", nil)
