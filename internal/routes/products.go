@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
@@ -121,10 +122,17 @@ func GetProductBySlug(w http.ResponseWriter, r *http.Request) {
 
 func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	var data map[string]string
+	rawCtgs, _ := db.FindAllCategories()
+	ctgs := internal.PtrSliceToPlainSlice(rawCtgs)
+
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse request body"))
+
+		state := forms.NewProductFormStateFromMap("create", data)
+		state.GeneralError = "Algo salió mal"
+		dashboard.CreateProductForm(state, ctgs).Render(r.Context(), w)
+
 		log.Printf("failed to parse request body: %v\n", err)
 		return
 	}
@@ -134,13 +142,15 @@ func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	err = formState.Validate()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Something went wrong"))
+		formState.GeneralError = "El formulario contiene errores"
+		dashboard.CreateProductForm(formState, ctgs).Render(r.Context(), w)
 		log.Printf("failed to render CreateProduct err: %v\n", err)
 		return
 	}
 	var product db.Product
 	product.Name = formState.Values.Name
 	product.Description = formState.Values.Description
+	product.LongDescription = formState.Values.LongDescription
 	product.MainImg = formState.Values.MainImg
 	product.CategoryID = formState.Values.CategoryID
 	product.Available = formState.Values.Available
@@ -151,12 +161,22 @@ func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	err = db.CreateProduct(&product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to create product"))
+
+		formState.ResetFieldState()
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			formState.GeneralError = "El formulario contiene errores"
+			formState.SetFieldError("name", "El nombre ya existe")
+		} else {
+			formState.GeneralError = "Algo salió mal"
+		}
+		dashboard.CreateProductForm(formState, ctgs).Render(r.Context(), w)
+
 		log.Printf("failed to create product: %v\n", err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	formState.SuccessMessage = "Producto creado exitosamente"
+	dashboard.CreateProductForm(formState, ctgs).Render(r.Context(), w)
 }
 
 func UpdateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {

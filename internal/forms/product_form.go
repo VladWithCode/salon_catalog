@@ -11,7 +11,7 @@ import (
 
 const MinProductNameLength = 3
 const MaxProductNameLength = 512
-const MaxProductDescriptionLength = 512
+const MaxProductDescriptionLength = 120
 
 var (
 	ErrValidationFailed = errors.New("validation failed")
@@ -115,7 +115,7 @@ func NewProductFormStateFromProduct(mode string, product *db.Product) *ProductFo
 		Values: ProductFormValues{
 			Name:            product.Name,
 			Description:     product.Description,
-			LongDescription: product.Description,
+			LongDescription: product.LongDescription,
 			CategoryID:      product.CategoryID,
 			Available:       product.Available,
 			Gallery:         product.Gallery,
@@ -171,6 +171,21 @@ func (pfs *ProductFormState) SetFieldWarning(field, message string) {
 	state.WarningText = message
 	state.ValidationClass = "warning"
 	pfs.Fields[field] = state
+}
+
+func (pfs *ProductFormState) ResetFieldState() {
+	fieldState := pfs.Fields
+
+	for k := range fieldState {
+		fieldState[k] = FieldState{
+			IsTouched:       false,
+			IsValid:         false,
+			HasError:        false,
+			ValidationClass: "",
+			HelpText:        "",
+			WarningText:     "",
+		}
+	}
 }
 
 func (pfs *ProductFormState) ClearFieldError(field string) {
@@ -248,18 +263,14 @@ func (pfs *ProductFormState) Validate() error {
 		hasErrors = true
 	} else if l > MaxProductNameLength {
 		pfs.SetFieldError("name", fmt.Sprintf("El nombre no puede exceder %d caracteres", MaxProductNameLength))
-	} else {
-		pfs.SetFieldValid("name")
 	}
 
 	if strings.TrimSpace(pfs.Values.Description) == "" {
 		pfs.SetFieldError("description", "La descripción es requerida")
 		hasErrors = true
 	} else if len(pfs.Values.Description) > MaxProductDescriptionLength {
-		pfs.SetFieldError("description", "La descripción no puede exceder 512 caracteres")
+		pfs.SetFieldError("description", fmt.Sprintf("La descripción no puede exceder %d caracteres", MaxProductDescriptionLength))
 		hasErrors = true
-	} else {
-		pfs.SetFieldValid("description")
 	}
 
 	if hasErrors {
