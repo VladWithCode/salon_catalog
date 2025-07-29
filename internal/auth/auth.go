@@ -41,7 +41,7 @@ func CreateToken(user *db.User) (string, error) {
 		t *jwt.Token
 		k = os.Getenv("JWT_SECRET")
 	)
-	expTime := time.Now().Add(6 * time.Hour)
+	expTime := time.Now().Add(DefaultExpirationTime)
 
 	t = jwt.NewWithClaims(jwt.SigningMethodHS256, AuthClaims{
 		user.ID,
