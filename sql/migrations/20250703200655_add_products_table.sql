@@ -4,7 +4,8 @@ CREATE TABLE products (
     id UUID PRIMARY KEY,
     name VARCHAR(512) NOT NULL,
     slug VARCHAR(512) UNIQUE NOT NULL,
-    description VARCHAR(512) NOT NULL,
+    description VARCHAR(128) NOT NULL,
+    long_description VARCHAR(512),
     main_img UUID REFERENCES images(id) ON DELETE SET NULL,
     category UUID REFERENCES categories(id) ON DELETE RESTRICT,
     available BOOLEAN NOT NULL DEFAULT TRUE

@@ -3,9 +3,10 @@
 CREATE TABLE images (
     id UUID PRIMARY KEY,
     filename VARCHAR(512) UNIQUE NOT NULL,
-    no_optimize BOOLEAN NOT NULL,
+    name VARCHAR(512) NOT NULL,
+    no_optimize BOOLEAN NOT NULL DEFAULT FALSE,
     size INT NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 
