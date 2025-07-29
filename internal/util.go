@@ -31,3 +31,11 @@ func HandleRedirect(toRoute string, code int, w http.ResponseWriter, r *http.Req
 		http.Redirect(w, r, toRoute, code)
 	}
 }
+
+func PtrSliceToPlainSlice[T any](s []*T) []T {
+	var res = make([]T, len(s))
+	for _, v := range s {
+		res = append(res, *v)
+	}
+	return res
+}
