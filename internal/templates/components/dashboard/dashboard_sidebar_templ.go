@@ -35,56 +35,167 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar-dropshadow\" class=\"fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"></div><aside id=\"sidebar\" class=\"fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static transition-[height] duration-100\" data-sidebar-open=\"false\"><div class=\"w-full h-full bg-primary text-secondary/90 rounded-sm\"><div class=\"relative flex flex-col h-full\"><!-- Sidebar Header --><div class=\"flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent\"><h1 class=\"text-xl font-semibold text-sidebar-foreground\">Panel</h1><button id=\"closeSidebar\" class=\"lg:hidden text-sidebar-foreground hover:text-white\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Navigation Menu --><nav class=\"flex-1 px-4 py-6 space-y-2 overflow-y-auto\"><!-- Dashboard Home --><a href=\"/panel\" class=\"nav-item active flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z\"></path></svg> Panel</a><!-- Products Section --><div class=\"space-y-1\" data-nav-section=\"closed\"><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\" data-nav-section-title><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\"></path></svg> Productos</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar-dropshadow\" class=\"fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"></div><aside id=\"sidebar\" class=\"fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static transition-[height] duration-100\" data-sidebar-open=\"false\"><div class=\"w-full h-full bg-primary text-secondary/90 rounded-sm\"><div class=\"relative flex flex-col h-full\"><!-- Sidebar Header --><div class=\"flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent\"><h1 class=\"text-xl font-semibold text-sidebar-foreground\">Panel</h1><button id=\"closeSidebar\" class=\"lg:hidden text-sidebar-foreground hover:text-white\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Navigation Menu --><nav class=\"flex-1 px-4 py-6 space-y-2 overflow-y-auto\"><!-- Dashboard Home --><a href=\"/panel\" class=\"nav-item active flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z\"></path></svg> Panel</a><!-- Products Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.ChevronIcon(
-			"-rotate-90 w-4",
-			templ.Attributes{
-				"data-nav-section-chevron": true,
-			},
-		).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = SidebarSectionNavItem("Productos", "/panel/productos", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Categorías", "/panel/products/categorias", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Crear categoría", "/panel/products/inventory", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = SidebarSection("Productos", components.BoxIcon("h-5 mr-3")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu><a href=\"/panel/productos\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Ver Productos</a> <a href=\"/panel/productos/nuevo\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Crear Producto</a> <a href=\"/panel/products/categorias\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Categorias</a> <a href=\"/panel/products/\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Inventory</a></div></div><!-- Orders Section --><div class=\"space-y-1\" data-nav-section><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\"><svg class=\"w-5 h-5 mr-3 fill-current\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg> Asistente de Eventos</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Images Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.ChevronIcon(
-			"-rotate-90 w-4",
-			templ.Attributes{
-				"data-nav-section-chevron": true,
-			},
-		).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = SidebarSectionNavItem("Imagenes", "/panel/imagenes", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = SidebarSection(
+			"Imagenes",
+			components.ImageIcon("h-5 mr-3"),
+		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu><a href=\"/panel/asistente\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Ver Asistentes</a> <a href=\"/panel/asistente/nuevo\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Crear Asistentes</a> <a href=\"/panel/asistente/actualizar\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Actualizar Asistentes</a> <a href=\"/panel/asistente/eliminar\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Eliminar Asistentes</a><hr class=\"border-px border-primary/50\"><a href=\"/panel/asistente/pasos\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Ver Pasos</a> <a href=\"/panel/asistente/pasos/nuevo\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\">Crear Pasos</a></div></div><!-- Quotes Section --><!-- Contact Requests --><a href=\"/panel/contacts\" class=\"nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"></path></svg> Solicitudes de Contacto ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- Wizard Section -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = SidebarSectionNavItem("Ver Asistentes", "/panel/asistente", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Crear Asistentes", "/panel/asistente/nuevo", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Pasos", "/panel/asistente/pasos", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SidebarSectionNavItem("Crear Pasos", "/panel/asistente/pasos/nuevo", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Contact Requests --><a href=\"/panel/contacts\" class=\"nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"></path></svg> Solicitudes de Contacto ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if false {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(0)
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(0)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 147, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 79, Col: 98}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</a><!-- Customers --><!-- Analytics --><!-- Settings --></nav><!-- Sidebar Footer --><div class=\"p-4 border-t border-sidebar-accent\"><div class=\"flex items-center space-x-3\"><div class=\"w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center\"><span class=\"text-white text-sm font-medium\">JD</span></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-sidebar-foreground truncate\">John Doe</p><p class=\"text-xs text-sidebar-foreground/70 truncate\">admin@company.com</p></div><button class=\"text-sidebar-foreground/70 hover:text-sidebar-foreground\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1\"></path></svg></button></div></div></div></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</a><!-- Quotes Section --><!-- Analytics --><!-- Settings --></nav><!-- Sidebar Footer --><div class=\"p-4 border-t border-sidebar-accent\"><div class=\"flex items-center space-x-3\"><div class=\"w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center\"><span class=\"text-white text-sm font-medium\">JD</span></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-sidebar-foreground truncate\">John Doe</p><p class=\"text-xs text-sidebar-foreground/70 truncate\">admin@company.com</p></div><button class=\"text-sidebar-foreground/70 hover:text-sidebar-foreground\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1\"></path></svg></button></div></div></div></div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,12 +219,155 @@ func sidebarScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const sidebarTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});\n        sidebarTl.to('#sidebar', {\n            x: '0%',\n        }).to('#sidebar-dropshadow', {\n            opacity: 1,\n            pointerEvents: 'auto',\n        }, \"-=0.15\");\n        // Listen for multiple sidebar toggles\n        eventManager.registerClick('sidebar-toggle', (e) => {\n            const target = e.target.hasAttribute('data-sidebar-toggle') ? e.target : e.target.closest('[data-sidebar-toggle]');\n            if (!target) {\n                console.error('Invalid sidebar toggle target');\n                return;\n            }\n\n            const force = target.dataset.sidebarForce;\n            const sidebar = document.getElementById('sidebar');\n            const isOpen = sidebar.dataset.sidebarOpen === 'true';\n            const duration = 0.15;\n\n            if (force) {\n                if (force === 'open') {\n                    sidebarTl.play();\n                } else if (force === 'close') {\n                    sidebarTl.reverse();\n                }\n            } else if (isOpen) {\n                sidebarTl.reverse();\n            } else {\n                sidebarTl.play();\n            }\n        })\n\n        const navSectionToggles = document.querySelectorAll('[data-nav-section-toggle]');\n        for (const toggle of navSectionToggles) {\n            toggle.addEventListener('click', function () {\n                const section = this.closest('[data-nav-section]');\n                if (!section) {\n                    return;\n                }\n\n                const isOpen = section.dataset.navSection === 'open';\n                const submenu = section.querySelector('[data-nav-section-submenu]')\n                const chevron = this.querySelector('[data-nav-section-chevron]');\n                const duration = 0.1;\n\n                if (isOpen) {\n                    gsap.to(submenu, {\n                        height: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: '-90deg',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'closed';\n                } else {\n                    gsap.to(submenu, {\n                        height: 'auto',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'open';\n                }\n            });\n        }\n    });\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const sidebarTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});\n        sidebarTl.to('#sidebar', {\n            x: '0%',\n        }).to('#sidebar-dropshadow', {\n            opacity: 1,\n            pointerEvents: 'auto',\n        }, \"-=0.15\");\n        // Listen for multiple sidebar toggles\n        eventManager.registerClick('sidebar-toggle', (e) => {\n            const target = e.target.hasAttribute('data-sidebar-toggle') ? e.target : e.target.closest('[data-sidebar-toggle]');\n            if (!target) {\n                console.error('Invalid sidebar toggle target');\n                return;\n            }\n\n            const force = target.dataset.sidebarForce;\n            const sidebar = document.getElementById('sidebar');\n            const isOpen = sidebar.dataset.sidebarOpen === 'true';\n            const duration = 0.15;\n\n            if (force) {\n                if (force === 'open') {\n                    sidebarTl.play();\n                } else if (force === 'close') {\n                    sidebarTl.reverse();\n                }\n            } else if (isOpen) {\n                sidebarTl.reverse();\n            } else {\n                sidebarTl.play();\n            }\n        })\n\n        const navSectionToggles = document.querySelectorAll('[data-nav-section-toggle]');\n        for (const toggle of navSectionToggles) {\n            toggle.addEventListener('click', function () {\n                const section = this.closest('[data-nav-section]');\n                if (!section) {\n                    return;\n                }\n\n                const isOpen = section.dataset.navSection === 'open';\n                const submenu = section.querySelector('[data-nav-section-submenu]')\n                const chevron = this.querySelector('[data-nav-section-chevron]');\n                const duration = 0.1;\n\n                if (isOpen) {\n                    gsap.to(submenu, {\n                        height: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: '-90deg',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'closed';\n                } else {\n                    gsap.to(submenu, {\n                        height: 'auto',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'open';\n                }\n            });\n        }\n    });\n</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func SidebarSection(title string, icon templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"space-y-1\" data-nav-section=\"closed\" data-nav-section-title=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 210, Col: 79}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\" data-nav-section-title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = icon.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 216, Col: 19}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.ChevronIcon(
+			"-rotate-90 w-4",
+			templ.Attributes{
+				"data-nav-section-chevron": true,
+			},
+		).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var7.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 templ.SafeURL
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(href)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 232, Col: 14}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, attr)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 233, Col: 11}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -6,7 +6,8 @@ templ DashboardSidebar() {
 @sidebarScript()
 <div id="sidebar-dropshadow" class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden"
     data-click-handler-selector="sidebar-toggle" data-sidebar-toggle data-sidebar-force="close"></div>
-<aside id="sidebar" class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static transition-[height] duration-100"
+<aside id="sidebar"
+    class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static transition-[height] duration-100"
     data-sidebar-open="false">
     <div class="w-full h-full bg-primary text-secondary/90 rounded-sm">
         <div class="relative flex flex-col h-full">
@@ -35,105 +36,36 @@ templ DashboardSidebar() {
                     Panel
                 </a>
                 <!-- Products Section -->
-                <div class="space-y-1" data-nav-section="closed">
-                    <button
-                        class="nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors"
-                        data-nav-section-toggle>
-                        <div class="flex items-center" data-nav-section-title>
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                            Productos
-                        </div>
-                        @components.ChevronIcon(
-                        "-rotate-90 w-4",
-                        templ.Attributes{
-                        "data-nav-section-chevron": true,
-                        },
-                        )
-                    </button>
-                    <div class="nav-submenu ml-8 space-y-1 h-0 overflow-hidden" data-nav-section-submenu>
-                        <a href="/panel/productos"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">
-                            Ver Productos
-                        </a>
-                        <a href="/panel/productos/nuevo"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Crear Producto</a>
-                        <a href="/panel/products/categorias"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Categorias</a>
-                        <a href="/panel/products/"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Inventory</a>
-                    </div>
+                @SidebarSection("Productos", components.BoxIcon("h-5 mr-3")) {
+                @SidebarSectionNavItem("Productos", "/panel/productos", templ.Attributes{})
+                @SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", templ.Attributes{})
+                <div class="border-b border-accent/70">
+                    <p class="sr-only">sidebar separator</p>
                 </div>
-                <!-- Orders Section -->
-                <div class="space-y-1" data-nav-section>
-                    <button
-                        class="nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors"
-                        data-nav-section-toggle>
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 fill-current">
-                                <use href="/static/assets/wizard.svg#wizard"></use>
-                            </svg>
-                            Asistente de Eventos
-                        </div>
-                        @components.ChevronIcon(
-                        "-rotate-90 w-4",
-                        templ.Attributes{
-                        "data-nav-section-chevron": true,
-                        },
-                        )
-                    </button>
-                    <div class="nav-submenu ml-8 space-y-1 h-0 overflow-hidden" data-nav-section-submenu>
-                        <a href="/panel/asistente"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">
-                            Ver Asistentes
-                        </a>
-                        <a href="/panel/asistente/nuevo"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Crear Asistentes</a>
-                        <a href="/panel/asistente/actualizar"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Actualizar
-                            Asistentes</a>
-                        <a href="/panel/asistente/eliminar"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Eliminar
-                            Asistentes</a>
-                        <hr class="border-px border-primary/50" />
-                        <a href="/panel/asistente/pasos"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Ver Pasos</a>
-                        <a href="/panel/asistente/pasos/nuevo"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Crear Pasos</a>
-                    </div>
+                @SidebarSectionNavItem("Categorías", "/panel/products/categorias", templ.Attributes{})
+                @SidebarSectionNavItem("Crear categoría", "/panel/products/inventory", templ.Attributes{})
+                }
+
+                <!-- Images Section -->
+                @SidebarSection(
+                "Imagenes",
+                components.ImageIcon("h-5 mr-3"),
+                ) {
+                @SidebarSectionNavItem("Imagenes", "/panel/imagenes", templ.Attributes{})
+                @SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{})
+                }
+
+                <!-- Wizard Section -->
+                @SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3")) {
+                @SidebarSectionNavItem("Ver Asistentes", "/panel/asistente", templ.Attributes{})
+                @SidebarSectionNavItem("Crear Asistentes", "/panel/asistente/nuevo", templ.Attributes{})
+                <div class="border-b border-accent/70">
+                    <p class="sr-only">sidebar separator</p>
                 </div>
-                <!-- Quotes Section -->
-                /* <div class="space-y-1">
-                    <button
-                        class="nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                            Quotes
-                        </div>
-                        <svg class="w-4 h-4 transition-transform nav-chevron" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </button>
-                    <div class="nav-submenu ml-8 space-y-1">
-                        <a href="/panel/quotes"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">All
-                            Quotes</a>
-                        <a href="/panel/quotes/create"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Create Quote</a>
-                        <a href="/panel/quotes/pending"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Pending</a>
-                        <a href="/panel/quotes/approved"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Approved</a>
-                    </div>
-                </div> */
+                @SidebarSectionNavItem("Pasos", "/panel/asistente/pasos", templ.Attributes{})
+                @SidebarSectionNavItem("Crear Pasos", "/panel/asistente/pasos/nuevo", templ.Attributes{})
+                }
+
                 <!-- Contact Requests -->
                 <a href="/panel/contacts"
                     class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors">
@@ -147,57 +79,28 @@ templ DashboardSidebar() {
                     <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{ 0 }</span>
                     }
                 </a>
-                <!-- Customers -->
-                /* <a href="/panel/customers"
-                    class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
-                        </path>
-                    </svg>
-                    Customers
-                </a> */
+                <!-- Quotes Section -->
+                /* @SidebarSection(
+                "Quotes",
+                components.EmailIcon("h-5 mr-3"),
+                ) {
+                @SidebarSectionNavItem("Ver Quotes", "/panel/quotes", templ.Attributes{})
+                @SidebarSectionNavItem("Crear Quote", "/panel/quotes/nuevo", templ.Attributes{})
+                @SidebarSectionNavItem("Pending", "/panel/quotes/pending", templ.Attributes{})
+                @SidebarSectionNavItem("Approved", "/panel/quotes/approved", templ.Attributes{})
+                } */
                 <!-- Analytics -->
-                /* <a href="/panel/analytics"
-                    class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
-                    </svg>
-                    Analytics
-                </a>*/
+                /* @SidebarSection("Analytics", components.GraphIcon("h-5 mr-3", templ.Attributes{})) {
+                @SidebarSectionNavItem("Ver Reportes", "/panel/analytics", templ.Attributes{})
+                @SidebarSectionNavItem("Crear Reportes", "/panel/analytics/nuevo", templ.Attributes{})
+                } */
                 <!-- Settings -->
-                /* <div class="space-y-1">
-                    <button
-                        class="nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            Settings
-                        </div>
-                        <svg class="w-4 h-4 transition-transform nav-chevron" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </button>
-                    <div class="nav-submenu ml-8 space-y-1">
-                        <a href="/panel/settings/general"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">General</a>
-                        <a href="/panel/settings/users"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Users</a>
-                        <a href="/panel/settings/permissions"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Permissions</a>
-                        <a href="/panel/settings/integrations"
-                            class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors">Integrations</a>
-                    </div>
-                </div>*/
+                /* @SidebarSection("Settings", components.SettingsIcon("h-5 mr-3", templ.Attributes{})) {
+                @SidebarSectionNavItem("General", "/panel/settings/general", templ.Attributes{})
+                @SidebarSectionNavItem("Users", "/panel/settings/users", templ.Attributes{})
+                @SidebarSectionNavItem("Permissions", "/panel/settings/permissions", templ.Attributes{})
+                @SidebarSectionNavItem("Integrations", "/panel/settings/integrations", templ.Attributes{})
+                } */
             </nav>
             <!-- Sidebar Footer -->
             <div class="p-4 border-t border-sidebar-accent">
@@ -301,4 +204,32 @@ templ sidebarScript() {
         }
     });
 </script>
+}
+
+templ SidebarSection(title string, icon templ.Component) {
+<div class="space-y-1" data-nav-section="closed" data-nav-section-title={ title }>
+    <button
+        class="nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors"
+        data-nav-section-toggle>
+        <div class="flex items-center" data-nav-section-title>
+            @icon
+            { title }
+        </div>
+        @components.ChevronIcon(
+        "-rotate-90 w-4",
+        templ.Attributes{
+        "data-nav-section-chevron": true,
+        },
+        )
+    </button>
+    <div class="nav-submenu ml-8 space-y-1 h-0 overflow-hidden" data-nav-section-submenu>
+        { children... }
+    </div>
+</div>
+}
+
+templ SidebarSectionNavItem(title, href string, attr templ.Attributes) {
+<a href={ href } class="nav-item block px-4 py-2 text-sm rounded-lg transition-colors" { attr... }>
+    { title }
+</a>
 }
