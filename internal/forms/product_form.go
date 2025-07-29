@@ -1,6 +1,19 @@
 package forms
 
-import "time"
+import (
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+)
+
+const MinProductNameLength = 3
+const MaxProductNameLength = 512
+const MaxProductDescriptionLength = 512
+
+var (
+	ErrValidationFailed = errors.New("validation failed")
+)
 
 type ProductFormState struct {
 	// Form data preservation and error handling
@@ -180,4 +193,36 @@ func (pfs *ProductFormState) GetFieldError(field string) string {
 
 func (pfs *ProductFormState) HasFieldError(field string) bool {
 	return pfs.GetFieldError(field) != ""
+}
+
+func (pfs *ProductFormState) Validate() error {
+	hasErrors := false
+
+	if l := len(pfs.Values.Name); strings.TrimSpace(pfs.Values.Name) == "" {
+		pfs.SetFieldError("name", "El nombre es requerido")
+		hasErrors = true
+	} else if l < 3 {
+		pfs.SetFieldError("name", "El nombre debe tener al menos 3 caracteres")
+		hasErrors = true
+	} else if l > MaxProductNameLength {
+		pfs.SetFieldError("name", fmt.Sprintf("El nombre no puede exceder %d caracteres", MaxProductNameLength))
+	} else {
+		pfs.SetFieldValid("name")
+	}
+
+	if strings.TrimSpace(pfs.Values.Description) == "" {
+		pfs.SetFieldError("description", "La descripción es requerida")
+		hasErrors = true
+	} else if len(pfs.Values.Description) > MaxProductDescriptionLength {
+		pfs.SetFieldError("description", "La descripción no puede exceder 512 caracteres")
+		hasErrors = true
+	} else {
+		pfs.SetFieldValid("description")
+	}
+
+	if hasErrors {
+		return ErrValidationFailed
+	}
+
+	return nil
 }
