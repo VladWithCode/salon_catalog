@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -11,6 +12,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+)
+
+var (
+	ErrProductInsert = errors.New("failed to insert product")
+	ErrGalleryInsert = errors.New("failed to insert gallery images")
 )
 
 type Product struct {
@@ -61,6 +67,11 @@ func CreateProduct(product *Product) error {
 		return err
 	}
 	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -71,7 +82,7 @@ func CreateProduct(product *Product) error {
 		String: product.MainImg,
 		Valid:  product.MainImg != "",
 	}
-	_, err = conn.Exec(
+	_, err = tx.Exec(
 		ctx,
 		`INSERT INTO products (id, name, slug, description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		product.ID,
@@ -79,12 +90,25 @@ func CreateProduct(product *Product) error {
 		product.Slug,
 		product.Description,
 		mainImg,
-		product.Category,
+		product.CategoryID,
 	)
 	if err != nil {
-		return err
+		return errors.Join(ErrProductInsert, err)
 	}
 
+	for _, img := range product.Gallery {
+		_, err = tx.Exec(
+			ctx,
+			`INSERT INTO images_products (image_id, product_id) VALUES ($1, $2)`,
+			img,
+			product.ID,
+		)
+		if err != nil {
+			return errors.Join(ErrGalleryInsert, err)
+		}
+	}
+
+	tx.Commit(ctx)
 	return nil
 }
 
