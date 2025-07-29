@@ -1049,6 +1049,18 @@
   .border-primary {
     border-color: var(--color-primary);
   }
+  .border-primary\/20 {
+    border-color: color-mix(in srgb, #5C4033 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
+    }
+  }
+  .border-primary\/40 {
+    border-color: color-mix(in srgb, #5C4033 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    }
+  }
   .border-primary\/50 {
     border-color: color-mix(in srgb, #5C4033 50%, transparent);
     @supports (color: color-mix(in lab, red, red)) {

@@ -9,32 +9,46 @@ templ QuickActions() {
             const list = document.getElementById('quick-actions-list');
             const isOpen = list.dataset.quickActionsOpen === 'true';
             const duration = 0.15;
+            const easing = 'power2.out';
 
             if (isOpen) {
                 gsap.to(list, {
                     height: 0,
                     duration,
-                    ease: 'power2.out',
+                    ease: easing,
                 });
+                gsap.to('[data-quick-toggle-chevron]', {
+                    rotate: '-90deg',
+                    duration,
+                    ease: easing,
+                }, "<");
                 list.dataset.quickActionsOpen = 'false';
             } else {
                 gsap.to(list, {
                     height: 'auto',
                     duration,
-                    ease: 'power2.out',
+                    ease: easing,
                 });
+                gsap.to('[data-quick-toggle-chevron]', {
+                    rotate: 0,
+                    duration,
+                    ease: easing,
+                }, "<");
                 list.dataset.quickActionsOpen = 'true';
             }
         });
     });
 </script>
 <div class="px-4 ">
-    <button id="quick-actions-toggle" class="flex w-full justify-between py-2 text-primary focus:outline-accent" data-click-handler-selector="quick-actions-toggle">
-        <h3 class="text-lg font-semibold text-gray-900">Acciones Rápidas</h3>
-        @components.ChevronIcon("w-6", nil)
+    <button id="quick-actions-toggle"
+        class="flex w-full justify-between py-2 focus:outline-accent text-gray-700"
+        data-click-handler-selector="quick-actions-toggle">
+        <h3 class="text-lg font-semibold">Acciones Rápidas</h3>
+        @components.ChevronIcon("w-6", templ.Attributes{"data-quick-toggle-chevron": true})
     </button>
-    <div class="h-px border-t border-primary/70 pb-2"></div>
-    <div id="quick-actions-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden h-0" data-quick-actions-open="false">
+    <div class="h-px border-t border-gray-200 pb-2"></div>
+    <div id="quick-actions-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden"
+        data-quick-actions-open="true">
         <a href="/panel/productos/nuevo"
             class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
