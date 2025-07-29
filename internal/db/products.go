@@ -78,13 +78,16 @@ func CreateProduct(product *Product) error {
 		return ErrUUIDFail
 	}
 	product.ID = id.String()
-	mainImg := sql.NullString{
-		String: product.MainImg,
-		Valid:  product.MainImg != "",
+	mainImg := uuid.NullUUID{}
+	if product.MainImg != "" {
+		id, err := uuid.Parse(product.MainImg)
+		mainImg.UUID = id
+		mainImg.Valid = err == nil
 	}
+
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		`INSERT INTO products (id, name, slug, description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6)`,
 		product.ID,
 		product.Name,
 		product.Slug,

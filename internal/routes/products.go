@@ -117,21 +117,36 @@ func GetProductBySlug(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var data db.Product
+func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	var data map[string]string
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to parse request body"))
 		log.Printf("failed to parse request body: %v\n", err)
 		return
 	}
+	defer r.Body.Close()
 
-	if data.Slug == "" {
-		data.Slug = internal.Slugify(data.Name)
+	formState := forms.NewProductFormStateFromMap("create", data)
+	err = formState.Validate()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render CreateProduct err: %v\n", err)
+		return
 	}
+	var product db.Product
+	product.Name = formState.Values.Name
+	product.Description = formState.Values.Description
+	product.MainImg = formState.Values.MainImg
+	product.CategoryID = formState.Values.CategoryID
+	product.Available = formState.Values.Available
+	product.Gallery = formState.Values.Gallery
 
-	err = db.CreateProduct(&data)
+	product.Slug = internal.Slugify(product.Name)
+
+	err = db.CreateProduct(&product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to create product"))
