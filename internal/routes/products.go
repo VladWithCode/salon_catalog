@@ -8,7 +8,9 @@ import (
 	"strconv"
 
 	"github.com/vladwithcode/salon_catalog/internal"
+	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/forms"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
@@ -19,11 +21,11 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /api/products/list", GetProductsList)
 	router.HandleFunc("GET /api/products/{slug}", GetProductBySlug)
 
-	router.HandleFunc("POST /api/products", CreateProduct)
-	router.HandleFunc("PUT /api/products/{id}", UpdateProduct)
-	router.HandleFunc("PUT /api/products/{id}/images", UpdateProductImages)
-	router.HandleFunc("DELETE /api/products/{id}", DeleteProduct)
-	router.HandleFunc("DELETE /api/products/{id}/images", DeleteProductImages)
+	router.HandleFunc("POST /api/products", auth.ValidateAuth(CreateProduct))
+	router.HandleFunc("PUT /api/products/{id}", auth.ValidateAuth(UpdateProduct))
+	router.HandleFunc("PUT /api/products/{id}/images", auth.ValidateAuth(UpdateProductImages))
+	router.HandleFunc("DELETE /api/products/{id}", auth.ValidateAuth(DeleteProduct))
+	router.HandleFunc("DELETE /api/products/{id}/images", auth.ValidateAuth(DeleteProductImages))
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +159,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func UpdateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	var data db.Product
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -206,7 +208,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func UpdateProductImages(w http.ResponseWriter, r *http.Request) {
+func UpdateProductImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
 	var imgIDs []string
 	err := json.NewDecoder(r.Body).Decode(&imgIDs)
@@ -236,7 +238,7 @@ func UpdateProductImages(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func DeleteProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
 	err := db.DeleteProduct(id)
 	if err != nil {
@@ -249,7 +251,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func DeleteProductImages(w http.ResponseWriter, r *http.Request) {
+func DeleteProductImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
 	var imgIDs []string
 	err := json.NewDecoder(r.Body).Decode(&imgIDs)
