@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/vladwithcode/salon_catalog/internal/db"
 )
 
 const MinProductNameLength = 3
@@ -77,6 +79,46 @@ func NewProductFormState(mode string) *ProductFormState {
 		Values: ProductFormValues{
 			Available: true, // Default to available
 			Gallery:   []string{},
+		},
+		Errors:      ProductFormErrors{},
+		Fields:      make(map[string]FieldState),
+		FormMode:    mode,
+		LastUpdated: time.Now(),
+	}
+}
+
+func NewProductFormStateFromMap(mode string, values map[string]string) *ProductFormState {
+	newState := &ProductFormState{
+		Values: ProductFormValues{
+			Name:            values["name"],
+			Description:     values["description"],
+			LongDescription: values["long_description"],
+			CategoryID:      values["category_id"],
+			MainImg:         values["main_img"],
+			Available:       values["available"] == "on",
+		},
+		Errors:      ProductFormErrors{},
+		Fields:      make(map[string]FieldState),
+		FormMode:    mode,
+		LastUpdated: time.Now(),
+	}
+
+	if values["gallery"] != "" {
+		newState.Values.Gallery = strings.Split(values["gallery"], ",")
+	}
+
+	return newState
+}
+
+func NewProductFormStateFromProduct(mode string, product *db.Product) *ProductFormState {
+	return &ProductFormState{
+		Values: ProductFormValues{
+			Name:            product.Name,
+			Description:     product.Description,
+			LongDescription: product.Description,
+			CategoryID:      product.CategoryID,
+			Available:       product.Available,
+			Gallery:         product.Gallery,
 		},
 		Errors:      ProductFormErrors{},
 		Fields:      make(map[string]FieldState),
