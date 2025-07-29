@@ -1,20 +1,22 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
 
 func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /api/products", GetProducts)
 	router.HandleFunc("GET /api/products/table", GetProductsTable)
+	router.HandleFunc("GET /api/products/list", GetProductsList)
 	router.HandleFunc("GET /api/products/{slug}", GetProductBySlug)
 
 	router.HandleFunc("POST /api/products", CreateProduct)
@@ -53,8 +55,26 @@ func GetProductsTable(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to parse request body: %v\n", err)
 		return
 	}
-	fmt.Printf("params: %+v\n", params)
+
 	prods, err := db.FilterProducts(*params)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to find products"))
+		log.Printf("failed to find products: %v\n", err)
+		return
+	}
+
+	err = dashboard.ProductsTable(*prods).Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render ProductsTable err: %v\n", err)
+		return
+	}
+}
+
+func GetProductsList(w http.ResponseWriter, r *http.Request) {
+	prods, err := db.FindAllProducts()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to find products"))

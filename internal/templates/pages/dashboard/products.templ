@@ -1,0 +1,117 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ Products() {
+@productsScript()
+@templates.AdminLayout("Productos| Panel Chenacolo", "Administración de Productos") {
+<div class="flex-1 flex flex-col overflow-hidden space-y-2 px-0.5">
+    <div class="bg-white px-2">
+        <div class="flex gap-4 border-b border-primary/70 pb-2">
+            <div class="flex-1 space-x-4 text-gray-700">
+                <h2 class="text-2xl tracking-tight">Productos</h2>
+                <p class="text-xs text-current/50">
+                    Agrega, modifica y elimina productos de tu catálogo.
+                </p>
+            </div>
+            <button id="product-actions-toggle"
+                class="shrink flex items-center justify-center text-current/80 xl:hidden"
+                data-click-handler="product-actions-toggle">
+                @components.BarsIcon("w-8", nil)
+            </button>
+        </div>
+        <div class="overflow-hidden h-0" data-product-actions="closed">
+            <div class="py-2">
+                <h4 class="text-lg font-medium text-gray-700 mb-2">Acciones</h4>
+                <ul class="space-y-4">
+                    <li class="">
+                        <a href="/panel/productos/nuevo"
+                            class="flex items-center gap-4 px-4 py-3 text-sm text-light font-medium rounded-lg bg-accent transition-colors hover:bg-primary/10 focus:outline-accent">
+                            @components.PlusIcon("w-4", nil)
+                            Nuevo producto
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <main id="main-content" class="flex-1 flex flex-col overflow-hidden space-y-2">
+        <div class="shrink basis-auto bg-white rounded-xs shadow-sm border border-gray-200">
+            <div class="p-2 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="lg:col-span-2">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+                            Buscar Productos
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="search" name="search" placeholder="Buscar por nombre o descripción"
+                                hx-get="/api/products/table" hx-trigger="input changed delay:500ms"
+                                hx-target="#products-table" hx-indicator="#products-table-loading"
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent" />
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                // @components.ProductFilters()
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden bg-white rounded-xs shadow-sm border border-gray-200">
+            <div class="shrink basis-auto p-2 border-b border-gray-200">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-medium text-gray-900">Productos</h3>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto grid grid-cols-1 grid-rows-1">
+                <div class="static col-start-1 row-start-1 pointer-events-none z-10">
+                    <div id="products-table-loading"
+                        class="bg-white p-8 text-center inset-0 flex flex-col items-center justify-center products-table-indicator">
+                        @components.LoadingIcon("h-8 text-primary mx-auto")
+                        <p class="mt-2 text-sm text-gray-500">Cargando productos...</p>
+                    </div>
+                </div>
+                <div class="static col-start-1 row-start-1 z-0 h-full overflow-auto -mt-px" data-product-table-container="expanded">
+                    <div id="products-table" hx-get="/api/products/table" hx-trigger="load"
+                        hx-indicator="#products-table-loading"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+}
+}
+
+templ productsScript() {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        eventManager
+            .register('beforeRequest', '#products-table', function (e) {
+                gsap.to(e.detail.target.closest('[data-product-table-container]'), {
+                    height: '0%',
+                    duration: 0.3,
+                    ease: 'power2.out',
+                });
+            })
+            .register('beforeSwap', '#products-table', function (e) {
+                gsap.to(e.detail.target.closest('[data-product-table-container]'), {
+                    height: 'auto',
+                    duration: 0.3,
+                    ease: 'power2.out',
+                });
+            })
+            .registerClick('product-filters-clear', function (e) {
+                clearProductTableFilters();
+            });
+    });
+
+    function clearProductTableFilters() {
+        document.getElementById('search').value = '';
+    }
+</script>
+}
