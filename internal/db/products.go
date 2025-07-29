@@ -43,7 +43,7 @@ type ProductFilterParams struct {
 	Limit      int        `json:"limit"`
 }
 
-type FilterProductsResult struct {
+type ProductFilterResult struct {
 	Products    []*Product `json:"products"`
 	Total       int        `json:"total"`
 	Page        int        `json:"page"`
@@ -305,7 +305,7 @@ func DeleteProduct(id string) error {
 	return nil
 }
 
-func FilterProducts(filters ProductFilterParams) (*FilterProductsResult, error) {
+func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -384,7 +384,7 @@ func FilterProducts(filters ProductFilterParams) (*FilterProductsResult, error) 
 	}
 
 	// Build result
-	result := &FilterProductsResult{
+	result := &ProductFilterResult{
 		Products:    products,
 		Total:       total,
 		Page:        filters.Page,
