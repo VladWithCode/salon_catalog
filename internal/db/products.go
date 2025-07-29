@@ -20,15 +20,16 @@ var (
 )
 
 type Product struct {
-	ID          string   `db:"id" json:"id"`
-	Name        string   `db:"name" json:"name"`
-	Slug        string   `db:"slug" json:"slug"`
-	Description string   `db:"description" json:"description"`
-	MainImg     string   `db:"main_img" json:"mainImg"`
-	Gallery     []string `db:"gallery" json:"gallery"`
-	Category    string   `db:"category" json:"category"`
-	CategoryID  string   `db:"category_id" json:"categoryId"`
-	Available   bool     `db:"available" json:"available"`
+	ID              string   `db:"id" json:"id"`
+	Name            string   `db:"name" json:"name"`
+	Slug            string   `db:"slug" json:"slug"`
+	Description     string   `db:"description" json:"description"`
+	LongDescription string   `db:"long_description" json:"longDescription"`
+	MainImg         string   `db:"main_img" json:"mainImg"`
+	Gallery         []string `db:"gallery" json:"gallery"`
+	Category        string   `db:"category" json:"category"`
+	CategoryID      string   `db:"category_id" json:"categoryId"`
+	Available       bool     `db:"available" json:"available"`
 }
 
 // SearchMode defines how search should behave
@@ -87,11 +88,12 @@ func CreateProduct(product *Product) error {
 
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6)`,
+		`INSERT INTO products (id, name, slug, description, long_description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		product.ID,
 		product.Name,
 		product.Slug,
 		product.Description,
+		product.LongDescription,
 		mainImg,
 		product.CategoryID,
 	)
@@ -127,10 +129,11 @@ func FindProductBySlug(slug string) (*Product, error) {
 	var product Product
 	var mainImg sql.NullString
 	var gallery pgtype.Array[*string]
+	var longDescription sql.NullString
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.slug, prod.description,
+			prod.id, prod.name, prod.slug, prod.description, prod.long_description,
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
@@ -141,13 +144,14 @@ func FindProductBySlug(slug string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, main.filename, ctg.name, ctg.id`,
 		slug,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
+		&longDescription,
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
@@ -166,6 +170,9 @@ func FindProductBySlug(slug string) (*Product, error) {
 				product.Gallery = append(product.Gallery, *img)
 			}
 		}
+	}
+	if longDescription.Valid {
+		product.LongDescription = longDescription.String
 	}
 
 	return &product, nil
@@ -183,10 +190,11 @@ func FindProductByID(id string) (*Product, error) {
 	var product Product
 	var mainImg sql.NullString
 	var gallery pgtype.Array[*string]
+	var longDescription sql.NullString
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.slug, prod.description,
+			prod.id, prod.name, prod.slug, prod.description, prod.long_description,
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
@@ -197,13 +205,14 @@ func FindProductByID(id string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, main.filename, ctg.name, ctg.id`,
 		id,
 	).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Slug,
 		&product.Description,
+		&longDescription,
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
@@ -222,6 +231,9 @@ func FindProductByID(id string) (*Product, error) {
 			}
 		}
 	}
+	if longDescription.Valid {
+		product.LongDescription = longDescription.String
+	}
 
 	return &product, nil
 }
@@ -238,7 +250,7 @@ func FindAllProducts() ([]*Product, error) {
 	rows, err := conn.Query(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.slug, prod.description,
+			prod.id, prod.name, prod.slug, prod.description, prod.long_description,
 			ctg.name AS category,
 			ctg.id AS category_id,
 			img.filename AS main_img
@@ -255,11 +267,13 @@ func FindAllProducts() ([]*Product, error) {
 	for rows.Next() {
 		var product Product
 		var mainImg sql.NullString
+		var longDescription sql.NullString
 		err = rows.Scan(
 			&product.ID,
 			&product.Name,
 			&product.Slug,
 			&product.Description,
+			&longDescription,
 			&product.Category,
 			&product.CategoryID,
 			&mainImg,
@@ -269,6 +283,9 @@ func FindAllProducts() ([]*Product, error) {
 		}
 		if mainImg.Valid {
 			product.MainImg = mainImg.String
+		}
+		if longDescription.Valid {
+			product.LongDescription = longDescription.String
 		}
 		products = append(products, &product)
 	}
@@ -290,17 +307,20 @@ func UpdateProduct(product *Product) error {
 		Valid:  product.MainImg != "",
 	}
 	args := pgx.NamedArgs{
-		"id":          product.ID,
-		"name":        product.Name,
-		"slug":        product.Slug,
-		"description": product.Description,
-		"category":    product.CategoryID,
-		"main_img":    mainImg,
+		"id":               product.ID,
+		"name":             product.Name,
+		"slug":             product.Slug,
+		"description":      product.Description,
+		"long_description": product.LongDescription,
+		"category":         product.CategoryID,
+		"main_img":         mainImg,
 	}
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE products SET
-			name = @name, slug = @slug, description = @description, category = @category, main_img = @main_img
+			name = @name, slug = @slug, description = @description,
+			long_description = @long_description, category = @category,
+			main_img = @main_img
 		WHERE id = @id`,
 		args,
 	)
@@ -388,12 +408,12 @@ func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 	orderBy := buildProductsOrderByClause(filters)
 	selectQuery := fmt.Sprintf(`
 		SELECT 
-			prod.id, prod.name, prod.description, ctg.id as category_id, ctg.name as category, 
+			prod.id, prod.name, prod.description, prod.long_description, ctg.id as category_id, ctg.name as category,
 			img.filename as main_img, prod.available, 
 			COALESCE(ARRAY_AGG(imgs.filename) FILTER (WHERE imgs.filename IS NOT NULL), '{}') as images,
 			%s
-		%s GROUP BY prod.id, prod.name, prod.description, ctg.id,
-		ctg.name, img.filename, prod.available %s 
+		%s GROUP BY prod.id, prod.name, prod.description, prod.long_description,
+		ctg.id, ctg.name, img.filename, prod.available %s 
 		LIMIT @limit OFFSET @offset`,
 		buildSearchRankSelect(filters), baseQuery, orderBy)
 
@@ -516,12 +536,14 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 		var images []string
 		var searchRank float32
 		var mainImg sql.NullString
+		var longDescription sql.NullString
 
 		if includeRank {
 			err := rows.Scan(
 				&product.ID,
 				&product.Name,
 				&product.Description,
+				&longDescription,
 				&product.CategoryID,
 				&product.Category,
 				&mainImg,
@@ -552,10 +574,11 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 		if mainImg.Valid {
 			product.MainImg = mainImg.String
 		}
-
-		// Unmarshal JSON fields
 		if len(images) > 0 {
 			product.Gallery = images
+		}
+		if longDescription.Valid {
+			product.LongDescription = longDescription.String
 		}
 
 		products = append(products, &product)
