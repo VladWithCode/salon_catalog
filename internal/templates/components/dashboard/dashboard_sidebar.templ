@@ -36,7 +36,7 @@ templ DashboardSidebar() {
                     Panel
                 </a>
                 <!-- Products Section -->
-                @SidebarSection("Productos", components.BoxIcon("h-5 mr-3")) {
+                @SidebarSection("Productos", components.BoxIcon("h-5 mr-3", nil)) {
                 @SidebarSectionNavItem("Productos", "/panel/productos", templ.Attributes{})
                 @SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", templ.Attributes{})
                 <div class="border-b border-accent/70">
@@ -49,14 +49,14 @@ templ DashboardSidebar() {
                 <!-- Images Section -->
                 @SidebarSection(
                 "Imagenes",
-                components.ImageIcon("h-5 mr-3"),
+                components.ImageIcon("h-5 mr-3", nil),
                 ) {
                 @SidebarSectionNavItem("Imagenes", "/panel/imagenes", templ.Attributes{})
                 @SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{})
                 }
 
                 <!-- Wizard Section -->
-                @SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3")) {
+                @SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)) {
                 @SidebarSectionNavItem("Ver Asistentes", "/panel/asistente", templ.Attributes{})
                 @SidebarSectionNavItem("Crear Asistentes", "/panel/asistente/nuevo", templ.Attributes{})
                 <div class="border-b border-accent/70">

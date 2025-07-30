@@ -48,6 +48,9 @@
     .grid-rows-page {
         grid-template-rows: auto 1fr auto;
     }
+    .grid-cols-table {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
 
     .bg-brand-1 {
         background: 
@@ -104,11 +107,10 @@
     }
 }
 
-@base {
-    @apply bg-stone-200;
-}
-
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 2.5rem;
+}
+body {
+    @apply bg-stone-100 text-gray-700;
 }

@@ -127,7 +127,7 @@ func CreateProductForm(formState *forms.ProductFormState, ctgs []db.Category) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.LoadingIcon("h-5").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.LoadingIcon("h-5", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

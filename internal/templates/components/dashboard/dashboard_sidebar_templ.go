@@ -81,7 +81,7 @@ func DashboardSidebar() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = SidebarSection("Productos", components.BoxIcon("h-5 mr-3")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = SidebarSection("Productos", components.BoxIcon("h-5 mr-3", nil)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -117,7 +117,7 @@ func DashboardSidebar() templ.Component {
 		})
 		templ_7745c5c3_Err = SidebarSection(
 			"Imagenes",
-			components.ImageIcon("h-5 mr-3"),
+			components.ImageIcon("h-5 mr-3", nil),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -168,7 +168,7 @@ func DashboardSidebar() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
