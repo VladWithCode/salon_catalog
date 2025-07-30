@@ -2,6 +2,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -82,7 +83,8 @@ func PopulateAuth(next AuthedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookieToken, err := r.Cookie("auth_token")
 		var auth = &Auth{}
-		defer next(w, r, auth)
+		authedReq := r.WithContext(context.WithValue(r.Context(), "auth", auth))
+		defer next(w, authedReq, auth)
 		if err != nil {
 			auth.ID = InvalidTokenID
 			return
@@ -158,7 +160,15 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 				return
 			}
 
-			next(w, r, &Auth{
+			a := &Auth{
+				ID:       id,
+				Username: username,
+				Role:     role,
+				Fullname: fullname,
+			}
+			authedReq := r.WithContext(context.WithValue(r.Context(), "auth", a))
+
+			next(w, authedReq, &Auth{
 				ID:       id,
 				Username: username,
 				Role:     role,
