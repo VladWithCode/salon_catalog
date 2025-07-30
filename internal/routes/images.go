@@ -25,14 +25,23 @@ func RegisterImagesRoutes(router *customServeMux) {
 	router.HandleFunc("DELETE /api/images/{id}", auth.ValidateAuth(DeleteImage))
 }
 
-func GetImages(w http.ResponseWriter, r *http.Request) {
-	sortOrder := r.URL.Query().Get("sortOrder")
-	sortBy := r.URL.Query().Get("sortBy")
-	if sortOrder == "" {
-		sortOrder = "desc"
+func RenderImagesTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	// Parse query parameters
+	filters := parseImageFilters(r)
+
+	// Get filtered images
+	result, err := db.FilterImages(filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to get images"))
+		log.Printf("failed to filter images: %v\n", err)
+		return
 	}
-	if sortBy == "" {
-		sortBy = "created_at"
+
+	// Render the template with the results
+	component := dashboard.ImagesTable(result)
+	component.Render(r.Context(), w)
+}
 
 func GetImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	// rawSort := r.URL.Query().Get("images_sort")
@@ -217,4 +226,70 @@ func DeleteImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func parseImagesSort(s string) (sortOrder, sortBy string) {
+	parts := strings.Split(s, "_")
+	sortOrder = "DESC"
+	sortBy = "name"
+
+	if len(parts) == 0 {
+		return
+	} else if len(parts) == 2 {
+		sortBy = strings.ToLower(parts[0])
+		sortOrder = strings.ToUpper(parts[1])
+	}
+
+	if sortBy == "date" {
+		sortBy = "created_at"
+	}
+
+	return
+}
+
+// parseImageFilters extracts and parses filter parameters from the request
+func parseImageFilters(r *http.Request) db.ImageFilterParams {
+	query := r.URL.Query()
+
+	filters := db.ImageFilterParams{
+		Name: strings.TrimSpace(query.Get("name")),
+	}
+
+	// Parse sorting
+	rawSort := query.Get("sort")
+	filters.SortOrder, filters.SortBy = parseImagesSort(rawSort)
+
+	// Parse pagination
+	if pageStr := query.Get("page"); pageStr != "" {
+		if page, err := strconv.Atoi(pageStr); err == nil && page > 0 {
+			filters.Page = page
+		}
+	}
+
+	if limitStr := query.Get("limit"); limitStr != "" {
+		if limit, err := strconv.Atoi(limitStr); err == nil && limit > 0 {
+			filters.Limit = limit
+		}
+	}
+
+	// Parse date filters
+	if exactDateStr := query.Get("date"); exactDateStr != "" {
+		if exactDate, err := time.Parse("2006-01-02", exactDateStr); err == nil {
+			filters.ExactDate = exactDate
+		}
+	}
+
+	if afterDateStr := query.Get("date_after"); afterDateStr != "" {
+		if afterDate, err := time.Parse("2006-01-02", afterDateStr); err == nil {
+			filters.DateAfter = afterDate
+		}
+	}
+
+	if beforeDateStr := query.Get("date_before"); beforeDateStr != "" {
+		if beforeDate, err := time.Parse("2006-01-02", beforeDateStr); err == nil {
+			filters.DateBefore = beforeDate
+		}
+	}
+
+	return filters
 }
