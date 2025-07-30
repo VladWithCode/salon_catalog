@@ -81,30 +81,34 @@ class EventManager {
 
     matchesSelector(event, selector) {
         const target = event.detail?.target 
-            || event.detail.elt 
-            || event.detail.requestConfig?.elt
+            || event.detail?.elt 
+            || event.detail?.requestConfig?.elt
             || event.target;
+
+        if (!target) {
+            return false;
+        }
 
         switch (selector) {
             case 'wizard-modal':
-                return target?.id === 'wizard-modal';
+                return target.id === 'wizard-modal';
 
             case 'product-modal':
-                return target?.id === 'product-modal';
+                return target.id === 'product-modal';
 
             case 'cart-sidebar':
-                return target?.id === 'cart-sidebar';
+                return target.id === 'cart-sidebar';
 
             case 'products-grid':
-                return target?.id === 'products' || event.detail.requestConfig.elt.closest('#products');
+                return target.id === 'products' || event.detail.requestConfig.elt.closest('#products');
 
             case 'category-filter':
                 return event.detail?.elt?.matches?.('[data-category-filter]') ||
-                    event.target?.matches?.('[data-category-filter]');
+                    event.target.matches?.('[data-category-filter]');
 
             case 'add-to-cart':
                 return event.detail?.elt?.matches?.('[data-add-to-cart]') ||
-                    event.target?.matches?.('[data-add-to-cart]');
+                    event.target.matches?.('[data-add-to-cart]');
 
             case 'wizard-step':
                 return event.detail?.path?.includes('/wizard/step/');
@@ -114,9 +118,9 @@ class EventManager {
 
             default:
                 // Fallback to CSS selector matching
-                return target?.matches?.(selector) 
-                    || event.detail.elt?.closest?.(selector)
-                    || event.detail.requestConfig?.elt?.closest?.(selector);
+                return target.matches(selector)
+                    || Boolean(event.detail.elt?.closest(selector))
+                    || event.detail.requestConfig?.elt?.closest(selector);
         }
     }
 
