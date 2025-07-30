@@ -185,7 +185,7 @@ func FindImageByID(id string) (*Image, error) {
 	return &image, nil
 }
 
-func FindAllImages() ([]*Image, error) {
+func FindAllImages(ids []string) ([]*Image, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -194,9 +194,14 @@ func FindAllImages() ([]*Image, error) {
 	}
 	defer conn.Release()
 
+	baseQuery := `SELECT id, filename, name, no_optimize, size, created_at FROM images`
+	if len(ids) > 0 {
+		baseQuery += ` WHERE id IN @ids::uuid[]`
+	}
+
 	rows, err := conn.Query(
 		ctx,
-		`SELECT id, filename, name, no_optimize, size, created_at FROM images`,
+		baseQuery,
 	)
 	if err != nil {
 		return nil, err
@@ -242,6 +247,27 @@ func UpdateImage(image *Image) error {
 		image.ID,
 	)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteImages(ids []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(
+		ctx,
+		`DELETE FROM images WHERE id IN @ids::uuid[]`,
+		pgx.NamedArgs{"ids": ids},
+	)
 	if err != nil {
 		return err
 	}
