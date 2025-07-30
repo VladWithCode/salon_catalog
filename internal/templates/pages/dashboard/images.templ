@@ -66,7 +66,7 @@ templ Images() {
         </div>
     </div>
     <main class="flex-1 flex flex-col overflow-hidden space-y-4">
-        <div class="flex-1 border border-gray-200 rounded-xs bg-white shadow overflow-auto">
+        <div class="flex-1 rounded-xs bg-white shadow-sm overflow-auto">
             <div
                 class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between p-2 border-b border-gray-200">
                 <h4 class="flex-1 basis-full text-gray-900">
@@ -102,6 +102,12 @@ templ Images() {
         </div>
     </main>
 </div>
+<div id="images-modal-container" class="fixed inset-0 z-50 overflow-hidden opacity-0 pointer-events-none">
+    <div id="images-modal-backdrop" class="absolute h-full w-full z-0 bg-dark/30" data-images-modal-toggle="close">
+    </div>
+    <div id="images-modal" class="relative h-full w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+        data-images-modal="closed"></div>
+</div>
 }
 }
 
@@ -111,16 +117,35 @@ templ imagesScript() {
         const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
         toggleActionsTl.fromTo('#images-actions-container', {opacity: 0, height: '0px'}, {opacity: 1, height: 'auto'});
 
+        const modalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power3.out'}});
+        modalTl.set('#images-modal-container', {
+            pointerEvents: 'auto',
+        }).to('#images-modal-container', {
+            opacity: 1,
+            duration: 0.2,
+        }).to('#images-modal', {
+            opacity: 1,
+            y: '0rem',
+        }, "-=0.1");
+
         eventManager
             .register('beforeRequest', '#images-table', function (e) {
-                gsap.to(e.detail.target.closest('[data-images-table-container]'), {
+                const tableContainer = e.detail.target.closest('[data-images-table-container]');
+                if (!tableContainer) {
+                    return;
+                }
+                gsap.to(tableContainer, {
                     height: '0%',
                     duration: 0.3,
                     ease: 'power2.out',
                 });
             })
             .register('beforeSwap', '#images-table', function (e) {
-                gsap.to(e.detail.target.closest('[data-images-table-container]'), {
+                const tableContainer = e.detail.target.closest('[data-images-table-container]');
+                if (!tableContainer) {
+                    return;
+                }
+                gsap.to(tableContainer, {
                     height: 'auto',
                     duration: 0.3,
                     ease: 'power2.out',
@@ -128,6 +153,12 @@ templ imagesScript() {
             })
             .register('beforeRequest', '[data-images-multi-action]', function (e) {
                 console.log(e.detail);
+            })
+            .register('afterSwap', '#images-modal', function (e) {
+                if (e.detail.elt.dataset.imagesModal === 'closed') {
+                    modalTl.play();
+                    e.detail.elt.dataset.imagesModal = 'open';
+                }
             })
             .registerClick('images-actions-toggle', function (e) {
                 const actionsContainer = document.getElementById('images-actions-container')
@@ -137,6 +168,31 @@ templ imagesScript() {
                 } else {
                     toggleActionsTl.play();
                     actionsContainer.dataset.imagesActions = 'open';
+                }
+            })
+            .registerClick('[data-images-modal-toggle]', function (e) {
+                const target = e.target.matches('[data-images-modal-toggle]')
+                    ? e.target
+                    : e.target.closest('[data-images-modal-toggle]');
+                const modal = document.getElementById('images-modal');
+
+                const force = target.dataset.imagesModalToggle
+                if (force) {
+                    if (force === 'close') {
+                        modalTl.reverse();
+                        modal.dataset.imagesModal = 'closed';
+                    } else {
+                        modalTl.play();
+                        modal.dataset.imagesModal = 'open';
+                    }
+                } else {
+                    if (modal.dataset.imagesModal === 'open') {
+                        modalTl.reverse();
+                        modal.dataset.imagesModal = 'closed';
+                    } else {
+                        modalTl.play();
+                        modal.dataset.imagesModal = 'open';
+                    }
                 }
             })
             .registerClick('[data-images-filter-clear]', function (e) {

@@ -34,7 +34,7 @@ templ ImagesTable(result *db.ImageFilterResult) {
 
 templ ImageGridItem(image *db.Image) {
 <div
-    class="relative bg-white border border-gray-200 rounded-xs overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
+    class="relative bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
     data-image-id={ image.ID }>
     <div class="absolute top-1 left-1 z-10">
         <input 
@@ -48,12 +48,12 @@ templ ImageGridItem(image *db.Image) {
         <img src={ fmt.Sprintf("/static/uploads/%s", image.Filename) } alt={ image.Name } loading="lazy"
             class="w-full h-full object-cover group-hover:scale-105 group-active:scale-105 transition-transform ease-in-out duration-200" />
     </div>
-    <div class="flex flex-col gap-1 p-1">
-        <div class="flex items-center justify-between">
-            <h5 class="tracking-wide" title={ image.Name }>
+    <div class="flex flex-col gap-1 p-2 pt-4">
+        <div class="flex gap-1 justify-between">
+            <h5 class="tracking-wide font-medium overflow-hidden whitespace-nowrap text-clip" title={ image.Name }>
                 { image.Name }
             </h5>
-            <div class="text-sm">
+            <div class="shrink-0 grow-0 basis-auto text-sm text-current/60">
                 { formatFileSize(image.Size) }
             </div>
         </div>
@@ -61,17 +61,18 @@ templ ImageGridItem(image *db.Image) {
             { formatDate(image.CreatedAt) }
         </div>
     </div>
-    <div class="flex h-8 border-t border-primary/20">
-        <a
-            href={ fmt.Sprintf("/panel/imagenes/%s", image.ID) }
-            class="flex-1 basis-full border-r border-primary/20 px-2 py-1 text-gray-700">
+    <div class="flex gap-2 p-2 pt-0.5">
+        <button
+            hx-get={ fmt.Sprintf("/imagenes/%s", image.ID) }
+            hx-target="#images-modal"
+            class="flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700">
             @components.ViewIcon("w-5 mx-auto", nil)
             <div class="sr-only">Ver imágen</div>
-        </a>
+        </button>
         <button
             hx-delete={ fmt.Sprintf("/api/images/%s", image.ID) }
             hx-confirm="¿Seguro que deseas eliminar la imágen?"
-            class="flex-1 basis-full px-2 py-1 text-red-700">
+            class="flex-1 basis-full bg-red-700/20 rounded-xs p-2 text-red-700">
             @components.BinIcon("w-5 mx-auto", nil)
             <div class="sr-only">Eliminar imágen</div>
         </button>
@@ -111,6 +112,51 @@ templ ImagesPagination(result *db.ImageFilterResult) {
 </div>
 }
 
+templ ImageModal(image *db.Image, err string) {
+<div id="images-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
+    <div class="flex-1 flex justify-between items-center">
+        <h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+            if err != "" {
+            Ocurrió un err al cargar la imagen
+            } else {
+            { image.Name }
+            }
+        </h3>
+        <button
+            id="images-modal-close"
+            class="p-2 rounded-sm text-gray-700 bg-stone-50" 
+            data-images-modal-toggle="close"
+            data-click-handler-selector="[data-images-modal-toggle]">
+            @components.TimesIcon("w-8 mx-auto", nil)
+        </button>
+    </div>
+    <div class="flex-1 basis-full w-full overflow-hidden">
+        if err != "" {
+        <div class="flex flex-col items-center justify-center h-full">
+            <p class="text-red-700/70 mx-auto">@components.TimesIcon("w-10 mx-auto", nil)</p>
+            <p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+        </div>
+        } else {
+        <img src={ fmt.Sprintf("/static/uploads/%s", image.Filename) } alt={ image.Name } loading="lazy"
+            class="w-full h-full object-cover rounded-sm" />
+        }
+    </div>
+    <div class="flex-1 flex gap-2 justify-end items-center">
+        <button id="images-modal-back" class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+            data-images-modal-toggle="close" data-click-handler-selector="[data-images-modal-toggle]">
+            @components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+            Volver
+        </button>
+
+        <button id="images-modal-delete" class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
+            hx-delete={ fmt.Sprintf("/api/images/%s", image.ID) } hx-target="#toaster" hx-confirm="¿Seguro que deseas eliminar la imagen?"
+            data-images-modal-toggle="close" data-click-handler-selector="[data-images-modal-toggle]">
+            @components.BinIcon("w-5 mx-auto", nil)
+            Eliminar
+        </button>
+    </div>
+</div>
+}
 // Helper functions (add these to your template helpers)
 
 func truncateString(s string, length int) string {

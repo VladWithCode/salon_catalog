@@ -16,6 +16,8 @@ import (
 )
 
 func RegisterImagesRoutes(router *customServeMux) {
+	router.HandleFunc("GET /imagenes/{id}", auth.PopulateAuth(RenderImage))
+
 	// router.HandleFunc("GET /api/images", RenderIndex)
 	router.HandleFunc("GET /api/images/table", auth.ValidateAuth(RenderImagesTable))
 
@@ -23,6 +25,27 @@ func RegisterImagesRoutes(router *customServeMux) {
 	router.HandleFunc("PUT /api/images/{id}", auth.ValidateAuth(UpdateImage))
 	router.HandleFunc("DELETE /api/images", auth.ValidateAuth(DeleteImages))
 	router.HandleFunc("DELETE /api/images/{id}", auth.ValidateAuth(DeleteImage))
+}
+
+func RenderImage(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	id := r.PathValue("id")
+	img, err := db.FindImageByID(id)
+
+	// If request is AJAX, render components
+	if r.Header.Get("HX-Request") == "true" {
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			dashboard.ImageModal(img, "Imágen no encontrada").Render(r.Context(), w)
+			log.Printf("failed to find image: %v\n", err)
+			return
+		}
+
+		component := dashboard.ImageModal(img, "")
+		component.Render(r.Context(), w)
+	} else {
+		// Else render page
+		// TODO: render page
+	}
 }
 
 func RenderImagesTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
