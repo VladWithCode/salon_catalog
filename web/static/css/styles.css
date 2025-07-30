@@ -595,9 +595,6 @@
   .h-20 {
     height: calc(var(--spacing) * 20);
   }
-  .h-24 {
-    height: calc(var(--spacing) * 24);
-  }
   .h-\[60vh\] {
     height: 60vh;
   }
@@ -1241,9 +1238,6 @@
       background-color: color-mix(in oklab, var(--color-red-500) 80%, transparent);
     }
   }
-  .bg-red-700 {
-    background-color: var(--color-red-700);
-  }
   .bg-secondary {
     background-color: var(--color-secondary);
   }
@@ -1479,6 +1473,9 @@
   }
   .pt-1 {
     padding-top: calc(var(--spacing) * 1);
+  }
+  .pt-2 {
+    padding-top: calc(var(--spacing) * 2);
   }
   .pt-8 {
     padding-top: calc(var(--spacing) * 8);
