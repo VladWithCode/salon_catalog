@@ -93,3 +93,15 @@ func Delete(filename string) error {
 
 	return os.Remove(delPath)
 }
+
+func DeleteMultiple(filenames []string) error {
+	for _, filename := range filenames {
+		delPath := filepath.Join(UploadsPath, filename)
+		err := os.Remove(delPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
