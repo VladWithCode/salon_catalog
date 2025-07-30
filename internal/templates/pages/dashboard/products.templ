@@ -17,7 +17,7 @@ templ Products() {
             </div>
             <button id="product-actions-toggle"
                 class="shrink flex items-center justify-center text-current/80 xl:hidden"
-                data-click-handler="product-actions-toggle">
+                data-click-handler-selector="product-actions-toggle">
                 @components.BarsIcon("w-8", nil)
             </button>
         </div>
@@ -91,6 +91,9 @@ templ Products() {
 templ productsScript() {
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
+        toggleActionsTl.fromTo('[data-product-actions]', {opacity: 0, height: '0px'}, {opacity: 1, height: 'auto'});
+
         eventManager
             .register('beforeRequest', '#products-table', function (e) {
                 gsap.to(e.detail.target.closest('[data-product-table-container]'), {
@@ -108,6 +111,16 @@ templ productsScript() {
             })
             .registerClick('product-filters-clear', function (e) {
                 clearProductTableFilters();
+            })
+            .registerClick('product-actions-toggle', function (e) {
+                const actionsContainer = document.querySelector('[data-product-actions]')
+                if (actionsContainer.dataset.productActions === 'open') {
+                    toggleActionsTl.reverse();
+                    actionsContainer.dataset.productActions = 'closed';
+                } else {
+                    toggleActionsTl.play();
+                    actionsContainer.dataset.productActions = 'open';
+                }
             });
     });
 
