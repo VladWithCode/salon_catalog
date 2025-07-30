@@ -16,6 +16,8 @@ func RegisterDashboardRoutes(router *customServeMux) {
 	router.HandleFunc("GET /panel", auth.ValidateAuth(RenderDashboard))
 	router.HandleFunc("GET /panel/productos", auth.ValidateAuth(RenderProducts))
 	router.HandleFunc("GET /panel/productos/nuevo", auth.ValidateAuth(RenderCreateProduct))
+
+	router.HandleFunc("GET /panel/imagenes", auth.ValidateAuth(RenderImages))
 }
 
 func RenderDashboard(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
@@ -69,5 +71,14 @@ func RenderCreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render CreateProduct err: %v\n", err)
+	}
+}
+
+func RenderImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	err := dashboard.Images().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Images err: %v\n", err)
 	}
 }

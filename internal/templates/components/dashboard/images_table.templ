@@ -1,0 +1,150 @@
+package dashboard
+
+import (
+"fmt"
+"github.com/vladwithcode/salon_catalog/internal/db"
+"time"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ ImagesTable(result *db.ImageFilterResult) {
+<span id="images-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Images)) }/ { fmt.Sprintf("%d", result.Total) })</span>
+<div class="max-w-screen-xl p-1 mx-auto">
+    if len(result.Images) == 0 {
+    <div class="text-center p-4 space-y-2">
+        <h3 class="">No se encontraron imágenes que coincidan con tu búsqueda</h3>
+        <button type="button" class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+            hx-get="/api/images/table" hx-target="#images-table" hx-params="none"
+            data-click-handler-selector="[data-images-filter-clear]" data-images-filter-clear>Limpiar Filtros</button>
+    </div>
+    } else {
+    <!-- Images Grid -->
+    <div class="grid grid-cols-table gap-2">
+        for _, image := range result.Images {
+        @ImageGridItem(image)
+        }
+    </div>
+    <!-- Pagination -->
+    if result.TotalPages > 1 {
+    @ImagesPagination(result)
+    }
+    }
+</div>
+}
+
+templ ImageGridItem(image *db.Image) {
+<div
+    class="relative bg-white border border-gray-200 rounded-xs overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
+    data-image-id={ image.ID }>
+    <div class="absolute top-1 left-1 z-10">
+        <input 
+            type="checkbox"
+            name="image-table-selection"
+            id={ fmt.Sprintf("image-table-selection-%s", image.ID) }
+            value={image.ID}
+            class="h-4.5 w-4.5 rounded-xs bg-stone-50 border border-gray-200" />
+    </div>
+    <div class="aspect-4/3 relative overflow-hidden">
+        <img src={ fmt.Sprintf("/static/uploads/%s", image.Filename) } alt={ image.Name } loading="lazy"
+            class="w-full h-full object-cover group-hover:scale-105 group-active:scale-105 transition-transform ease-in-out duration-200" />
+    </div>
+    <div class="flex flex-col gap-1 p-1">
+        <div class="flex items-center justify-between">
+            <h5 class="tracking-wide" title={ image.Name }>
+                { image.Name }
+            </h5>
+            <div class="text-sm">
+                { formatFileSize(image.Size) }
+            </div>
+        </div>
+        <div class="ml-auto text-current/60 text-sm font-extralight">
+            { formatDate(image.CreatedAt) }
+        </div>
+    </div>
+    <div class="flex h-8 border-t border-primary/20">
+        <a
+            href={ fmt.Sprintf("/panel/imagenes/%s", image.ID) }
+            class="flex-1 basis-full border-r border-primary/20 px-2 py-1 text-gray-700">
+            @components.ViewIcon("w-5 mx-auto", nil)
+            <div class="sr-only">Ver imágen</div>
+        </a>
+        <button
+            hx-delete={ fmt.Sprintf("/api/images/%s", image.ID) }
+            hx-confirm="¿Seguro que deseas eliminar la imágen?"
+            class="flex-1 basis-full px-2 py-1 text-red-700">
+            @components.BinIcon("w-5 mx-auto", nil)
+            <div class="sr-only">Eliminar imágen</div>
+        </button>
+    </div>
+</div>
+}
+
+templ ImagesPagination(result *db.ImageFilterResult) {
+<div class="pagination">
+    <div class="pagination-controls">
+        if result.HasPrevious {
+        <button class="btn-pagination" hx-get={ fmt.Sprintf("/api/images/table?page=%d", result.Page-1) }
+            hx-target=".images-container">
+            ← Anterior
+        </button>
+        }
+        <!-- Page numbers -->
+        <div class="page-numbers">
+            for i := max(1, result.Page-2); i <= min(result.TotalPages, result.Page+2); i++ {
+                if i==result.Page {
+                    <span class="page-number active">{ fmt.Sprintf("%d", i) }</span>
+                } else {
+                    <button class="page-number" hx-get={ fmt.Sprintf("/api/images/table?page=%d", i) }
+                        hx-target=".images-container">
+                        { fmt.Sprintf("%d", i) }
+                    </button>
+                }
+            }
+        </div>
+        if result.HasNext {
+        <button class="btn-pagination" hx-get={ fmt.Sprintf("/api/images/table?page=%d", result.Page+1) }
+            hx-target=".images-container">
+            Siguiente →
+        </button>
+        }
+    </div>
+</div>
+}
+
+// Helper functions (add these to your template helpers)
+
+func truncateString(s string, length int) string {
+    if len(s) <= length { return s }
+    return s[:length] + "..."
+}
+
+func formatFileSize(bytes int) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
+func formatDate(t time.Time) string {
+	return t.Format("02/01/2006 15:04")
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
