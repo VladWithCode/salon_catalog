@@ -1,6 +1,7 @@
 package templates
 
 import "github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 
 templ AdminLayout(title string, headerTitle string) {
 <!DOCTYPE html>
@@ -42,6 +43,8 @@ templ AdminLayout(title string, headerTitle string) {
             { children... }
         </div>
     </div>
+
+    @components.Toaster()
 </body>
 
 </html>
