@@ -1,7 +1,6 @@
 package forms
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -13,10 +12,6 @@ const MinProductNameLength = 3
 const MaxProductNameLength = 512
 const MaxProductDescriptionLength = 120
 
-var (
-	ErrValidationFailed = errors.New("validation failed")
-)
-
 type ProductFormState struct {
 	// Form data preservation and error handling
 	Values ProductFormValues `json:"values"`
@@ -27,8 +22,6 @@ type ProductFormState struct {
 
 	// Global form state
 	IsSubmitted    bool   `json:"is_submitted"`
-	IsValid        bool   `json:"is_valid"`
-	HasErrors      bool   `json:"has_errors"`
 	SuccessMessage string `json:"success_message,omitempty"`
 	GeneralError   string `json:"general_error,omitempty"`
 
@@ -58,17 +51,6 @@ type ProductFormErrors struct {
 	CategoryID      string `json:"category_id,omitempty"`
 	MainImg         string `json:"main_img,omitempty"`
 	Gallery         string `json:"gallery,omitempty"`
-}
-
-type FieldState struct {
-	IsTouched       bool   `json:"is_touched"`
-	IsValid         bool   `json:"is_valid"`
-	HasError        bool   `json:"has_error"`
-	HasWarning      bool   `json:"has_warning"`
-	IsRequired      bool   `json:"is_required"`
-	ValidationClass string `json:"validation_class"`
-	HelpText        string `json:"help_text,omitempty"`
-	WarningText     string `json:"warning_text,omitempty"`
 }
 
 // Helper methods
@@ -127,6 +109,70 @@ func NewProductFormStateFromProduct(mode string, product *db.Product) *ProductFo
 	}
 }
 
+// FormState interface implementation
+
+func (pfs *ProductFormState) GetFormState() *ProductFormState {
+	return pfs
+}
+
+// GetFieldValue returns the current value of a field
+func (pfs *ProductFormState) GetFieldValue(field string) string {
+	switch field {
+	case "name":
+		return pfs.Values.Name
+	case "description":
+		return pfs.Values.Description
+	case "long_description":
+		return pfs.Values.LongDescription
+	case "category_id":
+		return pfs.Values.CategoryID
+	case "main_img":
+		return pfs.Values.MainImg
+	case "available":
+		if pfs.Values.Available {
+			return "on"
+		}
+		return ""
+	case "gallery":
+		return strings.Join(pfs.Values.Gallery, ",")
+	default:
+		return ""
+	}
+}
+
+// GetFieldState returns the FieldState for a specific field
+func (pfs *ProductFormState) GetFieldState(field string) FieldState {
+	state, exists := pfs.Fields[field]
+	if !exists {
+		// Return default state for fields that haven't been touched
+		return FieldState{
+			Value:           pfs.GetFieldValue(field),
+			IsTouched:       false,
+			IsValid:         false,
+			HasError:        false,
+			ErrorMessage:    "",
+			HasWarning:      false,
+			WarningText:     "",
+			HelpText:        "",
+			ValidationClass: "border-gray-300 focus:ring-accent focus:border-transparent",
+			IsRequired:      pfs.isFieldRequired(field),
+		}
+	}
+
+	// Update value in case it changed
+	state.Value = pfs.GetFieldValue(field)
+	state.ErrorMessage = pfs.GetFieldError(field)
+	state.ValidationClass = pfs.GetFieldClass(field)
+	state.IsRequired = pfs.isFieldRequired(field)
+
+	return state
+}
+
+// SetFieldState sets the complete field state
+func (pfs *ProductFormState) SetFieldState(field string, state FieldState) {
+	pfs.Fields[field] = state
+}
+
 // SetFieldError sets the error message for a specific field
 // and updates the field state accordingly
 func (pfs *ProductFormState) SetFieldError(field, message string) {
@@ -136,6 +182,8 @@ func (pfs *ProductFormState) SetFieldError(field, message string) {
 		pfs.Errors.Name = message
 	case "description":
 		pfs.Errors.Description = message
+	case "long_description":
+		pfs.Errors.LongDescription = message
 	case "category_id":
 		pfs.Errors.CategoryID = message
 	case "main_img":
@@ -144,56 +192,25 @@ func (pfs *ProductFormState) SetFieldError(field, message string) {
 		pfs.Errors.Gallery = message
 	}
 
-	pfs.Fields[field] = FieldState{
-		IsTouched:       true,
-		IsValid:         false,
-		HasError:        true,
-		ValidationClass: "error",
-	}
-	pfs.HasErrors = true
-}
+	state := pfs.GetFieldState(field)
+	state.IsTouched = true
+	state.IsValid = false
+	state.HasError = true
+	state.ErrorMessage = message
+	state.ValidationClass = "error"
 
-// SetFieldValid sets the valid state for a specific field
-// and updates the field state accordingly
-func (pfs *ProductFormState) SetFieldValid(field string) {
-	pfs.ClearFieldError(field)
-	pfs.Fields[field] = FieldState{
-		IsTouched:       true,
-		IsValid:         true,
-		HasError:        false,
-		ValidationClass: "valid",
-	}
-}
-
-func (pfs *ProductFormState) SetFieldWarning(field, message string) {
-	state := pfs.Fields[field]
-	state.HasWarning = true
-	state.WarningText = message
-	state.ValidationClass = "warning"
 	pfs.Fields[field] = state
 }
 
-func (pfs *ProductFormState) ResetFieldState() {
-	fieldState := pfs.Fields
-
-	for k := range fieldState {
-		fieldState[k] = FieldState{
-			IsTouched:       false,
-			IsValid:         false,
-			HasError:        false,
-			ValidationClass: "",
-			HelpText:        "",
-			WarningText:     "",
-		}
-	}
-}
-
+// ClearFieldError clears the error for a specific field
 func (pfs *ProductFormState) ClearFieldError(field string) {
 	switch field {
 	case "name":
 		pfs.Errors.Name = ""
 	case "description":
 		pfs.Errors.Description = ""
+	case "long_description":
+		pfs.Errors.LongDescription = ""
 	case "category_id":
 		pfs.Errors.CategoryID = ""
 	case "main_img":
@@ -202,12 +219,54 @@ func (pfs *ProductFormState) ClearFieldError(field string) {
 		pfs.Errors.Gallery = ""
 	}
 
-	state := pfs.Fields[field]
+	state := pfs.GetFieldState(field)
 	state.HasError = false
+	state.ErrorMessage = ""
 	state.ValidationClass = ""
 	pfs.Fields[field] = state
 }
 
+// HasFieldError returns true if the field has an error
+func (pfs *ProductFormState) HasFieldError(field string) bool {
+	return pfs.GetFieldError(field) != ""
+}
+
+// SetFieldWarning sets a warning message for a field
+func (pfs *ProductFormState) SetFieldWarning(field, message string) {
+	state := pfs.GetFieldState(field)
+	state.HasWarning = true
+	state.WarningText = message
+	state.ValidationClass = "warning"
+	pfs.Fields[field] = state
+}
+
+// HasFieldWarning returns true if the field has a warning
+func (pfs *ProductFormState) HasFieldWarning(field string) bool {
+	state := pfs.GetFieldState(field)
+	return state.HasWarning
+}
+
+// GetFieldError returns the error message for a field
+func (pfs *ProductFormState) GetFieldError(field string) string {
+	switch field {
+	case "name":
+		return pfs.Errors.Name
+	case "description":
+		return pfs.Errors.Description
+	case "long_description":
+		return pfs.Errors.LongDescription
+	case "category_id":
+		return pfs.Errors.CategoryID
+	case "main_img":
+		return pfs.Errors.MainImg
+	case "gallery":
+		return pfs.Errors.Gallery
+	default:
+		return ""
+	}
+}
+
+// GetFieldClass returns the CSS class for a field based on its state
 func (pfs *ProductFormState) GetFieldClass(field string) string {
 	state, exists := pfs.Fields[field]
 	if !exists {
@@ -231,38 +290,97 @@ func (pfs *ProductFormState) GetFieldClass(field string) string {
 	}
 }
 
-func (pfs *ProductFormState) GetFieldError(field string) string {
-	switch field {
-	case "name":
-		return pfs.Errors.Name
-	case "description":
-		return pfs.Errors.Description
-	case "category_id":
-		return pfs.Errors.CategoryID
-	case "main_img":
-		return pfs.Errors.MainImg
-	case "gallery":
-		return pfs.Errors.Gallery
-	default:
-		return ""
+// IsValid returns true if the form is valid (no errors)
+func (pfs *ProductFormState) IsValid() bool {
+	return !pfs.HasErrors()
+}
+
+// IsSuccessful returns true if the form was successfully submitted
+func (pfs *ProductFormState) IsSuccessful() bool {
+	return pfs.IsSubmitted && pfs.IsValid() && !pfs.HasErrors() && pfs.SuccessMessage != ""
+}
+
+// GetSuccessMessage returns the success message
+func (pfs *ProductFormState) GetSuccessMessage() string {
+	return pfs.SuccessMessage
+}
+
+// HasErrors returns true if the form has any errors
+func (pfs *ProductFormState) HasErrors() bool {
+	for _, state := range pfs.Fields {
+		if state.HasError {
+			return true
+		}
+	}
+	return false
+}
+
+// GetErrorMessage returns the general error message
+func (pfs *ProductFormState) GetErrorMessage() string {
+	return pfs.GeneralError
+}
+
+// ClearErrors clears all errors in the form
+func (pfs *ProductFormState) ClearErrors() {
+	pfs.Errors = ProductFormErrors{}
+	pfs.GeneralError = ""
+
+	// Clear field error states
+	for field := range pfs.Fields {
+		state := pfs.Fields[field]
+		state.HasError = false
+		state.ErrorMessage = ""
+		if state.ValidationClass == "error" {
+			state.ValidationClass = ""
+		}
+		pfs.Fields[field] = state
 	}
 }
 
-func (pfs *ProductFormState) HasFieldError(field string) bool {
-	return pfs.GetFieldError(field) != ""
+// ResetFieldState resets the state of specified fields, or all fields if none specified
+func (pfs *ProductFormState) ResetFieldState(fields ...[]string) {
+	var fieldsToReset []string
+
+	if len(fields) > 0 && len(fields[0]) > 0 {
+		fieldsToReset = fields[0]
+	} else {
+		// Reset all fields
+		for k := range pfs.Fields {
+			fieldsToReset = append(fieldsToReset, k)
+		}
+	}
+
+	for _, field := range fieldsToReset {
+		pfs.Fields[field] = FieldState{
+			Value:           pfs.GetFieldValue(field),
+			IsTouched:       false,
+			IsValid:         false,
+			HasError:        false,
+			ErrorMessage:    "",
+			HasWarning:      false,
+			WarningText:     "",
+			HelpText:        "",
+			ValidationClass: "",
+			IsRequired:      pfs.isFieldRequired(field),
+		}
+	}
 }
 
+// Validate validates the form and returns an error if validation fails
 func (pfs *ProductFormState) Validate() error {
 	hasErrors := false
 
 	if l := len(pfs.Values.Name); strings.TrimSpace(pfs.Values.Name) == "" {
 		pfs.SetFieldError("name", "El nombre es requerido")
 		hasErrors = true
-	} else if l < 3 {
-		pfs.SetFieldError("name", "El nombre debe tener al menos 3 caracteres")
+	} else if l < MinProductNameLength {
+		pfs.SetFieldError("name", fmt.Sprintf("El nombre debe tener al menos %d caracteres", MinProductNameLength))
 		hasErrors = true
 	} else if l > MaxProductNameLength {
 		pfs.SetFieldError("name", fmt.Sprintf("El nombre no puede exceder %d caracteres", MaxProductNameLength))
+		hasErrors = true
+	} else {
+		pfs.SetFieldValid("name")
 	}
 
 	if strings.TrimSpace(pfs.Values.Description) == "" {
@@ -271,6 +389,8 @@ func (pfs *ProductFormState) Validate() error {
 	} else if len(pfs.Values.Description) > MaxProductDescriptionLength {
 		pfs.SetFieldError("description", fmt.Sprintf("La descripción no puede exceder %d caracteres", MaxProductDescriptionLength))
 		hasErrors = true
+	} else {
+		pfs.SetFieldValid("description")
 	}
 
 	if hasErrors {
@@ -278,4 +398,28 @@ func (pfs *ProductFormState) Validate() error {
 	}
 
 	return nil
+}
+
+// Helper methods
+
+// SetFieldValid sets the valid state for a specific field
+// and updates the field state accordingly
+func (pfs *ProductFormState) SetFieldValid(field string) {
+	pfs.ClearFieldError(field)
+	state := pfs.GetFieldState(field)
+	state.IsTouched = true
+	state.IsValid = true
+	state.HasError = false
+	state.ValidationClass = "valid"
+	pfs.Fields[field] = state
+}
+
+// isFieldRequired returns true if the field is required
+func (pfs *ProductFormState) isFieldRequired(field string) bool {
+	switch field {
+	case "name", "description":
+		return true
+	default:
+		return false
+	}
 }
