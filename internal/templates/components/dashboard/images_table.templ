@@ -10,28 +10,27 @@ import (
 templ ImagesTable(result *db.ImageFilterResult) {
 	<span id="images-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Images)) }/ { fmt.Sprintf("%d", result.Total) })</span>
 	<div class="max-w-screen-xl flex flex-col p-1 mx-auto">
-        if result.HasError {
-            <div class="flex-1 flex items-center justify-center gap-4 p-4">
-                <h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
-                <button
-                    type="button"
-                    class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
-                    hx-get="/api/images/table"
-                    hx-target="#images-table"
-                    hx-params="none"
-                    data-click-handler-selector="[data-images-filter-clear]"
-                    data-images-filter-clear
-                >Limpiar Filtros</button>
-            </div>
-        }
-
+		if result.HasError {
+			<div class="flex-1 flex items-center justify-center gap-4 p-4">
+				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/imagenes/table"
+					hx-target="#images-table"
+					hx-params="none"
+					data-click-handler-selector="[data-images-filter-clear]"
+					data-images-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		}
 		if len(result.Images) == 0 {
 			<div class="text-center p-4 space-y-2">
 				<h3 class="">No se encontraron imágenes que coincidan con tu búsqueda</h3>
 				<button
 					type="button"
 					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
-					hx-get="/api/images/table"
+					hx-get="/imagenes/table"
 					hx-target="#images-table"
 					hx-params="none"
 					data-click-handler-selector="[data-images-filter-clear]"
@@ -92,7 +91,7 @@ templ ImageTableRow(image *db.Image) {
 			<button
 				hx-get={ fmt.Sprintf("/imagenes/%s", image.ID) }
 				hx-target="#images-modal"
-                hx-indicator="#global-loading-indicator"
+				hx-indicator="#global-loading-indicator"
 				class="flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700"
 			>
 				@components.ViewIcon("w-5 mx-auto", nil)
@@ -101,9 +100,9 @@ templ ImageTableRow(image *db.Image) {
 			<button
 				hx-delete={ fmt.Sprintf("/imagenes/%s", image.ID) }
 				hx-confirm="¿Seguro que deseas eliminar la imágen?"
-                hx-indicator="#global-loading-indicator"
-                hx-target="#images-table"
-                hx-include='[name="sort"], [name="name"], [name="date"], [name="date_after"], [name="date_before"]'
+				hx-indicator="#global-loading-indicator"
+				hx-target="#images-table"
+				hx-include='[name="sort"], [name="name"], [name="date"], [name="date_after"], [name="date_before"]'
 				class="flex-1 basis-full bg-red-700/20 rounded-xs p-2 text-red-700"
 			>
 				@components.BinIcon("w-5 mx-auto", nil)
@@ -119,7 +118,7 @@ templ ImagesPagination(result *db.ImageFilterResult) {
 			if result.HasPrevious {
 				<button
 					class="btn-pagination"
-					hx-get={ fmt.Sprintf("/api/images/table?page=%d", result.Page-1) }
+					hx-get={ fmt.Sprintf("/imagenes/table?page=%d", result.Page-1) }
 					hx-target=".images-container"
 				>
 					← Anterior
@@ -133,7 +132,7 @@ templ ImagesPagination(result *db.ImageFilterResult) {
 					} else {
 						<button
 							class="page-number"
-							hx-get={ fmt.Sprintf("/api/images/table?page=%d", i) }
+							hx-get={ fmt.Sprintf("/imagenes/table?page=%d", i) }
 							hx-target=".images-container"
 						>
 							{ fmt.Sprintf("%d", i) }
@@ -144,7 +143,7 @@ templ ImagesPagination(result *db.ImageFilterResult) {
 			if result.HasNext {
 				<button
 					class="btn-pagination"
-					hx-get={ fmt.Sprintf("/api/images/table?page=%d", result.Page+1) }
+					hx-get={ fmt.Sprintf("/imagenes/table?page=%d", result.Page+1) }
 					hx-target=".images-container"
 				>
 					Siguiente →
@@ -176,8 +175,9 @@ templ ImageModal(image *db.Image, err string) {
 		<div class="flex-1 basis-full w-full overflow-hidden">
 			if err != "" {
 				<div class="flex flex-col items-center justify-center h-full">
-					<p class="text-red-700/70 mx-auto">@components.TimesIcon("w-10 mx-auto", nil)
-</p>
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
 					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
 				</div>
 			} else {
@@ -204,8 +204,8 @@ templ ImageModal(image *db.Image, err string) {
 				class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
 				hx-delete={ fmt.Sprintf("/imagenes/%s", image.ID) }
 				hx-target="#images-table"
-                hx-include='[name="sort"], [name="name"], [name="date"], [name="date_after"], [name="date_before"]'
-                hx-indicator="#global-loading-indicator"
+				hx-include='[name="sort"], [name="name"], [name="date"], [name="date_after"], [name="date_before"]'
+				hx-indicator="#global-loading-indicator"
 				hx-confirm="¿Seguro que deseas eliminar la imágen?"
 				data-images-modal-toggle="close"
 				data-click-handler-selector="[data-images-modal-toggle]"

@@ -6,6 +6,7 @@ import (
 )
 
 templ Images() {
+	<script src="/static/js/popup.js" defer></script>
 	@imagesScript()
 	@templates.AdminLayout("Imágenes| Villa Chenacolo", "Administración de Imágenes") {
 		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5" hx-ext="response-targets">
@@ -26,16 +27,28 @@ templ Images() {
 				<div id="images-actions-container" class="overflow-hidden h-0" data-images-actions="closed">
 					<div class="py-2 border-t border-primary/70">
 						<h4 class="text-lg font-medium text-gray-700 mb-2">Acciones</h4>
-						<ul class="flex flex-col items-center gap-4">
+						<ul class="flex flex-col items-center gap-2">
+							<li class="w-full">
+								<button
+									id="images-actions-new"
+									hx-get="/imagenes/subir"
+									hx-target=""
+									hx-indicator="#global-loading-indicator"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								>
+									@components.PlusIcon("w-5", nil)
+									Subir Imagenes
+								</button>
+							</li>
 							<li class="w-full">
 								<button
 									id="images-multi-selection-delete"
-									hx-delete="/api/images/del"
+									hx-delete="/imagenes/del"
 									hx-target=""
 									hx-confirm="¿Eliminar las imágenes seleccionadas?"
 									hx-indicator="#images-table-loading"
 									hx-include='[name="image-table-selection"]'
-									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
 									disabled
 								>
 									@components.BinIcon("w-5", nil)
@@ -45,7 +58,7 @@ templ Images() {
 						</ul>
 						<!-- Filters -->
 						<form
-							hx-get="/api/images/table"
+							hx-get="/imagenes/table"
 							hx-trigger="input changed delay:500ms"
 							hx-target="#images-table"
 							hx-indicator="#images-table-loading"
@@ -77,7 +90,7 @@ templ Images() {
 								<button
 									type="button"
 									class="text-sm text-gray-700 font-bold tracking-wide"
-									hx-get="/api/images/table"
+									hx-get="/imagenes/table"
 									hx-target="#images-table"
 									data-click-handler-selector="[data-images-filter-clear]"
 									data-images-filter-clear
@@ -99,7 +112,7 @@ templ Images() {
 							<span id="images-table-count" hx-swap-oob>(0/0)</span>
 						</h4>
 						<select
-							hx-get="/api/images/table"
+							hx-get="/imagenes/table"
 							hx-trigger="change"
 							hx-target="#images-table"
 							hx-indicator="#images-table-loading"
@@ -132,12 +145,12 @@ templ Images() {
 						>
 							<div
 								id="images-table"
-								hx-get="/api/images/table"
+								hx-get="/imagenes/table"
 								hx-include='[name="name"], [name="date"], [name="sort"]'
 								hx-target-5xx="this"
 								hx-target-4xx="this"
 								hx-trigger="load"
-								hx-indicator="#images-table-loading"
+								hx-indicator="#global-loading-indicator"
 							></div>
 						</div>
 					</div>
@@ -145,7 +158,12 @@ templ Images() {
 			</main>
 		</div>
 		<div id="images-modal-container" class="fixed inset-0 z-50 overflow-hidden opacity-0 pointer-events-none">
-			<div id="images-modal-backdrop" class="absolute h-full w-full z-0 bg-dark/30" data-images-modal-toggle="close"></div>
+			<div
+				id="images-modal-backdrop"
+				class="absolute h-full w-full z-0 bg-dark/30"
+				data-images-modal-toggle="close"
+				data-click-handler-selector="[data-images-modal-toggle]"
+			></div>
 			<div
 				id="images-modal"
 				class="relative h-full w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"

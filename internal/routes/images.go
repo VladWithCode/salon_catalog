@@ -20,13 +20,14 @@ import (
 )
 
 func RegisterImagesRoutes(router *customServeMux) {
+	// This routes respond with templ components (i.e. HTML or text/HTML mime type responses)
 	router.HandleFunc("GET /imagenes/{id}", auth.PopulateAuth(RenderImage))
+	router.HandleFunc("GET /imagenes/table", auth.ValidateAuth(RenderImagesTable))
 	router.HandleFunc("DELETE /imagenes/{id}", auth.PopulateAuth(DeleteImageAndReturnTable))
 
-	// router.HandleFunc("GET /api/images", RenderIndex)
-	router.HandleFunc("GET /api/images/table", auth.ValidateAuth(RenderImagesTable))
-
 	router.HandleFunc("POST /api/images", auth.ValidateAuth(UploadImages))
+	// This routes respond with JSON
+	// TODO: update to use JSON responses
 	router.HandleFunc("PUT /api/images/{id}", auth.ValidateAuth(UpdateImage))
 	router.HandleFunc("DELETE /api/images", auth.ValidateAuth(DeleteImages))
 	router.HandleFunc("DELETE /api/images/{id}", auth.ValidateAuth(DeleteImage))

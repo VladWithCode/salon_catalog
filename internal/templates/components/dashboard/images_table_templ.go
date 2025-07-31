@@ -67,13 +67,13 @@ func ImagesTable(result *db.ImageFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if result.HasError {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex-1 flex items-center justify-center gap-4 p-4\"><h3 class=\"text-lg text-red-700 font-semibold\">Algo salió mal</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/api/images/table\" hx-target=\"#images-table\" hx-params=\"none\" data-click-handler-selector=\"[data-images-filter-clear]\" data-images-filter-clear>Limpiar Filtros</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex-1 flex items-center justify-center gap-4 p-4\"><h3 class=\"text-lg text-red-700 font-semibold\">Algo salió mal</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/imagenes/table\" hx-target=\"#images-table\" hx-params=\"none\" data-click-handler-selector=\"[data-images-filter-clear]\" data-images-filter-clear>Limpiar Filtros</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if len(result.Images) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"text-center p-4 space-y-2\"><h3 class=\"\">No se encontraron imágenes que coincidan con tu búsqueda</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/api/images/table\" hx-target=\"#images-table\" hx-params=\"none\" data-click-handler-selector=\"[data-images-filter-clear]\" data-images-filter-clear>Limpiar Filtros</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"text-center p-4 space-y-2\"><h3 class=\"\">No se encontraron imágenes que coincidan con tu búsqueda</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/imagenes/table\" hx-target=\"#images-table\" hx-params=\"none\" data-click-handler-selector=\"[data-images-filter-clear]\" data-images-filter-clear>Limpiar Filtros</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -135,7 +135,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(image.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 59, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 58, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -148,7 +148,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("image-table-selection-%s", image.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 65, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 64, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -161,7 +161,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(image.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 66, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 65, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -174,7 +174,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", image.Filename))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 72, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 71, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +187,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 73, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 72, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -200,7 +200,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 80, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 79, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -213,7 +213,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 81, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 80, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +226,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formatFileSize(image.Size))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 84, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 83, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(formatDate(image.CreatedAt))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 88, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 87, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -252,7 +252,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/imagenes/%s", image.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 93, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 92, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -273,7 +273,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/imagenes/%s", image.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 102, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 101, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -326,9 +326,9 @@ func ImagesPagination(result *db.ImageFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/table?page=%d", result.Page-1))
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/imagenes/table?page=%d", result.Page-1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 122, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 121, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -352,7 +352,7 @@ func ImagesPagination(result *db.ImageFilterResult) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 132, Col: 61}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 131, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -368,9 +368,9 @@ func ImagesPagination(result *db.ImageFilterResult) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var19 string
-				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/table?page=%d", i))
+				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/imagenes/table?page=%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 136, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 135, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -383,7 +383,7 @@ func ImagesPagination(result *db.ImageFilterResult) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 139, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 138, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -405,9 +405,9 @@ func ImagesPagination(result *db.ImageFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/table?page=%d", result.Page+1))
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/imagenes/table?page=%d", result.Page+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 147, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 146, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -460,7 +460,7 @@ func ImageModal(image *db.Image, err string) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 164, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 163, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
