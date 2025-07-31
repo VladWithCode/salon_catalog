@@ -2,11 +2,14 @@ package components
 
 templ Header(isMainPage bool) {
 	@Script()
-	<div id="top-observer-target" class={
-       "absolute left-0 right-0 pointer-events-none",
-       templ.KV("top-[20vh]", !isMainPage),
-       templ.KV("top-[90vh]", isMainPage),
-   }></div>
+	<div
+		id="top-observer-target"
+		class={
+			"absolute left-0 right-0 pointer-events-none",
+			templ.KV("top-[20vh]", !isMainPage),
+			templ.KV("top-[90vh]", isMainPage),
+		}
+	></div>
 	<header
 		id="header"
 		class="absolute top-0 left-0 right-0 h-12 z-40 flex items-center justify-between text-stone-50 px-4"
@@ -109,9 +112,9 @@ templ Header(isMainPage bool) {
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
-                            <svg class="w-5 h-5 mr-3 text-primary stroke-current menu-icon">
-                                <use href="/static/assets/briefcase.svg#briefcase"></use>
-                            </svg>
+							<svg class="w-5 h-5 mr-3 text-primary stroke-current menu-icon">
+								<use href="/static/assets/briefcase.svg#briefcase"></use>
+							</svg>
 							<span class="font-medium">Servicios</span>
 						</a>
 					</li>
@@ -124,9 +127,9 @@ templ Header(isMainPage bool) {
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
-                            <svg class="w-5 h-5 mr-3 text-primary fill-current menu-icon">
-                                <use href="/static/assets/glass.svg#glass"></use>
-                            </svg>
+							<svg class="w-5 h-5 mr-3 text-primary fill-current menu-icon">
+								<use href="/static/assets/glass.svg#glass"></use>
+							</svg>
 							<span class="font-medium">Catálogo</span>
 						</a>
 					</li>

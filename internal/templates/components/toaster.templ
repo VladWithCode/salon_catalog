@@ -14,8 +14,7 @@ templ Toaster() {
 		id="toaster-container"
 		class="fixed flex flex-col items-end gap-2 bottom-0 inset-x-0 z-50 px-2 pointer-events-none"
 		data-toaster-count="0"
-	>
-	</div>
+	></div>
 }
 
 templ toasterScript() {
@@ -165,11 +164,11 @@ func NewToastData(message string, toastType ToastType, duration int, closable, p
 		Closable: closable,
 		Pinned:   pinned,
 	}
-    if pinned {
-        td.Duration = 0
-    }
+	if pinned {
+		td.Duration = 0
+	}
 
-    return td
+	return td
 }
 
 func (td *ToastData) GetClass() string {
@@ -224,14 +223,13 @@ templ ToasterToast(data *ToastData) {
 			data-toaster-toast-pinned
 		}
 	>
-        if data.Pinned {
-            <div class="absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4"></div>
-        }
-
+		if data.Pinned {
+			<div class="absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4"></div>
+		}
 		<div class="flex gap-2">
-            @data.GetIcon()
-            <span class="block flex-1 text-sm font-bold tracking-wide">{ data.Message }</span>
-        </div>
+			@data.GetIcon()
+			<span class="block flex-1 text-sm font-bold tracking-wide">{ data.Message }</span>
+		</div>
 		if data.Closable || data.Pinned {
 			<button class="ml-auto" data-toaster-toast-close={ data.ID } data-click-handler-selector="[data-toaster-toast-close]">
 				@TimesIcon("w-6", nil)

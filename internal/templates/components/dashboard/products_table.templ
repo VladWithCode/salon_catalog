@@ -3,62 +3,72 @@ package dashboard
 import "github.com/vladwithcode/salon_catalog/internal/db"
 
 templ ProductsTable(productData db.ProductFilterResult) {
-if productData.Total == 0 {
-@ProductTableEmpty()
-}
-if productData.Products != nil {
-<div class="grid grid-cols-3 lg:grid-cols-4" tabindex="-1">
-    <div class="sticky bg-white inset-y-0 top-0 col-span-full grid grid-cols-subgrid grid-rows-1">
-        <div class="hidden lg:block p-2 border-b border-r border-gray-200">ID</div>
-        <div class="p-2 border-b border-r border-gray-200">Nombre</div>
-        <div class="p-2 border-b border-r border-gray-200">Categoría</div>
-        <div class="p-2 border-b border-r border-gray-200">Acciones</div>
-    </div>
-    for _, product := range productData.Products {
-    @ProductTableRow(*product)
-    }
-</div>
-}
+	if productData.Total == 0 {
+		@ProductTableEmpty()
+	}
+	if productData.Products != nil {
+		<div class="grid grid-cols-3 lg:grid-cols-4" tabindex="-1">
+			<div class="sticky bg-white inset-y-0 top-0 col-span-full grid grid-cols-subgrid grid-rows-1">
+				<div class="hidden lg:block p-2 border-b border-r border-gray-200">ID</div>
+				<div class="p-2 border-b border-r border-gray-200">Nombre</div>
+				<div class="p-2 border-b border-r border-gray-200">Categoría</div>
+				<div class="p-2 border-b border-r border-gray-200">Acciones</div>
+			</div>
+			for _, product := range productData.Products {
+				@ProductTableRow(*product)
+			}
+		</div>
+	}
 }
 
 templ ProductTableRow(product db.Product) {
-<div class="grid col-span-full grid-cols-subgrid border-gray-200">
-    <p class="hidden border-b border-r border-inherit text-sm text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.ID }</p>
-    <p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Name }</p>
-    <p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Category }</p>
-    <p class="border-b border-inherit flex gap-4 items-center justify-center p-2">
-        <button class="text-blue-600">
-            <svg class="h-5 w-5 fill-current">
-                <use href="/static/assets/view.svg#view"></use>
-            </svg>
-        </button>
-        <button class="text-red-600">
-            <svg class="h-5 w-5 fill-current">
-                <use href="/static/assets/bin.svg#bin"></use>
-            </svg>
-        </button>
-    </p>
-</div>
+	<div class="grid col-span-full grid-cols-subgrid border-gray-200">
+		<p class="hidden border-b border-r border-inherit text-sm text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.ID }</p>
+		<p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Name }</p>
+		<p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Category }</p>
+		<p class="border-b border-inherit flex gap-4 items-center justify-center p-2">
+			<button class="text-blue-600">
+				<svg class="h-5 w-5 fill-current">
+					<use href="/static/assets/view.svg#view"></use>
+				</svg>
+			</button>
+			<button class="text-red-600">
+				<svg class="h-5 w-5 fill-current">
+					<use href="/static/assets/bin.svg#bin"></use>
+				</svg>
+			</button>
+		</p>
+	</div>
 }
 
 templ ProductTableEmpty() {
-<div class="flex flex-col items-center justify-center gap-4 py-8 px-4">
-    <span class="text-center text-stone-800/80">No se encontraron productos que coincidan con tu búsqueda</span>
-    <button id="product-table-clear-filters" class="text-accent text-xl font-bold underline underline-offset-2 hover:bg-primary/90 transition-colors"
-        hx-get="/api/products/table" hx-target="#products-table" hx-indicator="#products-table-loading"
-        data-click-handler-selector="product-filters-clear">
-        Limpiar filtros
-    </button>
-</div>
+	<div class="flex flex-col items-center justify-center gap-4 py-8 px-4">
+		<span class="text-center text-stone-800/80">No se encontraron productos que coincidan con tu búsqueda</span>
+		<button
+			id="product-table-clear-filters"
+			class="text-accent text-xl font-bold underline underline-offset-2 hover:bg-primary/90 transition-colors"
+			hx-get="/api/products/table"
+			hx-target="#products-table"
+			hx-indicator="#products-table-loading"
+			data-click-handler-selector="product-filters-clear"
+		>
+			Limpiar filtros
+		</button>
+	</div>
 }
 
 templ ProductTableError() {
-<div class="flex flex-col items-center justify-center gap-4 py-8 text-xl font-bold text-primary">
-    <span class="text-lg">Algo salió mal</span>
-    <button id="product-table-retry" class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-        hx-get="/api/products/table" hx-target="#products-table" hx-indicator="#product-table-loading"
-        data-click-handler-selector="product-actions-toggle">
-        Volver a intentar
-    </button>
-</div>
+	<div class="flex flex-col items-center justify-center gap-4 py-8 text-xl font-bold text-primary">
+		<span class="text-lg">Algo salió mal</span>
+		<button
+			id="product-table-retry"
+			class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+			hx-get="/api/products/table"
+			hx-target="#products-table"
+			hx-indicator="#product-table-loading"
+			data-click-handler-selector="product-actions-toggle"
+		>
+			Volver a intentar
+		</button>
+	</div>
 }

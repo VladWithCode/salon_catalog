@@ -4,18 +4,18 @@ import "github.com/vladwithcode/salon_catalog/internal/templates"
 
 templ Index() {
 	@templates.BaseLayout("", nil, true) {
-        @Script()
+		@Script()
 		<section id="seccion-hero" class="relative z-0 mb-8">
 			<div class="absolute inset-0 -z-10">
-                <video
-                    src="/static/assets/chenacolo_vid.mp4"
-                    alt="Salon Hero Background"
-                    class="w-full h-full object-cover object-center"
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                />
+				<video
+					src="/static/assets/chenacolo_vid.mp4"
+					alt="Salon Hero Background"
+					class="w-full h-full object-cover object-center"
+					autoplay
+					muted
+					loop
+					playsinline
+				></video>
 			</div>
 			<div class="bg-gradient-to-br from-primary/60 to-accent/60 flex flex-col items-center justify-center h-[90vh]">
 				<h1 class="text-stone-50 text-3xl text-center font-semibold px-4 mb-4 opacity-0 translate-y-6" data-hero-item>
@@ -35,13 +35,13 @@ templ Index() {
 				</a>
 			</div>
 		</section>
-        <section id="seccion-oferta" class="px-4 mb-6">
+		<section id="seccion-oferta" class="px-4 mb-6">
 			<h2 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Nuestra Oferta</h2>
 			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">Conoce los servicios que tenemos para tu evento.</p>
 			<div class="space-y-4">
 				<div
 					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
-                    data-intsc-animate-item="offer-section"
+					data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/chenacolo_11.jpeg"
@@ -62,7 +62,7 @@ templ Index() {
 				</div>
 				<div
 					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
-                    data-intsc-animate-item="offer-section"
+					data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/chenacolo_18.jpeg"
@@ -83,7 +83,7 @@ templ Index() {
 				</div>
 				<div
 					class="relative shadow shadow-stone-800/50 max-w-80 aspect-[5/4] z-0 mx-auto transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0"
-                    data-intsc-animate-item="offer-section"
+					data-intsc-animate-item="offer-section"
 				>
 					<img
 						src="/static/assets/chenacolo_8.jpeg"
@@ -121,7 +121,7 @@ templ Index() {
 					<a
 						href="#"
 						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
-                        data-intsc-animate-item="catalog-section"
+						data-intsc-animate-item="catalog-section"
 					>
 						<img
 							src="/static/assets/chenacolo_24.jpeg"
@@ -140,7 +140,7 @@ templ Index() {
 					<a
 						href="#"
 						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
-                        data-intsc-animate-item="catalog-section"
+						data-intsc-animate-item="catalog-section"
 					>
 						<img
 							src="/static/assets/chenacolo_26.jpeg"
@@ -166,7 +166,7 @@ templ Index() {
 				<a
 					href="#"
 					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
-                    data-intsc-animate-item="gallery-section"
+					data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/chenacolo_25.jpeg"
@@ -177,7 +177,7 @@ templ Index() {
 				<a
 					href="#"
 					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
-                    data-intsc-animate-item="gallery-section"
+					data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/chenacolo_30.jpeg"
@@ -188,7 +188,7 @@ templ Index() {
 				<a
 					href="#"
 					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
-                    data-intsc-animate-item="gallery-section"
+					data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/chenacolo_31.jpeg"
@@ -199,7 +199,7 @@ templ Index() {
 				<a
 					href="#"
 					class="block relative w-full aspect-square overflow-hidden transition-[scale] group hover:scale-110 translate-y-6 opacity-0"
-                    data-intsc-animate-item="gallery-section"
+					data-intsc-animate-item="gallery-section"
 				>
 					<img
 						src="/static/assets/chenacolo_23.jpeg"
@@ -319,10 +319,10 @@ templ Index() {
 							<p class="col-start-2">618 123 4455</p>
 						</div>
 					</div>
-                    <div class="space-y-1 text-center mt-8">
-                        <p class="text-xs tracking-wide text-current/80">O también puedes reservar ahora:</p>
-                        <a href="/reservaciones" class="block w-full py-4 bg-accent text-lg font-bold mb-4 rounded-xs">¡Agenda ya!</a>
-                    </div>
+					<div class="space-y-1 text-center mt-8">
+						<p class="text-xs tracking-wide text-current/80">O también puedes reservar ahora:</p>
+						<a href="/reservaciones" class="block w-full py-4 bg-accent text-lg font-bold mb-4 rounded-xs">¡Agenda ya!</a>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -330,7 +330,7 @@ templ Index() {
 }
 
 templ Script() {
-    <script>
+	<script>
         document.addEventListener("DOMContentLoaded", function () {
             const tl = gsap.timeline();
 
