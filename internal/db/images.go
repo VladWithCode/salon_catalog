@@ -44,6 +44,8 @@ type ImageFilterResult struct {
 	TotalPages  int      `json:"total_pages"`
 	HasNext     bool     `json:"has_next"`
 	HasPrevious bool     `json:"has_previous"`
+	HasError    bool     `json:"has_error"`
+	Error       string   `json:"error"`
 }
 
 func CreateImages(imgs []*Image) error {
@@ -299,25 +301,27 @@ func DeleteImages(ids []string) error {
 	return nil
 }
 
-func DeleteImage(id string) error {
+func DeleteImage(id string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer conn.Release()
 
-	_, err = conn.Exec(
+	var filename string
+	row := conn.QueryRow(
 		ctx,
-		`DELETE FROM images WHERE id = $1`,
+		`DELETE FROM images WHERE id = $1 RETURNING filename`,
 		id,
 	)
+	err = row.Scan(&filename)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return filename, nil
 }
 
 func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
