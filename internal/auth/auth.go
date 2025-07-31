@@ -37,6 +37,10 @@ const DefaultExpirationTime = time.Hour * 24
 const InvalidTokenID = "invalid"
 const ExpiredTokenID = "expired"
 
+type AuthCtxKey string
+
+const DefaultAuthCtxKey AuthCtxKey = "auth"
+
 func CreateToken(user *db.User) (string, error) {
 	var (
 		t *jwt.Token
@@ -83,7 +87,7 @@ func PopulateAuth(next AuthedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookieToken, err := r.Cookie("auth_token")
 		var auth = &Auth{}
-		authedReq := r.WithContext(context.WithValue(r.Context(), "auth", auth))
+		authedReq := r.WithContext(context.WithValue(r.Context(), DefaultAuthCtxKey, auth))
 		defer next(w, authedReq, auth)
 		if err != nil {
 			auth.ID = InvalidTokenID
@@ -166,7 +170,7 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 				Role:     role,
 				Fullname: fullname,
 			}
-			authedReq := r.WithContext(context.WithValue(r.Context(), "auth", a))
+			authedReq := r.WithContext(context.WithValue(r.Context(), DefaultAuthCtxKey, a))
 
 			next(w, authedReq, &Auth{
 				ID:       id,
