@@ -41,7 +41,7 @@ func Toaster() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toaster-container\" class=\"fixed flex flex-col items-end gap-2 bottom-0 inset-x-0 z-50 px-2 pointer-events-none\" data-toaster-count=\"0\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toaster-container\" class=\"fixed flex flex-col items-end gap-2 bottom-0 inset-x-0 z-50 p-2 pointer-events-none\" data-toaster-count=\"0\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func toasterScript() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const toasterContainer = document.getElementById('toaster-container');\n        const toasterTest = document.getElementById('toaster-test');\n\n        // Register with global event manager\n        window.eventManager\n            .register('afterSwap', '#toaster-container', function (e) {\n                const toaster = e.detail.elt;\n                const toastElt = toaster.querySelector('[data-toaster-toast-id]');\n                if (!toastElt) {\n                    return;\n                }\n\n                window.toastManager.pushToast(toastElt)\n            })\n            .registerClick('[toaster-toast-close]', (e) => closeToaster())\n    });\n\n    (function () {\n        class ToastManager {\n            #toasts = new Map();\n            toasterElement;\n\n            constructor() {\n                this.toasterElement = document.getElementById('toaster-container');\n                this.bindEvents();\n            }\n\n            bindEvents() {\n                this.toasterElement.addEventListener('click', this.onToastClose.bind(this));\n            }\n\n            pushToast(toastElt) {\n                const isPinned = toastElt.hasAttribute('data-toaster-toast-pinned');\n                const isClosable = toastElt.hasAttribute('data-toaster-toast-closable');\n                const duration = Number(toastElt.dataset.toasterToastDuration);\n                const type = toastElt.dataset.toasterToastType;\n                const toast = {\n                    id: toastElt.dataset.toasterToastId,\n                    type: type,\n                    duration: duration,\n                    closable: isClosable,\n                    pinned: isPinned,\n                    timeoutID: null,\n                }\n\n                if (!isNaN(duration) && duration > 0) {\n                    toast.timeoutID = setTimeout(() => {\n                        console.log('timeout', toast.id);\n                        this.popToast(toast.id);\n                    }, duration);\n                }\n                \n                this.#toasts.set(toast.id, toast)\n                this.animateToastIn(toast.id);\n            }\n\n            popToast(id) {\n                const toast = this.#toasts.get(id);\n                if (!toast) {\n                    return;\n                }\n\n                if (toast.timeoutID) {\n                    clearTimeout(toast.timeoutID);\n                }\n                this.animateToastOut(toast.id);\n                this.#toasts.delete(id);\n            }\n\n            onToastClose(e) {\n                const toastParent = e.target.closest('[data-toaster-toast-id]');\n                if (!toastParent) {\n                    return;\n                }\n                const toastId = toastParent.getAttribute('data-toaster-toast-id');\n                this.popToast(toastId);\n            }\n\n            animateToastOut(id) {\n                const toastElt = document.getElementById(`toaster-toast-${id}`);\n                if (!toastElt) {\n                    return;\n                }\n\n                gsap.to(toastElt, {\n                    opacity: 0,\n                    x: \"150%\",\n                    height: \"0rem\",\n                    duration: 0.3,\n                    ease: \"power2.in\",\n                    onComplete: () => {\n                        toastElt.remove();\n                    }\n                });\n            }\n\n            animateToastIn(id) {\n                const toastElt = document.getElementById(`toaster-toast-${id}`);\n                if (!toastElt) {\n                    return;\n                }\n\n                gsap.to(toastElt, {\n                    opacity: 1,\n                    y: \"0rem\",\n                    ease: \"power3.in\"\n                });\n            }\n        }\n\n        document.addEventListener('DOMContentLoaded', () => window.toastManager = new ToastManager());\n    })();\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const toasterContainer = document.getElementById('toaster-container');\n\n        // Register with global event manager\n        window.eventManager\n            .registerClick('[toaster-toast-close]', (e) => closeToaster())\n\n        document.addEventListener('htmx:afterRequest', (e) => {\n            if (e.detail.xhr.getResponseHeader('X-Includes-Toast') !== 'true') {\n                return;\n            }\n            const toastElt = toasterContainer.querySelector('[data-toaster-toast-id]');\n            if (!toastElt) {\n                return;\n            }\n\n            window.toastManager.pushToast(toastElt)\n        });\n    });\n\n    (function () {\n        class ToastManager {\n            #toasts = new Map();\n            toasterElement;\n\n            constructor() {\n                this.toasterElement = document.getElementById('toaster-container');\n                this.bindEvents();\n            }\n\n            bindEvents() {\n                this.toasterElement.addEventListener('click', this.onToastClose.bind(this));\n            }\n\n            pushToast(toastElt) {\n                const isPinned = toastElt.hasAttribute('data-toaster-toast-pinned');\n                const isClosable = toastElt.hasAttribute('data-toaster-toast-closable');\n                const duration = Number(toastElt.dataset.toasterToastDuration);\n                const type = toastElt.dataset.toasterToastType;\n                const toast = {\n                    id: toastElt.dataset.toasterToastId,\n                    type: type,\n                    duration: duration,\n                    closable: isClosable,\n                    pinned: isPinned,\n                    timeoutID: null,\n                }\n\n                if (!isNaN(duration) && duration > 0) {\n                    toast.timeoutID = setTimeout(() => {\n                        this.popToast(toast.id);\n                    }, duration);\n                }\n                \n                this.#toasts.set(toast.id, toast)\n                this.animateToastIn(toast.id);\n            }\n\n            popToast(id) {\n                const toast = this.#toasts.get(id);\n                if (!toast) {\n                    return;\n                }\n\n                if (toast.timeoutID) {\n                    clearTimeout(toast.timeoutID);\n                }\n                this.animateToastOut(toast.id);\n                this.#toasts.delete(id);\n            }\n\n            onToastClose(e) {\n                const toastParent = e.target.closest('[data-toaster-toast-id]');\n                if (!toastParent) {\n                    return;\n                }\n                const toastId = toastParent.getAttribute('data-toaster-toast-id');\n                this.popToast(toastId);\n            }\n\n            animateToastOut(id) {\n                const toastElt = document.getElementById(`toaster-toast-${id}`);\n                if (!toastElt) {\n                    return;\n                }\n\n                gsap.to(toastElt, {\n                    opacity: 0,\n                    x: \"150%\",\n                    height: \"0rem\",\n                    duration: 0.3,\n                    ease: \"power2.in\",\n                    onComplete: () => {\n                        toastElt.remove();\n                    }\n                });\n            }\n\n            animateToastIn(id) {\n                const toastElt = document.getElementById(`toaster-toast-${id}`);\n                if (!toastElt) {\n                    return;\n                }\n\n                gsap.to(toastElt, {\n                    opacity: 1,\n                    y: \"0rem\",\n                    ease: \"power3.in\"\n                });\n            }\n        }\n\n        document.addEventListener('DOMContentLoaded', () => window.toastManager = new ToastManager());\n    })();\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -172,25 +172,29 @@ func ToasterToast(data *ToastData) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div hx-swap-oob=\"afterbegin:#toaster-container\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		var templ_7745c5c3_Var4 = []any{"relative z-0 flex gap-4 p-2 rounded-sm shadow translate-y-6 opacity-0 pointer-events-auto ", data.GetClass()}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("toaster-toast-%s", data.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 213, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 215, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -203,65 +207,65 @@ func ToasterToast(data *ToastData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-toaster-toast-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-toaster-toast-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(data.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 215, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 217, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !data.Pinned {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " data-toaster-toast-duration=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " data-toaster-toast-duration=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.GetDuration())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 217, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 219, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if data.Closable {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " data-toaster-toast-closable")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " data-toaster-toast-closable")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if data.Pinned {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " data-toaster-toast-pinned")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " data-toaster-toast-pinned")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if data.Pinned {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"flex gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"flex gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -269,38 +273,38 @@ func ToasterToast(data *ToastData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<span class=\"block flex-1 text-sm font-bold tracking-wide\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"block flex-1 text-sm font-bold tracking-wide\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.Message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 231, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 233, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if data.Closable || data.Pinned {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<button class=\"ml-auto\" data-toaster-toast-close=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<button class=\"ml-auto\" data-toaster-toast-close=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 234, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/toaster.templ`, Line: 236, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" data-click-handler-selector=\"[data-toaster-toast-close]\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" data-click-handler-selector=\"[data-toaster-toast-close]\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -308,12 +312,12 @@ func ToasterToast(data *ToastData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

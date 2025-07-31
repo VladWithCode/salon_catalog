@@ -95,6 +95,27 @@
         pointer-events: auto;
     }
 
+    .global-loading-indicator {
+        --gli-transition-duration: 300ms;
+        --gli-transition-timing-function: ease-out;
+
+        transition: opacity var(--gli-transition-duration) var(--gli-transition-timing-function);
+
+        .gli-content {
+            transition: 
+                opacity var(--gli-transition-duration) var(--gli-transition-timing-function),
+                translate var(--gli-transition-duration) var(--gli-transition-timing-function);
+        }
+    }
+    .global-loading-indicator.htmx-request {
+        opacity: 1;
+
+        .gli-content {
+            opacity: 1;
+            translate: 0 0
+        }
+    }
+
     .htmx-indicator{
         opacity:0;
         transition: opacity 300ms ease-in;
