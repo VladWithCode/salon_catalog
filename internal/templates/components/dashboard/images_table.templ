@@ -21,7 +21,7 @@ templ ImagesTable(result *db.ImageFilterResult) {
     <!-- Images Grid -->
     <div class="grid grid-cols-table gap-2">
         for _, image := range result.Images {
-        @ImageGridItem(image)
+        @ImageTableRow(image)
         }
     </div>
     <!-- Pagination -->
@@ -32,7 +32,7 @@ templ ImagesTable(result *db.ImageFilterResult) {
 </div>
 }
 
-templ ImageGridItem(image *db.Image) {
+templ ImageTableRow(image *db.Image) {
 <div
     class="relative bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
     data-image-id={ image.ID }>
