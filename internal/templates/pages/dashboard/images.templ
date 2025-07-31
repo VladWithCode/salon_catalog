@@ -239,22 +239,13 @@ templ imagesScript() {
                 const modal = document.getElementById('images-modal');
 
                 const force = target.dataset.imagesModalToggle
-                if (force) {
-                    if (force === 'close') {
-                        modalTl.reverse();
-                        modal.dataset.imagesModal = 'closed';
-                    } else {
-                        modalTl.play();
-                        modal.dataset.imagesModal = 'open';
-                    }
+                const shouldClose = (force === 'close') || (!force && modal.dataset.imagesModal === 'open');
+                if (shouldClose) {
+                    modalTl.reverse();
+                    modal.dataset.imagesModal = 'closed';
                 } else {
-                    if (modal.dataset.imagesModal === 'open') {
-                        modalTl.reverse();
-                        modal.dataset.imagesModal = 'closed';
-                    } else {
-                        modalTl.play();
-                        modal.dataset.imagesModal = 'open';
-                    }
+                    modalTl.play();
+                    modal.dataset.imagesModal = 'open';
                 }
             })
             .registerClick('[data-images-filter-clear]', function (e) {
