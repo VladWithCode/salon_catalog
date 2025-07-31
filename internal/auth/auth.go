@@ -15,6 +15,10 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal/db"
 )
 
+var (
+	ErrInvalidAuth = errors.New("invalid auth")
+)
+
 type Auth struct {
 	ID       string
 	Username string
@@ -186,4 +190,13 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 
 func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string) {
 	internal.HandleRedirect("/iniciar-sesion", http.StatusFound, w, r)
+}
+
+func ExtractAuth(r *http.Request) (*Auth, error) {
+	auth, ok := r.Context().Value(DefaultAuthCtxKey).(*Auth)
+	if !ok || auth == nil {
+		return nil, ErrInvalidAuth
+	}
+
+	return auth, nil
 }
