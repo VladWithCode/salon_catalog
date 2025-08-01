@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/forms"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
@@ -21,6 +24,8 @@ import (
 
 func RegisterImagesRoutes(router *customServeMux) {
 	// This routes respond with templ components (i.e. HTML or text/HTML mime type responses)
+	router.HandleFunc("GET /imagenes/subir", auth.ValidateAuth(RenderNewImageForm))
+	router.HandleFunc("POST /imagenes/subir", auth.ValidateAuth(UploadImagesForm))
 	router.HandleFunc("GET /imagenes/{id}", auth.PopulateAuth(RenderImage))
 	router.HandleFunc("GET /imagenes/table", auth.ValidateAuth(RenderImagesTable))
 	router.HandleFunc("DELETE /imagenes/{id}", auth.PopulateAuth(DeleteImageAndReturnTable))
@@ -70,6 +75,178 @@ func RenderImagesTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	// Render the template with the results
 	component := dashboard.ImagesTable(result)
 	component.Render(r.Context(), w)
+}
+
+func RenderNewImageForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	fs := forms.NewImagesFormState()
+	err := dashboard.ImagesNewForm(fs).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to render new image form"))
+		log.Printf("failed to render new image form: %v\n", err)
+		return
+	}
+}
+
+func UploadImagesForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	// Create states and indicate we're including toasts
+	w.Header().Add("X-Includes-Toast", "true")
+	fs, err := forms.NewImagesFormStateFromReq(r)
+	fs.SetSuccessMessage("Imágenes subidas exitosamente")
+	td := components.NewToastData(
+		"Se subieron las imágenes exitosamente",
+		components.ToastSuccess,
+		3000,
+		true,
+		false,
+	)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		fs := forms.NewImagesFormState()
+		fs.SetErrorMessage("El tamaño máximo de subida es de 64MB")
+		td := components.NewToastData("El peso total excede el máximo permitido", components.ToastError, 3000, true, false)
+		td.Message = "Imágenes muy grandes"
+		td.Type = components.ToastError
+		templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		).Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	err = fs.Validate()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		fs.SetErrorMessage("Hay errores en el formulario")
+		td.Message = "Hay errores en el formulario"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	files := r.MultipartForm.File
+	if len(files) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+
+		fs.SetErrorMessage("No se encontraron imágenes")
+		td.Message = "No se encontraron imágenes"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	imgs, wrtFiles, err := parseImageUploads(r)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+
+		if errors.Is(err, ErrInvalidImageUpload) {
+			fs.SetErrorMessage("Hay imagenes mal formadas")
+			td.Message = "Hay imagenes mal formadas"
+			component.Render(r.Context(), w)
+			return
+		} else if errors.Is(err, ErrTooManyImages) {
+			fs.SetErrorMessage("Hay demasiadas imagenes")
+			td.Message = "Hay demasiadas imagenes"
+			component.Render(r.Context(), w)
+			return
+		}
+	}
+
+	writtenFiles, err := uploads.UploadMultiple(wrtFiles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		fs.SetErrorMessage("Algo salió mal")
+		td.Message = "Algo salió mal"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	for i, img := range imgs {
+		img.Filename = writtenFiles[i].Filename
+		img.Size = int(writtenFiles[i].Size)
+	}
+
+	err = db.CreateImages(imgs)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		fs.SetErrorMessage("Algo salió mal")
+		td.Message = "Algo salió mal"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	w.Header().Add("Hx-Reswap", "innerHTML")
+	filters := parseImageFilters(r)
+	imagesResult, err := db.FilterImages(filters)
+	if err != nil {
+		w.Header().Add("Hx-Retarget", "#images-table")
+		w.WriteHeader(http.StatusInternalServerError)
+
+		imagesResult.HasError = true
+		imagesResult.Error = "Algo salió mal al recuperar las imágenes"
+		td.Message = "Se subieron las imágenes exitosamente"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesTable(imagesResult),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload error while querying images: %v\n", err)
+		return
+	}
+
+	err = templ.Join(
+		dashboard.ImagesTable(imagesResult),
+		components.ToasterToast(td),
+	).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		fs.SetErrorMessage("Algo salió mal")
+		td.Message = "Algo salió mal"
+		td.Type = components.ToastError
+		component := templ.Join(
+			dashboard.ImagesNewForm(fs),
+			components.ToasterToast(td),
+		)
+		component.Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
 }
 
 func DeleteImageAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
@@ -382,4 +559,66 @@ func parseImageFilters(r *http.Request) db.ImageFilterParams {
 	}
 
 	return filters
+}
+
+var (
+	ErrInvalidImageUpload = errors.New("las imágenes subidas no son válidas")
+	ErrTooManyImages      = errors.New("el máximo de imágenes subidas es de 10")
+)
+
+func parseImageUploads(r *http.Request) ([]*db.Image, []*multipart.FileHeader, error) {
+	imgs := []*db.Image{}
+	wrtFiles := []*multipart.FileHeader{}
+	createDate := time.Now()
+	files := r.MultipartForm.File
+	count := 0
+
+	for name, fileHdl := range files {
+		parts := strings.SplitN(name, "_", 3)
+		if len(parts) != 3 {
+			return nil, nil, ErrInvalidImageUpload
+		}
+
+		inpName := fmt.Sprintf("%s_name_%s", parts[0], parts[2])
+		imgName := r.FormValue(inpName)
+		if imgName == "" {
+			imgName = createDate.Format("2006-01-02_15-04-05")
+		}
+
+		if len(fileHdl) > 1 {
+			for i, handle := range fileHdl {
+				count++
+				if count > 10 {
+					return nil, nil, ErrTooManyImages
+				}
+				id := uuid.Must(uuid.NewV7())
+				img := &db.Image{
+					ID:         id.String(),
+					Name:       fmt.Sprintf("%s %d", imgName, i+1),
+					Filename:   "",
+					Size:       0,
+					CreatedAt:  createDate,
+					NoOptimize: false,
+				}
+
+				imgs = append(imgs, img)
+				wrtFiles = append(wrtFiles, handle)
+			}
+		} else {
+			id := uuid.Must(uuid.NewV7())
+			img := &db.Image{
+				ID:         id.String(),
+				Name:       imgName,
+				Filename:   "",
+				Size:       0,
+				CreatedAt:  createDate,
+				NoOptimize: false,
+			}
+
+			imgs = append(imgs, img)
+			wrtFiles = append(wrtFiles, fileHdl[0])
+		}
+	}
+
+	return imgs, wrtFiles, nil
 }

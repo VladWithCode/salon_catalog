@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	RemoveImgFlag = "delete"
+	RemoveImgFlag      = "delete"
+	MaxImageUploadSize = 64 << 20
 )
 
 var (

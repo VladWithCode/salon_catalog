@@ -5,10 +5,10 @@ import "github.com/vladwithcode/salon_catalog/internal/forms"
 import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 import "github.com/vladwithcode/salon_catalog/internal/db"
 
-templ CreateProductForm(formState *forms.ProductFormState, ctgs []db.Category) {
+templ CreateProductForm(formState forms.FormState, ctgs []db.Category) {
 	<div class="max-w-4xl space-y-4" id="product-form-container" hx-ext="response-targets">
 		<!-- Global Error Message -->
-		if formState.GeneralError != "" {
+		if formState.GetErrorMessage() != "" {
 			<div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-xs">
 				<div class="flex">
 					<svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -16,19 +16,19 @@ templ CreateProductForm(formState *forms.ProductFormState, ctgs []db.Category) {
 					</svg>
 					<div>
 						<h3 class="text-sm font-medium text-red-800">Error en el formulario</h3>
-						<p class="text-sm text-red-700 mt-1">{ formState.GeneralError }</p>
+						<p class="text-sm text-red-700 mt-1">{ formState.GetErrorMessage() }</p>
 					</div>
 				</div>
 			</div>
 		}
 		<!-- Success Message -->
-		if formState.SuccessMessage != "" {
+		if formState.GetSuccessMessage() != "" {
 			<div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-xs">
 				<div class="flex">
 					<svg class="h-5 w-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
 						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 					</svg>
-					<p class="text-sm text-green-700 font-medium">{ formState.SuccessMessage }</p>
+					<p class="text-sm text-green-700 font-medium">{ formState.GetSuccessMessage() }</p>
 				</div>
 			</div>
 		}
@@ -76,11 +76,7 @@ templ CreateProductForm(formState *forms.ProductFormState, ctgs []db.Category) {
 					data-submit-btn
 				>
 					<span data-btn-text>
-						if formState.FormMode == "edit" {
-							Actualizar Producto
-						} else {
-							Crear
-						}
+						Crear
 					</span>
 					<div class="hidden" data-btn-loading>
 						@components.LoadingIcon("h-5", nil)
@@ -101,7 +97,7 @@ templ CreateProductForm(formState *forms.ProductFormState, ctgs []db.Category) {
 }
 
 // Form field components with enhanced error handling
-templ FormField(formState *forms.ProductFormState, name, inputType, label, placeholder string, required bool) {
+templ FormField(formState forms.FormState, name, inputType, label, placeholder string, required bool) {
 	<div class="form-field">
 		<label class="block text-sm font-medium text-gray-700 mb-2">
 			{ label }
@@ -112,7 +108,7 @@ templ FormField(formState *forms.ProductFormState, name, inputType, label, place
 		<input
 			type={ inputType }
 			name={ name }
-			value={ getFieldValue(formState, name) }
+			value={ formState.GetFieldValue(name) }
 			placeholder={ placeholder }
 			required?={ required }
 			class={ "w-full px-4 py-3 rounded-xs border " + formState.GetFieldClass(name) }
@@ -122,7 +118,7 @@ templ FormField(formState *forms.ProductFormState, name, inputType, label, place
 	</div>
 }
 
-templ TextareaField(formState *forms.ProductFormState, name, label, placeholder string, required bool, rows int) {
+templ TextareaField(formState forms.FormState, name, label, placeholder string, required bool, rows int) {
 	<div class="form-field">
 		<label class="block text-sm font-medium text-gray-700 mb-2">
 			{ label }
@@ -137,12 +133,12 @@ templ TextareaField(formState *forms.ProductFormState, name, label, placeholder 
 			rows={ fmt.Sprintf("%d", rows) }
 			class={ "w-full px-4 py-3 rounded-xs resize-none border " + formState.GetFieldClass(name) }
 			data-field={ name }
-		>{ getFieldValue(formState, name) }</textarea>
+		>{ formState.GetFieldValue(name) }</textarea>
 		@FieldFeedback(formState, name)
 	</div>
 }
 
-templ CheckboxField(formState *forms.ProductFormState, name, label string) {
+templ CheckboxField(formState forms.FormState, name, label string) {
 	<div class="form-field">
 		<label class="flex items-center gap-3 cursor-pointer">
 			<input
@@ -178,14 +174,14 @@ func optionsFromCategories(ctgs []db.Category) []SelectOption {
 	return options
 }
 
-templ CategorySelect(formState *forms.ProductFormState, name, label string, ctgs []db.Category) {
+templ CategorySelect(formState forms.FormState, name, label string, ctgs []db.Category) {
 	<div class="form-field">
 		@SelectField(formState, name, label, optionsFromCategories(ctgs), true)
 		@FieldFeedback(formState, name)
 	</div>
 }
 
-templ SelectField(formState *forms.ProductFormState, name, label string, options []SelectOption, required bool) {
+templ SelectField(formState forms.FormState, name, label string, options []SelectOption, required bool) {
 	<div class="form-field">
 		<label class="block text-sm font-medium text-gray-700 mb-2">
 			{ label }
@@ -202,7 +198,7 @@ templ SelectField(formState *forms.ProductFormState, name, label string, options
 			for _, option := range options {
 				<option
 					value={ option.Value }
-					selected?={ getFieldValue(formState, name) == option.Value }
+					selected?={ formState.GetFieldValue( name) == option.Value }
 				>
 					{ option.Label }
 				</option>
@@ -212,7 +208,7 @@ templ SelectField(formState *forms.ProductFormState, name, label string, options
 	</div>
 }
 
-templ FieldFeedback(formState *forms.ProductFormState, fieldName string) {
+templ FieldFeedback(formState forms.FormState, fieldName string) {
 	<!-- Error Message -->
 	if formState.HasFieldError(fieldName) {
 		<div
@@ -226,7 +222,7 @@ templ FieldFeedback(formState *forms.ProductFormState, fieldName string) {
 		</div>
 	}
 	<!-- Warning Message -->
-	{{ fieldState := formState.Fields[fieldName] }}
+	{{ fieldState := formState.GetFieldState(fieldName) }}
 	if fieldState.HasWarning && fieldState.WarningText != "" {
 		<div class="field-warning text-yellow-600 text-sm mt-1 flex items-center gap-2">
 			<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -252,28 +248,10 @@ templ FieldFeedback(formState *forms.ProductFormState, fieldName string) {
 	}
 }
 
-// Helper functions (these would be utility functions)
-func getFieldValue(formState *forms.ProductFormState, fieldName string) string {
-	switch fieldName {
-	case "name":
-		return formState.Values.Name
-	case "description":
-		return formState.Values.Description
-	case "category_id":
-		return formState.Values.CategoryID
-	case "main_img":
-		return formState.Values.MainImg
-	case "long_description":
-		return formState.Values.LongDescription
-	default:
-		return ""
-	}
-}
-
-func getBoolFieldValue(formState *forms.ProductFormState, fieldName string) bool {
+func getBoolFieldValue(formState forms.FormState, fieldName string) bool {
 	switch fieldName {
 	case "available":
-		return formState.Values.Available
+		return formState.GetFieldValue(fieldName) == "on"
 	default:
 		return false
 	}

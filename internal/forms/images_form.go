@@ -6,16 +6,21 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strings"
+
+	"github.com/vladwithcode/salon_catalog/internal"
+	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
 
 const MinImageNameLength = 3
 const MaxImageNameLength = 120
+const MaxImageSize = 10 << 20 // 10MB
 
 var (
 	ErrNameRequired = errors.New("el nombre es requerido")
 	ErrNameTooShort = fmt.Errorf("el nombre debe tener al menos %d caracteres", MinImageNameLength)
 	ErrNameTooLong  = fmt.Errorf("el nombre no puede exceder %d caracteres", MaxImageNameLength)
 	ErrFileRequired = errors.New("el archivo es requerido")
+	ErrFileTooLarge = fmt.Errorf("el archivo no puede exceder %s", internal.FormatFileSize(MaxImageSize))
 )
 
 type ImagesFormState struct {
@@ -45,30 +50,44 @@ func NewImagesFormState() *ImagesFormState {
 	}
 }
 
-func NewImagesFormStateFromReq(r *http.Request) *ImagesFormState {
+// NewImagesFormStateFromReq creates a new ImagesFormState instance from the request
+// and parses the multipart form data
+func NewImagesFormStateFromReq(r *http.Request) (*ImagesFormState, error) {
 	fs := NewImagesFormState()
-	for k, v := range r.Form {
-		if !strings.HasPrefix(k, "img_name_") {
-			continue
-		}
-
-		fs.fields[k] = FieldState{
-			Value:     v[0],
-			FieldType: FieldTypeText,
-		}
-	}
-	for k, v := range r.MultipartForm.File {
-		if !strings.HasPrefix(k, "img_file_") {
-			continue
-		}
-
-		fs.fields[k] = FieldState{
-			File:      v[0],
-			FieldType: FieldTypeFile,
+	if r.MultipartForm == nil {
+		err := r.ParseMultipartForm(uploads.MaxImageUploadSize)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return fs
+	if r.MultipartForm.Value != nil {
+		for k, v := range r.MultipartForm.Value {
+			if !strings.HasPrefix(k, "img_name_") {
+				continue
+			}
+
+			fs.fields[k] = FieldState{
+				Value:     v[0],
+				FieldType: FieldTypeText,
+			}
+		}
+	}
+
+	if r.MultipartForm.File != nil {
+		for k, v := range r.MultipartForm.File {
+			if !strings.HasPrefix(k, "img_file_") {
+				continue
+			}
+
+			fs.fields[k] = FieldState{
+				File:      v[0],
+				FieldType: FieldTypeFile,
+			}
+		}
+	}
+
+	return fs, nil
 }
 
 func (fs *ImagesFormState) GetFieldValue(field string) string {
@@ -304,6 +323,9 @@ func ValidateImageName(name string) error {
 func ValidateImageFile(file *multipart.FileHeader) error {
 	if file == nil {
 		return ErrFileRequired
+	}
+	if file.Size > int64(MaxImageSize) {
+		return ErrFileTooLarge
 	}
 	return nil
 }

@@ -32,7 +32,7 @@ templ Images() {
 								<button
 									id="images-actions-new"
 									hx-get="/imagenes/subir"
-									hx-target=""
+									hx-target="#images-modal"
 									hx-indicator="#global-loading-indicator"
 									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
 								>
@@ -215,6 +215,13 @@ templ imagesScript() {
             })
             .register('beforeRequest', '[data-images-multi-action]', function (e) {
                 console.log(e.detail);
+            })
+            .register('afterSwap', '#images-table', function (e) {
+                const modal = document.getElementById('images-modal');
+                if (modal.dataset.imagesModal === 'open') {
+                    modalTl.reverse();
+                    modal.dataset.imagesModal = 'closed';
+                }
             })
             .register('afterSwap', '#images-modal', function (e) {
                 if (e.detail.elt.dataset.imagesModal === 'closed') {
