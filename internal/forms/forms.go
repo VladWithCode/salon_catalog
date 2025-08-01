@@ -4,7 +4,7 @@ package forms
 
 import (
 	"errors"
-	"os"
+	"mime/multipart"
 )
 
 var (
@@ -19,9 +19,9 @@ const (
 )
 
 type FieldState struct {
-	Value     string    `json:"value"`
-	File      *os.File  `json:"file,omitempty"`
-	FieldType FieldType `json:"field_type"`
+	Value     string                `json:"value"`
+	File      *multipart.FileHeader `json:"file,omitempty"`
+	FieldType FieldType             `json:"field_type"`
 
 	IsTouched       bool   `json:"is_touched"`
 	IsValid         bool   `json:"is_valid"`
@@ -50,8 +50,10 @@ type FormState interface {
 	// Form
 	IsValid() bool
 	IsSuccessful() bool
+	SetSuccessMessage(message string)
 	GetSuccessMessage() string
 	HasErrors() bool
+	SetErrorMessage(message string)
 	GetErrorMessage() string
 	ClearErrors()
 	ResetFieldState(fields ...[]string)

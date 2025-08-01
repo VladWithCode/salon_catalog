@@ -3,7 +3,8 @@ package forms
 import (
 	"errors"
 	"fmt"
-	"os"
+	"mime/multipart"
+	"net/http"
 	"strings"
 )
 
@@ -30,10 +31,9 @@ type ImagesFormState struct {
 	hasWarnings bool
 	hasSuccess  bool
 	isLoading   bool
-	formMode    string
 }
 
-func NewImagesFormState(formMode string) *ImagesFormState {
+func NewImagesFormState() *ImagesFormState {
 	return &ImagesFormState{
 		fields:      make(map[string]FieldState),
 		isSubmitted: false,
@@ -42,8 +42,33 @@ func NewImagesFormState(formMode string) *ImagesFormState {
 		hasWarnings: false,
 		hasSuccess:  false,
 		isLoading:   false,
-		formMode:    formMode,
 	}
+}
+
+func NewImagesFormStateFromReq(r *http.Request) *ImagesFormState {
+	fs := NewImagesFormState()
+	for k, v := range r.Form {
+		if !strings.HasPrefix(k, "img_name_") {
+			continue
+		}
+
+		fs.fields[k] = FieldState{
+			Value:     v[0],
+			FieldType: FieldTypeText,
+		}
+	}
+	for k, v := range r.MultipartForm.File {
+		if !strings.HasPrefix(k, "img_file_") {
+			continue
+		}
+
+		fs.fields[k] = FieldState{
+			File:      v[0],
+			FieldType: FieldTypeFile,
+		}
+	}
+
+	return fs
 }
 
 func (fs *ImagesFormState) GetFieldValue(field string) string {
@@ -165,6 +190,10 @@ func (fs *ImagesFormState) GetSuccessMessage() string {
 	return fs.successMessage
 }
 
+func (fs *ImagesFormState) SetSuccessMessage(message string) {
+	fs.successMessage = message
+}
+
 func (fs *ImagesFormState) HasErrors() bool {
 	for _, state := range fs.fields {
 		if state.HasError {
@@ -176,6 +205,10 @@ func (fs *ImagesFormState) HasErrors() bool {
 
 func (fs *ImagesFormState) GetErrorMessage() string {
 	return fs.generalError
+}
+
+func (fs *ImagesFormState) SetErrorMessage(message string) {
+	fs.generalError = message
 }
 
 func (fs *ImagesFormState) ClearErrors() {
@@ -228,16 +261,16 @@ func (fs *ImagesFormState) Validate() error {
 		switch fld.FieldType {
 		case FieldTypeText:
 			if err := ValidateImageName(fld.Value); err != nil {
-				fs.SetFieldError(fmt.Sprintf("%s", k), err.Error())
+				fs.SetFieldError(k, err.Error())
 				hasErrors = true
 			}
 		case FieldTypeFile:
 			if err := ValidateImageFile(fld.File); err != nil {
-				fs.SetFieldError(fmt.Sprintf("%s", k), err.Error())
+				fs.SetFieldError(k, err.Error())
 				hasErrors = true
 			}
 		default:
-			fs.SetFieldError(fmt.Sprintf("%s", k), "Campo inválido")
+			fs.SetFieldError(k, "Campo inválido")
 			hasErrors = true
 		}
 	}
@@ -260,7 +293,7 @@ func ValidateImageName(name string) error {
 	return nil
 }
 
-func ValidateImageFile(file *os.File) error {
+func ValidateImageFile(file *multipart.FileHeader) error {
 	if file == nil {
 		return ErrFileRequired
 	}
