@@ -44,6 +44,7 @@ type FormState interface {
 	ClearFieldError(field string)
 	HasFieldWarning(field string) bool
 	SetFieldWarning(field, message string)
+	GetFieldWarning(field string) string
 	GetFieldError(field string) string
 	GetFieldClass(field string) string
 

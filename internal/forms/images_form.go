@@ -135,6 +135,14 @@ func (fs *ImagesFormState) HasFieldWarning(field string) bool {
 	return fld.HasWarning
 }
 
+func (fs *ImagesFormState) GetFieldWarning(field string) string {
+	fld, exists := fs.fields[field]
+	if !exists {
+		return ""
+	}
+	return fld.WarningText
+}
+
 func (fs *ImagesFormState) SetFieldWarning(field, message string) {
 	fld, exists := fs.fields[field]
 	if !exists {

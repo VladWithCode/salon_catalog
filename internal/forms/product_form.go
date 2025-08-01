@@ -246,6 +246,17 @@ func (pfs *ProductFormState) HasFieldWarning(field string) bool {
 	return state.HasWarning
 }
 
+// GetFieldWarning returns the warning message for a field
+func (pfs *ProductFormState) GetFieldWarning(field string) string {
+	fieldState := pfs.GetFieldState(field)
+	return fieldState.WarningText
+}
+
+func (pfs *ProductFormState) GetFieldHelpText(field string) string {
+	fieldState := pfs.GetFieldState(field)
+	return fieldState.HelpText
+}
+
 // GetFieldError returns the error message for a field
 func (pfs *ProductFormState) GetFieldError(field string) string {
 	switch field {
@@ -305,6 +316,11 @@ func (pfs *ProductFormState) GetSuccessMessage() string {
 	return pfs.SuccessMessage
 }
 
+// SetSuccessMessage sets the success message
+func (pfs *ProductFormState) SetSuccessMessage(message string) {
+	pfs.SuccessMessage = message
+}
+
 // HasErrors returns true if the form has any errors
 func (pfs *ProductFormState) HasErrors() bool {
 	for _, state := range pfs.Fields {
@@ -318,6 +334,11 @@ func (pfs *ProductFormState) HasErrors() bool {
 // GetErrorMessage returns the general error message
 func (pfs *ProductFormState) GetErrorMessage() string {
 	return pfs.GeneralError
+}
+
+// SetErrorMessage sets the general error message
+func (pfs *ProductFormState) SetErrorMessage(message string) {
+	pfs.GeneralError = message
 }
 
 // ClearErrors clears all errors in the form
