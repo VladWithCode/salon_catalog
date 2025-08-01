@@ -2,14 +2,27 @@
 // various forms.
 package forms
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 var (
 	ErrValidationFailed = errors.New("validation failed")
 )
 
+type FieldType string
+
+const (
+	FieldTypeText FieldType = "text"
+	FieldTypeFile FieldType = "file"
+)
+
 type FieldState struct {
-	Value           string `json:"value"`
+	Value     string    `json:"value"`
+	File      *os.File  `json:"file,omitempty"`
+	FieldType FieldType `json:"field_type"`
+
 	IsTouched       bool   `json:"is_touched"`
 	IsValid         bool   `json:"is_valid"`
 	HasError        bool   `json:"has_error"`
@@ -21,7 +34,7 @@ type FieldState struct {
 	IsRequired      bool   `json:"is_required"`
 }
 
-type FormState[T any] interface {
+type FormState interface {
 	// Fields
 	GetFieldValue(field string) string
 	GetFieldState(field string) FieldState
@@ -43,6 +56,4 @@ type FormState[T any] interface {
 	ClearErrors()
 	ResetFieldState(fields ...[]string)
 	Validate() error
-
-	GetFormState() *T
 }
