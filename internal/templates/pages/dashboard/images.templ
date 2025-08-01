@@ -102,10 +102,10 @@ templ Images() {
 					</div>
 				</div>
 			</div>
-			<main class="flex-1 flex flex-col overflow-hidden space-y-4">
-				<div class="flex-1 rounded-xs bg-white shadow-sm overflow-auto">
+			<main class="flex-1 overflow-hidden">
+				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-images-table-scroll>
 					<div
-						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between p-2 border-b border-gray-200"
+						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between p-2 border border-gray-100 rounded-sm shadow-sm"
 					>
 						<h4 class="flex-1 basis-full text-gray-900">
 							Imágenes
@@ -129,18 +129,18 @@ templ Images() {
 							<option value="size_desc">Tamaño &darr;</option>
 						</select>
 					</div>
-					<div class="flex-1 overflow-y-auto grid grid-cols-1 grid-rows-1">
-						<div class="static col-start-1 row-start-1 pointer-events-none z-10">
+					<div class="flex-1 grid grid-cols-1 grid-rows-1">
+						<div class="static h-full col-start-1 row-start-1 pointer-events-none z-10">
 							<div
 								id="images-table-loading"
-								class="bg-white p-8 text-center inset-0 flex flex-col items-center justify-center loading-table-indicator"
+								class="h-full max-h-[60vh] bg-white p-8 text-center inset-0 flex flex-col items-center justify-center loading-table-indicator"
 							>
-								@components.LoadingIcon("h-8 text-primary mx-auto", nil)
-								<p class="mt-2 text-sm text-gray-500">Cargando imágenes...</p>
+								@components.LoadingIcon("h-12 text-primary mx-auto", nil)
+								<p class="mt-2 text-gray-500">Cargando imágenes...</p>
 							</div>
 						</div>
 						<div
-							class="static col-start-1 row-start-1 z-0 h-full overflow-auto -mt-px"
+							class="static col-start-1 row-start-1 z-0 h-0 opacity-0 -mt-px"
 							data-images-table-container="expanded"
 						>
 							<div
@@ -150,10 +150,14 @@ templ Images() {
 								hx-target-5xx="this"
 								hx-target-4xx="this"
 								hx-trigger="load"
-								hx-indicator="#global-loading-indicator"
+								hx-indicator="#images-table-loading"
 							></div>
 						</div>
 					</div>
+					<div
+						class="fixed inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
+						id="images-table-pagination"
+					></div>
 				</div>
 			</main>
 		</div>
@@ -174,8 +178,12 @@ templ Images() {
 }
 
 templ imagesScript() {
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 	<script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Register gsap plugins
+        gsap.registerPlugin(window.ScrollTrigger);
+
         const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
         toggleActionsTl.fromTo('#images-actions-container', {opacity: 0, height: '0px'}, {opacity: 1, height: 'auto'});
 
@@ -192,31 +200,42 @@ templ imagesScript() {
 
         eventManager
             .register('beforeRequest', '#images-table', function (e) {
-                const tableContainer = e.detail.target.closest('[data-images-table-container]');
-                if (!tableContainer) {
-                    return;
-                }
-                gsap.to(tableContainer, {
-                    height: '0%',
-                    duration: 0.3,
-                    ease: 'power2.out',
-                });
+                gsap.set('[data-images-table-container]', { pointerEvents: 'none' });
+                gsap.to(
+                    '[data-images-table-container]', 
+                    { height: '0rem', opacity: 0, },
+                )
+                gsap.to(
+                    '[data-images-table-img]', 
+                    { y: '0rem', opacity: 1, stagger: 0.05, },
+                    { y: '10rem', opacity: 0, stagger: 0.05, },
+                );
             })
-            .register('beforeSwap', '#images-table', function (e) {
-                const tableContainer = e.detail.target.closest('[data-images-table-container]');
-                if (!tableContainer) {
-                    return;
-                }
-                gsap.to(tableContainer, {
-                    height: 'auto',
-                    duration: 0.3,
-                    ease: 'power2.out',
-                });
-            })
+            // .register('beforeSwap', '#images-table', function (e) {
+            // })
             .register('beforeRequest', '[data-images-multi-action]', function (e) {
                 console.log(e.detail);
             })
             .register('afterSwap', '#images-table', function (e) {
+                gsap.to(
+                    '[data-images-table-container]', 
+                    { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' },
+                )
+                gsap.fromTo(
+                    '[data-images-table-img]', 
+                    { y: '1rem', opacity: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' },
+                    { y: '0rem', opacity: 1 },
+                    "<",
+                );
+                gsap.set('[data-images-table-container]', { pointerEvents: 'auto' });
+
+                // Scroll to top of table
+                const tableScroll = e.detail.target.closest('[data-images-table-scroll]');
+                if (tableScroll) {
+                    tableScroll.scrollTo(0, 0);
+                }
+
+                // Close modal if open
                 const modal = document.getElementById('images-modal');
                 if (modal.dataset.imagesModal === 'open') {
                     modalTl.reverse();
