@@ -23,25 +23,30 @@ var (
 	UploadsPath = "web/static/uploads"
 )
 
-func writeFile(file *multipart.FileHeader, writePath string) error {
+type WrittenFile struct {
+	Filename string
+	Size     int64
+}
+
+func writeFile(file *multipart.FileHeader, writePath string) (int64, error) {
 	p, err := file.Open()
 	if err != nil {
-		return errors.Join(ErrFileHeaderOpenFail, err)
+		return 0, errors.Join(ErrFileHeaderOpenFail, err)
 	}
 	defer p.Close()
 
 	outFile, err := os.Create(writePath)
 	if err != nil {
-		return errors.Join(ErrFileCreateFail, err)
+		return 0, errors.Join(ErrFileCreateFail, err)
 	}
 	defer outFile.Close()
 
-	_, err = io.Copy(outFile, p)
+	written, err := io.Copy(outFile, p)
 	if err != nil {
-		return errors.Join(ErrFileCopyFail, err)
+		return 0, errors.Join(ErrFileCopyFail, err)
 	}
 
-	return nil
+	return written, nil
 }
 
 func Upload(file *multipart.FileHeader) (filename string, err error) {
@@ -50,7 +55,7 @@ func Upload(file *multipart.FileHeader) (filename string, err error) {
 
 	filename = fmt.Sprintf("upload_%s_%d%s", date, 0, filepath.Ext(file.Filename))
 	writePath := filepath.Join(uploadsPath, filename)
-	err = writeFile(file, writePath)
+	_, err = writeFile(file, writePath)
 	if err != nil {
 		return "", err
 	}
@@ -58,29 +63,32 @@ func Upload(file *multipart.FileHeader) (filename string, err error) {
 	return filename, nil
 }
 
-func UploadMultiple(files []*multipart.FileHeader) (fileNames []string, err error) {
+func UploadMultiple(files []*multipart.FileHeader) (writtenFiles []*WrittenFile, err error) {
 	date := time.Now().Format("2006-01-02T15:04:05")
 	uploadsPath := UploadsPath
-	fileNames = make([]string, len(files))
+	writtenFiles = make([]*WrittenFile, len(files))
 
 	for i, fHeader := range files {
 		filename := fmt.Sprintf("upload_%s_%d%s", date, i, filepath.Ext(fHeader.Filename))
 		writePath := filepath.Join(uploadsPath, filename)
 
-		err = writeFile(fHeader, writePath)
+		sz, err := writeFile(fHeader, writePath)
 		if err != nil {
 			return nil, err
 		}
 
-		fileNames[i] = filename
+		writtenFiles[i] = &WrittenFile{
+			Filename: filename,
+			Size:     sz,
+		}
 	}
 
-	return fileNames, nil
+	return writtenFiles, nil
 }
 
 func Update(filename string, newFile *multipart.FileHeader) error {
 	writePath := filepath.Join(UploadsPath, filename)
-	err := writeFile(newFile, writePath)
+	_, err := writeFile(newFile, writePath)
 	if err != nil {
 		return err
 	}

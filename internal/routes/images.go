@@ -180,12 +180,7 @@ func UploadImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		return
 	}
 
-	var sizes []int64
-	for _, file := range imgs {
-		sizes = append(sizes, file.Size)
-	}
-
-	fileNames, err := uploads.UploadMultiple(imgs)
+	writtenFiles, err := uploads.UploadMultiple(imgs)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to upload images"))
@@ -196,7 +191,7 @@ func UploadImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	var uploadedImages []*db.Image
 	imageNames := r.Form["img_names"]
 
-	for i, fileName := range fileNames {
+	for i, fileName := range writtenFiles {
 		id, err := uuid.NewV7()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -208,8 +203,8 @@ func UploadImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		img := &db.Image{
 			ID:         id.String(),
 			Name:       imageNames[i],
-			Filename:   fileName,
-			Size:       int(sizes[i]),
+			Filename:   fileName.Filename,
+			Size:       int(fileName.Size),
 			CreatedAt:  time.Now(),
 			NoOptimize: false,
 		}
