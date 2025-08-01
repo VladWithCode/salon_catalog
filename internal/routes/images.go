@@ -26,9 +26,10 @@ func RegisterImagesRoutes(router *customServeMux) {
 	// This routes respond with templ components (i.e. HTML or text/HTML mime type responses)
 	router.HandleFunc("GET /imagenes/subir", auth.ValidateAuth(RenderNewImageForm))
 	router.HandleFunc("POST /imagenes/subir", auth.ValidateAuth(UploadImagesForm))
-	router.HandleFunc("GET /imagenes/{id}", auth.PopulateAuth(RenderImage))
+	router.HandleFunc("GET /imagenes/{id}", auth.ValidateAuth(RenderImage))
 	router.HandleFunc("GET /imagenes/table", auth.ValidateAuth(RenderImagesTable))
-	router.HandleFunc("DELETE /imagenes/{id}", auth.PopulateAuth(DeleteImageAndReturnTable))
+	router.HandleFunc("DELETE /imagenes", auth.ValidateAuth(DeleteImagesAndReturnTable))
+	router.HandleFunc("DELETE /imagenes/{id}", auth.ValidateAuth(DeleteImageAndReturnTable))
 
 	router.HandleFunc("POST /api/images", auth.ValidateAuth(UploadImages))
 	// This routes respond with JSON
@@ -323,6 +324,77 @@ func DeleteImageAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.A
 	}
 }
 
+func DeleteImagesAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	td := components.NewToastData("Se eliminaron las imágenes", components.ToastSuccess, 3000, true, false)
+
+	var err error
+	imgIds := r.URL.Query()["ids"]
+	fileNames := []string{}
+	if len(imgIds) > 0 {
+		fileNames, err = db.DeleteImages(imgIds)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			td.Message = "Algo salió mal"
+			td.Type = components.ToastError
+			comp := templ.Join(
+				dashboard.ImagesTable(&db.ImageFilterResult{HasError: true, Error: "Algo salió mal"}),
+				components.ToasterToast(td),
+			)
+			comp.Render(r.Context(), w)
+
+			log.Printf("failed to delete images: %v\n", err)
+			return
+		}
+	}
+
+	filters := parseImageFilters(r)
+	result, err := db.FilterImages(filters)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		td.Message = "Algo salió mal"
+		td.Type = components.ToastError
+		result := &db.ImageFilterResult{HasError: true, Error: "Algo salió mal"}
+		comp := templ.Join(
+			dashboard.ImagesTable(result),
+			components.ToasterToast(td),
+		)
+		comp.Render(r.Context(), w)
+
+		log.Printf("failed to delete images: %v\n", err)
+		return
+	}
+
+	err = uploads.DeleteMultiple(fileNames)
+	if err != nil {
+		td.Message = "Las imágenes no se eliminaron del disco"
+		td.Type = components.ToastWarning
+	}
+
+	comp := templ.Join(
+		dashboard.ImagesTable(result),
+		components.ToasterToast(td),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		toastData := components.NewToastData("Algo salió mal", components.ToastError, 3000, true, false)
+		toastData.Message = "Algo salió mal"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImagesTable(&db.ImageFilterResult{HasError: true, Error: "Algo salió mal"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+
+		log.Printf("failed to delete images: %v\n", err)
+		return
+	}
+}
+
 func GetImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	// rawSort := r.URL.Query().Get("images_sort")
 	// sortOrder, sortBy := parseImagesSort(rawSort)
@@ -464,15 +536,7 @@ func DeleteImage(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 func DeleteImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	ids := r.URL.Query()["ids"]
 
-	imgs, err := db.FindAllImages(ids)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to find images"))
-		log.Printf("failed to find images: %v\n", err)
-		return
-	}
-
-	err = db.DeleteImages(ids)
+	fileNames, err := db.DeleteImages(ids)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to delete image"))
@@ -480,11 +544,7 @@ func DeleteImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		return
 	}
 
-	var filenames = make([]string, len(imgs))
-	for i, img := range imgs {
-		filenames[i] = img.Filename
-	}
-	err = uploads.DeleteMultiple(filenames)
+	err = uploads.DeleteMultiple(fileNames)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to delete images"))

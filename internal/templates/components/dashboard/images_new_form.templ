@@ -16,6 +16,7 @@ templ ImagesNewForm(formState forms.FormState) {
 			<button
 				class=""
 				id="new-image-form-close"
+                data-images-modal-toggle
 				data-click-handler-selector="[data-images-modal-toggle]"
 			>
 				@components.TimesIcon("w-7", nil)
@@ -23,6 +24,7 @@ templ ImagesNewForm(formState forms.FormState) {
 		</div>
 		@templ.Fragment("imagesNewForm") {
 			<form
+                id="new-image-form"
 				hx-post="/imagenes/subir"
 				hx-encoding="multipart/form-data"
 				hx-target="#images-table"

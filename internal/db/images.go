@@ -280,25 +280,35 @@ func UpdateImage(image *Image) error {
 	return nil
 }
 
-func DeleteImages(ids []string) error {
+func DeleteImages(ids []string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	conn, err := GetConn()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer conn.Release()
 
-	_, err = conn.Exec(
+	var deletedFilenames []string
+	rows, err := conn.Query(
 		ctx,
-		`DELETE FROM images WHERE id IN @ids::uuid[]`,
+		`DELETE FROM images WHERE id = ANY(@ids::uuid[]) RETURNING filename`,
 		pgx.NamedArgs{"ids": ids},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	for rows.Next() {
+		var filename string
+		err = rows.Scan(&filename)
+		if err != nil {
+			return nil, err
+		}
+		deletedFilenames = append(deletedFilenames, filename)
+	}
+
+	return deletedFilenames, nil
 }
 
 func DeleteImage(id string) (string, error) {

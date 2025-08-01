@@ -43,8 +43,9 @@ templ Images() {
 							<li class="w-full">
 								<button
 									id="images-multi-selection-delete"
-									hx-delete="/imagenes/del"
-									hx-target=""
+                                    data-images-multi-action="delete"
+									hx-delete="/imagenes"
+									hx-target="#images-table"
 									hx-confirm="¿Eliminar las imágenes seleccionadas?"
 									hx-indicator="#images-table-loading"
 									hx-include='[name="image-table-selection"]'
@@ -105,8 +106,47 @@ templ Images() {
 			<main class="flex-1 overflow-hidden">
 				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-images-table-scroll>
 					<div
-						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between p-2 border border-gray-100 rounded-sm shadow-sm"
+						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
 					>
+						// Button modes: all, none, some
+						<style>
+                            [data-multi-selection-mode="all"] [data-multi-selection-mode-display="all"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="none"] [data-multi-selection-mode-display="none"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="some"] [data-multi-selection-mode-display="some"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode-display] {
+                                transition: opacity 0.1s linear;
+                            }
+                        </style>
+						<button
+							id="images-table-multi-selection-ctl"
+							type="button"
+							class="shrink-0 grow-0 basis-5 aspect-square grid grid-cols-1 grid-rows-1"
+							data-click-handler-selector="#images-table-multi-selection-ctl"
+							data-multi-selection-mode="all"
+						>
+							<div
+								class="col-start-1 row-start-1 w-full h-full border border-gray-300 rounded-xs"
+								data-multi-selection-mode-display="all"
+							></div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="none"
+							>
+								@components.CheckIcon("w-full text-gray-50", nil)
+							</div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="some"
+							>
+								<div class="w-3/4 h-0.5 bg-stone-50 rounded-xs"></div>
+							</div>
+						</button>
 						<h4 class="flex-1 basis-full text-gray-900">
 							Imágenes
 							<span id="images-table-count" hx-swap-oob>(0/0)</span>
@@ -211,10 +251,13 @@ templ imagesScript() {
                     { y: '10rem', opacity: 0, stagger: 0.05, },
                 );
             })
-            // .register('beforeSwap', '#images-table', function (e) {
-            // })
-            .register('beforeRequest', '[data-images-multi-action]', function (e) {
-                console.log(e.detail);
+            .register('configRequest', '[data-images-multi-action]', function (e) {
+                const ids = e.detail.parameters.getAll('image-table-selection');
+                for (const id of ids) {
+                    e.detail.parameters.append('ids', id);
+                }
+
+                e.detail.parameters.delete('image-table-selection');
             })
             .register('afterSwap', '#images-table', function (e) {
                 gsap.to(
@@ -240,6 +283,13 @@ templ imagesScript() {
                 if (modal.dataset.imagesModal === 'open') {
                     modalTl.reverse();
                     modal.dataset.imagesModal = 'closed';
+                }
+
+                updateImagesTableSelection();
+
+                const uploadForm = document.getElementById('new-image-form');
+                if (uploadForm) {
+                    uploadForm.reset();
                 }
             })
             .register('afterSwap', '#images-modal', function (e) {
@@ -276,20 +326,60 @@ templ imagesScript() {
             })
             .registerClick('[data-images-filter-clear]', function (e) {
                 clearImagesTableFilters();
+            })
+            .registerClick('#images-table-multi-selection-ctl', function (e) {
+                const target = e.target.matches('[data-multi-selection-mode]')
+                    ? e.target
+                    : e.target.closest('[data-multi-selection-mode]');
+                    
+                const mode = target.dataset.multiSelectionMode;
+                switch (mode) {
+                    case 'none':
+                        document.querySelectorAll('[name="image-table-selection"]').forEach(function (img) {
+                            img.checked = false;
+                        });
+                        updateImagesTableSelection();
+                        break;
+                    case 'some':
+                        document.querySelectorAll('[name="image-table-selection"]:checked').forEach(function (img) {
+                            img.checked = false;
+                        });
+                        updateImagesTableSelection();
+                        break;
+                    case 'all':
+                    default:
+                        document.querySelectorAll('[name="image-table-selection"]').forEach(function (img) {
+                            img.checked = true;
+                        });
+                        updateImagesTableSelection();
+                        break;
+                }
             });
 
         document.addEventListener('input', function (e) {
             if (!e.target.matches('[name="image-table-selection"]')) {
                 return;
             }
+            updateImagesTableSelection();
+        });
+
+        function updateImagesTableSelection() {
+            const totalImgs = document.querySelectorAll('[name="image-table-selection"]').length;
             const selectedImgs = document.querySelectorAll('[name="image-table-selection"]:checked');
             if (selectedImgs.length === 0) {
                 document.getElementById('images-multi-selection-delete').disabled = true;
+                document.getElementById('images-table-multi-selection-ctl').dataset.multiSelectionMode = 'all';
                 return;
             }
 
+            if (selectedImgs.length === totalImgs) {
+                document.getElementById('images-table-multi-selection-ctl').dataset.multiSelectionMode = 'none';
+            } else {
+                document.getElementById('images-table-multi-selection-ctl').dataset.multiSelectionMode = 'some';
+            }
+
             document.getElementById('images-multi-selection-delete').disabled = false;
-        });
+        }
 
         function clearImagesTableFilters() {
             document.getElementById('name').value = '';
