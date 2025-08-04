@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE categories (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(512) NOT NULL,
     slug VARCHAR(512) UNIQUE NOT NULL,
     description VARCHAR(512) NOT NULL,

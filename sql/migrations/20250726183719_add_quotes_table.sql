@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE quotes (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_name VARCHAR(256) NOT NULL,
     customer_phone VARCHAR(256) NOT NULL,
     time_start TIMESTAMP,

@@ -52,6 +52,10 @@
         grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
     }
 
+    .bg-gradient-1 {
+        background: transparent;
+        background-image: radial-gradient(circle at 50% 50%, --alpha(var(--color-dark) / 100%) 70%, --alpha(var(--color-dark) / 0%) 100%);
+    }
     .bg-brand-1 {
         background: 
             radial-gradient(circle at 50% 50%, --alpha(var(--color-stone-950) / 60%), --alpha(var(--color-stone-950) / 80%)),
@@ -133,5 +137,5 @@ html {
     scroll-padding-top: 2.5rem;
 }
 body {
-    @apply bg-stone-100 text-gray-700;
+    @apply bg-stone-100 text-gray-700 font-sans;
 }

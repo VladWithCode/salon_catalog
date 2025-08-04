@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE images (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     filename VARCHAR(512) UNIQUE NOT NULL,
     name VARCHAR(512) NOT NULL,
     no_optimize BOOLEAN NOT NULL DEFAULT FALSE,

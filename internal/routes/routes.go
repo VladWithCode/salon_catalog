@@ -11,6 +11,7 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
@@ -44,7 +45,23 @@ func NewRouter() http.Handler {
 }
 
 func RenderIndex(w http.ResponseWriter, r *http.Request) {
-	err := pages.Index().Render(context.Background(), w)
+	rawListings, err := db.FindCatalogListings()
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Index err: %v\n", err)
+		return
+	}
+
+	listings := make(components.CatalogListings)
+	for ctg, list := range rawListings {
+		listings[ctg] = make([]db.CatalogProd, len(list))
+		for i, prod := range list {
+			listings[ctg][i] = *prod
+		}
+	}
+
+	err = pages.Index(listings).Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))

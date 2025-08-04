@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -194,4 +195,72 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 	}
 
 	return products, nil
+}
+
+func FindCatalogListings() (map[string][]*CatalogProd, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	rows, err := conn.Query(
+		ctx,
+		`SELECT 
+			prod.id, prod.name, prod.description,
+			ctg.name as category, pic.filename as main_img
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER (PARTITION BY p.category) as row_num,
+				p.id, p.name, p.description, p.category as category_id,
+				p.main_img
+			FROM products p
+			ORDER BY p.category, p.name
+		) as prod
+		LEFT JOIN categories ctg ON prod.category_id = ctg.id
+		LEFT JOIN images pic ON prod.main_img = pic.id
+		WHERE prod.row_num <= 4
+		ORDER BY category, prod.name
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	listings := make(map[string][]*CatalogProd)
+	for rows.Next() {
+		var product CatalogProd
+		var imgUrl sql.NullString
+
+		err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Description,
+			&product.Category,
+			&imgUrl,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if imgUrl.Valid {
+			product.ImageURL = imgUrl.String
+		}
+		if _, ok := listings[product.Category]; !ok {
+			listings[product.Category] = []*CatalogProd{}
+			listings[product.Category] = append(listings[product.Category], &product)
+		} else {
+			listings[product.Category] = append(listings[product.Category], &product)
+		}
+	}
+
+	// Check for iteration errors
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return listings, nil
 }

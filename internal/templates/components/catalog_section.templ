@@ -1,0 +1,90 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal/db"
+import "fmt"
+
+type CatalogListings map[string][]db.CatalogProd
+
+templ CatalogSection(listings map[string][]db.CatalogProd) {
+	<section id="seccion-catalogo" class="relative z-0 overflow-hidden">
+		<div class="absolute inset-0 z-0">
+			<img
+				src="/static/assets/chenacolo_24.jpeg"
+				alt="Imagen del area de bar del salon de eventos"
+				class="w-full h-full object-cover object-center"
+			/>
+		</div>
+		<div class="bg-gradient-to-tl from-primary/80 to-accent/80 text-light relative w-full z-10 px-4 py-12">
+			<h2 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">
+				Conoce nuestro extenso catálogo
+			</h2>
+			<p class="text-center text-current/80 mb-8 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">
+				Tenemos una gran repertorio de mesas, copas y otros utensilios para brindarte la experiencia perfecta.
+			</p>
+			<div class="space-y-6">
+				if len(listings) > 0 {
+					for category, listing := range listings {
+						@CatalogListing(category, listing)
+					}
+				} else {
+					<a
+						href="/catalogo"
+						class="block relative grow-0 shrink-0 basis-60 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-sm"
+						data-intsc-animate-item="catalog-section"
+					>
+						<img
+							src="/static/assets/chenacolo_24.jpeg"
+							alt="Imagen del area de bar del salon de eventos"
+							class="absolute inset-0 w-full object-cover object-center z-0"
+						/>
+						<div
+							class="relative flex flex-col items-center justify-center bg-stone-200/90 text-dark w-full h-full p-4 z-10"
+						>
+							<h3 class="text-3xl font-bold uppercase mb-2">Ver Catálogo</h3>
+						</div>
+					</a>
+				}
+			</div>
+		</div>
+	</section>
+}
+
+templ CatalogListing(listingTitle string, listing []db.CatalogProd) {
+	<div class="space-y-2">
+		<h3 class="text-xl font-bold text-light/90">{ listingTitle }</h3>
+		<div class="flex gap-4 text-center overflow-x-auto overflow-y-hidden">
+			for _, item := range listing {
+				@CatalogListingItem(item)
+			}
+		</div>
+	</div>
+}
+
+templ CatalogListingItem(item db.CatalogProd) {
+	<a
+		href={ fmt.Sprintf("/catalogo/producto/%s", item.ID) }
+		class="block relative grow-0 shrink-0 basis-60 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-sm"
+		data-intsc-animate-item="catalog-section"
+	>
+		<img
+			src={ getMainImg(item) }
+			alt={ fmt.Sprintf("Imagen principal del producto %s.", item.Name) }
+			class="absolute inset-0 w-full object-cover object-center z-0 pointer-events-none select-none"
+		/>
+		<div
+			class="absolute bottom-0 inset-x-0 h-2/5 flex flex-col gap-2 bg-stone-200/90 text-dark text-start p-4 z-10"
+		>
+			<h3 class="text-xl font-bold uppercase text-ellipsis line-clamp-2 flex-1">{ item.Name }</h3>
+			<p class="text-[4px] group-hover:text-base group-active:text-base group-hover:opacity-100 group-active:opacity-100 transition-[font-size,opacity] opacity-0 underline duration-120">
+				Ver detalles
+			</p>
+		</div>
+	</a>
+}
+
+func getMainImg(item db.CatalogProd) string {
+	if item.ImageURL != "" {
+		return fmt.Sprintf("/static/uploads/%s", item.ImageURL)
+	}
+	return "/static/assets/chenacolo_24.jpeg"
+}

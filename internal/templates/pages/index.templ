@@ -1,8 +1,9 @@
 package pages
 
 import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
 
-templ Index() {
+templ Index(catalogListings components.CatalogListings) {
 	@templates.BaseLayout("", nil, true) {
 		@Script()
 		<section id="seccion-hero" class="relative z-0 mb-8">
@@ -104,61 +105,7 @@ templ Index() {
 				</div>
 			</div>
 		</section>
-		<section id="seccion-catalogo" class="relative z-0 overflow-hidden">
-			<div class="absolute inset-0 z-0">
-				<img
-					src="/static/assets/chenacolo_24.jpeg"
-					alt="Imagen del area de bar del salon de eventos"
-					class="w-full h-full object-cover object-center"
-				/>
-			</div>
-			<div class="bg-gradient-to-tl from-primary/80 to-accent/80 text-light relative w-full z-10 px-4 py-12">
-				<h2 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">Conoce nuestro extenso catalogo</h2>
-				<p class="text-center font-medium mb-8 translate-y-6 opacity-0" data-intsc-animate-item="catalog-section">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus.
-				</p>
-				<div class="space-y-4 text-center">
-					<a
-						href="#"
-						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
-						data-intsc-animate-item="catalog-section"
-					>
-						<img
-							src="/static/assets/chenacolo_24.jpeg"
-							alt="Imagen del area de bar del salon de eventos"
-							class="absolute inset-0 w-full object-cover object-center z-0"
-						/>
-						<div
-							class="relative flex flex-col items-center justify-center bg-stone-200/90 text-dark w-full h-full p-4 z-10"
-						>
-							<h3 class="text-3xl font-bold uppercase mb-2">Mesas y Utensilios</h3>
-							<p class="text-[0px] group-hover:text-base group-active:text-base transition-[font-size] underline duration-120">
-								Ver más
-							</p>
-						</div>
-					</a>
-					<a
-						href="#"
-						class="block relative w-4/5 aspect-square mx-auto overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0"
-						data-intsc-animate-item="catalog-section"
-					>
-						<img
-							src="/static/assets/chenacolo_26.jpeg"
-							alt="Imagen del area de bar del salon de eventos"
-							class="absolute inset-0 w-full object-cover object-center z-0"
-						/>
-						<div
-							class="relative flex flex-col items-center justify-center bg-stone-200/90 text-dark w-full h-full p-4 z-10"
-						>
-							<h3 class="text-3xl font-bold uppercase mb-2">Manteleria</h3>
-							<p class="text-[0px] group-hover:text-base group-active:text-base transition-[font-size] underline duration-120">
-								Ver más
-							</p>
-						</div>
-					</a>
-				</div>
-			</div>
-		</section>
+		@components.CatalogSection(catalogListings)
 		<section id="seccion-galeria" class="py-12 px-4 relative">
 			<h2 class="text-3xl text-center font-bold mb-4 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Galería</h2>
 			<p class="text-center mb-8 translate-y-6 opacity-0" data-intsc-animate-item="gallery-section">Aquí encontrarás fotos y videos de eventos que hemos organizado.</p>
