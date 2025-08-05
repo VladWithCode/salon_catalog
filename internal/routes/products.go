@@ -27,6 +27,8 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("PUT /api/products/{id}/images", auth.ValidateAuth(UpdateProductImages))
 	router.HandleFunc("DELETE /api/products/{id}", auth.ValidateAuth(DeleteProduct))
 	router.HandleFunc("DELETE /api/products/{id}/images", auth.ValidateAuth(DeleteProductImages))
+
+	router.HandleFunc("POST /api/special/products", sCreateProducts)
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -299,6 +301,27 @@ func DeleteProductImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func sCreateProducts(w http.ResponseWriter, r *http.Request) {
+	products := make([]*db.Product, 0)
+	err := json.NewDecoder(r.Body).Decode(&products)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Failed to parse request body"))
+		log.Printf("failed to parse request body: %v\n", err)
+		return
+	}
+
+	err = db.SCreateProducts(products)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to create products: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Products created successfully"))
 }
 
 func parseProductFilterParams(r *http.Request) (*db.ProductFilterParams, error) {
