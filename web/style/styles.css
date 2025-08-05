@@ -29,6 +29,14 @@
     font-display: swap; /* <-- Important for performance */
 }
 
+@base {
+    input[type="datetime-local"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+}
+
 @theme {
     --font-serif: "Agatho", serif;
     --font-sans: "Inter", sans-serif;

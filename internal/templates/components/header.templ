@@ -22,15 +22,11 @@ templ Header(isMainPage bool) {
 				// <img src="/static/assets/logo_name.png" alt="Logotipo del Villa Chenacolo" class="h-8 invert w-auto" />
 			</a>
 		</div>
-		<div class="hidden items-center space-x-4 md:flex">
-			<a href="/" class="text-2xl font-bold">Home</a>
-			<a href="/" class="text-2xl font-bold">About</a>
-			<a href="/" class="text-2xl font-bold">Contact</a>
-		</div>
+		@DesktopNavigation(isMainPage)
 		<!-- Mobile menu -->
 		<button
 			id="mobile-menu-button"
-			class="md:hidden focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-2"
+			class="lg:hidden focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-2"
 			aria-label="Toggle menu"
 		>
 			<span class="w-6 h-6 flex flex-col justify-center items-center space-y-1.5">
@@ -43,13 +39,13 @@ templ Header(isMainPage bool) {
 	<!-- Mobile Menu Overlay -->
 	<div
 		id="mobile-menu-overlay"
-		class="fixed inset-0 bg-black bg-black/50 z-40 md:hidden"
+		class="fixed inset-0 bg-black bg-black/50 z-40 lg:hidden"
 		style="opacity: 0; visibility: hidden;"
 	></div>
 	<!-- Mobile Menu -->
 	<nav
 		id="mobile-menu"
-		class="fixed top-0 right-0 h-full w-80 max-w-sm bg-white shadow-2xl z-50 md:hidden"
+		class="fixed top-0 right-0 h-full w-80 max-w-sm bg-white shadow-2xl z-50 lg:hidden"
 		style="transform: translateX(100%);"
 	>
 		<div class="flex flex-col h-full">
@@ -563,6 +559,54 @@ templ Script() {
                     scale: 1,
                     rotation: 0,
                     duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // Desktop navigation smooth scrolling
+        const desktopNavLinks = document.querySelectorAll('.desktop-nav-link');
+        desktopNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                
+                // Only handle section links (starting with #)
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    
+                    const targetSection = document.querySelector(href);
+                    if (targetSection) {
+                        // Smooth scroll to section
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Add subtle click animation
+                        gsap.to(link, {
+                            scale: 0.95,
+                            duration: 0.1,
+                            ease: 'power2.out',
+                            yoyo: true,
+                            repeat: 1
+                        });
+                    }
+                }
+            });
+
+            // Add hover animation for desktop nav links
+            link.addEventListener('mouseenter', () => {
+                gsap.to(link, {
+                    scale: 1.05,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+
+            link.addEventListener('mouseleave', () => {
+                gsap.to(link, {
+                    scale: 1,
+                    duration: 0.2,
                     ease: 'power2.out'
                 });
             });

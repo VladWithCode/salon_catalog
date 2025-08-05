@@ -1,0 +1,83 @@
+package components
+
+templ DesktopNavigation(isMainPage bool) {
+	<nav class="hidden lg:flex items-center space-x-6 xl:space-x-8">
+		<a
+			if isMainPage {
+				href="#seccion-hero"
+			} else {
+				href="/"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="hero"
+		>
+			Inicio
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-oferta"
+			} else {
+				href="/servicios"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="oferta"
+		>
+			Servicios
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-catalogo"
+			} else {
+				href="/catalogo"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="catalogo"
+		>
+			Catálogo
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-oferta"
+			} else {
+				href="/salon"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="oferta"
+		>
+			Salón
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-galeria"
+			} else {
+				href="/galeria"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="galeria"
+		>
+			Galería
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-contacto"
+			} else {
+				href="/reservaciones"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="contacto"
+		>
+			Agendar
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-contacto"
+			} else {
+				href="/contacto"
+			}
+			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="contacto"
+		>
+			Contacto
+		</a>
+	</nav>
+}
