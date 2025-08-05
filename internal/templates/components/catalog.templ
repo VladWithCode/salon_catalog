@@ -92,9 +92,9 @@ templ ProductCard(product db.CatalogProd) {
 	>
 		<!-- Product Image -->
 		<div class="aspect-square overflow-hidden bg-gray-100 relative">
-			/*src={"/static/uploads", product.ImageURL} */
+			// src="/static/assets/chenacolo_24.jpeg"
 			<img
-				src="/static/assets/chenacolo_24.jpeg"
+				src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
 				alt={ product.Name }
 				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 				loading="lazy"
