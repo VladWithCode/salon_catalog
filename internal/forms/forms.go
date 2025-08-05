@@ -9,13 +9,17 @@ import (
 
 var (
 	ErrValidationFailed = errors.New("validation failed")
+	ErrInvalidFieldType = errors.New("cannot convert field value to type")
 )
 
 type FieldType string
 
 const (
-	FieldTypeText FieldType = "text"
-	FieldTypeFile FieldType = "file"
+	FieldTypeText    FieldType = "text"
+	FieldTypeNumber  FieldType = "number"
+	FieldTypeBoolean FieldType = "boolean"
+	FieldTypeDate    FieldType = "date"
+	FieldTypeFile    FieldType = "file"
 )
 
 type FieldState struct {

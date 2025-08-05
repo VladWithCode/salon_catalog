@@ -3,9 +3,13 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type Category struct {
@@ -16,6 +20,27 @@ type Category struct {
 	LongDescription string `db:"long_description" json:"longDescription"`
 	HeaderImg       string `db:"header_img" json:"headerImg"`
 	DisplayImg      string `db:"display_img" json:"displayImg"`
+	ProductCount    int    `db:"product_count" json:"productCount"`
+}
+
+type CategoryFilterParams struct {
+	Search     string     `json:"search"`
+	SearchMode SearchMode `json:"search_mode"`
+	Sort       string     `json:"sort"`
+	Page       int        `json:"page"`
+	Limit      int        `json:"limit"`
+}
+
+type CategoryFilterResult struct {
+	Categories  []*Category `json:"categories"`
+	Total       int         `json:"total"`
+	Page        int         `json:"page"`
+	Limit       int         `json:"limit"`
+	TotalPages  int         `json:"total_pages"`
+	HasNext     bool        `json:"has_next"`
+	HasPrevious bool        `json:"has_previous"`
+	HasError    bool        `json:"has_error"`
+	Error       string      `json:"error"`
 }
 
 func CreateCategory(category *Category) error {
@@ -267,4 +292,230 @@ func DeleteCategory(id string) error {
 	}
 
 	return nil
+}
+
+func FilterCategories(filters CategoryFilterParams) (*CategoryFilterResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	// Set defaults
+	if filters.Page < 1 {
+		filters.Page = 1
+	}
+	if filters.Limit < 1 || filters.Limit > 100 {
+		filters.Limit = 20
+	}
+	if filters.SearchMode == "" {
+		filters.SearchMode = SearchModeFullText
+	}
+
+	// Build query conditions and named arguments
+	conditions, namedArgs := buildCategoryQueryConditions(filters)
+
+	// Base query with explicit column selection
+	baseQuery := `
+		FROM categories ctg
+		LEFT JOIN products p ON ctg.id = p.category
+		LEFT JOIN images header ON header.id = ctg.header_img
+		LEFT JOIN images display ON display.id = ctg.display_img
+		`
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Get total count
+	countQuery := "SELECT COUNT(DISTINCT ctg.id) " + baseQuery
+	var total int
+	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	// Calculate pagination
+	offset := (filters.Page - 1) * filters.Limit
+	totalPages := int(math.Ceil(float64(total) / float64(filters.Limit)))
+
+	// Add pagination to named args
+	namedArgs["limit"] = filters.Limit
+	namedArgs["offset"] = offset
+
+	// Build final query with sorting and pagination
+	orderBy := buildCategoryOrderByClause(filters)
+	selectQuery := fmt.Sprintf(`
+		SELECT 
+			ctg.id, ctg.name, ctg.slug, ctg.description, ctg.long_description,
+			header.filename as header_img,
+			display.filename as display_img,
+			COUNT(p.id) as product_count,
+			%s
+		%s GROUP BY ctg.id, ctg.name, ctg.slug, ctg.description, ctg.long_description,
+		header.filename, display.filename %s
+		LIMIT @limit OFFSET @offset`,
+		buildCategorySearchRankSelect(filters), baseQuery, orderBy)
+
+	// Execute query
+	rows, err := conn.Query(ctx, selectQuery, namedArgs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	// Scan results
+	categories, err := scanCategories(rows, filters.SearchMode == SearchModeFullText)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build result
+	result := &CategoryFilterResult{
+		Categories:  categories,
+		Total:       total,
+		Page:        filters.Page,
+		Limit:       filters.Limit,
+		TotalPages:  totalPages,
+		HasNext:     filters.Page < totalPages,
+		HasPrevious: filters.Page > 1,
+	}
+
+	return result, nil
+}
+
+// buildCategoryQueryConditions creates WHERE conditions and named arguments
+func buildCategoryQueryConditions(filters CategoryFilterParams) ([]string, pgx.NamedArgs) {
+	var conditions []string
+	namedArgs := make(pgx.NamedArgs)
+
+	// Add search condition
+	if filters.Search != "" {
+		switch filters.SearchMode {
+		case SearchModeFullText:
+			// Full-text search with ranking
+			conditions = append(conditions, "ctg.search_vector @@ plainto_tsquery('spanish', @search_query)")
+			namedArgs["search_query"] = filters.Search
+
+		case SearchModeExact:
+			// Exact match search
+			conditions = append(conditions, "(ctg.name ILIKE @exact_search OR ctg.description ILIKE @exact_search)")
+			namedArgs["exact_search"] = filters.Search
+
+		case SearchModeFuzzy:
+			// Fuzzy search (LIKE with wildcards)
+			conditions = append(conditions, "(ctg.name ILIKE @fuzzy_search OR ctg.description ILIKE @fuzzy_search)")
+			namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
+		}
+	}
+
+	return conditions, namedArgs
+}
+
+// buildCategorySearchRankSelect adds search ranking column when using full-text search
+func buildCategorySearchRankSelect(filters CategoryFilterParams) string {
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		return "ts_rank(ctg.search_vector, plainto_tsquery('spanish', @search_query)) as search_rank"
+	}
+	return "0 as search_rank"
+}
+
+// buildCategoryOrderByClause constructs the ORDER BY clause
+func buildCategoryOrderByClause(filters CategoryFilterParams) string {
+	// If using full-text search with a query, prioritize search ranking
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		switch strings.ToLower(filters.Sort) {
+		case "relevance", "":
+			return "ORDER BY search_rank DESC, ctg.name ASC"
+		case "name_asc", "name":
+			return "ORDER BY ctg.name ASC"
+		case "name_desc":
+			return "ORDER BY ctg.name DESC"
+		case "product_count_asc":
+			return "ORDER BY product_count ASC, search_rank DESC"
+		case "product_count_desc":
+			return "ORDER BY product_count DESC, search_rank DESC"
+		default:
+			return "ORDER BY search_rank DESC, ctg.name ASC"
+		}
+	}
+
+	// Regular sorting without search ranking
+	switch strings.ToLower(filters.Sort) {
+	case "name_asc", "name", "":
+		return "ORDER BY ctg.name ASC"
+	case "name_desc":
+		return "ORDER BY ctg.name DESC"
+	case "product_count_asc":
+		return "ORDER BY product_count ASC"
+	case "product_count_desc":
+		return "ORDER BY product_count DESC"
+	default:
+		return "ORDER BY ctg.name ASC"
+	}
+}
+
+// scanCategories scans the query results into Category structs
+func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
+	var categories []*Category
+
+	for rows.Next() {
+		var category Category
+		var searchRank float32
+		var headerImg sql.NullString
+		var displayImg sql.NullString
+		var longDescription sql.NullString
+
+		if includeRank {
+			err := rows.Scan(
+				&category.ID,
+				&category.Name,
+				&category.Slug,
+				&category.Description,
+				&longDescription,
+				&headerImg,
+				&displayImg,
+				&category.ProductCount,
+				&searchRank,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan category with rank: %w", err)
+			}
+		} else {
+			err := rows.Scan(
+				&category.ID,
+				&category.Name,
+				&category.Slug,
+				&category.Description,
+				&longDescription,
+				&headerImg,
+				&displayImg,
+				&category.ProductCount,
+				&searchRank, // Still need to scan the rank column (will be 0)
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan category: %w", err)
+			}
+		}
+
+		if headerImg.Valid {
+			category.HeaderImg = headerImg.String
+		}
+		if displayImg.Valid {
+			category.DisplayImg = displayImg.String
+		}
+		if longDescription.Valid {
+			category.LongDescription = longDescription.String
+		}
+
+		categories = append(categories, &category)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return categories, nil
 }

@@ -1,0 +1,36 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+
+templ CreateCategory(form templ.Component) {
+	@createProductScript()
+	@templates.AdminLayout("Nueva Categoría | Panel Villa Chenacolo", "Administración de Categorías") {
+		<div class="flex-1 flex flex-col overflow-hidden space-y-2 px-0.5">
+			<div class="flex gap-4 border-b border-primary/70 pb-2 px-2">
+				<div class="flex-1 space-x-4 text-gray-700">
+					<h1 class="text-2xl tracking-tight">Nueva Categoría</h1>
+					<p class="text-xs text-current/50">
+						Agrega una nueva categoría a tu catálogo.
+					</p>
+				</div>
+			</div>
+			<main id="main-content" class="flex-1 flex flex-col overflow-auto space-y-2">
+				<div class="flex-1 p-2 border border-gray-200 rounded-xs shadow-sm bg-white space-y-4">
+					<div class="space-y-0.5 text-gray-700">
+						<h2 class="text-lg font-medium">Información de la categoría</h2>
+						<p class="text-xs text-current/80">Ingresa los datos de la categoría nueva</p>
+					</div>
+					@form
+				</div>
+			</main>
+		</div>
+	}
+}
+
+templ createCategoryScript() {
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('hello from createProductScript');
+    });
+</script>
+}

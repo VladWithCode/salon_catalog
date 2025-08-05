@@ -51,31 +51,19 @@ func DashboardSidebar() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = SidebarSectionNavItem("Productos", "/panel/productos", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = SidebarSectionNavItem("Productos", "/panel/productos", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "  <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = SidebarSectionNavItem("Categorías", "/panel/categorias", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = SidebarSectionNavItem("Categorías", "/panel/products/categorias", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = SidebarSectionNavItem("Crear categoría", "/panel/products/inventory", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -85,7 +73,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Images Section -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Images Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -105,7 +93,7 @@ func DashboardSidebar() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -122,7 +110,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- Wizard Section -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Wizard Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -142,7 +130,7 @@ func DashboardSidebar() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -150,7 +138,7 @@ func DashboardSidebar() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " <div class=\"border-b border-accent/70\"><p class=\"sr-only\">sidebar separator</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -158,7 +146,7 @@ func DashboardSidebar() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,7 +160,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Contact Requests --><a href=\"/panel/contacts\" class=\"nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Contact Requests --><a href=\"/panel/contacts\" class=\"nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,12 +168,12 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "Solicitudes de Contacto ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "Solicitudes de Contacto ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if false {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -198,12 +186,12 @@ func DashboardSidebar() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</a><!-- Quotes Section --><!-- Analytics --><!-- Settings --></nav><!-- Sidebar Footer --><div class=\"p-4 border-t border-sidebar-accent\"><div class=\"flex items-center space-x-3\"><div class=\"w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center\"><span class=\"text-white text-sm font-medium\">JD</span></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-sidebar-foreground truncate\">John Doe</p><p class=\"text-xs text-sidebar-foreground/70 truncate\">admin@company.com</p></div><button class=\"text-sidebar-foreground/70 hover:text-sidebar-foreground\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1\"></path></svg></button></div></div></div></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</a><!-- Quotes Section --><!-- Analytics --><!-- Settings --></nav><!-- Sidebar Footer --><div class=\"p-4 border-t border-sidebar-accent\"><div class=\"flex items-center space-x-3\"><div class=\"w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center\"><span class=\"text-white text-sm font-medium\">JD</span></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-sidebar-foreground truncate\">John Doe</p><p class=\"text-xs text-sidebar-foreground/70 truncate\">admin@company.com</p></div><button class=\"text-sidebar-foreground/70 hover:text-sidebar-foreground\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1\"></path></svg></button></div></div></div></div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -232,7 +220,7 @@ func sidebarScript() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const sidebarTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});\n        sidebarTl.to('#sidebar', {\n            x: '0%',\n        }).to('#sidebar-dropshadow', {\n            opacity: 1,\n            pointerEvents: 'auto',\n        }, \"-=0.15\");\n        // Listen for multiple sidebar toggles\n        eventManager.registerClick('sidebar-toggle', (e) => {\n            const target = e.target.hasAttribute('data-sidebar-toggle') ? e.target : e.target.closest('[data-sidebar-toggle]');\n            if (!target) {\n                console.error('Invalid sidebar toggle target');\n                return;\n            }\n\n            const force = target.dataset.sidebarForce;\n            const sidebar = document.getElementById('sidebar');\n            const isOpen = sidebar.dataset.sidebarOpen === 'true';\n            const duration = 0.15;\n\n            if (force) {\n                if (force === 'open') {\n                    sidebarTl.play();\n                } else if (force === 'close') {\n                    sidebarTl.reverse();\n                }\n            } else if (isOpen) {\n                sidebarTl.reverse();\n            } else {\n                sidebarTl.play();\n            }\n        })\n\n        const navSectionToggles = document.querySelectorAll('[data-nav-section-toggle]');\n        for (const toggle of navSectionToggles) {\n            toggle.addEventListener('click', function () {\n                const section = this.closest('[data-nav-section]');\n                if (!section) {\n                    return;\n                }\n\n                const isOpen = section.dataset.navSection === 'open';\n                const submenu = section.querySelector('[data-nav-section-submenu]')\n                const chevron = this.querySelector('[data-nav-section-chevron]');\n                const duration = 0.1;\n\n                if (isOpen) {\n                    gsap.to(submenu, {\n                        height: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: '-90deg',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'closed';\n                } else {\n                    gsap.to(submenu, {\n                        height: 'auto',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'open';\n                }\n            });\n        }\n    });\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<script>\n    document.addEventListener('DOMContentLoaded', function () {\n        const sidebarTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});\n        sidebarTl.to('#sidebar', {\n            x: '0%',\n        }).to('#sidebar-dropshadow', {\n            opacity: 1,\n            pointerEvents: 'auto',\n        }, \"-=0.15\");\n        // Listen for multiple sidebar toggles\n        eventManager.registerClick('sidebar-toggle', (e) => {\n            const target = e.target.hasAttribute('data-sidebar-toggle') ? e.target : e.target.closest('[data-sidebar-toggle]');\n            if (!target) {\n                console.error('Invalid sidebar toggle target');\n                return;\n            }\n\n            const force = target.dataset.sidebarForce;\n            const sidebar = document.getElementById('sidebar');\n            const isOpen = sidebar.dataset.sidebarOpen === 'true';\n            const duration = 0.15;\n\n            if (force) {\n                if (force === 'open') {\n                    sidebarTl.play();\n                } else if (force === 'close') {\n                    sidebarTl.reverse();\n                }\n            } else if (isOpen) {\n                sidebarTl.reverse();\n            } else {\n                sidebarTl.play();\n            }\n        })\n\n        const navSectionToggles = document.querySelectorAll('[data-nav-section-toggle]');\n        for (const toggle of navSectionToggles) {\n            toggle.addEventListener('click', function () {\n                const section = this.closest('[data-nav-section]');\n                if (!section) {\n                    return;\n                }\n\n                const isOpen = section.dataset.navSection === 'open';\n                const submenu = section.querySelector('[data-nav-section-submenu]')\n                const chevron = this.querySelector('[data-nav-section-chevron]');\n                const duration = 0.1;\n\n                if (isOpen) {\n                    gsap.to(submenu, {\n                        height: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: '-90deg',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'closed';\n                } else {\n                    gsap.to(submenu, {\n                        height: 'auto',\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    gsap.to(chevron, {\n                        rotate: 0,\n                        duration,\n                        ease: 'power2.out',\n                    });\n                    section.dataset.navSection = 'open';\n                }\n            });\n        }\n    });\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -261,7 +249,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"space-y-1\" data-nav-section=\"closed\" data-nav-section-title=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"space-y-1\" data-nav-section=\"closed\" data-nav-section-title=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -274,7 +262,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\" data-nav-section-title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><button class=\"nav-section-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors\" data-nav-section-toggle><div class=\"flex items-center\" data-nav-section-title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -291,7 +279,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -304,7 +292,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</button><div class=\"nav-submenu ml-8 space-y-1 h-0 overflow-hidden\" data-nav-section-submenu>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -312,7 +300,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -341,7 +329,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -354,7 +342,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"nav-item block px-4 py-2 text-sm rounded-lg transition-colors\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -362,7 +350,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, ">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -375,7 +363,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

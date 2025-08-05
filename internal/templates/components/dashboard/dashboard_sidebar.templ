@@ -58,13 +58,13 @@ templ DashboardSidebar() {
 					</a>
 					<!-- Products Section -->
 					@SidebarSection("Productos", components.BoxIcon("h-5 mr-3", nil)) {
-						@SidebarSectionNavItem("Productos", "/panel/productos", templ.Attributes{})
-						@SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", templ.Attributes{})
+						@SidebarSectionNavItem("Productos", "/panel/productos", nil)
+						// @SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", nil)
 						<div class="border-b border-accent/70">
 							<p class="sr-only">sidebar separator</p>
 						</div>
-						@SidebarSectionNavItem("Categorías", "/panel/products/categorias", templ.Attributes{})
-						@SidebarSectionNavItem("Crear categoría", "/panel/products/inventory", templ.Attributes{})
+						@SidebarSectionNavItem("Categorías", "/panel/categorias", nil)
+						// @SidebarSectionNavItem("Crear categoría", "/panel/categorias/nueva", templ.Attributes{})
 					}
 					<!-- Images Section -->
 					@SidebarSection(

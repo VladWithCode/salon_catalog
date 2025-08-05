@@ -16,6 +16,11 @@ func RegisterDashboardRoutes(router *customServeMux) {
 	router.HandleFunc("GET /panel", auth.ValidateAuth(RenderDashboard))
 	router.HandleFunc("GET /panel/productos", auth.ValidateAuth(RenderProducts))
 	router.HandleFunc("GET /panel/productos/nuevo", auth.ValidateAuth(RenderCreateProduct))
+	router.HandleFunc("GET /panel/productos/editar/{id}", auth.ValidateAuth(RenderCreateProduct))
+
+	router.HandleFunc("GET /panel/categorias", auth.ValidateAuth(RenderCategories))
+	router.HandleFunc("GET /panel/categorias/nueva", auth.ValidateAuth(RenderCreateProduct))
+	router.HandleFunc("GET /panel/categorias/editar/{id}", auth.ValidateAuth(RenderCreateProduct))
 
 	router.HandleFunc("GET /panel/imagenes", auth.ValidateAuth(RenderImages))
 }
@@ -71,6 +76,15 @@ func RenderCreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render CreateProduct err: %v\n", err)
+	}
+}
+
+func RenderCategories(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	err := dashboard.Categories().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Categories err: %v\n", err)
 	}
 }
 
