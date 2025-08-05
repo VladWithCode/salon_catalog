@@ -20,7 +20,7 @@ type CatalogProd struct {
 	Name            string   `json:"name"`
 	Description     string   `json:"description"`
 	LongDescription string   `json:"long_description"`
-	Category        string   `json:"category"`
+	CategoryName    string   `json:"category"`
 	CategoryID      string   `json:"category_id"`
 	ImageURL        string   `json:"image_url"`
 	Images          []string `json:"images"`
@@ -96,7 +96,7 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 		&product.Description,
 		&product.LongDescription,
 		&product.CategoryID,
-		&product.Category,
+		&product.CategoryName,
 		&product.ImageURL,
 		&product.Available,
 		&imagesJSON,
@@ -124,7 +124,7 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 
 	// Build query conditionally
 	query := `SELECT 
-		id, name, description, long_description, category_id, category, 
+		id, name, description, long_description, category_id, category_name, 
 		image_url, available, images
 		FROM catalog_products WHERE 1=1`
 
@@ -172,7 +172,7 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 			&product.Description,
 			&product.LongDescription,
 			&product.CategoryID,
-			&product.Category,
+			&product.CategoryName,
 			&product.ImageURL,
 			&product.Available,
 			&imagesJSON, // Scan JSON as bytes first
@@ -239,7 +239,7 @@ func FindCatalogListings() (map[string][]*CatalogProd, error) {
 			&product.ID,
 			&product.Name,
 			&product.Description,
-			&product.Category,
+			&product.CategoryName,
 			&imgUrl,
 		)
 		if err != nil {
@@ -249,11 +249,11 @@ func FindCatalogListings() (map[string][]*CatalogProd, error) {
 		if imgUrl.Valid {
 			product.ImageURL = imgUrl.String
 		}
-		if _, ok := listings[product.Category]; !ok {
-			listings[product.Category] = []*CatalogProd{}
-			listings[product.Category] = append(listings[product.Category], &product)
+		if _, ok := listings[product.CategoryName]; !ok {
+			listings[product.CategoryName] = []*CatalogProd{}
+			listings[product.CategoryName] = append(listings[product.CategoryName], &product)
 		} else {
-			listings[product.Category] = append(listings[product.Category], &product)
+			listings[product.CategoryName] = append(listings[product.CategoryName], &product)
 		}
 	}
 

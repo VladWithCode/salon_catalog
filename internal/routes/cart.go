@@ -62,7 +62,7 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 			ProductID: productID,
 			Source:    source,
 			Name:      prod.Name,
-			Category:  prod.Category,
+			Category:  prod.CategoryName,
 			ImageURL:  prod.ImageURL,
 			Quantity:  1,
 		}
