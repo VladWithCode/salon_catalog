@@ -10,3 +10,5 @@ dist/
 
 # ignore tailwindls hack
 tailwind.config.js
+
+sql/data_bk.sql
