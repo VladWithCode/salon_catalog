@@ -63,6 +63,8 @@ type ProductFilterResult struct {
 	TotalPages  int        `json:"total_pages"`
 	HasNext     bool       `json:"has_next"`
 	HasPrevious bool       `json:"has_previous"`
+	HasError    bool       `json:"has_error"`
+	Error       string     `json:"error"`
 }
 
 func CreateProduct(product *Product) error {
@@ -487,7 +489,7 @@ func buildQueryConditions(filters ProductFilterParams) ([]string, pgx.NamedArgs)
 
 		case SearchModeFuzzy:
 			// Fuzzy search (LIKE with wildcards)
-			conditions = append(conditions, "(name ILIKE @fuzzy_search OR description ILIKE @fuzzy_search OR category_name ILIKE @fuzzy_search)")
+			conditions = append(conditions, "(name ILIKE @fuzzy_search OR description ILIKE @fuzzy_search OR category ILIKE @fuzzy_search)")
 			namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
 		}
 	}
@@ -555,7 +557,7 @@ func buildProductsOrderByClause(filters ProductFilterParams) string {
 	case "oldest":
 		return "ORDER BY id ASC"
 	case "category":
-		return "ORDER BY category_name ASC, name ASC"
+		return "ORDER BY category ASC, name ASC"
 	default:
 		return "ORDER BY name ASC"
 	}

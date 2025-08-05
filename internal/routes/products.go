@@ -2,21 +2,36 @@ package routes
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/forms"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
 
 func RegisterProductsRoutes(router *customServeMux) {
+	// HTMX routes that respond with templ components
+	router.HandleFunc("GET /productos", auth.ValidateAuth(RenderProductsTable))
+	router.HandleFunc("GET /productos/nuevo", auth.ValidateAuth(RenderNewProductForm))
+	router.HandleFunc("POST /productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
+	router.HandleFunc("GET /productos/{id}", auth.ValidateAuth(RenderProduct))
+	router.HandleFunc("PUT /productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
+	router.HandleFunc("DELETE /productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
+	router.HandleFunc("DELETE /productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
+
+	// Legacy API routes
 	router.HandleFunc("GET /api/products", GetProducts)
 	router.HandleFunc("GET /api/products/table", GetProductsTable)
 	router.HandleFunc("GET /api/products/list", GetProductsList)
@@ -69,7 +84,7 @@ func GetProductsTable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dashboard.ProductsTable(*prods).Render(context.Background(), w)
+	err = dashboard.ProductsTable(prods).Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Something went wrong"))
@@ -333,4 +348,367 @@ func parseProductFilterParams(r *http.Request) (*db.ProductFilterParams, error) 
 	params.Limit, _ = strconv.Atoi(r.FormValue("limit"))
 
 	return params, nil
+}
+
+func RenderNewProductForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	// If request is AJAX, render components
+	if r.Header.Get("HX-Request") == "true" {
+		component := dashboard.ProductCreateModal("")
+		component.Render(r.Context(), w)
+	} else {
+		// Else render page
+		// TODO: render page
+	}
+}
+
+func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se creó el producto exitosamente", components.ToastSuccess, 3000, true, false)
+
+	// Parse form data
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al procesar el formulario"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	// Get form values
+	name := strings.TrimSpace(r.FormValue("name"))
+	description := strings.TrimSpace(r.FormValue("description"))
+	longDescription := strings.TrimSpace(r.FormValue("long_description"))
+	categoryID := strings.TrimSpace(r.FormValue("category"))
+	quantityStr := strings.TrimSpace(r.FormValue("quantity"))
+	availableStr := r.FormValue("available")
+
+	// Validate required fields
+	if name == "" || description == "" || categoryID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Nombre, descripción y categoría son requeridos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductCreateModal("Nombre, descripción y categoría son requeridos"),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		return
+	}
+
+	// Parse quantity
+	quantity := 0
+	if quantityStr != "" {
+		quantity, _ = strconv.Atoi(quantityStr)
+	}
+
+	// Parse availability
+	available := availableStr == "on"
+
+	// Create new product
+	product := &db.Product{
+		Name:            name,
+		Slug:            internal.Slugify(name),
+		Description:     description,
+		LongDescription: longDescription,
+		CategoryID:      categoryID,
+		Available:       available,
+		Quantity:        quantity,
+	}
+
+	// Create product in database
+	err = db.CreateProduct(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al crear el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductCreateModal("Error al crear el producto"),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to create product: %v\n", err)
+		return
+	}
+
+	// Get updated products list
+	filters, _ := parseProductFilterParams(r)
+	result, err := db.FilterProducts(*filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar los productos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to get products after create: %v\n", err)
+		return
+	}
+
+	comp := templ.Join(
+		dashboard.ProductsTable(result),
+		components.ToasterToast(toastData),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to render response: %v\n", err)
+		return
+	}
+}
+
+func RenderProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	id := r.PathValue("id")
+	product, err := db.FindProductByID(id)
+
+	// If request is AJAX, render components
+	if r.Header.Get("HX-Request") == "true" {
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			dashboard.ProductModal(product, "Producto no encontrado").Render(r.Context(), w)
+			log.Printf("failed to find product: %v\n", err)
+			return
+		}
+
+		component := dashboard.ProductModal(product, "")
+		component.Render(r.Context(), w)
+	} else {
+		// Else render page
+		// TODO: render page
+	}
+}
+
+func RenderProductsTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	// Parse query parameters
+	filters, err := parseProductFilterParams(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to parse filters"))
+		log.Printf("failed to parse filters: %v\n", err)
+		return
+	}
+	fmt.Printf("filters: %+v\n", filters)
+
+	// Get filtered products
+	result, err := db.FilterProducts(*filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to get products"))
+		log.Printf("failed to filter products: %v\n", err)
+		return
+	}
+
+	// Render the template with the results
+	component := dashboard.ProductsTable(result)
+	component.Render(r.Context(), w)
+}
+
+func UpdateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	id := r.PathValue("id")
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se actualizó el producto", components.ToastSuccess, 3000, true, false)
+
+	// Parse form data
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al procesar el formulario"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	// Get existing product
+	product, err := db.FindProductByID(id)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		toastData.Message = "Producto no encontrado"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Producto no encontrado"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to find product: %v\n", err)
+		return
+	}
+
+	// Update product fields
+	product.Name = strings.TrimSpace(r.FormValue("name"))
+	product.Slug = strings.TrimSpace(r.FormValue("slug"))
+	product.Description = strings.TrimSpace(r.FormValue("description"))
+	product.LongDescription = strings.TrimSpace(r.FormValue("long_description"))
+	product.CategoryID = strings.TrimSpace(r.FormValue("category"))
+
+	quantityStr := strings.TrimSpace(r.FormValue("quantity"))
+	if quantityStr != "" {
+		product.Quantity, _ = strconv.Atoi(quantityStr)
+	}
+
+	product.Available = r.FormValue("available") == "on"
+
+	// Validate required fields
+	if product.Name == "" || product.Slug == "" || product.Description == "" || product.CategoryID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Nombre, slug, descripción y categoría son requeridos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Campos requeridos faltantes"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		return
+	}
+
+	// Update product in database
+	err = db.UpdateProduct(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al actualizar el producto"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to update product: %v\n", err)
+		return
+	}
+
+	// Get updated products list
+	filters, _ := parseProductFilterParams(r)
+	result, err := db.FilterProducts(*filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar los productos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to get products after update: %v\n", err)
+		return
+	}
+
+	comp := templ.Join(
+		dashboard.ProductsTable(result),
+		components.ToasterToast(toastData),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to render response: %v\n", err)
+		return
+	}
+}
+
+func DeleteProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	id := r.PathValue("id")
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se eliminó el producto", components.ToastSuccess, 3000, true, false)
+
+	err := db.DeleteProduct(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al eliminar el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al eliminar el producto"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to delete product: %v\n", err)
+		return
+	}
+
+	filters, _ := parseProductFilterParams(r)
+	result, err := db.FilterProducts(*filters)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar los productos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to get products after delete: %v\n", err)
+		return
+	}
+
+	comp := templ.Join(
+		dashboard.ProductsTable(result),
+		components.ToasterToast(toastData),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to render response: %v\n", err)
+		return
+	}
+}
+
+func DeleteProductsAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	td := components.NewToastData("Se eliminaron los productos", components.ToastSuccess, 3000, true, false)
+
+	var err error
+	productIds := r.URL.Query()["ids"]
+	if len(productIds) > 0 {
+		for _, id := range productIds {
+			err = db.DeleteProduct(id)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				td.Message = "Error al eliminar los productos"
+				td.Type = components.ToastError
+				comp := templ.Join(
+					dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al eliminar los productos"}),
+					components.ToasterToast(td),
+				)
+				comp.Render(r.Context(), w)
+				log.Printf("failed to delete products: %v\n", err)
+				return
+			}
+		}
+	}
+
+	filters, _ := parseProductFilterParams(r)
+	result, err := db.FilterProducts(*filters)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusInternalServerError)
+		td.Message = "Error al recuperar los productos"
+		td.Type = components.ToastError
+		result := &db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}
+		comp := templ.Join(
+			dashboard.ProductsTable(result),
+			components.ToasterToast(td),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to get products after bulk delete: %v\n", err)
+		return
+	}
+
+	comp := templ.Join(
+		dashboard.ProductsTable(result),
+		components.ToasterToast(td),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to render response: %v\n", err)
+		return
+	}
 }

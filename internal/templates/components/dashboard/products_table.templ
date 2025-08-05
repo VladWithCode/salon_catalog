@@ -1,74 +1,482 @@
 package dashboard
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
 
-templ ProductsTable(productData db.ProductFilterResult) {
-	if productData.Total == 0 {
-		@ProductTableEmpty()
-	}
-	if productData.Products != nil {
-		<div class="grid grid-cols-3 lg:grid-cols-4" tabindex="-1">
-			<div class="sticky bg-white inset-y-0 top-0 col-span-full grid grid-cols-subgrid grid-rows-1">
-				<div class="hidden lg:block p-2 border-b border-r border-gray-200">ID</div>
-				<div class="p-2 border-b border-r border-gray-200">Nombre</div>
-				<div class="p-2 border-b border-r border-gray-200">Categoría</div>
-				<div class="p-2 border-b border-r border-gray-200">Acciones</div>
+templ ProductsTable(result *db.ProductFilterResult) {
+	<span id="products-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Products)) }/ { fmt.Sprintf("%d", result.Total) })</span>
+	<div class="max-w-screen-xl flex flex-col p-1 mx-auto">
+		if result.HasError {
+			<div class="flex-1 flex items-center justify-center gap-4 p-4">
+				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/productos"
+					hx-target="#products-table"
+					hx-params="none"
+					data-click-handler-selector="[data-products-filter-clear]"
+					data-products-filter-clear
+				>Limpiar Filtros</button>
 			</div>
-			for _, product := range productData.Products {
-				@ProductTableRow(*product)
+		}
+		if len(result.Products) == 0 {
+			<div class="text-center p-4 space-y-2">
+				<h3 class="">No se encontraron productos que coincidan con tu búsqueda</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/productos"
+					hx-target="#products-table"
+					hx-params="none"
+					data-click-handler-selector="[data-products-filter-clear]"
+					data-products-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		} else {
+			<!-- Products Grid -->
+			<div class="grid grid-cols-table gap-2">
+				for _, product := range result.Products {
+					@ProductTableRow(product)
+				}
+			</div>
+		}
+	</div>
+	if result.TotalPages > 1 {
+		<div hx-swap-oob="innerHTML:#products-table-pagination">
+			<!-- Pagination -->
+			if result.TotalPages > 1 {
+				@ProductsPagination(result)
 			}
 		</div>
 	}
 }
 
-templ ProductTableRow(product db.Product) {
-	<div class="grid col-span-full grid-cols-subgrid border-gray-200">
-		<p class="hidden border-b border-r border-inherit text-sm text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.ID }</p>
-		<p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Name }</p>
-		<p class="text-sm border-b border-r border-inherit text-dark overflow-hidden whitespace-nowrap text-ellipsis p-2">{ product.Category }</p>
-		<p class="border-b border-inherit flex gap-4 items-center justify-center p-2">
-			<button class="text-blue-600">
-				<svg class="h-5 w-5 fill-current">
-					<use href="/static/assets/view.svg#view"></use>
-				</svg>
+templ ProductTableRow(product *db.Product) {
+	<div
+		class="relative bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
+		data-products-table-row={ product.ID }
+		data-product-id={ product.ID }
+	>
+		<div class="absolute top-1 left-1 z-10">
+			<input
+				type="checkbox"
+				name="product-table-selection"
+				id={ fmt.Sprintf("product-table-selection-%s", product.ID) }
+				value={ product.ID }
+				class="h-4.5 w-4.5 rounded-xs bg-stone-50 border border-gray-200"
+			/>
+		</div>
+		<div class="aspect-4/3 relative overflow-hidden">
+			if product.MainImg != "" {
+				<img
+					src={ fmt.Sprintf("/static/uploads/%s", product.MainImg) }
+					alt={ product.Name }
+					loading="lazy"
+					class="w-full h-full object-cover group-hover:scale-105 group-active:scale-105 transition-transform ease-in-out duration-200"
+				/>
+			} else {
+				<div class="w-full h-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors ease-in-out duration-200">
+					<div class="text-center text-gray-400">
+						@components.ImageIcon("w-12 h-12 mx-auto mb-2", nil)
+						<p class="text-xs">Sin imagen</p>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="flex flex-col gap-1 p-2 pt-4">
+			<div class="flex gap-1 justify-between">
+				<h5 class="tracking-wide font-medium overflow-hidden whitespace-nowrap text-clip" title={ product.Name }>
+					{ product.Name }
+				</h5>
+				<div class="shrink-0 grow-0 basis-auto text-sm text-current/60">
+					if product.Available {
+						<span class="text-green-600">Disponible</span>
+					} else {
+						<span class="text-red-600">No disponible</span>
+					}
+				</div>
+			</div>
+			<div class="text-current/60 text-sm font-extralight line-clamp-2" title={ product.Description }>
+				{ product.Description }
+			</div>
+			<div class="flex justify-between items-center text-xs text-current/60">
+				<span>{ product.Category }</span>
+				<span>Cantidad: { fmt.Sprintf("%d", product.Quantity) }</span>
+			</div>
+		</div>
+		<div class="flex gap-2 p-2 pt-0.5">
+			<button
+				hx-get={ fmt.Sprintf("/productos/%s", product.ID) }
+				hx-target="#products-modal"
+				hx-indicator="#global-loading-indicator"
+				class="flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700"
+			>
+				@components.ViewIcon("w-5 mx-auto", nil)
+				<div class="sr-only">Ver producto</div>
 			</button>
-			<button class="text-red-600">
-				<svg class="h-5 w-5 fill-current">
-					<use href="/static/assets/bin.svg#bin"></use>
-				</svg>
+			<button
+				hx-delete={ fmt.Sprintf("/productos/%s", product.ID) }
+				hx-confirm="¿Seguro que deseas eliminar el producto?"
+				hx-indicator="#global-loading-indicator"
+				hx-target="#products-table"
+				hx-include='[name="sort"], [name="search"]'
+				class="flex-1 basis-full bg-red-700/20 rounded-xs p-2 text-red-700"
+			>
+				@components.BinIcon("w-5 mx-auto", nil)
+				<div class="sr-only">Eliminar producto</div>
 			</button>
-		</p>
+		</div>
 	</div>
 }
 
-templ ProductTableEmpty() {
-	<div class="flex flex-col items-center justify-center gap-4 py-8 px-4">
-		<span class="text-center text-stone-800/80">No se encontraron productos que coincidan con tu búsqueda</span>
+templ ProductsPagination(result *db.ProductFilterResult) {
+	<div class="flex gap-0.5 h-10 items-center">
 		<button
-			id="product-table-clear-filters"
-			class="text-accent text-xl font-bold underline underline-offset-2 hover:bg-primary/90 transition-colors"
-			hx-get="/api/products/table"
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasPrevious),
+			}
+			hx-get={ fmt.Sprintf("/productos?page=%d", result.Page-1) }
+			hx-include="[name='search'], [name='sort']"
+            hx-indicator="#products-table-loading"
 			hx-target="#products-table"
-			hx-indicator="#products-table-loading"
-			data-click-handler-selector="product-filters-clear"
 		>
-			Limpiar filtros
+			@components.ChevronIcon("w-6 rotate-90", nil)
+		</button>
+		<!-- Page numbers -->
+		<div class="flex-1 basis-full flex justify-center gap-0.5 overflow-x-auto">
+			for i, lim:= max(1, result.Page-2), min(result.TotalPages, result.Page+2); i <= lim; i++ {
+				<button
+					class="w-8 aspect-square rounded-sm disabled:font-medium disabled:text-gray-800 disabled:bg-secondary"
+					hx-get={ fmt.Sprintf("/productos?page=%d", i) }
+					hx-target="#products-table"
+					hx-include="[name='search'], [name='sort']"
+                    hx-indicator="#products-table-loading"
+					disabled?={ i==result.Page }
+				>
+					{ fmt.Sprintf("%d", i) }
+				</button>
+			}
+		</div>
+		<button
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasNext),
+			}
+			hx-get={ fmt.Sprintf("/productos?page=%d", result.Page+1) }
+			hx-include="[name='search'], [name='sort']"
+			hx-target="#products-table"
+            hx-indicator="#products-table-loading"
+		>
+			@components.ChevronIcon("w-6 -rotate-90", nil)
 		</button>
 	</div>
 }
 
-templ ProductTableError() {
-	<div class="flex flex-col items-center justify-center gap-4 py-8 text-xl font-bold text-primary">
-		<span class="text-lg">Algo salió mal</span>
-		<button
-			id="product-table-retry"
-			class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-			hx-get="/api/products/table"
-			hx-target="#products-table"
-			hx-indicator="#product-table-loading"
-			data-click-handler-selector="product-actions-toggle"
-		>
-			Volver a intentar
-		</button>
+templ ProductModal(product *db.Product, err string) {
+	<div id="products-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
+		<div class="flex-1 flex justify-between items-center">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				if err != "" {
+					Ocurrió un error al cargar el producto
+				} else {
+					{ product.Name }
+				}
+			</h3>
+			<button
+				id="products-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-products-modal-toggle="close"
+				data-click-handler-selector="[data-products-modal-toggle]"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if err != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+				</div>
+			</div>
+		} else {
+			@ProductEditForm(product)
+		}
+		<div class="flex-1 flex gap-2 justify-end items-center">
+			<button
+				id="products-modal-back"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-products-modal-toggle="close"
+				data-click-handler-selector="[data-products-modal-toggle]"
+			>
+				@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+				Volver
+			</button>
+			if err == "" {
+				<button
+					id="products-modal-delete"
+					class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
+					hx-delete={ fmt.Sprintf("/productos/%s", product.ID) }
+					hx-target="#products-table"
+					hx-include='[name="sort"], [name="search"]'
+					hx-indicator="#global-loading-indicator"
+					hx-confirm="¿Seguro que deseas eliminar el producto?"
+					data-products-modal-toggle="close"
+					data-click-handler-selector="[data-products-modal-toggle]"
+				>
+					@components.BinIcon("w-5 mx-auto", nil)
+					Eliminar
+				</button>
+			}
+		</div>
 	</div>
+}
+
+templ ProductEditForm(product *db.Product) {
+	<form
+		hx-put={ fmt.Sprintf("/productos/%s", product.ID) }
+		hx-target="#products-table"
+		hx-indicator="#global-loading-indicator"
+		class="flex-1 basis-full w-full overflow-auto space-y-4 p-4"
+	>
+		<div class="space-y-2">
+			<label for="product-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+			<input
+				id="product-name"
+				name="name"
+				type="text"
+				value={ product.Name }
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
+		</div>
+		<div class="space-y-2">
+			<label for="product-slug" class="block text-sm font-medium text-gray-700">Slug</label>
+			<input
+				id="product-slug"
+				name="slug"
+				type="text"
+				value={ product.Slug }
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
+		</div>
+		<div class="space-y-2">
+			<label for="product-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+			<textarea
+				id="product-description"
+				name="description"
+				rows="3"
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			>{ product.Description }</textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="product-long-description" class="block text-sm font-medium text-gray-700">Descripción Larga</label>
+			<textarea
+				id="product-long-description"
+				name="long_description"
+				rows="4"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			>{ product.LongDescription }</textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="product-category" class="block text-sm font-medium text-gray-700">Categoría</label>
+			<select
+				id="product-category"
+				name="category"
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+			>
+				<option value="">Seleccionar categoría</option>
+				@ProductCategoryOptions(product.CategoryID)
+			</select>
+		</div>
+		<div class="grid grid-cols-2 gap-4">
+			<div class="space-y-2">
+				<label for="product-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+				<input
+					id="product-quantity"
+					name="quantity"
+					type="number"
+					min="0"
+					value={ fmt.Sprintf("%d", product.Quantity) }
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Disponibilidad</label>
+				<div class="flex items-center">
+					<input
+						id="product-available"
+						name="available"
+						type="checkbox"
+						checked?={ product.Available }
+						class="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
+					/>
+					<label for="product-available" class="ml-2 block text-sm text-gray-900">
+						Producto disponible
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="flex gap-2 pt-4">
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+			>
+				Guardar Cambios
+			</button>
+		</div>
+	</form>
+}
+
+templ ProductCreateModal(err string) {
+	<div id="products-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
+		<div class="flex-1 flex justify-between items-center">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				if err != "" {
+					Ocurrió un error al crear el producto
+				} else {
+					Nuevo Producto
+				}
+			</h3>
+			<button
+				id="products-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-products-modal-toggle="close"
+				data-click-handler-selector="[data-products-modal-toggle]"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if err != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+				</div>
+			</div>
+		} else {
+			@ProductCreateForm()
+		}
+		<div class="flex-1 flex gap-2 justify-end items-center">
+			<button
+				id="products-modal-back"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-products-modal-toggle="close"
+				data-click-handler-selector="[data-products-modal-toggle]"
+			>
+				@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+				Cancelar
+			</button>
+		</div>
+	</div>
+}
+
+templ ProductCreateForm() {
+	<form
+		hx-post="/productos/nuevo"
+		hx-target="#products-table"
+		hx-indicator="#global-loading-indicator"
+		hx-include='[name="search"], [name="sort"]'
+		class="flex-1 basis-full w-full overflow-auto space-y-4 p-4"
+	>
+		<div class="space-y-2">
+			<label for="product-create-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+			<input
+				id="product-create-name"
+				name="name"
+				type="text"
+				required
+				placeholder="Nombre del producto"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
+		</div>
+		<div class="space-y-2">
+			<label for="product-create-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+			<textarea
+				id="product-create-description"
+				name="description"
+				rows="3"
+				required
+				placeholder="Descripción breve del producto"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			></textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="product-create-long-description" class="block text-sm font-medium text-gray-700">Descripción Larga</label>
+			<textarea
+				id="product-create-long-description"
+				name="long_description"
+				rows="4"
+				placeholder="Descripción detallada (opcional)"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			></textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="product-create-category" class="block text-sm font-medium text-gray-700">Categoría</label>
+			<select
+				id="product-create-category"
+				name="category"
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+			>
+				<option value="">Seleccionar categoría</option>
+				@ProductCategoryOptions("")
+			</select>
+		</div>
+		<div class="grid grid-cols-2 gap-4">
+			<div class="space-y-2">
+				<label for="product-create-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+				<input
+					id="product-create-quantity"
+					name="quantity"
+					type="number"
+					min="0"
+					value="0"
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Disponibilidad</label>
+				<div class="flex items-center">
+					<input
+						id="product-create-available"
+						name="available"
+						type="checkbox"
+						checked
+						class="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
+					/>
+					<label for="product-create-available" class="ml-2 block text-sm text-gray-900">
+						Producto disponible
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="flex gap-2 pt-4">
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+			>
+				Crear Producto
+			</button>
+		</div>
+	</form>
+}
+
+templ ProductCategoryOptions(selectedID string) {
+	// Load categories from database - this is a simplified version
+	// In a real implementation, you'd pass categories as a parameter
+	<option value="1" selected?={ selectedID == "1" }>Servicios de Belleza</option>
+	<option value="2" selected?={ selectedID == "2" }>Productos de Cuidado</option>
+	<option value="3" selected?={ selectedID == "3" }>Accesorios</option>
 }
