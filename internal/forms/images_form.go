@@ -16,11 +16,11 @@ const MaxImageNameLength = 120
 const MaxImageSize = 10 << 20 // 10MB
 
 var (
-	ErrNameRequired = errors.New("el nombre es requerido")
-	ErrNameTooShort = fmt.Errorf("el nombre debe tener al menos %d caracteres", MinImageNameLength)
-	ErrNameTooLong  = fmt.Errorf("el nombre no puede exceder %d caracteres", MaxImageNameLength)
-	ErrFileRequired = errors.New("el archivo es requerido")
-	ErrFileTooLarge = fmt.Errorf("el archivo no puede exceder %s", internal.FormatFileSize(MaxImageSize))
+	ErrFileNameRequired = errors.New("el nombre es requerido")
+	ErrFileNameTooShort = fmt.Errorf("el nombre debe tener al menos %d caracteres", MinImageNameLength)
+	ErrFileNameTooLong  = fmt.Errorf("el nombre no puede exceder %d caracteres", MaxImageNameLength)
+	ErrFileRequired     = errors.New("el archivo es requerido")
+	ErrFileTooLarge     = fmt.Errorf("el archivo no puede exceder %s", internal.FormatFileSize(MaxImageSize))
 )
 
 type ImagesFormState struct {
@@ -254,31 +254,37 @@ func (fs *ImagesFormState) ClearErrors() {
 	}
 }
 
-func (fs *ImagesFormState) ResetFieldState(fields ...[]string) {
-	var fieldsToReset []string
-
+func (fs *ImagesFormState) ResetFieldState(fields ...string) {
 	if len(fields) > 0 && len(fields[0]) > 0 {
-		fieldsToReset = fields[0]
+		for _, field := range fields {
+			fs.fields[field] = FieldState{
+				Value:           fs.GetFieldValue(field),
+				IsTouched:       false,
+				IsValid:         false,
+				HasError:        false,
+				ErrorMessage:    "",
+				HasWarning:      false,
+				WarningText:     "",
+				HelpText:        "",
+				ValidationClass: "",
+			}
+		}
 	} else {
-		// Reset all fields
-		for k := range fs.fields {
-			fieldsToReset = append(fieldsToReset, k)
+		for field := range fs.fields {
+			fs.fields[field] = FieldState{
+				Value:           fs.GetFieldValue(field),
+				IsTouched:       false,
+				IsValid:         false,
+				HasError:        false,
+				ErrorMessage:    "",
+				HasWarning:      false,
+				WarningText:     "",
+				HelpText:        "",
+				ValidationClass: "",
+			}
 		}
 	}
 
-	for _, field := range fieldsToReset {
-		fs.fields[field] = FieldState{
-			Value:           fs.GetFieldValue(field),
-			IsTouched:       false,
-			IsValid:         false,
-			HasError:        false,
-			ErrorMessage:    "",
-			HasWarning:      false,
-			WarningText:     "",
-			HelpText:        "",
-			ValidationClass: "",
-		}
-	}
 }
 
 func (fs *ImagesFormState) Validate() error {
@@ -311,11 +317,11 @@ func (fs *ImagesFormState) Validate() error {
 
 func ValidateImageName(name string) error {
 	if l := len(name); strings.TrimSpace(name) == "" {
-		return ErrNameRequired
+		return ErrFileNameRequired
 	} else if l < MinImageNameLength {
-		return ErrNameTooShort
+		return ErrFileNameTooShort
 	} else if l > MaxImageNameLength {
-		return ErrNameTooLong
+		return ErrFileNameTooLong
 	}
 	return nil
 }

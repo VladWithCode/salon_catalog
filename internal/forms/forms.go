@@ -19,6 +19,7 @@ const (
 )
 
 type FieldState struct {
+	Label     string                `json:"label"`
 	Value     string                `json:"value"`
 	File      *multipart.FileHeader `json:"file,omitempty"`
 	FieldType FieldType             `json:"field_type"`
@@ -57,6 +58,6 @@ type FormState interface {
 	SetErrorMessage(message string)
 	GetErrorMessage() string
 	ClearErrors()
-	ResetFieldState(fields ...[]string)
+	ResetFieldState(fields ...string)
 	Validate() error
 }

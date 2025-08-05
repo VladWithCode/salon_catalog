@@ -360,32 +360,39 @@ func (pfs *ProductFormState) ClearErrors() {
 }
 
 // ResetFieldState resets the state of specified fields, or all fields if none specified
-func (pfs *ProductFormState) ResetFieldState(fields ...[]string) {
-	var fieldsToReset []string
-
+func (pfs *ProductFormState) ResetFieldState(fields ...string) {
 	if len(fields) > 0 && len(fields[0]) > 0 {
-		fieldsToReset = fields[0]
+		for _, field := range fields {
+			pfs.Fields[field] = FieldState{
+				Value:           pfs.GetFieldValue(field),
+				IsTouched:       false,
+				IsValid:         false,
+				HasError:        false,
+				ErrorMessage:    "",
+				HasWarning:      false,
+				WarningText:     "",
+				HelpText:        "",
+				ValidationClass: "",
+				IsRequired:      pfs.isFieldRequired(field),
+			}
+		}
 	} else {
-		// Reset all fields
-		for k := range pfs.Fields {
-			fieldsToReset = append(fieldsToReset, k)
+		for field := range pfs.Fields {
+			pfs.Fields[field] = FieldState{
+				Value:           pfs.GetFieldValue(field),
+				IsTouched:       false,
+				IsValid:         false,
+				HasError:        false,
+				ErrorMessage:    "",
+				HasWarning:      false,
+				WarningText:     "",
+				HelpText:        "",
+				ValidationClass: "",
+				IsRequired:      pfs.isFieldRequired(field),
+			}
 		}
 	}
 
-	for _, field := range fieldsToReset {
-		pfs.Fields[field] = FieldState{
-			Value:           pfs.GetFieldValue(field),
-			IsTouched:       false,
-			IsValid:         false,
-			HasError:        false,
-			ErrorMessage:    "",
-			HasWarning:      false,
-			WarningText:     "",
-			HelpText:        "",
-			ValidationClass: "",
-			IsRequired:      pfs.isFieldRequired(field),
-		}
-	}
 }
 
 // Validate validates the form and returns an error if validation fails
