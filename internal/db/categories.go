@@ -9,12 +9,13 @@ import (
 )
 
 type Category struct {
-	ID          string `db:"id" json:"id"`
-	Name        string `db:"name" json:"name"`
-	Slug        string `db:"slug" json:"slug"`
-	Description string `db:"description" json:"description"`
-	HeaderImg   string `db:"header_img" json:"headerImg"`
-	DisplayImg  string `db:"display_img" json:"displayImg"`
+	ID              string `db:"id" json:"id"`
+	Name            string `db:"name" json:"name"`
+	Slug            string `db:"slug" json:"slug"`
+	Description     string `db:"description" json:"description"`
+	LongDescription string `db:"long_description" json:"longDescription"`
+	HeaderImg       string `db:"header_img" json:"headerImg"`
+	DisplayImg      string `db:"display_img" json:"displayImg"`
 }
 
 func CreateCategory(category *Category) error {

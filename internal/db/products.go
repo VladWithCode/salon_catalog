@@ -12,6 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/vladwithcode/salon_catalog/internal"
 )
 
 var (
@@ -30,6 +32,7 @@ type Product struct {
 	Category        string   `db:"category" json:"category"`
 	CategoryID      string   `db:"category_id" json:"categoryId"`
 	Available       bool     `db:"available" json:"available"`
+	Quantity        int      `db:"quantity" json:"quantity"`
 }
 
 // SearchMode defines how search should behave
@@ -48,6 +51,8 @@ type ProductFilterParams struct {
 	Sort       string     `json:"sort"`
 	Page       int        `json:"page"`
 	Limit      int        `json:"limit"`
+	Available  int        `json:"available"`
+	Quantity   int        `json:"quantity"`
 }
 
 type ProductFilterResult struct {
@@ -86,16 +91,23 @@ func CreateProduct(product *Product) error {
 		mainImg.Valid = err == nil
 	}
 
+	args := pgx.NamedArgs{
+		"id":               product.ID,
+		"name":             product.Name,
+		"slug":             product.Slug,
+		"description":      product.Description,
+		"long_description": product.LongDescription,
+		"main_img":         mainImg,
+		"category":         product.CategoryID,
+		"available":        product.Available,
+		"quantity":         product.Quantity,
+	}
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO products (id, name, slug, description, long_description, main_img, category) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		product.ID,
-		product.Name,
-		product.Slug,
-		product.Description,
-		product.LongDescription,
-		mainImg,
-		product.CategoryID,
+		`INSERT INTO products 
+		(id, name, slug, description, long_description, main_img, category, available, quantity)
+		VALUES (@id, @name, @slug, @description, @long_description, @main_img, @category, @available, @quantity)`,
+		args,
 	)
 	if err != nil {
 		return errors.Join(ErrProductInsert, err)
@@ -137,6 +149,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
+			prod.available, prod.quantity,
 			ARRAY_AGG(img.filename) AS gallery
 		FROM products prod 
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
@@ -144,7 +157,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id`,
 		slug,
 	).Scan(
 		&product.ID,
@@ -155,6 +168,8 @@ func FindProductBySlug(slug string) (*Product, error) {
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
+		&product.Available,
+		&product.Quantity,
 		&gallery,
 	)
 	if err != nil {
@@ -198,6 +213,7 @@ func FindProductByID(id string) (*Product, error) {
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
+			prod.available, prod.quantity,
 			ARRAY_AGG(img.filename) AS gallery
 		FROM products prod
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
@@ -205,7 +221,7 @@ func FindProductByID(id string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id`,
 		id,
 	).Scan(
 		&product.ID,
@@ -216,6 +232,8 @@ func FindProductByID(id string) (*Product, error) {
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
+		&product.Available,
+		&product.Quantity,
 		&gallery,
 	)
 	if err != nil {
@@ -254,6 +272,7 @@ func FindAllProducts() ([]*Product, error) {
 			ctg.name AS category,
 			ctg.id AS category_id,
 			img.filename AS main_img
+			prod.available, prod.quantity,
 		FROM products prod
 			LEFT JOIN images img ON img.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category`,
@@ -277,6 +296,8 @@ func FindAllProducts() ([]*Product, error) {
 			&product.Category,
 			&product.CategoryID,
 			&mainImg,
+			&product.Available,
+			&product.Quantity,
 		)
 		if err != nil {
 			return nil, err
@@ -314,13 +335,15 @@ func UpdateProduct(product *Product) error {
 		"long_description": product.LongDescription,
 		"category":         product.CategoryID,
 		"main_img":         mainImg,
+		"available":        product.Available,
+		"quantity":         product.Quantity,
 	}
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE products SET
 			name = @name, slug = @slug, description = @description,
 			long_description = @long_description, category = @category,
-			main_img = @main_img
+			main_img = @main_img, available = @available, quantity = @quantity
 		WHERE id = @id`,
 		args,
 	)
@@ -409,11 +432,11 @@ func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 	selectQuery := fmt.Sprintf(`
 		SELECT 
 			prod.id, prod.name, prod.description, prod.long_description, ctg.id as category_id, ctg.name as category,
-			img.filename as main_img, prod.available, 
+			img.filename as main_img, prod.available, prod.quantity,
 			COALESCE(ARRAY_AGG(imgs.filename) FILTER (WHERE imgs.filename IS NOT NULL), '{}') as images,
 			%s
 		%s GROUP BY prod.id, prod.name, prod.description, prod.long_description,
-		ctg.id, ctg.name, img.filename, prod.available %s 
+		ctg.id, ctg.name, img.filename, prod.available, prod.quantity %s
 		LIMIT @limit OFFSET @offset`,
 		buildSearchRankSelect(filters), baseQuery, orderBy)
 
@@ -473,6 +496,17 @@ func buildQueryConditions(filters ProductFilterParams) ([]string, pgx.NamedArgs)
 	if filters.Category != "" {
 		conditions = append(conditions, "category_id = @category_id")
 		namedArgs["category_id"] = filters.Category
+	}
+
+	if filters.Available > 0 {
+		conditions = append(conditions, "available")
+	} else if filters.Available < 0 {
+		conditions = append(conditions, "NOT available")
+	}
+
+	if filters.Quantity > 0 {
+		conditions = append(conditions, "quantity = @quantity")
+		namedArgs["quantity"] = filters.Quantity
 	}
 
 	return conditions, namedArgs
@@ -548,6 +582,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&product.Category,
 				&mainImg,
 				&product.Available,
+				&product.Quantity,
 				&images,
 				&searchRank,
 			)
@@ -563,6 +598,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&product.Category,
 				&mainImg,
 				&product.Available,
+				&product.Quantity,
 				&images,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)
@@ -589,4 +625,94 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 	}
 
 	return products, nil
+}
+
+func SCreateProducts(product []*Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	ctgs, err := FindAllCategories()
+	if err != nil {
+		return err
+	}
+	ctgMap := make(map[string]string)
+	for _, ctg := range ctgs {
+		ctgMap[ctg.Name] = ctg.ID
+	}
+
+	for _, prod := range product {
+		id, err := uuid.NewV7()
+		if err != nil {
+			return ErrUUIDFail
+		}
+
+		prod.ID = id.String()
+		setProdMainImg(prod, conn)
+		prod.Gallery = []string{prod.MainImg}
+
+		if prod.Slug == "" {
+			prod.Slug = internal.Slugify(prod.Name)
+		}
+
+		args := pgx.NamedArgs{
+			"id":               prod.ID,
+			"name":             prod.Name,
+			"slug":             prod.Slug,
+			"description":      prod.Description,
+			"long_description": prod.LongDescription,
+			"main_img":         prod.MainImg,
+			"category":         ctgMap[prod.Category],
+			"available":        prod.Available,
+			"quantity":         prod.Quantity,
+		}
+		_, err = tx.Exec(
+			ctx,
+			`INSERT INTO products
+				(id, name, slug, description, long_description, main_img, category, available, quantity)
+				VALUES (@id, @name, @slug, @description, @long_description, @main_img, @category, @available, @quantity)`,
+			args,
+		)
+		if err != nil {
+			tx.Rollback(ctx)
+			return errors.Join(ErrProductInsert, err)
+		}
+
+		for _, img := range prod.Gallery {
+			_, err = tx.Exec(
+				ctx,
+				`INSERT INTO images_products (image_id, product_id) VALUES ($1, $2)`,
+				img,
+				prod.ID,
+			)
+			if err != nil {
+				tx.Rollback(ctx)
+				return errors.Join(ErrGalleryInsert, err)
+			}
+		}
+	}
+
+	tx.Commit(ctx)
+	return nil
+}
+
+func setProdMainImg(prod *Product, conn *pgxpool.Conn) {
+	row := conn.QueryRow(
+		context.Background(),
+		`SELECT id FROM images WHERE name = $1`,
+		prod.Name,
+	)
+	var imgID sql.NullString
+	row.Scan(&imgID)
+	if imgID.Valid {
+		prod.MainImg = imgID.String
+	}
 }

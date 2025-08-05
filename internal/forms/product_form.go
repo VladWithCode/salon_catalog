@@ -9,8 +9,9 @@ import (
 )
 
 const MinProductNameLength = 3
-const MaxProductNameLength = 512
-const MaxProductDescriptionLength = 120
+const MaxProductNameLength = 120
+const MaxProductDescriptionLength = 128
+const MaxProductLongDescriptionLength = 360
 
 type ProductFormState struct {
 	// Form data preservation and error handling
