@@ -6,14 +6,14 @@ templ DashboardSidebar() {
 	@sidebarScript()
 	<div
 		id="sidebar-dropshadow"
-		class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden"
+		class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none xl:hidden"
 		data-click-handler-selector="sidebar-toggle"
 		data-sidebar-toggle
 		data-sidebar-force="close"
 	></div>
 	<aside
 		id="sidebar"
-		class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static lg:translate-x-0 transition-[height] duration-100"
+		class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 xl:block xl:static xl:translate-x-0 xl:z-10 transition-[height] duration-100"
 		data-sidebar-open="false"
 	>
 		<div class="w-full h-full bg-secondary text-primary/90 rounded-xs">
@@ -66,6 +66,16 @@ templ DashboardSidebar() {
 						@SidebarSectionNavItem("Categorías", "/panel/categorias", nil)
 						// @SidebarSectionNavItem("Crear categoría", "/panel/categorias/nueva", templ.Attributes{})
 					}
+					<!-- Event Types Section -->
+					<a
+						href="/panel/tipos-eventos"
+						class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
+					>
+						<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v16a2 2 0 002 2z"></path>
+						</svg>
+						Tipos de Eventos
+					</a>
 					<!-- Images Section -->
 					@SidebarSection(
 						"Imagenes",

@@ -35,7 +35,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar-dropshadow\" class=\"fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"></div><aside id=\"sidebar\" class=\"fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static lg:translate-x-0 transition-[height] duration-100\" data-sidebar-open=\"false\"><div class=\"w-full h-full bg-secondary text-primary/90 rounded-xs\"><div class=\"relative flex flex-col h-full\"><!-- Sidebar Header --><div class=\"flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent\"><h1 class=\"text-xl font-semibold text-sidebar-foreground\">Panel</h1><button id=\"closeSidebar\" class=\"lg:hidden text-sidebar-foreground hover:text-white\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Navigation Menu --><nav class=\"flex-1 px-4 py-6 space-y-2 overflow-y-auto\"><!-- Dashboard Home --><a href=\"/panel\" class=\"nav-item active flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z\"></path></svg> Panel</a><!-- Products Section -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar-dropshadow\" class=\"fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none xl:hidden\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"></div><aside id=\"sidebar\" class=\"fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 xl:block xl:static xl:translate-x-0 xl:z-10 transition-[height] duration-100\" data-sidebar-open=\"false\"><div class=\"w-full h-full bg-secondary text-primary/90 rounded-xs\"><div class=\"relative flex flex-col h-full\"><!-- Sidebar Header --><div class=\"flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent\"><h1 class=\"text-xl font-semibold text-sidebar-foreground\">Panel</h1><button id=\"closeSidebar\" class=\"lg:hidden text-sidebar-foreground hover:text-white\" data-click-handler-selector=\"sidebar-toggle\" data-sidebar-toggle data-sidebar-force=\"close\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Navigation Menu --><nav class=\"flex-1 px-4 py-6 space-y-2 overflow-y-auto\"><!-- Dashboard Home --><a href=\"/panel\" class=\"nav-item active flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z\"></path></svg> Panel</a><!-- Products Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func DashboardSidebar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Images Section -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Event Types Section --><a href=\"/panel/tipos-eventos\" class=\"nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors\"><svg class=\"w-5 h-5 mr-3\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v16a2 2 0 002 2z\"></path></svg> Tipos de Eventos</a><!-- Images Section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,7 +180,7 @@ func DashboardSidebar() templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(0)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 95, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 105, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -256,7 +256,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 229, Col: 80}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 239, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -273,7 +273,7 @@ func SidebarSection(title string, icon templ.Component) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 236, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 246, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -336,7 +336,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 252, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 262, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -357,7 +357,7 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 253, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/dashboard_sidebar.templ`, Line: 263, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
