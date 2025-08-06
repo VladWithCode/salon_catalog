@@ -22,6 +22,7 @@ func RegisterDashboardRoutes(router *customServeMux) {
 	router.HandleFunc("GET /panel/categorias/nueva", auth.ValidateAuth(RenderCreateProduct))
 	router.HandleFunc("GET /panel/categorias/editar/{id}", auth.ValidateAuth(RenderCreateProduct))
 
+	router.HandleFunc("GET /panel/tipos-eventos", auth.ValidateAuth(RenderEventKinds))
 	router.HandleFunc("GET /panel/imagenes", auth.ValidateAuth(RenderImages))
 }
 
@@ -85,6 +86,15 @@ func RenderCategories(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render Categories err: %v\n", err)
+	}
+}
+
+func RenderEventKinds(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	err := dashboard.EventKinds().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render EventKinds err: %v\n", err)
 	}
 }
 

@@ -1,0 +1,320 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ EventKinds() {
+	<script src="/static/js/popup.js" defer></script>
+	@eventKindsScript()
+	@templates.AdminLayout("Tipos de Eventos | Panel Villa Chenacolo", "Administración de Tipos de Eventos") {
+		<div class="flex-1 flex flex-col xl:flex-row overflow-hidden space-y-4 xl:space-y-0 xl:space-x-4 px-0.5" hx-ext="response-targets">
+			<!-- Mobile/Tablet Header and Actions -->
+			<div class="px-2 xl:hidden">
+				<div class="flex gap-4 pb-2">
+					<div class="space-y-0.5">
+						<h1 class="text-3xl tracking-tight">Tipos de Eventos</h1>
+						<p class="text-xs text-current/50">Agrega, modifica y elimina tipos de eventos para reservaciones.</p>
+					</div>
+					<button
+						id="event-kinds-actions-toggle"
+						class="shrink flex items-center justify-center text-current/80"
+						data-click-handler-selector="event-kinds-actions-toggle"
+					>
+						@components.BarsIcon("w-8", nil)
+					</button>
+				</div>
+				<div id="event-kinds-actions-container" class="overflow-hidden h-0" data-event-kinds-actions="closed">
+					<div class="py-2 border-t border-primary/70">
+						<h4 class="text-lg font-medium text-gray-700 mb-2">Acciones</h4>
+						<ul class="flex flex-col items-center gap-2">
+							<li class="w-full">
+								<button
+									id="event-kinds-actions-new"
+									hx-get="/panel/tipos-eventos/modal/nuevo"
+									hx-target="#event-kinds-modal"
+									hx-indicator="#global-loading-indicator"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								>
+									@components.PlusIcon("w-5", nil)
+									Nuevo Tipo de Evento
+								</button>
+							</li>
+						</ul>
+						<!-- Filters -->
+						<form
+							hx-get="/panel/tipos-eventos/table"
+							hx-trigger="input changed delay:500ms"
+							hx-target="#event-kinds-table"
+							hx-indicator="#event-kinds-table-loading"
+							class="shrink grow-0 basis-auto pt-2 space-y-1"
+						>
+							<h3 class="font-light text-gray-700/70">Filtrar Tipos de Eventos</h3>
+							<div class="flex items-center gap-0.5">
+								<div class="h-full flex-1 basis-full space-y-1">
+									<label for="search-mobile" class="block text-sm font-medium text-gray-700">Buscar Tipos de Eventos</label>
+									<input
+										id="search-mobile"
+										name="search"
+										class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+										type="text"
+										placeholder="Buscar por nombre o descripción..."
+									/>
+								</div>
+							</div>
+							<div class="flex items-center justify-end pt-1">
+								<button
+									type="button"
+									class="text-sm text-gray-700 font-bold tracking-wide"
+									hx-get="/panel/tipos-eventos/table"
+									hx-target="#event-kinds-table"
+									data-click-handler-selector="[data-event-kinds-filter-clear]"
+									data-event-kinds-filter-clear
+								>
+									Limpiar Filtros
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Desktop Sidebar -->
+			<div class="hidden xl:flex xl:flex-col xl:w-80 2xl:w-96 xl:shrink-0 px-2">
+				<div class="space-y-0.5 pb-4">
+					<h1 class="text-3xl tracking-tight">Tipos de Eventos</h1>
+					<p class="text-xs text-current/50">Agrega, modifica y elimina tipos de eventos para reservaciones.</p>
+				</div>
+				
+				<div class="bg-white rounded-xs shadow-sm p-4 space-y-4">
+					<div>
+						<h4 class="text-lg font-medium text-gray-700 mb-3">Acciones</h4>
+						<button
+							hx-get="/panel/tipos-eventos/modal/nuevo"
+							hx-target="#event-kinds-modal"
+							hx-indicator="#global-loading-indicator"
+							class="w-full flex items-center justify-center gap-3 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg hover:bg-gray-800 focus:outline-accent transition-colors"
+						>
+							@components.PlusIcon("w-5", nil)
+							Nuevo Tipo de Evento
+						</button>
+					</div>
+
+					<div class="border-t border-gray-200 pt-4">
+						<form
+							hx-get="/panel/tipos-eventos/table"
+							hx-trigger="input changed delay:500ms"
+							hx-target="#event-kinds-table"
+							hx-indicator="#event-kinds-table-loading"
+							class="space-y-3"
+						>
+							<h4 class="text-lg font-medium text-gray-700">Filtros</h4>
+							<div class="space-y-3">
+								<div>
+									<label for="search-desktop" class="block text-sm font-medium text-gray-700 mb-1">Buscar Tipos de Eventos</label>
+									<input
+										id="search-desktop"
+										name="search"
+										class="block w-full px-3 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent text-sm"
+										type="text"
+										placeholder="Buscar por nombre o descripción..."
+									/>
+								</div>
+							</div>
+							<div class="flex items-center justify-end pt-2">
+								<button
+									type="button"
+									class="text-sm text-gray-600 hover:text-gray-800 font-medium tracking-wide transition-colors"
+									hx-get="/panel/tipos-eventos/table"
+									hx-target="#event-kinds-table"
+									data-click-handler-selector="[data-event-kinds-filter-clear]"
+									data-event-kinds-filter-clear
+								>
+									Limpiar Filtros
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Main Content Area -->
+			<div class="flex-1 px-2 xl:px-0">
+				<main class="flex-1 overflow-hidden">
+					<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-event-kinds-table-scroll>
+						<div
+							class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
+						>
+							<h4 class="flex-1 basis-full text-gray-900">
+								Tipos de Eventos
+								<span id="event-kinds-table-count" hx-swap-oob>(0/0)</span>
+							</h4>
+						</div>
+						<div class="flex-1 grid grid-cols-1 grid-rows-1">
+							<div class="static h-full col-start-1 row-start-1 pointer-events-none z-10">
+								<div
+									id="event-kinds-table-loading"
+									class="h-full max-h-[60vh] bg-white p-8 text-center inset-0 flex flex-col items-center justify-center loading-table-indicator"
+								>
+									@components.LoadingIcon("h-12 text-primary mx-auto", nil)
+									<p class="mt-2 text-gray-500">Cargando tipos de eventos...</p>
+								</div>
+							</div>
+							<div
+								class="static col-start-1 row-start-1 z-0 h-0 opacity-0 -mt-px"
+								data-event-kinds-table-container="expanded"
+							>
+								<div
+									id="event-kinds-table"
+									hx-get="/panel/tipos-eventos/table"
+									hx-include='[name="search"]'
+									hx-target-5xx="this"
+									hx-target-4xx="this"
+									hx-trigger="load"
+									hx-indicator="#event-kinds-table-loading"
+								></div>
+							</div>
+						</div>
+					</div>
+				</main>
+			</div>
+		</div>
+		<div id="event-kinds-modal-container" class="fixed inset-0 w-screen z-40 flex flex-col justify-center items-center overflow-hidden opacity-0 pointer-events-none">
+			<div
+				id="event-kinds-modal-backdrop"
+				class="absolute h-full w-full z-0 bg-dark/30"
+				data-event-kinds-modal-toggle="close"
+				data-click-handler-selector="[data-event-kinds-modal-toggle]"
+			></div>
+			<div
+				id="event-kinds-modal"
+				class="relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+				data-event-kinds-modal="closed"
+			></div>
+		</div>
+	}
+}
+
+templ eventKindsScript() {
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Register gsap plugins
+			gsap.registerPlugin(window.ScrollTrigger);
+
+			const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
+			toggleActionsTl.fromTo('#event-kinds-actions-container', {opacity: 0, height: '0px'}, {opacity: 1, height: 'auto'});
+
+			const modalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power3.out'}});
+			modalTl.set('#event-kinds-modal-container', {
+				pointerEvents: 'auto',
+			}).to('#event-kinds-modal-container', {
+				opacity: 1,
+				duration: 0.2,
+			}).to('#event-kinds-modal', {
+				opacity: 1,
+				y: '0rem',
+			}, "-=0.1");
+
+			eventManager
+				.register('beforeRequest', '#event-kinds-table', function (e) {
+					gsap.set('[data-event-kinds-table-container]', { pointerEvents: 'none' });
+					gsap.to(
+						'[data-event-kinds-table-container]', 
+						{ height: '0rem', opacity: 0, },
+					)
+					gsap.to(
+						'[data-event-kinds-table-row]', 
+						{ y: '0rem', opacity: 1, stagger: 0.05, },
+						{ y: '10rem', opacity: 0, stagger: 0.05, },
+					);
+				})
+				.register('afterSwap', '#event-kinds-table', function (e) {
+					gsap.to(
+						'[data-event-kinds-table-container]', 
+						{ height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' },
+					)
+					gsap.fromTo(
+						'[data-event-kinds-table-row]', 
+						{ y: '1rem', opacity: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' },
+						{ y: '0rem', opacity: 1 },
+						"<",
+					);
+					gsap.set('[data-event-kinds-table-container]', { pointerEvents: 'auto' });
+
+					// Scroll to top of table
+					const tableScroll = e.detail.target.closest('[data-event-kinds-table-scroll]');
+					if (tableScroll) {
+						tableScroll.scrollTo(0, 0);
+					}
+
+					// Close modal if open
+					const modal = document.getElementById('event-kinds-modal');
+					if (modal.dataset.eventKindsModal === 'open') {
+						modalTl.reverse();
+						modal.dataset.eventKindsModal = 'closed';
+					}
+				})
+				.register('afterSwap', '#event-kinds-modal', function (e) {
+					if (e.detail.elt.dataset.eventKindsModal === 'closed') {
+						modalTl.play();
+						e.detail.elt.dataset.eventKindsModal = 'open';
+					}
+
+					// Reset create form if it exists
+					const createForm = document.querySelector('#event-kinds-modal form[hx-post]');
+					if (createForm) {
+						createForm.reset();
+					}
+				})
+				.registerClick('event-kinds-actions-toggle', function (e) {
+					const actionsContainer = document.getElementById('event-kinds-actions-container')
+					if (actionsContainer.dataset.eventKindsActions === 'open') {
+						toggleActionsTl.reverse();
+						actionsContainer.dataset.eventKindsActions = 'closed';
+					} else {
+						toggleActionsTl.play();
+						actionsContainer.dataset.eventKindsActions = 'open';
+					}
+				})
+				.registerClick('[data-event-kinds-modal-toggle]', function (e) {
+					const target = e.target.matches('[data-event-kinds-modal-toggle]')
+						? e.target
+						: e.target.closest('[data-event-kinds-modal-toggle]');
+					const modal = document.getElementById('event-kinds-modal');
+
+					const force = target.dataset.eventKindsModalToggle
+					const shouldClose = (force === 'close') || (!force && modal.dataset.eventKindsModal === 'open');
+					if (shouldClose) {
+						modalTl.reverse();
+						modal.dataset.eventKindsModal = 'closed';
+					} else {
+						modalTl.play();
+						modal.dataset.eventKindsModal = 'open';
+					}
+				})
+				.registerClick('[data-event-kinds-filter-clear]', function (e) {
+					clearEventKindsTableFilters();
+				});
+
+			function clearEventKindsTableFilters() {
+				// Clear both mobile and desktop search inputs
+				const mobileSearch = document.getElementById('search-mobile');
+				const desktopSearch = document.getElementById('search-desktop');
+				
+				if (mobileSearch) mobileSearch.value = '';
+				if (desktopSearch) desktopSearch.value = '';
+			}
+
+			// Sync search inputs between mobile and desktop
+			document.addEventListener('input', function(e) {
+				if (e.target.matches('#search-mobile')) {
+					const desktopSearch = document.getElementById('search-desktop');
+					if (desktopSearch) desktopSearch.value = e.target.value;
+				} else if (e.target.matches('#search-desktop')) {
+					const mobileSearch = document.getElementById('search-mobile');
+					if (mobileSearch) mobileSearch.value = e.target.value;
+				}
+			});
+		});
+	</script>
+}
