@@ -87,12 +87,10 @@ templ DashboardSidebar() {
 					<!-- Wizard Section -->
 					@SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)) {
 						@SidebarSectionNavItem("Ver Asistentes", "/panel/asistente", templ.Attributes{})
-						@SidebarSectionNavItem("Crear Asistentes", "/panel/asistente/nuevo", templ.Attributes{})
 						<div class="border-b border-accent/70">
 							<p class="sr-only">sidebar separator</p>
 						</div>
 						@SidebarSectionNavItem("Pasos", "/panel/asistente/pasos", templ.Attributes{})
-						@SidebarSectionNavItem("Crear Pasos", "/panel/asistente/pasos/nuevo", templ.Attributes{})
 					}
 					<!-- Contact Requests -->
 					<a
