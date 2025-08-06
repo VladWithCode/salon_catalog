@@ -7,8 +7,8 @@ SELECT
     c.id,
     c.name,
     COUNT(p.id) as product_count
-FROM categories c
-LEFT JOIN products p ON c.id = p.category
+FROM public.categories c
+LEFT JOIN public.products p ON c.id = p.category
 GROUP BY c.id, c.name
 ORDER BY c.name;
 
@@ -18,8 +18,9 @@ SELECT
     p.id,
     p.name,
     p.description,
-    p.description as long_description, -- You may want to add a separate long_description column later
+    p.long_description as long_description, -- You may want to add a separate long_description column later
     p.category as category_id,
+    p.slug,
     c.name as category_name,
     COALESCE(main_img.filename, '') as image_url,
     p.available,
@@ -27,15 +28,15 @@ SELECT
     COALESCE(
         (
             SELECT json_agg(i.filename ORDER BY i.filename)
-            FROM images_products ip
-            JOIN images i ON ip.image_id = i.id
+            FROM public.images_products ip
+            JOIN public.images i ON ip.image_id = i.id
             WHERE ip.product_id = p.id
         ),
         '[]'::json
     ) as images
-FROM products p
-LEFT JOIN categories c ON p.category = c.id
-LEFT JOIN images main_img ON p.main_img = main_img.id
+FROM public.products p
+LEFT JOIN public.categories c ON p.category = c.id
+LEFT JOIN public.images main_img ON p.main_img = main_img.id
 ORDER BY p.name;
 -- +goose StatementEnd
 

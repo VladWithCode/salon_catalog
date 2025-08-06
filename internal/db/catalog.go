@@ -18,6 +18,7 @@ type CatalogCtg struct {
 type CatalogProd struct {
 	ID              string   `json:"id"`
 	Name            string   `json:"name"`
+	Slug            string   `json:"slug"`
 	Description     string   `json:"description"`
 	LongDescription string   `json:"long_description"`
 	CategoryName    string   `json:"category"`
@@ -209,12 +210,12 @@ func FindCatalogListings() (map[string][]*CatalogProd, error) {
 	rows, err := conn.Query(
 		ctx,
 		`SELECT 
-			prod.id, prod.name, prod.description,
+			prod.id, prod.name, prod.description, prod.slug,
 			ctg.name as category, pic.filename as main_img
 		FROM (
 			SELECT
 				ROW_NUMBER() OVER (PARTITION BY p.category) as row_num,
-				p.id, p.name, p.description, p.category as category_id,
+				p.id, p.name, p.description, p.slug, p.category as category_id,
 				p.main_img
 			FROM products p
 			ORDER BY p.category, p.name
@@ -239,6 +240,7 @@ func FindCatalogListings() (map[string][]*CatalogProd, error) {
 			&product.ID,
 			&product.Name,
 			&product.Description,
+			&product.Slug,
 			&product.CategoryName,
 			&imgUrl,
 		)

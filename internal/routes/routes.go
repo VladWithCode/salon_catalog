@@ -20,6 +20,7 @@ func NewRouter() http.Handler {
 
 	router.HandleFunc("GET /{$}", RenderIndex)
 	router.HandleFunc("GET /catalogo", RenderCatalaog)
+	router.HandleFunc("GET /productos/{slug}", RenderProductDetail)
 	router.HandleFunc("GET /servicios", RenderServices)
 	router.HandleFunc("GET /salon", RenderSalon)
 	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
@@ -220,6 +221,30 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	})
 
 	internal.HandleRedirect("/panel", http.StatusFound, w, r)
+}
+
+func RenderProductDetail(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Product slug is required"))
+		return
+	}
+
+	product, err := db.FindProductBySlug(slug)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Product not found"))
+		log.Printf("failed to find product by slug %s: %v\n", slug, err)
+		return
+	}
+
+	err = pages.Product(product).Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Product page err: %v\n", err)
+	}
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {
