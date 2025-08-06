@@ -38,7 +38,7 @@ func BaseLayout(title string, contents templ.Component, isMainPage bool) templ.C
 			return templ_7745c5c3_Err
 		}
 		if title == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "Salon Catalog")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "Villa Chenacolo")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

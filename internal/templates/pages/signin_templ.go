@@ -96,7 +96,7 @@ func SignIn(formState *FormState) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = templates.BaseLayout("Iniciar Sesión | Chenacolo", nil, false).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templates.BaseLayout("Iniciar Sesión | Villa Chenacolo", nil, false).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
