@@ -15,7 +15,7 @@ templ ProductsTable(result *db.ProductFilterResult) {
 				<button
 					type="button"
 					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
-					hx-get="/productos"
+					hx-get="/panel/productos/table"
 					hx-target="#products-table"
 					hx-params="none"
 					data-click-handler-selector="[data-products-filter-clear]"
@@ -29,7 +29,7 @@ templ ProductsTable(result *db.ProductFilterResult) {
 				<button
 					type="button"
 					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
-					hx-get="/productos"
+					hx-get="/panel/productos/table"
 					hx-target="#products-table"
 					hx-params="none"
 					data-click-handler-selector="[data-products-filter-clear]"
@@ -110,7 +110,7 @@ templ ProductTableRow(product *db.Product) {
 		</div>
 		<div class="flex gap-2 p-2 pt-0.5">
 			<button
-				hx-get={ fmt.Sprintf("/productos/%s", product.ID) }
+				hx-get={ fmt.Sprintf("/panel/productos/modal/%s", product.ID) }
 				hx-target="#products-modal"
 				hx-indicator="#global-loading-indicator"
 				class="flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700"
@@ -119,8 +119,7 @@ templ ProductTableRow(product *db.Product) {
 				<div class="sr-only">Ver producto</div>
 			</button>
 			<button
-				hx-delete={ fmt.Sprintf("/productos/%s", product.ID) }
-				hx-confirm="¿Seguro que deseas eliminar el producto?"
+					hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }				hx-confirm="¿Seguro que deseas eliminar el producto?"
 				hx-indicator="#global-loading-indicator"
 				hx-target="#products-table"
 				hx-include='[name="sort"], [name="search"]'
@@ -140,7 +139,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 				"w-8 aspect-square",
 				templ.KV("opacity-0 invisible", !result.HasPrevious),
 			}
-			hx-get={ fmt.Sprintf("/productos?page=%d", result.Page-1) }
+			hx-get={ fmt.Sprintf("/panel/productos?page=%d", result.Page-1) }
 			hx-include="[name='search'], [name='sort']"
             hx-indicator="#products-table-loading"
 			hx-target="#products-table"
@@ -152,7 +151,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 			for i, lim:= max(1, result.Page-2), min(result.TotalPages, result.Page+2); i <= lim; i++ {
 				<button
 					class="w-8 aspect-square rounded-sm disabled:font-medium disabled:text-gray-800 disabled:bg-secondary"
-					hx-get={ fmt.Sprintf("/productos?page=%d", i) }
+					hx-get={ fmt.Sprintf("/panel/productos?page=%d", i) }
 					hx-target="#products-table"
 					hx-include="[name='search'], [name='sort']"
                     hx-indicator="#products-table-loading"
@@ -167,7 +166,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 				"w-8 aspect-square",
 				templ.KV("opacity-0 invisible", !result.HasNext),
 			}
-			hx-get={ fmt.Sprintf("/productos?page=%d", result.Page+1) }
+			hx-get={ fmt.Sprintf("/panel/productos?page=%d", result.Page+1) }
 			hx-include="[name='search'], [name='sort']"
 			hx-target="#products-table"
             hx-indicator="#products-table-loading"
@@ -222,8 +221,7 @@ templ ProductModal(product *db.Product, err string) {
 				<button
 					id="products-modal-delete"
 					class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
-					hx-delete={ fmt.Sprintf("/productos/%s", product.ID) }
-					hx-target="#products-table"
+				hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }					hx-target="#products-table"
 					hx-include='[name="sort"], [name="search"]'
 					hx-indicator="#global-loading-indicator"
 					hx-confirm="¿Seguro que deseas eliminar el producto?"
@@ -240,7 +238,7 @@ templ ProductModal(product *db.Product, err string) {
 
 templ ProductEditForm(product *db.Product) {
 	<form
-		hx-put={ fmt.Sprintf("/productos/%s", product.ID) }
+		hx-put={ fmt.Sprintf("/panel/productos/%s", product.ID) }
 		hx-target="#products-table"
 		hx-indicator="#global-loading-indicator"
 		class="flex-1 basis-full w-full overflow-auto space-y-4 p-4"
@@ -384,7 +382,7 @@ templ ProductCreateModal(err string) {
 
 templ ProductCreateForm() {
 	<form
-		hx-post="/productos/nuevo"
+		hx-post="/panel/productos/nuevo"
 		hx-target="#products-table"
 		hx-indicator="#global-loading-indicator"
 		hx-include='[name="search"], [name="sort"]'

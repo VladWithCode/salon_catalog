@@ -29,7 +29,7 @@ templ Products() {
 							<li class="w-full">
 								<button
 									id="products-actions-new"
-									hx-get="/productos/nuevo"
+									hx-get="/panel/productos/modal/nuevo"
 									hx-target="#products-modal"
 									hx-indicator="#global-loading-indicator"
 									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
@@ -42,7 +42,7 @@ templ Products() {
 								<button
 									id="products-multi-selection-delete"
 									data-products-multi-action="delete"
-									hx-delete="/productos"
+									hx-delete="/panel/productos"
 									hx-target="#products-table"
 									hx-confirm="¿Eliminar los productos seleccionados?"
 									hx-indicator="#products-table-loading"
@@ -81,8 +81,7 @@ templ Products() {
 								<button
 									type="button"
 									class="text-sm text-gray-700 font-bold tracking-wide"
-									hx-get="/productos"
-									hx-target="#products-table"
+							hx-get="/panel/productos/table"									hx-target="#products-table"
 									data-click-handler-selector="[data-products-filter-clear]"
 									data-products-filter-clear
 								>
@@ -142,7 +141,7 @@ templ Products() {
 							<span id="products-table-count" hx-swap-oob>(0/0)</span>
 						</h4>
 						<select
-							hx-get="/productos"
+							hx-get="/panel/productos/table"
 							hx-trigger="change"
 							hx-target="#products-table"
 							hx-indicator="#products-table-loading"
@@ -174,7 +173,7 @@ templ Products() {
 						>
 							<div
 								id="products-table"
-								hx-get="/productos"
+								hx-get="/panel/productos/table"
 								hx-include='[name="search"], [name="sort"]'
 								hx-target-5xx="this"
 								hx-target-4xx="this"

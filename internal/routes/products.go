@@ -22,14 +22,14 @@ import (
 )
 
 func RegisterProductsRoutes(router *customServeMux) {
-	// HTMX routes that respond with templ components
-	router.HandleFunc("GET /productos", auth.ValidateAuth(RenderProductsTable))
-	router.HandleFunc("GET /productos/nuevo", auth.ValidateAuth(RenderNewProductForm))
-	router.HandleFunc("POST /productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
-	router.HandleFunc("GET /productos/{id}", auth.ValidateAuth(RenderProduct))
-	router.HandleFunc("PUT /productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
-	router.HandleFunc("DELETE /productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
-	router.HandleFunc("DELETE /productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
+	// HTMX routes that respond with templ components (for AJAX requests)
+	router.HandleFunc("GET /panel/productos/table", auth.ValidateAuth(RenderProductsTable))
+	router.HandleFunc("GET /panel/productos/modal/nuevo", auth.ValidateAuth(RenderNewProductForm))
+	router.HandleFunc("POST /panel/productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
+	router.HandleFunc("GET /panel/productos/modal/{id}", auth.ValidateAuth(RenderProduct))
+	router.HandleFunc("PUT /panel/productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
+	router.HandleFunc("DELETE /panel/productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
+	router.HandleFunc("DELETE /panel/productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
 
 	// Legacy API routes
 	router.HandleFunc("GET /api/products", GetProducts)

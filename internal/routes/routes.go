@@ -22,6 +22,7 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /catalogo", RenderCatalaog)
 	router.HandleFunc("GET /productos/{slug}", RenderProductDetail)
 	router.HandleFunc("GET /servicios", RenderServices)
+	router.HandleFunc("GET /reservaciones", RenderReservations)
 	router.HandleFunc("GET /salon", RenderSalon)
 	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
 
@@ -108,6 +109,15 @@ func RenderServices(w http.ResponseWriter, r *http.Request) {
 
 func RenderSalon(w http.ResponseWriter, r *http.Request) {
 	err := pages.Salon().Render(context.Background(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Gallery err: %v\n", err)
+	}
+}
+
+func RenderReservations(w http.ResponseWriter, r *http.Request) {
+	err := pages.Reservations().Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))

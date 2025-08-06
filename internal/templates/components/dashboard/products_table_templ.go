@@ -66,13 +66,13 @@ func ProductsTable(result *db.ProductFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if result.HasError {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex-1 flex items-center justify-center gap-4 p-4\"><h3 class=\"text-lg text-red-700 font-semibold\">Algo salió mal</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/productos\" hx-target=\"#products-table\" hx-params=\"none\" data-click-handler-selector=\"[data-products-filter-clear]\" data-products-filter-clear>Limpiar Filtros</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex-1 flex items-center justify-center gap-4 p-4\"><h3 class=\"text-lg text-red-700 font-semibold\">Algo salió mal</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/panel/productos/table\" hx-target=\"#products-table\" hx-params=\"none\" data-click-handler-selector=\"[data-products-filter-clear]\" data-products-filter-clear>Limpiar Filtros</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if len(result.Products) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"text-center p-4 space-y-2\"><h3 class=\"\">No se encontraron productos que coincidan con tu búsqueda</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/productos\" hx-target=\"#products-table\" hx-params=\"none\" data-click-handler-selector=\"[data-products-filter-clear]\" data-products-filter-clear>Limpiar Filtros</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"text-center p-4 space-y-2\"><h3 class=\"\">No se encontraron productos que coincidan con tu búsqueda</h3><button type=\"button\" class=\"text-lg underline underline-offset-2 text-accent font-bold tracking-wide\" hx-get=\"/panel/productos/table\" hx-target=\"#products-table\" hx-params=\"none\" data-click-handler-selector=\"[data-products-filter-clear]\" data-products-filter-clear>Limpiar Filtros</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -336,9 +336,9 @@ func ProductTableRow(product *db.Product) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos/%s", product.ID))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/modal/%s", product.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 113, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 113, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -357,9 +357,9 @@ func ProductTableRow(product *db.Product) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos/%s", product.ID))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/%s", product.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 122, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 122, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -431,9 +431,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos?page=%d", result.Page-1))
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", result.Page-1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 143, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 142, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -457,9 +457,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos?page=%d", i))
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 155, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 154, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -482,7 +482,7 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 161, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 160, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -522,9 +522,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos?page=%d", result.Page+1))
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", result.Page+1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 170, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 169, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -580,7 +580,7 @@ func ProductModal(product *db.Product, err string) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 187, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 186, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -615,7 +615,7 @@ func ProductModal(product *db.Product, err string) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 205, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 204, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
@@ -649,9 +649,9 @@ func ProductModal(product *db.Product, err string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var31 string
-			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos/%s", product.ID))
+			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/%s", product.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 225, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 224, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -704,9 +704,9 @@ func ProductEditForm(product *db.Product) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var33 string
-		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/productos/%s", product.ID))
+		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/%s", product.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 243, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 241, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -719,7 +719,7 @@ func ProductEditForm(product *db.Product) templ.Component {
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 254, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 252, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -732,7 +732,7 @@ func ProductEditForm(product *db.Product) templ.Component {
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(product.Slug)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 265, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 263, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -745,7 +745,7 @@ func ProductEditForm(product *db.Product) templ.Component {
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(product.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 278, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 276, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -758,7 +758,7 @@ func ProductEditForm(product *db.Product) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(product.LongDescription)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 287, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 285, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -779,7 +779,7 @@ func ProductEditForm(product *db.Product) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", product.Quantity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 309, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 307, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -867,7 +867,7 @@ func ProductCreateModal(err string) templ.Component {
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 365, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 363, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -920,7 +920,7 @@ func ProductCreateForm() templ.Component {
 			templ_7745c5c3_Var41 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<form hx-post=\"/productos/nuevo\" hx-target=\"#products-table\" hx-indicator=\"#global-loading-indicator\" hx-include='[name=\"search\"], [name=\"sort\"]' class=\"flex-1 basis-full w-full overflow-auto space-y-4 p-4\"><div class=\"space-y-2\"><label for=\"product-create-name\" class=\"block text-sm font-medium text-gray-700\">Nombre</label> <input id=\"product-create-name\" name=\"name\" type=\"text\" required placeholder=\"Nombre del producto\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></div><div class=\"space-y-2\"><label for=\"product-create-description\" class=\"block text-sm font-medium text-gray-700\">Descripción</label> <textarea id=\"product-create-description\" name=\"description\" rows=\"3\" required placeholder=\"Descripción breve del producto\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><div class=\"space-y-2\"><label for=\"product-create-long-description\" class=\"block text-sm font-medium text-gray-700\">Descripción Larga</label> <textarea id=\"product-create-long-description\" name=\"long_description\" rows=\"4\" placeholder=\"Descripción detallada (opcional)\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><div class=\"space-y-2\"><label for=\"product-create-category\" class=\"block text-sm font-medium text-gray-700\">Categoría</label> <select id=\"product-create-category\" name=\"category\" required class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent\"><option value=\"\">Seleccionar categoría</option>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<form hx-post=\"/panel/productos/nuevo\" hx-target=\"#products-table\" hx-indicator=\"#global-loading-indicator\" hx-include='[name=\"search\"], [name=\"sort\"]' class=\"flex-1 basis-full w-full overflow-auto space-y-4 p-4\"><div class=\"space-y-2\"><label for=\"product-create-name\" class=\"block text-sm font-medium text-gray-700\">Nombre</label> <input id=\"product-create-name\" name=\"name\" type=\"text\" required placeholder=\"Nombre del producto\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></div><div class=\"space-y-2\"><label for=\"product-create-description\" class=\"block text-sm font-medium text-gray-700\">Descripción</label> <textarea id=\"product-create-description\" name=\"description\" rows=\"3\" required placeholder=\"Descripción breve del producto\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><div class=\"space-y-2\"><label for=\"product-create-long-description\" class=\"block text-sm font-medium text-gray-700\">Descripción Larga</label> <textarea id=\"product-create-long-description\" name=\"long_description\" rows=\"4\" placeholder=\"Descripción detallada (opcional)\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><div class=\"space-y-2\"><label for=\"product-create-category\" class=\"block text-sm font-medium text-gray-700\">Categoría</label> <select id=\"product-create-category\" name=\"category\" required class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent\"><option value=\"\">Seleccionar categoría</option>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
