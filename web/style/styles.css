@@ -160,5 +160,5 @@ html {
     scroll-padding-top: 2.5rem;
 }
 body {
-    @apply bg-stone-100 text-gray-700 font-sans;
+    @apply bg-gray-200 text-gray-700 font-sans;
 }
