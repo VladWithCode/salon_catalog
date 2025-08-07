@@ -87,7 +87,7 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			id, name, description, long_description, category_id, category, 
+			id, name, description, long_description, category_id, category_name, 
 			image_url, available, images
 		FROM catalog_products WHERE id = $1`,
 		id,
