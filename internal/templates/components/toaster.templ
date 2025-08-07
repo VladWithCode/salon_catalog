@@ -210,33 +210,35 @@ func (td *ToastData) GetIcon() templ.Component {
 }
 
 templ ToasterToast(data *ToastData) {
-	<div hx-swap-oob="afterbegin:#toaster-container">
-		<div
-			id={ fmt.Sprintf("toaster-toast-%s", data.ID) }
-			class={ "relative z-0 flex gap-4 p-2 rounded-sm shadow translate-y-6 opacity-0 pointer-events-auto " , data.GetClass() }
-			data-toaster-toast-id={ data.ID }
-			if !data.Pinned {
-				data-toaster-toast-duration={ data.GetDuration() }
-			}
-			if data.Closable {
-				data-toaster-toast-closable
-			}
-			if data.Pinned {
-				data-toaster-toast-pinned
-			}
-		>
-			if data.Pinned {
-				<div class="absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4"></div>
-			}
-			<div class="flex gap-2">
-				@data.GetIcon()
-				<span class="block flex-1 text-sm font-bold tracking-wide">{ data.Message }</span>
+	@templ.Fragment("toaster-toast") {
+		<div hx-swap-oob="afterbegin:#toaster-container">
+			<div
+				id={ fmt.Sprintf("toaster-toast-%s", data.ID) }
+				class={ "relative z-0 flex gap-4 p-2 rounded-sm shadow translate-y-6 opacity-0 pointer-events-auto " , data.GetClass() }
+				data-toaster-toast-id={ data.ID }
+				if !data.Pinned {
+					data-toaster-toast-duration={ data.GetDuration() }
+				}
+				if data.Closable {
+					data-toaster-toast-closable
+				}
+				if data.Pinned {
+					data-toaster-toast-pinned
+				}
+			>
+				if data.Pinned {
+					<div class="absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4"></div>
+				}
+				<div class="flex gap-2">
+					@data.GetIcon()
+					<span class="block flex-1 text-sm font-bold tracking-wide">{ data.Message }</span>
+				</div>
+				if data.Closable || data.Pinned {
+					<button class="ml-auto" data-toaster-toast-close={ data.ID } data-click-handler-selector="[data-toaster-toast-close]">
+						@TimesIcon("w-6", nil)
+					</button>
+				}
 			</div>
-			if data.Closable || data.Pinned {
-				<button class="ml-auto" data-toaster-toast-close={ data.ID } data-click-handler-selector="[data-toaster-toast-close]">
-					@TimesIcon("w-6", nil)
-				</button>
-			}
 		</div>
-	</div>
+	}
 }

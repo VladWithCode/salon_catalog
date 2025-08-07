@@ -398,6 +398,9 @@ func SidebarSectionNavItem(title, href string, attr templ.Attributes) templ.Comp
 }
 
 func getUserInitals(user *auth.Auth) string {
+	if user == nil {
+		return "?"
+	}
 	nameParts := strings.SplitN(user.Fullname, " ", 2)
 	return nameParts[0][0:1]
 }

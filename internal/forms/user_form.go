@@ -1,6 +1,16 @@
 package forms
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
+import (
+	"fmt"
+	"regexp"
+
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
+
+const MinUserNameLength = 3
+const MaxUserNameLength = 255
+const MinUserPasswordLength = 8
+const MaxUserPasswordLength = 120
 
 type UserFormState struct {
 	fields map[string]FieldState
@@ -8,27 +18,30 @@ type UserFormState struct {
 	generalError   string
 	successMessage string
 
+	isSubmitted bool
 	hasErrors   bool
 	hasWarnings bool
 }
 
 func NewUserFormState() *UserFormState {
-	return &UserFormState{}
+	return &UserFormState{
+		fields: map[string]FieldState{},
+	}
 }
 
 func NewUserFormStateFromUser(user *db.User) *UserFormState {
 	return &UserFormState{
 		fields: map[string]FieldState{
-			"fullname": FieldState{
+			"fullname": {
 				Value: user.Fullname,
 			},
-			"username": FieldState{
+			"username": {
 				Value: user.Username,
 			},
-			"email": FieldState{
+			"email": {
 				Value: user.Email,
 			},
-			"role": FieldState{
+			"role": {
 				Value: user.Role,
 			},
 		},
@@ -133,7 +146,7 @@ func (fs *UserFormState) GetFieldClass(field string) string {
 		return "border-gray-300 focus:ring-accent focus:border-transparent"
 	}
 
-	baseClass := "transition-all duration-200"
+	baseClass := "transition-all duration-200 placeholder:text-gray-500"
 
 	switch fld.ValidationClass {
 	case "error":
@@ -143,10 +156,7 @@ func (fs *UserFormState) GetFieldClass(field string) string {
 	case "warning":
 		return baseClass + " border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500 bg-yellow-50"
 	default:
-		if fld.IsTouched {
-			return baseClass
-		}
-		return baseClass + " border-gray-300 focus:ring-accent focus:border-transparent hover:border-gray-400"
+		return baseClass + " border-gray-200 focus:ring-accent focus:border-transparent bg-light"
 	}
 }
 
@@ -234,5 +244,103 @@ func (fs *UserFormState) ResetFieldState(fields ...string) {
 			}
 		}
 	}
+}
 
+func (fs *UserFormState) Validate() error {
+	hasErrors := false
+
+	if nameFld, ok := fs.fields["fullname"]; ok {
+		exp := regexp.MustCompile("[a-zA-Z ]+$")
+		if nameFld.Value == "" && len(nameFld.Value) == 0 {
+			fs.SetFieldError("fullname", "El nombre es requerido")
+			hasErrors = true
+		} else if len(nameFld.Value) < MinUserNameLength {
+			fs.SetFieldError("fullname", fmt.Sprintf("El nombre debe tener al menos %d caracteres", MinUserNameLength))
+			hasErrors = true
+		} else if len(nameFld.Value) > MaxUserNameLength {
+			fs.SetFieldError("fullname", fmt.Sprintf("El nombre no puede exceder %d caracteres", MaxUserNameLength))
+			hasErrors = true
+		} else if exp.Match([]byte(nameFld.Value)) == false {
+			fs.SetFieldError("fullname", "El nombre no es válido. Solo letras y espacios son permitidos")
+			hasErrors = true
+		}
+	}
+
+	if usernameFld, ok := fs.fields["username"]; ok {
+		exp := regexp.MustCompile("[a-zA-Z0-9_]+$")
+		if usernameFld.Value == "" && len(usernameFld.Value) == 0 {
+			fs.SetFieldError("username", "El nombre es requerido")
+			hasErrors = true
+		} else if len(usernameFld.Value) < MinUserNameLength {
+			fs.SetFieldError("username", fmt.Sprintf("El nombre debe tener al menos %d caracteres", MinUserNameLength))
+			hasErrors = true
+		} else if len(usernameFld.Value) > MaxUserNameLength {
+			fs.SetFieldError("username", fmt.Sprintf("El nombre no puede exceder %d caracteres", MaxUserNameLength))
+			hasErrors = true
+		} else if exp.Match([]byte(usernameFld.Value)) == false {
+			fs.SetFieldError("username", "El nombre no es válido. Solo caracteres alfanuméricos y guiones son permitidos")
+			hasErrors = true
+		}
+	}
+
+	if roleFld, ok := fs.fields["role"]; ok {
+		if roleFld.Value == "" {
+			fs.SetFieldError("role", "El rol es requerido")
+			hasErrors = true
+		} else if roleFld.Value != db.RoleAdmin && roleFld.Value != db.RoleEditor && roleFld.Value != db.RoleUser {
+			fs.SetFieldError("role", "El rol no es válido")
+			hasErrors = true
+		}
+	}
+
+	if roleFld, ok := fs.fields["role"]; ok {
+		if roleFld.Value == "" {
+			fs.SetFieldError("role", "El rol es requerido")
+			hasErrors = true
+		}
+
+		if roleFld.Value != db.RoleAdmin && roleFld.Value != db.RoleEditor && roleFld.Value != db.RoleUser {
+			fs.SetFieldError("role", "El rol no es válido")
+			hasErrors = true
+		}
+	}
+
+	if passwordFld, ok := fs.fields["current_passwd"]; ok {
+		if passwordFld.Value == "" {
+			fs.SetFieldError("current_passwd", "Debes ingresar tu contraseña actual.")
+			hasErrors = true
+		}
+
+		newPasswordFld, _ := fs.fields["new_passwd"]
+		confirmPasswd, _ := fs.fields["confirm_passwd"]
+		if newPasswordFld.Value == "" {
+			fs.SetFieldError("new_passwd", "La nueva contraseña es requerida")
+			hasErrors = true
+		} else if len(newPasswordFld.Value) < MinUserPasswordLength {
+			fs.SetFieldError("new_passwd", fmt.Sprintf("La nueva contraseña debe tener al menos %d caracteres", MinUserPasswordLength))
+			hasErrors = true
+		} else if len(newPasswordFld.Value) > MaxUserPasswordLength {
+			fs.SetFieldError("new_passwd", fmt.Sprintf("La nueva contraseña no puede exceder %d caracteres", MaxUserPasswordLength))
+			hasErrors = true
+		}
+
+		if confirmPasswd.Value == "" || confirmPasswd.Value != newPasswordFld.Value {
+			fs.SetFieldError("confirm_passwd", "Las contraseñas no coinciden")
+			hasErrors = true
+		}
+	}
+
+	if hasErrors {
+		return ErrValidationFailed
+	}
+
+	return nil
+}
+
+func (fs *UserFormState) SetIsSubmitted() {
+	fs.isSubmitted = true
+}
+
+func (fs *UserFormState) IsSubmitted() bool {
+	return fs.isSubmitted
 }

@@ -167,12 +167,13 @@ func UpdateUser(user *User) error {
 
 	_, err = conn.Exec(
 		ctx,
-		"UPDATE users SET name = $1, lastname = $2, password = $3, username = $4, role = $5, email = $6, phone = $7, img = $8 WHERE id = $9",
+		"UPDATE users SET fullname = $1, password = $2, username = $3, role = $4, email = $5 WHERE id = $6",
 		user.Fullname,
 		user.Password,
 		user.Username,
 		user.Role,
 		user.Email,
+		user.ID,
 	)
 
 	if err != nil {

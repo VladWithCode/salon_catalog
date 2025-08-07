@@ -11,7 +11,10 @@ import (
 )
 
 func GetUserInitals(ctx context.Context) string {
-	user, _ := auth.ExtractAuthFromCtx(ctx)
+	user, err := auth.ExtractAuthFromCtx(ctx)
+	if err != nil || user == nil {
+		return "?"
+	}
 	nameParts := strings.SplitN(user.Fullname, " ", 2)
 	return nameParts[0][0:1]
 }
