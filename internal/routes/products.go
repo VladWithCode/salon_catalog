@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -351,9 +350,17 @@ func parseProductFilterParams(r *http.Request) (*db.ProductFilterParams, error) 
 }
 
 func RenderNewProductForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	tCtgs, err := db.FindAllCategories()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to find categories"))
+		log.Printf("failed to find categories: %v\n", err)
+		return
+	}
+	ctgs := internal.PtrSliceToPlainSlice(tCtgs)
 	// If request is AJAX, render components
 	if r.Header.Get("HX-Request") == "true" {
-		component := dashboard.ProductCreateModal("")
+		component := dashboard.ProductCreateModal(ctgs, "")
 		component.Render(r.Context(), w)
 	} else {
 		// Else render page
@@ -364,6 +371,8 @@ func RenderNewProductForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	w.Header().Add("X-Includes-Toast", "true")
 	toastData := components.NewToastData("Se creó el producto exitosamente", components.ToastSuccess, 3000, true, false)
+	tCtgs, _ := db.FindAllCategories()
+	ctgs := internal.PtrSliceToPlainSlice(tCtgs)
 
 	// Parse form data
 	err := r.ParseForm()
@@ -372,7 +381,7 @@ func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth
 		toastData.Message = "Error al procesar el formulario"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al procesar el formulario"}),
+			dashboard.ProductCreateModal(ctgs, "Error al procesar el formulario"),
 			components.ToasterToast(toastData),
 		)
 		comp.Render(r.Context(), w)
@@ -394,7 +403,7 @@ func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth
 		toastData.Message = "Nombre, descripción y categoría son requeridos"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductCreateModal("Nombre, descripción y categoría son requeridos"),
+			dashboard.ProductCreateModal(ctgs, "Nombre, descripción y categoría son requeridos"),
 			components.ToasterToast(toastData),
 		)
 		comp.Render(r.Context(), w)
@@ -428,7 +437,7 @@ func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth
 		toastData.Message = "Error al crear el producto"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductCreateModal("Error al crear el producto"),
+			dashboard.ProductCreateModal(ctgs, "Error al crear el producto"),
 			components.ToasterToast(toastData),
 		)
 		comp.Render(r.Context(), w)
@@ -441,8 +450,8 @@ func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth
 	result, err := db.FilterProducts(*filters)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		toastData.Message = "Error al recuperar los productos"
-		toastData.Type = components.ToastError
+		toastData.Message = "Producto creado. Ocurrió un error al recuperar los productos, actualice la página."
+		toastData.Type = components.ToastWarning
 		comp := templ.Join(
 			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
 			components.ToasterToast(toastData),
@@ -472,12 +481,19 @@ func RenderProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	if r.Header.Get("HX-Request") == "true" {
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
-			dashboard.ProductModal(product, "Producto no encontrado").Render(r.Context(), w)
+			dashboard.ProductModal(product, nil, "Producto no encontrado").Render(r.Context(), w)
+			log.Printf("failed to find product: %v\n", err)
+			return
+		}
+		ctgs, err := db.FindAllCategories()
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			dashboard.ProductModal(product, nil, "Algo salió mal").Render(r.Context(), w)
 			log.Printf("failed to find product: %v\n", err)
 			return
 		}
 
-		component := dashboard.ProductModal(product, "")
+		component := dashboard.ProductModal(product, internal.PtrSliceToPlainSlice(ctgs), "")
 		component.Render(r.Context(), w)
 	} else {
 		// Else render page
@@ -494,7 +510,6 @@ func RenderProductsTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		log.Printf("failed to parse filters: %v\n", err)
 		return
 	}
-	fmt.Printf("filters: %+v\n", filters)
 
 	// Get filtered products
 	result, err := db.FilterProducts(*filters)

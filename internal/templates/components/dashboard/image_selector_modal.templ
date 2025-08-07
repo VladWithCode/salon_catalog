@@ -1,0 +1,569 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
+
+type ImageSelectorConfig struct {
+	Mode         string   // "single" or "multiple"
+	TargetField  string   // Form field to update
+	Title        string   // Modal title
+	MaxSelection int      // Max images for multi-select
+	SelectedIds  []string // Currently selected image IDs
+	AllowUpload  bool     // Show upload tab
+}
+
+templ ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult) {
+	<!-- Image Selector Modal -->
+	<div
+		id="image-selector-modal"
+		class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+		onclick="closeImageSelectorModal(event)"
+		data-image-selector-config={ fmt.Sprintf(`{"mode":"%s","targetField":"%s","maxSelection":%d}`, config.Mode, config.TargetField, config.MaxSelection) }
+	>
+		<div class="relative max-w-6xl max-h-full w-full h-full flex flex-col bg-white rounded-lg shadow-xl">
+			<!-- Modal Header -->
+			<div class="flex items-center justify-between p-6 border-b border-gray-200">
+				<h2 class="text-xl font-semibold text-gray-900">{ config.Title }</h2>
+				<button
+					onclick="closeImageSelectorModal()"
+					class="text-gray-400 hover:text-gray-600 transition-colors"
+					aria-label="Cerrar selector"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			
+			<!-- Tab Navigation -->
+			<div class="flex border-b border-gray-200">
+				<button
+					id="selector-tab-select"
+					class="px-6 py-3 text-sm font-medium text-gray-700 border-b-2 border-accent bg-gray-50"
+					onclick="switchSelectorTab('select')"
+				>
+					Seleccionar Imágenes
+				</button>
+				if config.AllowUpload {
+					<button
+						id="selector-tab-upload"
+						class="px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300"
+						onclick="switchSelectorTab('upload')"
+					>
+						Subir Nuevas
+					</button>
+				}
+			</div>
+			
+			<!-- Tab Content -->
+			<div class="flex-1 flex flex-col overflow-hidden">
+				<!-- Select Tab -->
+				<div id="selector-content-select" class="flex-1 flex flex-col">
+					<!-- Search and Filter Bar -->
+					<div class="p-4 border-b border-gray-200">
+						<div class="flex gap-4 items-center">
+							<div class="flex-1">
+								<input
+									type="text"
+									id="image-selector-search"
+									placeholder="Buscar imágenes..."
+									class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
+									oninput="debounceImageSearch(this.value)"
+								/>
+							</div>
+							<select
+								id="image-selector-sort"
+								class="px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
+								onchange="updateImageSelectorSort(this.value)"
+							>
+								<option value="created_at_desc">Más recientes</option>
+								<option value="created_at_asc">Más antiguos</option>
+								<option value="name_asc">Nombre A-Z</option>
+								<option value="name_desc">Nombre Z-A</option>
+								<option value="size_desc">Tamaño mayor</option>
+								<option value="size_asc">Tamaño menor</option>
+							</select>
+						</div>
+					</div>
+					
+					<!-- Selection Summary -->
+					if config.Mode == "multiple" {
+						<div id="selection-summary" class="px-4 py-2 bg-gray-50 border-b border-gray-200">
+							<div class="flex items-center justify-between">
+								<span class="text-sm text-gray-600">
+									<span id="selected-count">0</span> de { fmt.Sprintf("%d", config.MaxSelection) } imágenes seleccionadas
+								</span>
+								<button
+									id="clear-selection"
+									class="text-sm text-accent hover:text-accent/80"
+									onclick="clearImageSelection()"
+								>
+									Limpiar selección
+								</button>
+							</div>
+						</div>
+					}
+					
+					<!-- Images Grid -->
+					<div class="flex-1 overflow-auto p-4">
+						<div id="images-selector-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+							@ImageSelectorGrid(result, config.SelectedIds)
+						</div>
+						
+						<!-- Loading Indicator -->
+						<div id="images-selector-loading" class="hidden flex justify-center items-center py-8">
+							<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+						</div>
+					</div>
+					
+					<!-- Pagination -->
+					if result.TotalPages > 1 {
+						<div class="p-4 border-t border-gray-200">
+							@ImageSelectorPagination(result)
+						</div>
+					}
+				</div>
+				
+				<!-- Upload Tab -->
+				if config.AllowUpload {
+					<div id="selector-content-upload" class="flex-1 flex-col hidden">
+						<div class="flex-1 p-4">
+							<div id="upload-form-container">
+								<!-- Upload form will be loaded here -->
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+			
+			<!-- Modal Footer -->
+			<div class="flex items-center justify-between p-6 border-t border-gray-200">
+				<div class="flex items-center space-x-4">
+					<!-- Selected Images Preview -->
+					<div id="selected-images-preview" class="flex space-x-2">
+						<!-- Selected image thumbnails will appear here -->
+					</div>
+				</div>
+				
+				<div class="flex space-x-3">
+					<button
+						onclick="closeImageSelectorModal()"
+						class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+					>
+						Cancelar
+					</button>
+					<button
+						id="confirm-selection"
+						onclick="confirmImageSelection()"
+						class="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled
+					>
+						Confirmar Selección
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	@ImageSelectorScript()
+}
+
+templ ImageSelectorGrid(result *db.ImageFilterResult, selectedIds []string) {
+	for _, image := range result.Images {
+		@ImageSelectorItem(image, isImageSelected(image.ID, selectedIds))
+	}
+}
+
+templ ImageSelectorItem(image *db.Image, isSelected bool) {
+	<div
+		class={ "relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200",
+			templ.KV("border-accent bg-accent/10", isSelected),
+			templ.KV("border-gray-200 hover:border-gray-300", !isSelected) }
+		data-image-id={ image.ID }
+		onclick="toggleImageSelection(this)"
+	>
+		<!-- Selection Indicator -->
+		<div class={ "absolute top-2 right-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+			templ.KV("bg-accent border-accent", isSelected),
+			templ.KV("bg-white border-gray-300 group-hover:border-gray-400", !isSelected) }>
+			if isSelected {
+				<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+				</svg>
+			}
+		</div>
+		
+		<!-- Image -->
+		<div class="aspect-square">
+			<img
+				src={ fmt.Sprintf("/static/uploads/%s", image.Filename) }
+				alt={ image.Name }
+				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+				loading="lazy"
+			/>
+		</div>
+		
+		<!-- Image Info -->
+		<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+			<p class="text-white text-sm font-medium truncate">{ image.Name }</p>
+			<p class="text-white/80 text-xs">{ formatFileSize(image.Size) }</p>
+		</div>
+	</div>
+}
+
+templ ImageSelectorPagination(result *db.ImageFilterResult) {
+	<div class="flex items-center justify-between">
+		<div class="text-sm text-gray-700">
+			Mostrando { fmt.Sprintf("%d", len(result.Images)) } de { fmt.Sprintf("%d", result.Total) } imágenes
+		</div>
+		
+		<div class="flex space-x-1">
+			if result.HasPrevious {
+				<button
+					onclick="loadImageSelectorPage({{ result.Page - 1 }})"
+					class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+				>
+					Anterior
+				</button>
+			}
+			
+			<!-- Page numbers -->
+			for i := maxInt(1, result.Page-2); i <= minInt(result.TotalPages, result.Page+2); i++ {
+				<button
+					onclick="loadImageSelectorPage({{ i }})"
+					class={ "px-3 py-2 text-sm border rounded-md",
+						templ.KV("bg-accent text-white border-accent", i == result.Page),
+						templ.KV("border-gray-300 hover:bg-gray-50", i != result.Page) }
+				>
+					{ fmt.Sprintf("%d", i) }
+				</button>
+			}
+			
+			if result.HasNext {
+				<button
+					onclick="loadImageSelectorPage({{ result.Page + 1 }})"
+					class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+				>
+					Siguiente
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ ImageSelectorScript() {
+	<script>
+		let imageSelectorState = {
+			selectedImages: new Map(),
+			config: {},
+			searchTimeout: null
+		};
+		
+		// Initialize selector when modal opens
+		function initImageSelector() {
+			const modal = document.getElementById('image-selector-modal');
+			const configData = modal.getAttribute('data-image-selector-config');
+			imageSelectorState.config = JSON.parse(configData);
+			
+			// Load pre-selected images
+			if (imageSelectorState.config.selectedIds) {
+				imageSelectorState.config.selectedIds.forEach(id => {
+					const element = document.querySelector(`[data-image-id="${id}"]`);
+					if (element) {
+						selectImageElement(element, id);
+					}
+				});
+			}
+			
+			updateSelectionUI();
+		}
+		
+		function switchSelectorTab(tab) {
+			// Update tab buttons
+			document.getElementById('selector-tab-select').className = 
+				tab === 'select' 
+					? 'px-6 py-3 text-sm font-medium text-gray-700 border-b-2 border-accent bg-gray-50'
+					: 'px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300';
+			
+			document.getElementById('selector-tab-upload').className = 
+				tab === 'upload' 
+					? 'px-6 py-3 text-sm font-medium text-gray-700 border-b-2 border-accent bg-gray-50'
+					: 'px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300';
+			
+			// Update tab content
+			document.getElementById('selector-content-select').className = 
+				tab === 'select' ? 'flex-1 flex flex-col' : 'flex-1 flex-col hidden';
+			
+			document.getElementById('selector-content-upload').className = 
+				tab === 'upload' ? 'flex-1 flex flex-col' : 'flex-1 flex-col hidden';
+			
+			// Load upload form if switching to upload tab
+			if (tab === 'upload') {
+				loadUploadForm();
+			}
+		}
+		
+		function toggleImageSelection(element) {
+			const imageId = element.getAttribute('data-image-id');
+			const isSelected = imageSelectorState.selectedImages.has(imageId);
+			
+			if (isSelected) {
+				deselectImageElement(element, imageId);
+			} else {
+				// Check selection limits for multiple mode
+				if (imageSelectorState.config.mode === 'multiple') {
+					if (imageSelectorState.selectedImages.size >= imageSelectorState.config.maxSelection) {
+						alert(`Máximo ${imageSelectorState.config.maxSelection} imágenes permitidas`);
+						return;
+					}
+				} else {
+					// Single mode - clear previous selection
+					clearImageSelection();
+				}
+				
+				selectImageElement(element, imageId);
+			}
+			
+			updateSelectionUI();
+		}
+		
+		function selectImageElement(element, imageId) {
+			// Get image data from element
+			const img = element.querySelector('img');
+			const imageData = {
+				id: imageId,
+				src: img.src,
+				name: img.alt
+			};
+			
+			imageSelectorState.selectedImages.set(imageId, imageData);
+			
+			// Update element appearance
+			element.className = element.className.replace('border-gray-200 hover:border-gray-300', 'border-accent bg-accent/10');
+			
+			// Update selection indicator
+			const indicator = element.querySelector('.absolute.top-2.right-2');
+			indicator.className = indicator.className.replace('bg-white border-gray-300 group-hover:border-gray-400', 'bg-accent border-accent');
+			indicator.innerHTML = '<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
+		}
+		
+		function deselectImageElement(element, imageId) {
+			imageSelectorState.selectedImages.delete(imageId);
+			
+			// Update element appearance
+			element.className = element.className.replace('border-accent bg-accent/10', 'border-gray-200 hover:border-gray-300');
+			
+			// Update selection indicator
+			const indicator = element.querySelector('.absolute.top-2.right-2');
+			indicator.className = indicator.className.replace('bg-accent border-accent', 'bg-white border-gray-300 group-hover:border-gray-400');
+			indicator.innerHTML = '';
+		}
+		
+		function clearImageSelection() {
+			imageSelectorState.selectedImages.forEach((imageData, imageId) => {
+				const element = document.querySelector(`[data-image-id="${imageId}"]`);
+				if (element) {
+					deselectImageElement(element, imageId);
+				}
+			});
+			imageSelectorState.selectedImages.clear();
+			updateSelectionUI();
+		}
+		
+		function updateSelectionUI() {
+			const selectedCount = imageSelectorState.selectedImages.size;
+			const confirmButton = document.getElementById('confirm-selection');
+			
+			// Update confirm button state
+			confirmButton.disabled = selectedCount === 0;
+			
+			// Update selection count for multiple mode
+			if (imageSelectorState.config.mode === 'multiple') {
+				const countElement = document.getElementById('selected-count');
+				if (countElement) {
+					countElement.textContent = selectedCount;
+				}
+			}
+			
+			// Update preview
+			updateSelectedImagesPreview();
+		}
+		
+		function updateSelectedImagesPreview() {
+			const previewContainer = document.getElementById('selected-images-preview');
+			previewContainer.innerHTML = '';
+			
+			imageSelectorState.selectedImages.forEach((imageData, imageId) => {
+				const preview = document.createElement('div');
+				preview.className = 'relative w-12 h-12 rounded-md overflow-hidden border border-gray-200';
+				preview.innerHTML = `
+					<img src="${imageData.src}" alt="${imageData.name}" class="w-full h-full object-cover">
+					<button onclick="removeFromSelection('${imageId}')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs hover:bg-red-600">×</button>
+				`;
+				previewContainer.appendChild(preview);
+			});
+		}
+		
+		function removeFromSelection(imageId) {
+			const element = document.querySelector(`[data-image-id="${imageId}"]`);
+			if (element) {
+				deselectImageElement(element, imageId);
+			}
+			updateSelectionUI();
+		}
+		
+		function confirmImageSelection() {
+			const selectedIds = Array.from(imageSelectorState.selectedImages.keys());
+			const targetField = imageSelectorState.config.targetField;
+			
+			if (selectedIds.length === 0) return;
+			
+			// Update form field
+			const formField = document.querySelector(`[name="${targetField}"]`);
+			if (formField) {
+				if (imageSelectorState.config.mode === 'single') {
+					formField.value = selectedIds[0];
+				} else {
+					formField.value = selectedIds.join(',');
+				}
+				
+				// Trigger change event
+				formField.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+			
+			// Update preview in form
+			updateFormImagePreview(targetField, Array.from(imageSelectorState.selectedImages.values()));
+			
+			closeImageSelectorModal();
+		}
+		
+		function updateFormImagePreview(targetField, selectedImages) {
+			const previewContainer = document.getElementById(`${targetField}-preview`);
+			if (!previewContainer) return;
+			
+			previewContainer.innerHTML = '';
+			
+			selectedImages.forEach((imageData, index) => {
+				const preview = document.createElement('div');
+				preview.className = 'relative inline-block w-20 h-20 rounded-md overflow-hidden border border-gray-200 mr-2 mb-2';
+				preview.innerHTML = `
+					<img src="${imageData.src}" alt="${imageData.name}" class="w-full h-full object-cover">
+					<div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">${imageData.name}</div>
+				`;
+				previewContainer.appendChild(preview);
+			});
+		}
+		
+		function debounceImageSearch(query) {
+			clearTimeout(imageSelectorState.searchTimeout);
+			imageSelectorState.searchTimeout = setTimeout(() => {
+				loadImageSelectorResults({ name: query, page: 1 });
+			}, 300);
+		}
+		
+		function updateImageSelectorSort(sortValue) {
+			const [sortBy, sortOrder] = sortValue.split('_');
+			loadImageSelectorResults({ sort: sortValue, page: 1 });
+		}
+		
+		function loadImageSelectorPage(page) {
+			const searchQuery = document.getElementById('image-selector-search').value;
+			const sortValue = document.getElementById('image-selector-sort').value;
+			
+			loadImageSelectorResults({
+				name: searchQuery,
+				sort: sortValue,
+				page: page
+			});
+		}
+		
+		function loadImageSelectorResults(params) {
+			const loading = document.getElementById('images-selector-loading');
+			const grid = document.getElementById('images-selector-grid');
+			
+			loading.classList.remove('hidden');
+			
+			const urlParams = new URLSearchParams(params);
+			urlParams.append('limit', '12');
+			
+			fetch(`/api/images/selector?${urlParams}`)
+				.then(response => response.json())
+				.then(data => {
+					// Update grid with new results
+					updateImageSelectorGrid(data);
+					loading.classList.add('hidden');
+				})
+				.catch(error => {
+					console.error('Error loading images:', error);
+					loading.classList.add('hidden');
+				});
+		}
+		
+		function updateImageSelectorGrid(result) {
+			// This would need to be implemented with HTMX or manual DOM manipulation
+			// For now, we'll reload the entire modal
+			location.reload();
+		}
+		
+		function loadUploadForm() {
+			const container = document.getElementById('upload-form-container');
+			if (container.innerHTML.trim() === '') {
+				// Load upload form via HTMX
+				htmx.ajax('GET', '/imagenes/subir', {
+					target: '#upload-form-container',
+					swap: 'innerHTML'
+				});
+			}
+		}
+		
+		function closeImageSelectorModal(event) {
+			if (event && event.target !== event.currentTarget) return;
+			
+			const modal = document.getElementById('image-selector-modal');
+			modal.remove();
+		}
+		
+		// Initialize when modal is loaded
+		document.addEventListener('DOMContentLoaded', function() {
+			if (document.getElementById('image-selector-modal')) {
+				initImageSelector();
+			}
+		});
+	</script>
+}
+
+// Helper functions
+func isImageSelected(imageId string, selectedIds []string) bool {
+	for _, id := range selectedIds {
+		if id == imageId {
+			return true
+		}
+	}
+	return false
+}
+
+func formatFileSize(size int) string {
+	if size < 1024 {
+		return fmt.Sprintf("%d B", size)
+	} else if size < 1024*1024 {
+		return fmt.Sprintf("%.1f KB", float64(size)/1024)
+	} else {
+		return fmt.Sprintf("%.1f MB", float64(size)/(1024*1024))
+	}
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

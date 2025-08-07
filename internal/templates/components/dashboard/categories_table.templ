@@ -51,9 +51,30 @@ templ CategoriesTable(result *db.CategoryFilterResult) {
 			if result.TotalPages > 1 {
 				@CategoriesPagination(result)
 			}
-		</div>
-	}
-}
+	</div>
+	
+	<script>
+		function openImageSelector(mode, targetField, title, maxSelection) {
+			const selectedIds = document.querySelector(`[name="${targetField}"]`).value;
+			const params = new URLSearchParams({
+				mode: mode,
+				target_field: targetField,
+				title: title,
+				max_selection: maxSelection,
+				selected_ids: selectedIds
+			});
+			
+			fetch(`/imagenes/selector?${params}`)
+				.then(response => response.text())
+				.then(html => {
+					document.body.insertAdjacentHTML('beforeend', html);
+				})
+				.catch(error => {
+					console.error('Error loading image selector:', error);
+				});
+		}
+	</script>
+}}
 
 templ CategoryTableRow(category *db.Category) {
 	<div
@@ -278,6 +299,57 @@ templ CategoryEditForm(category *db.Category) {
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
 			>{ category.LongDescription }</textarea>
 		</div>
+		
+		<!-- Images Section -->
+		<div class="space-y-4 border-t border-gray-200 pt-4">
+			<h3 class="text-md font-medium text-gray-700">Imágenes</h3>
+			
+			<!-- Hidden inputs for image fields -->
+			<input type="hidden" name="header_img" value={ category.HeaderImg } />
+			<input type="hidden" name="display_img" value={ category.DisplayImg } />
+			
+			<!-- Header Image Selector -->
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Imagen de Encabezado</label>
+				<div class="flex items-center space-x-4">
+					<button
+						type="button"
+						onclick="openImageSelector('single', 'header_img', 'Seleccionar Imagen de Encabezado', 1)"
+						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+					>
+						Seleccionar
+					</button>
+					<div id="header_img-preview" class="flex space-x-2">
+						if category.HeaderImg != "" {
+							<div class="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+								<img src={ fmt.Sprintf("/static/uploads/%s", category.HeaderImg) } alt="Header" class="w-full h-full object-cover"/>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+			
+			<!-- Display Image Selector -->
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Imagen de Visualización</label>
+				<div class="flex items-center space-x-4">
+					<button
+						type="button"
+						onclick="openImageSelector('single', 'display_img', 'Seleccionar Imagen de Visualización', 1)"
+						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+					>
+						Seleccionar
+					</button>
+					<div id="display_img-preview" class="flex space-x-2">
+						if category.DisplayImg != "" {
+							<div class="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+								<img src={ fmt.Sprintf("/static/uploads/%s", category.DisplayImg) } alt="Display" class="w-full h-full object-cover"/>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="flex gap-2 pt-4">
 			<button
 				type="submit"
@@ -373,6 +445,49 @@ templ CategoryCreateForm() {
 				placeholder="Descripción detallada (opcional)"
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
 			></textarea>
+		</div>
+		
+		<!-- Images Section -->
+		<div class="space-y-4 border-t border-gray-200 pt-4">
+			<h3 class="text-md font-medium text-gray-700">Imágenes</h3>
+			
+			<!-- Hidden inputs for image fields -->
+			<input type="hidden" name="header_img" value="" />
+			<input type="hidden" name="display_img" value="" />
+			
+			<!-- Header Image Selector -->
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Imagen de Encabezado</label>
+				<div class="flex items-center space-x-4">
+					<button
+						type="button"
+						onclick="openImageSelector('single', 'header_img', 'Seleccionar Imagen de Encabezado', 1)"
+						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+					>
+						Seleccionar
+					</button>
+					<div id="header_img-preview" class="flex space-x-2">
+						<!-- Selected image preview will appear here -->
+					</div>
+				</div>
+			</div>
+			
+			<!-- Display Image Selector -->
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Imagen de Visualización</label>
+				<div class="flex items-center space-x-4">
+					<button
+						type="button"
+						onclick="openImageSelector('single', 'display_img', 'Seleccionar Imagen de Visualización', 1)"
+						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+					>
+						Seleccionar
+					</button>
+					<div id="display_img-preview" class="flex space-x-2">
+						<!-- Selected image preview will appear here -->
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="flex gap-2 pt-4">
 			<button

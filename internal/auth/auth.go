@@ -174,8 +174,8 @@ func ValidateAuth(next AuthedHandler) http.HandlerFunc {
 				Role:     role,
 				Fullname: fullname,
 			}
-			authedReq := r.WithContext(context.WithValue(r.Context(), DefaultAuthCtxKey, a))
 
+			authedReq := r.WithContext(context.WithValue(r.Context(), DefaultAuthCtxKey, a))
 			next(w, authedReq, &Auth{
 				ID:       id,
 				Username: username,
@@ -192,8 +192,17 @@ func RejectUnauthenticated(w http.ResponseWriter, r *http.Request, reason string
 	internal.HandleRedirect("/iniciar-sesion", http.StatusFound, w, r)
 }
 
-func ExtractAuth(r *http.Request) (*Auth, error) {
+func ExtractAuthFromReq(r *http.Request) (*Auth, error) {
 	auth, ok := r.Context().Value(DefaultAuthCtxKey).(*Auth)
+	if !ok || auth == nil {
+		return nil, ErrInvalidAuth
+	}
+
+	return auth, nil
+}
+
+func ExtractAuthFromCtx(ctx context.Context) (*Auth, error) {
+	auth, ok := ctx.Value(DefaultAuthCtxKey).(*Auth)
 	if !ok || auth == nil {
 		return nil, ErrInvalidAuth
 	}

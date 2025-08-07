@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"log"
 	"net/http"
 
@@ -24,10 +23,12 @@ func RegisterDashboardRoutes(router *customServeMux) {
 
 	router.HandleFunc("GET /panel/tipos-eventos", auth.ValidateAuth(RenderEventKinds))
 	router.HandleFunc("GET /panel/imagenes", auth.ValidateAuth(RenderImages))
+
+	router.HandleFunc("GET /panel/usuario", auth.ValidateAuth(RenderProfile))
 }
 
 func RenderDashboard(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	err := dashboard.Dashboard().Render(context.Background(), w)
+	err := dashboard.Dashboard().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -36,7 +37,7 @@ func RenderDashboard(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 }
 
 func RenderProducts(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	err := dashboard.Products().Render(context.Background(), w)
+	err := dashboard.Products().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -72,7 +73,7 @@ func RenderCreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		HelpText:        "Breve descripción del producto",
 		ValidationClass: "",
 	}
-	err = dashboard.CreateProduct(dashcomps.CreateProductForm(formState, ctgs)).Render(context.Background(), w)
+	err = dashboard.CreateProduct(dashcomps.CreateProductForm(formState, ctgs)).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -81,7 +82,7 @@ func RenderCreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 }
 
 func RenderCategories(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	err := dashboard.Categories().Render(context.Background(), w)
+	err := dashboard.Categories().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -90,7 +91,7 @@ func RenderCategories(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 }
 
 func RenderEventKinds(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	err := dashboard.EventKinds().Render(context.Background(), w)
+	err := dashboard.EventKinds().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -99,10 +100,28 @@ func RenderEventKinds(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 }
 
 func RenderImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	err := dashboard.Images().Render(context.Background(), w)
+	err := dashboard.Images().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render Images err: %v\n", err)
+	}
+}
+
+func RenderProfile(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	user, err := db.GetUserByID(a.ID)
+	formState := forms.NewUserFormStateFromUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		dashboard.Profile(user, formState).Render(r.Context(), w)
+		log.Printf("failed to find user err: %v\n", err)
+		return
+	}
+
+	err = dashboard.Profile(user, formState).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Profile err: %v\n", err)
 	}
 }

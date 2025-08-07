@@ -52,9 +52,47 @@ templ CreateProductForm(formState forms.FormState, ctgs []db.Category) {
 				@TextareaField(formState, "long_description", "Descripción detallada", "Descripción completa con todas las características", false, 4)
 			</div>
 			<!-- Images Section -->
-			// <h2 class="text-lg font-semibold text-gray-800">Imágenes</h2>
-			// @ImageUploadField(formState, "image_url", "Imagen principal")
-			// @MultipleImageField(formState, "images", "Imágenes adicionales")
+			<div class="space-y-4 border-b border-gray-200 pb-4">
+				<h2 class="text-lg font-semibold text-gray-700">Imágenes</h2>
+				
+				<!-- Hidden inputs for image fields -->
+				<input type="hidden" name="main_img" value={ formState.GetFieldValue("main_img") } />
+				<input type="hidden" name="gallery" value={ formState.GetFieldValue("gallery") } />
+				
+				<!-- Main Image Selector -->
+				<div class="space-y-2">
+					<label class="block text-sm font-medium text-gray-700">Imagen Principal</label>
+					<div class="flex items-center space-x-4">
+						<button
+							type="button"
+							onclick="openImageSelector('single', 'main_img', 'Seleccionar Imagen Principal', 1)"
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+						>
+							Seleccionar Imagen
+						</button>
+						<div id="main_img-preview" class="flex space-x-2">
+							<!-- Selected image preview will appear here -->
+						</div>
+					</div>
+				</div>
+				
+				<!-- Gallery Images Selector -->
+				<div class="space-y-2">
+					<label class="block text-sm font-medium text-gray-700">Galería de Imágenes</label>
+					<div class="flex items-center space-x-4">
+						<button
+							type="button"
+							onclick="openImageSelector('multiple', 'gallery', 'Seleccionar Imágenes para Galería', 10)"
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+						>
+							Seleccionar Imágenes
+						</button>
+						<div id="gallery-preview" class="flex flex-wrap gap-2">
+							<!-- Selected images preview will appear here -->
+						</div>
+					</div>
+				</div>
+			</div>
 			<!-- Availability & Tags -->
 			<div class="">
 				<h2 class="text-lg font-semibold text-gray-700 mb-4">Disponibilidad</h2>
@@ -95,6 +133,28 @@ templ CreateProductForm(formState forms.FormState, ctgs []db.Category) {
 			</div>
 		</form>
 	</div>
+	
+	<script>
+		function openImageSelector(mode, targetField, title, maxSelection) {
+			const selectedIds = document.querySelector(`[name="${targetField}"]`).value;
+			const params = new URLSearchParams({
+				mode: mode,
+				target_field: targetField,
+				title: title,
+				max_selection: maxSelection,
+				selected_ids: selectedIds
+			});
+			
+			fetch(`/imagenes/selector?${params}`)
+				.then(response => response.text())
+				.then(html => {
+					document.body.insertAdjacentHTML('beforeend', html);
+				})
+				.catch(error => {
+					console.error('Error loading image selector:', error);
+				});
+		}
+	</script>
 }
 
 // Form field components with enhanced error handling

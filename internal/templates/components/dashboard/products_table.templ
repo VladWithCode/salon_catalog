@@ -119,7 +119,8 @@ templ ProductTableRow(product *db.Product) {
 				<div class="sr-only">Ver producto</div>
 			</button>
 			<button
-					hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }				hx-confirm="¿Seguro que deseas eliminar el producto?"
+				hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }
+				hx-confirm="¿Seguro que deseas eliminar el producto?"
 				hx-indicator="#global-loading-indicator"
 				hx-target="#products-table"
 				hx-include='[name="sort"], [name="search"]'
@@ -141,7 +142,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 			}
 			hx-get={ fmt.Sprintf("/panel/productos?page=%d", result.Page-1) }
 			hx-include="[name='search'], [name='sort']"
-            hx-indicator="#products-table-loading"
+			hx-indicator="#products-table-loading"
 			hx-target="#products-table"
 		>
 			@components.ChevronIcon("w-6 rotate-90", nil)
@@ -154,7 +155,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 					hx-get={ fmt.Sprintf("/panel/productos?page=%d", i) }
 					hx-target="#products-table"
 					hx-include="[name='search'], [name='sort']"
-                    hx-indicator="#products-table-loading"
+					hx-indicator="#products-table-loading"
 					disabled?={ i==result.Page }
 				>
 					{ fmt.Sprintf("%d", i) }
@@ -169,14 +170,14 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 			hx-get={ fmt.Sprintf("/panel/productos?page=%d", result.Page+1) }
 			hx-include="[name='search'], [name='sort']"
 			hx-target="#products-table"
-            hx-indicator="#products-table-loading"
+			hx-indicator="#products-table-loading"
 		>
 			@components.ChevronIcon("w-6 -rotate-90", nil)
 		</button>
 	</div>
 }
 
-templ ProductModal(product *db.Product, err string) {
+templ ProductModal(product *db.Product, availableCategories []db.Category, err string) {
 	<div id="products-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
 		<div class="flex-1 flex justify-between items-center">
 			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
@@ -205,7 +206,7 @@ templ ProductModal(product *db.Product, err string) {
 				</div>
 			</div>
 		} else {
-			@ProductEditForm(product)
+			@ProductEditForm(product, availableCategories)
 		}
 		<div class="flex-1 flex gap-2 justify-end items-center">
 			<button
@@ -221,7 +222,8 @@ templ ProductModal(product *db.Product, err string) {
 				<button
 					id="products-modal-delete"
 					class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
-				hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }					hx-target="#products-table"
+					hx-delete={ fmt.Sprintf("/panel/productos/%s", product.ID) }
+					hx-target="#products-table"
 					hx-include='[name="sort"], [name="search"]'
 					hx-indicator="#global-loading-indicator"
 					hx-confirm="¿Seguro que deseas eliminar el producto?"
@@ -236,7 +238,7 @@ templ ProductModal(product *db.Product, err string) {
 	</div>
 }
 
-templ ProductEditForm(product *db.Product) {
+templ ProductEditForm(product *db.Product, availableCategories []db.Category) {
 	<form
 		hx-put={ fmt.Sprintf("/panel/productos/%s", product.ID) }
 		hx-target="#products-table"
@@ -293,7 +295,7 @@ templ ProductEditForm(product *db.Product) {
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
 			>
 				<option value="">Seleccionar categoría</option>
-				@ProductCategoryOptions(product.CategoryID)
+				@ProductCategoryOptions(product.CategoryID, availableCategories)
 			</select>
 		</div>
 		<div class="grid grid-cols-2 gap-4">
@@ -335,7 +337,7 @@ templ ProductEditForm(product *db.Product) {
 	</form>
 }
 
-templ ProductCreateModal(err string) {
+templ ProductCreateModal(availableCategories []db.Category, err string) {
 	<div id="products-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
 		<div class="flex-1 flex justify-between items-center">
 			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
@@ -364,7 +366,7 @@ templ ProductCreateModal(err string) {
 				</div>
 			</div>
 		} else {
-			@ProductCreateForm()
+			@ProductCreateForm(availableCategories)
 		}
 		<div class="flex-1 flex gap-2 justify-end items-center">
 			<button
@@ -380,7 +382,7 @@ templ ProductCreateModal(err string) {
 	</div>
 }
 
-templ ProductCreateForm() {
+templ ProductCreateForm(availableCategories []db.Category) {
 	<form
 		hx-post="/panel/productos/nuevo"
 		hx-target="#products-table"
@@ -429,7 +431,7 @@ templ ProductCreateForm() {
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
 			>
 				<option value="">Seleccionar categoría</option>
-				@ProductCategoryOptions("")
+				@ProductCategoryOptions("", availableCategories)
 			</select>
 		</div>
 		<div class="grid grid-cols-2 gap-4">
@@ -471,10 +473,10 @@ templ ProductCreateForm() {
 	</form>
 }
 
-templ ProductCategoryOptions(selectedID string) {
+templ ProductCategoryOptions(selectedID string, availableCategories []db.Category) {
 	// Load categories from database - this is a simplified version
 	// In a real implementation, you'd pass categories as a parameter
-	<option value="1" selected?={ selectedID == "1" }>Servicios de Belleza</option>
-	<option value="2" selected?={ selectedID == "2" }>Productos de Cuidado</option>
-	<option value="3" selected?={ selectedID == "3" }>Accesorios</option>
+	for _, category := range availableCategories {
+		<option value={ category.ID } selected?={ selectedID == category.ID }>{ category.Name }</option>
+	}
 }
