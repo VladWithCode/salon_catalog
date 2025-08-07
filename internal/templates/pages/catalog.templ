@@ -30,7 +30,7 @@ templ Catalog() {
 			</div>
 		</section>
 		<!-- Wizard vs Browse Choice -->
-		<section class="py-8 px-4 bg-stone-50" id="catalog-intro">
+		/* <section class="py-8 px-4 bg-stone-50" id="catalog-intro">
 			<div class="max-w-4xl mx-auto text-center">
 				<h2 class="text-2xl font-bold mb-4">¿Cómo quieres planear tu evento?</h2>
 				<div class="grid md:grid-cols-2 gap-6 mt-8">
@@ -78,14 +78,8 @@ templ Catalog() {
 					</div>
 				</div>
 			</div>
-		</section>
-		<div id="catalog-browse" class="relative hidden">
-			<div id="browse-spinner" class="absolute inset-0 z-10 bg-secondary/70 htmx-indicator pointer-events-none">
-				<div class="h-[60vh] py-16 px-4 flex items-center justify-center gap-4">
-					<div class="h-10 w-10 border-b-6 border-accent animate-spin rounded-full"></div>
-					<span class="font-bold text-xl text-primary">Cargando productos...</span>
-				</div>
-			</div>
+		</section> */
+		<div id="catalog-browse" class="relative">
 			<!-- Search Bar -->
 			<section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
 				<div class="max-w-6xl mx-auto">
@@ -112,13 +106,13 @@ templ Catalog() {
 				</div>
 			</section>
 			<!-- Products Grid -->
-			<section class="grid" id="catalog-products">
+			<section class="relative grid" id="catalog-products">
 				<div
 					data-products-spinner
-					class="relative col-start-1 row-start-1 inset-0 max-h-full bg-secondary/90 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
+					class="absolute h-full w-full bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
 				>
 					<div class="flex flex-col items-center pt-8 gap-4 py-24 text-xl font-bold text-primary">
-						@components.LoadingIcon("h-20", nil)
+						@components.LoadingIcon("h-16", nil)
 						<p class="text-lg">Cargando productos...</p>
 					</div>
 				</div>
@@ -179,7 +173,6 @@ templ CatalogScript() {
             );
             window.scrollTo(0, 0);
         }
-
         function handleProductsBeforeSwap(e) {
             if (e.detail.xhr.status !== 200) {
                 return;
@@ -203,16 +196,14 @@ templ CatalogScript() {
 
             // Set initial state
             gsap.set(products, {opacity: 0, y: 30});
-            gsap.set(container, {opacity: 1});
+            gsap.to(container, {opacity: 1, height: 'auto'});
 
             // Animate products in
-            const tl = gsap.timeline();
+            const tl = gsap.timeline({defaults: {duration: 0.4, ease: "power2.out"}});
             const anim = tl.to(products, {
                 opacity: 1,
                 y: 0,
-                duration: 0.4,
                 stagger: 0.05,
-                ease: "power2.out"
             });
 
             currentAnimations.push(anim);
