@@ -41,14 +41,14 @@
     --font-serif: "Agatho", serif;
     --font-sans: "Inter", sans-serif;
 
-    --color-light: var(--color-gray-100);
-    --color-dark: #2C1810;
+    --color-light: #efe5d2;
+    --color-dark: #110e0a;
 
     /*--color-primary: #D4AF37;*/
-    --color-primary: #5C4033;
+    --color-primary: #3A2E23;
     /*--color-secondary: #E8B4B8;*/
-    --color-secondary: #F8F2E4;
-    --color-accent: #DE7C5A;
+    --color-secondary: #E4D3B4;
+    --color-accent: #9C7B56;
 
     --radius-xs: 0.15rem;
 }
