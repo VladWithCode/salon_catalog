@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/forms"
+	"github.com/vladwithcode/salon_catalog/internal/qrgen"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
@@ -27,6 +29,7 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("POST /panel/productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
 	router.HandleFunc("GET /panel/productos/modal/{id}", auth.ValidateAuth(RenderProduct))
 	router.HandleFunc("PUT /panel/productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
+	router.HandleFunc("PUT /panel/productos/{id}/qrcode", auth.ValidateAuth(UpdateProductQRCodeAndReturnTable))
 	router.HandleFunc("DELETE /panel/productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
 	router.HandleFunc("DELETE /panel/productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
 
@@ -193,6 +196,86 @@ func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 	formState.SuccessMessage = "Producto creado exitosamente"
 	dashboard.CreateProductForm(formState, ctgs).Render(r.Context(), w)
+}
+
+func UpdateProductQRCodeAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	id := r.PathValue("id")
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se actualizó el producto", components.ToastSuccess, 3000, true, false)
+	product, _ := db.FindProductByID(id)
+
+	// Parse form data
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductQRCode(product, true),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	// Update product fields
+	product.QRCodeFilename = strings.TrimSpace(r.FormValue("qrcode_filename"))
+
+	// Validate required fields
+	if product.QRCodeFilename == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Nombre, slug, descripción y categoría son requeridos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Campos requeridos faltantes"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		return
+	}
+
+	// Update product in database
+	err = db.UpdateProduct(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al actualizar el producto"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to update product: %v\n", err)
+		return
+	}
+
+	// Get updated products list
+	filters, _ := parseProductFilterParams(r)
+	result, err := db.FilterProducts(*filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar los productos"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to get products after update: %v\n", err)
+		return
+	}
+
+	comp := templ.Join(
+		dashboard.ProductsTable(result),
+		components.ToasterToast(toastData),
+	)
+	err = comp.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("failed to render response: %v\n", err)
+		return
+	}
 }
 
 func UpdateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
@@ -429,6 +512,12 @@ func CreateProductAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth
 		Available:       available,
 		Quantity:        quantity,
 	}
+
+	qrData := &qrgen.QRCodeData{
+		Filename: product.Slug,
+		Value:    fmt.Sprintf("https://salon.chenacolo.com/panel/productos/%s", product.ID),
+	}
+	product.QRCodeFilename, _ = qrgen.GenerateFromString(qrData)
 
 	// Create product in database
 	err = db.CreateProduct(product)

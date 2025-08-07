@@ -1,7 +1,10 @@
 package pages
 
-import "github.com/vladwithcode/salon_catalog/internal/templates"
-import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
 
 templ Salon() {
 	@templates.BaseLayout("Salón | VIlla Chenacolo", nil, false) {
@@ -100,49 +103,101 @@ templ Salon() {
 				</div>
 			</div>
 			<section class="px-4 py-16 space-y-4">
-				<img
-					src="/static/assets/chenacolo_2.jpeg"
-					alt="Imagen del recibidor del salon de eventos"
-					class="w-full aspect-[3/2] object-cover object-center rounded-xs mb-8"
-				/>
-				<h2 class="relative text-primary text-2xl font-bold">
-					<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
-					Exquisita arquitectura
-				</h2>
-				<p class="tracking-wide text-current/70">
-					Salón Chenacolo cuenta con unas instalaciones de alta calidad, con arquitectura refinada que te hara sentir
-					en un lugar especial, como ningún otro.
-				</p>
+				<div class="flex flex-col gap-8 lg:grid lg:grid-cols-2 max-w-7xl mx-auto">
+					<img
+						src="/static/assets/chenacolo_2.jpeg"
+						alt="Imagen del recibidor del salon de eventos"
+						class="w-full aspect-[3/2] object-cover object-center rounded-lg"
+					/>
+					<div class="flex flex-col gap-4 my-auto">
+						<h2 class="relative text-primary text-2xl font-bold">
+							<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
+							Exquisita arquitectura
+						</h2>
+						<p class="tracking-wide text-current/90">
+							Nada en Villa Chenacolo está puesto al azar. Cada arco, cada linea, cada textura fue elegida para crear un entorno funcional y estéticamente impecable.
+						</p>
+						<p class="tracking-wide text-current/90">
+							Un lugar que no compite con tu evento: lo realza.
+						</p>
+						<p class="tracking-wide text-current/90">
+							Más que una estructura, Villa Chenacolo es una experiencia arquitectónica que combina equilibrio, privacidad y distinción. 
+						</p>
+						<p class="tracking-wide text-current/90">
+							Todo está diseñado para que tus recuerdos encuentren el escenario perfecto.
+						</p>
+					</div>
+				</div>
 			</section>
-			<section class="bg-brand-1 px-4 py-16 space-y-4">
-				<img
-					src="/static/assets/chenacolo_3.jpeg"
-					alt="Imagen del recibidor del salon de eventos"
-					class="w-full aspect-[3/2] object-cover object-center rounded-xs mb-8"
-				/>
-				<h2 class="relative text-secondary text-2xl font-bold">
-					<span class="block absolute -top-4 h-2 w-24 bg-current"></span>
-					Finos y elegantes detalles
-				</h2>
-				<p class="tracking-wide text-stone-50/70">
-					Salón Chenacolo está equipado con detalles y equipamento elegante pensado para brindarte una experiencia
-					immersiva.
-				</p>
-			</section>
-			<section class="px-4 py-16 space-y-4">
-				<img
-					src="/static/assets/chenacolo_4.jpeg"
-					alt="Imagen del recibidor del salon de eventos"
-					class="w-full aspect-[3/2] object-cover object-center rounded-xs mb-8"
-				/>
-				<h2 class="relative text-primary text-2xl font-bold">
-					<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
-					Todo el espacio que necesitas
-				</h2>
-				<p class="tracking-wide text-current/70">
-					Salón Chenacolo cuenta con el espacio perfecto para tu evento, no importa que tan grande o pequeño sea.
-				</p>
-			</section>
+			<div class="section bg-primary px-4 py-16 space-y-8 overflow-hidden">
+				<div class="text-center text-light">
+					<h2 class="text-4xl lg:text-5xl font-bold uppercase">Galería</h2>
+				</div>
+				<div
+					id="gallery-container"
+					class="flex gap-4 w-full max-w-7xl overflow-x-auto overflow-y-hidden mx-auto"
+				>
+					for i := 0; i < len(allGalleryImages); i++ {
+						<button
+							data-gallery-popup-open-btn={ allGalleryImages[i] }
+							class="block relative grow-0 shrink-0 basis-72 aspect-1/2 overflow-hidden rounded-lg cursor-pointer transition-[transform] duration-300 rotate-0 hover:rotate-1"
+						>
+							<img
+								src={ allGalleryImages[i] }
+								alt="Imagen del area de bar del salon de eventos"
+								class="h-full aspect-square object-cover object-center z-0"
+							/>
+						</button>
+					}
+				</div>
+			</div>
+			<div
+				id="gallery-popup"
+				class="fixed inset-0 z-30 pt-16 invisible"
+				data-gallery-popup="closed"
+			>
+				<div
+					id="gallery-popup-backdrop"
+					class="absolute inset-0 z-0 bg-dark/60 backdrop-blur-sm pt-16 opacity-0"
+				></div>
+				<div id="gallery-popup-container" class="relative z-10 flex flex-col inset-x-0 bottom-0 bg-secondary h-full rounded-t-3xl p-2 translate-y-full opacity-0">
+					<div class="absolute -top-2 right-0 z-10">
+						<button
+							id="gallery-popup-close-btn"
+							data-gallery-popup-close-btn="gallery-popup"
+							class="rounded-full bg-primary text-light aspect-square cursor-pointer rotate-0 transition-transform duration-500 hover:-rotate-90"
+						>
+							@components.TimesIcon("h-12 ", nil)
+						</button>
+					</div>
+					<h4 class="pt-2 pb-4 px-4 text-xl font-semibold uppercase">Galería</h4>
+					<div class="flex-1 basis-full flex flex-col gap-4 overflow-hidden">
+						<div class="flex-1 flex items-center basis-full">
+							<img
+								id="gallery-popup-img"
+								src="/static/assets/chenacolo_1.jpeg"
+								alt=""
+								class="w-full object-contain object-center rounded-3xl"
+							/>
+						</div>
+						<div class="h-1/5 grow-0 flex gap-4 w-full overflow-auto">
+							for i, img := range allGalleryImages {
+								<button
+									id={ fmt.Sprintf("gallery-popup-img-btn-%d", i) }
+									class="shrink-0 grow-0 basis-auto aspect-square cursor-pointer rounded-lg group overflow-hidden"
+									data-gallery-popup-img-btn={ img }
+								>
+									<img
+										src={ img }
+										alt="Imagen del area de bar del salon de eventos"
+										class="h-full aspect-square object-cover object-center rounded-lg group-hover:scale-110 transition-transform duration-300"
+									/>
+								</button>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
 			@components.CTASection()
 		</main>
 	}
@@ -172,6 +227,95 @@ templ salonScript() {
                     this.contents.currentTime = 0;
                 },
             })
+
+            const galleryPopupId = 'gallery-popup';
+            const galleryPopup = document.getElementById('gallery-popup');
+            const galleryPopupContainer = document.getElementById('gallery-popup-container');
+            const galleryPopupBackdrop = document.getElementById('gallery-popup-backdrop');
+            const galleryPopupOpenBtns = document.querySelectorAll('[data-gallery-popup-open-btn]');
+            const galleryPopupImgBtns = document.querySelectorAll('[data-gallery-popup-img-btn]');
+            const galleryPopupImg = document.getElementById('gallery-popup-img');
+            const galleryPopupCloseBtn = document.getElementById('gallery-popup-close-btn');
+            const galleryPopupTl = gsap.timeline({paused: true, defaults: {duration: 0.4, ease: "power2.out"}});
+
+            galleryPopupTl.set(galleryPopup, {
+                visibility: 'visible',
+            })
+                .to(galleryPopupBackdrop, {
+                    opacity: 1,
+                })
+                .to(galleryPopupContainer, {
+                    opacity: 1,
+                    y: '0%',
+                }, "0+=0.05")
+
+            for (let openBtn of galleryPopupOpenBtns) {
+                openBtn.addEventListener('click', function(e) {
+                    const imgSrc = openBtn.dataset.galleryPopupOpenBtn;
+                    galleryPopupImg.src = imgSrc;
+                    galleryPopupTl.play();
+                    galleryPopup.dataset.galleryPopup = 'open';
+                });
+            }
+            for (let imgBtn of galleryPopupImgBtns) {
+                imgBtn.addEventListener('click', function(e) {
+                    const imgSrc = imgBtn.dataset.galleryPopupImgBtn;
+                    galleryPopupImg.src = imgSrc;
+                });
+            }
+
+            galleryPopupCloseBtn.addEventListener('click', function(e) {
+                galleryPopupTl.reverse();
+                galleryPopup.dataset.galleryPopup = 'closed';
+            });
+            galleryPopupBackdrop.addEventListener('click', function(e) {
+                galleryPopupTl.reverse();
+                galleryPopup.dataset.galleryPopup = 'closed';
+            });
+
+            document.querySelectorAll("[data-view-animate]").forEach(function (elem) {
+                gsap.to(elem, {
+                    opacity: 1,
+                    y: "0rem",
+                    duration: 1,
+                    ease: "power1.out",
+                    scrollTrigger: elem,
+                    delay: 0.3,
+                });
+            });
         });
     </script>
+}
+
+var allGalleryImages = []string{
+	"/static/assets/chenacolo_1.jpeg",
+	"/static/assets/chenacolo_2.jpeg",
+	"/static/assets/chenacolo_3.jpeg",
+	"/static/assets/chenacolo_4.jpeg",
+	"/static/assets/chenacolo_5.jpeg",
+	"/static/assets/chenacolo_6.jpeg",
+	"/static/assets/chenacolo_7.jpeg",
+	"/static/assets/chenacolo_8.jpeg",
+	"/static/assets/chenacolo_9.jpeg",
+	"/static/assets/chenacolo_10.jpeg",
+	"/static/assets/chenacolo_11.jpeg",
+	"/static/assets/chenacolo_12.jpeg",
+	"/static/assets/chenacolo_13.jpeg",
+	"/static/assets/chenacolo_14.jpeg",
+	"/static/assets/chenacolo_15.jpeg",
+	"/static/assets/chenacolo_16.jpeg",
+	"/static/assets/chenacolo_17.jpeg",
+	"/static/assets/chenacolo_18.jpeg",
+	"/static/assets/chenacolo_19.jpeg",
+	"/static/assets/chenacolo_20.jpeg",
+	"/static/assets/chenacolo_21.jpeg",
+	"/static/assets/chenacolo_22.jpeg",
+	"/static/assets/chenacolo_24.jpeg",
+	"/static/assets/chenacolo_25.jpeg",
+	"/static/assets/chenacolo_26.jpeg",
+	"/static/assets/chenacolo_27.jpeg",
+	"/static/assets/chenacolo_28.jpeg",
+	"/static/assets/chenacolo_29.jpeg",
+	"/static/assets/chenacolo_30.jpeg",
+	"/static/assets/chenacolo_31.jpeg",
 }

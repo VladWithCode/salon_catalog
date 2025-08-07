@@ -8,8 +8,11 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/vladwithcode/salon_catalog/internal/templates"
-import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
 
 func Salon() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -52,7 +55,100 @@ func Salon() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <main><section id=\"seccion-video\" class=\"relative z-0 h-[80vh]\"><div class=\"absolute inset-0 z-0\"><video width=\"400\" height=\"890\" src=\"/static/assets/chenacolo_vid.mp4\" class=\"w-full h-full object-cover object-center brightness-80\" autoplay muted loop playsinline poster=\"/static/assets/chenacolo_31.jpeg\"></video></div><button id=\"tour-play-btn\" class=\"absolute inset-0 z-10 h-full flex flex-col gap-4 items-center justify-center text-secondary px-4 text-center bg-primary/60\"><h2 class=\"text-6xl tracking-tight font-bold\"><div class=\"sr-only\">Villa Chenacolo</div><img src=\"/static/assets/logo_name.png\" alt=\"Logotipo del Villa Chenacolo\" class=\"h-20 md:h-40 max-w-full invert w-auto\"></h2><p class=\"font-medium tracking-wide text-current\">Da clic para ver el recorrido del salón</p><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/play-btn.svg#play\"></use></svg></button></section><div id=\"tour-video-popup\" class=\"fixed inset-0 z-40 bg-primary/60 backdrop-blur-sm px-4 py-16\" data-popup-group-id=\"video-tour\"><button class=\"absolute top-4 right-4 text-white hover:text-gray-300 z-10 p-2 rounded-full hover:bg-black hover:bg-opacity-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white\" data-popup-close-btn=\"video-tour\" aria-label=\"Cerrar video del recorrido\"><svg class=\"w-8 h-8\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button><div id=\"tour-video-container\" class=\"relative w-full h-full bg-paper rounded-md p-2\" data-popup-container=\"video-tour\"><p class=\"text-lg text-secondary font-bold absolute -top-8 left-0 translate-y-6 opacity-0\" data-popup-label=\"video-tour\">Video Tour | Salón Chenacolo</p><video id=\"tour-video-media\" width=\"400\" height=\"890\" src=\"/static/assets/chenacolo_vid.mp4\" class=\"w-full h-full rounded-md object-cover object-center\" loop playsinline controls volume=\"50\" poster=\"/static/assets/chenacolo_31.jpeg\" data-popup-contents=\"video-tour\"></video></div></div><section class=\"px-4 py-16 space-y-4\"><img src=\"/static/assets/chenacolo_2.jpeg\" alt=\"Imagen del recibidor del salon de eventos\" class=\"w-full aspect-[3/2] object-cover object-center rounded-xs mb-8\"><h2 class=\"relative text-primary text-2xl font-bold\"><span class=\"block absolute -top-4 h-2 w-24 bg-primary\"></span> Exquisita arquitectura</h2><p class=\"tracking-wide text-current/70\">Salón Chenacolo cuenta con unas instalaciones de alta calidad, con arquitectura refinada que te hara sentir en un lugar especial, como ningún otro.</p></section><section class=\"bg-brand-1 px-4 py-16 space-y-4\"><img src=\"/static/assets/chenacolo_3.jpeg\" alt=\"Imagen del recibidor del salon de eventos\" class=\"w-full aspect-[3/2] object-cover object-center rounded-xs mb-8\"><h2 class=\"relative text-secondary text-2xl font-bold\"><span class=\"block absolute -top-4 h-2 w-24 bg-current\"></span> Finos y elegantes detalles</h2><p class=\"tracking-wide text-stone-50/70\">Salón Chenacolo está equipado con detalles y equipamento elegante pensado para brindarte una experiencia immersiva.</p></section><section class=\"px-4 py-16 space-y-4\"><img src=\"/static/assets/chenacolo_4.jpeg\" alt=\"Imagen del recibidor del salon de eventos\" class=\"w-full aspect-[3/2] object-cover object-center rounded-xs mb-8\"><h2 class=\"relative text-primary text-2xl font-bold\"><span class=\"block absolute -top-4 h-2 w-24 bg-primary\"></span> Todo el espacio que necesitas</h2><p class=\"tracking-wide text-current/70\">Salón Chenacolo cuenta con el espacio perfecto para tu evento, no importa que tan grande o pequeño sea.</p></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <main><section id=\"seccion-video\" class=\"relative z-0 h-[80vh]\"><div class=\"absolute inset-0 z-0\"><video width=\"400\" height=\"890\" src=\"/static/assets/chenacolo_vid.mp4\" class=\"w-full h-full object-cover object-center brightness-80\" autoplay muted loop playsinline poster=\"/static/assets/chenacolo_31.jpeg\"></video></div><button id=\"tour-play-btn\" class=\"absolute inset-0 z-10 h-full flex flex-col gap-4 items-center justify-center text-secondary px-4 text-center bg-primary/60\"><h2 class=\"text-6xl tracking-tight font-bold\"><div class=\"sr-only\">Villa Chenacolo</div><img src=\"/static/assets/logo_name.png\" alt=\"Logotipo del Villa Chenacolo\" class=\"h-20 md:h-40 max-w-full invert w-auto\"></h2><p class=\"font-medium tracking-wide text-current\">Da clic para ver el recorrido del salón</p><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 fill-current\"><use href=\"/static/assets/play-btn.svg#play\"></use></svg></button></section><div id=\"tour-video-popup\" class=\"fixed inset-0 z-40 bg-primary/60 backdrop-blur-sm px-4 py-16\" data-popup-group-id=\"video-tour\"><button class=\"absolute top-4 right-4 text-white hover:text-gray-300 z-10 p-2 rounded-full hover:bg-black hover:bg-opacity-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white\" data-popup-close-btn=\"video-tour\" aria-label=\"Cerrar video del recorrido\"><svg class=\"w-8 h-8\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button><div id=\"tour-video-container\" class=\"relative w-full h-full bg-paper rounded-md p-2\" data-popup-container=\"video-tour\"><p class=\"text-lg text-secondary font-bold absolute -top-8 left-0 translate-y-6 opacity-0\" data-popup-label=\"video-tour\">Video Tour | Salón Chenacolo</p><video id=\"tour-video-media\" width=\"400\" height=\"890\" src=\"/static/assets/chenacolo_vid.mp4\" class=\"w-full h-full rounded-md object-cover object-center\" loop playsinline controls volume=\"50\" poster=\"/static/assets/chenacolo_31.jpeg\" data-popup-contents=\"video-tour\"></video></div></div><section class=\"px-4 py-16 space-y-4\"><div class=\"flex flex-col gap-8 lg:grid lg:grid-cols-2 max-w-7xl mx-auto\"><img src=\"/static/assets/chenacolo_2.jpeg\" alt=\"Imagen del recibidor del salon de eventos\" class=\"w-full aspect-[3/2] object-cover object-center rounded-lg\"><div class=\"flex flex-col gap-4 my-auto\"><h2 class=\"relative text-primary text-2xl font-bold\"><span class=\"block absolute -top-4 h-2 w-24 bg-primary\"></span> Exquisita arquitectura</h2><p class=\"tracking-wide text-current/90\">Nada en Villa Chenacolo está puesto al azar. Cada arco, cada linea, cada textura fue elegida para crear un entorno funcional y estéticamente impecable.</p><p class=\"tracking-wide text-current/90\">Un lugar que no compite con tu evento: lo realza.</p><p class=\"tracking-wide text-current/90\">Más que una estructura, Villa Chenacolo es una experiencia arquitectónica que combina equilibrio, privacidad y distinción. </p><p class=\"tracking-wide text-current/90\">Todo está diseñado para que tus recuerdos encuentren el escenario perfecto.</p></div></div></section><div class=\"section bg-primary px-4 py-16 space-y-8 overflow-hidden\"><div class=\"text-center text-light\"><h2 class=\"text-4xl lg:text-5xl font-bold uppercase\">Galería</h2></div><div id=\"gallery-container\" class=\"flex gap-4 w-full max-w-7xl overflow-x-auto overflow-y-hidden mx-auto\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for i := 0; i < len(allGalleryImages); i++ {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<button data-gallery-popup-open-btn=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(allGalleryImages[i])
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/salon.templ`, Line: 142, Col: 56}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"block relative grow-0 shrink-0 basis-72 aspect-1/2 overflow-hidden rounded-lg cursor-pointer transition-[transform] duration-300 rotate-0 hover:rotate-1\"><img src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(allGalleryImages[i])
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/salon.templ`, Line: 146, Col: 33}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" alt=\"Imagen del area de bar del salon de eventos\" class=\"h-full aspect-square object-cover object-center z-0\"></button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><div id=\"gallery-popup\" class=\"fixed inset-0 z-30 pt-16 invisible\" data-gallery-popup=\"closed\"><div id=\"gallery-popup-backdrop\" class=\"absolute inset-0 z-0 bg-dark/60 backdrop-blur-sm pt-16 opacity-0\"></div><div id=\"gallery-popup-container\" class=\"relative z-10 flex flex-col inset-x-0 bottom-0 bg-secondary h-full rounded-t-3xl p-2 translate-y-full opacity-0\"><div class=\"absolute -top-2 right-0 z-10\"><button id=\"gallery-popup-close-btn\" data-gallery-popup-close-btn=\"gallery-popup\" class=\"rounded-full bg-primary text-light aspect-square cursor-pointer rotate-0 transition-transform duration-500 hover:-rotate-90\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.TimesIcon("h-12 ", nil).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</button></div><h4 class=\"pt-2 pb-4 px-4 text-xl font-semibold uppercase\">Galería</h4><div class=\"flex-1 basis-full flex flex-col gap-4 overflow-hidden\"><div class=\"flex-1 flex items-center basis-full\"><img id=\"gallery-popup-img\" src=\"/static/assets/chenacolo_1.jpeg\" alt=\"\" class=\"w-full object-contain object-center rounded-3xl\"></div><div class=\"h-1/5 grow-0 flex gap-4 w-full overflow-auto\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for i, img := range allGalleryImages {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<button id=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("gallery-popup-img-btn-%d", i))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/salon.templ`, Line: 186, Col: 56}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"shrink-0 grow-0 basis-auto aspect-square cursor-pointer rounded-lg group overflow-hidden\" data-gallery-popup-img-btn=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(img)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/salon.templ`, Line: 188, Col: 41}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><img src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(img)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/salon.templ`, Line: 191, Col: 19}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" alt=\"Imagen del area de bar del salon de eventos\" class=\"h-full aspect-square object-cover object-center rounded-lg group-hover:scale-110 transition-transform duration-300\"></button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -60,7 +156,7 @@ func Salon() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -90,17 +186,50 @@ func salonScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n        document.addEventListener(\"DOMContentLoaded\", function() {\n            if (!window.PopupManager) {\n                return;\n            }\n            const groupId = document.getElementById(\"tour-video-popup\").dataset.popupGroupId;\n\n            new PopupManager({\n                openBtnId: 'tour-play-btn',\n                popupId: 'tour-video-popup',\n                closeBtnSelector: '[data-popup-close-btn=\"' + groupId + '\"]',\n                contentsSelector: '[data-popup-contents=\"' + groupId + '\"]',\n                containerSelector: '[data-popup-container=\"' + groupId + '\"]',\n\n                handleOpenClick: function(e) {\n                    this.contents.play();\n                    this.contents.volume = 0.5;\n                },\n                handleCloseClick: function(e) {\n                    this.contents.pause();\n                    this.contents.currentTime = 0;\n                },\n            })\n        });\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<script>\n        document.addEventListener(\"DOMContentLoaded\", function() {\n            if (!window.PopupManager) {\n                return;\n            }\n            const groupId = document.getElementById(\"tour-video-popup\").dataset.popupGroupId;\n\n            new PopupManager({\n                openBtnId: 'tour-play-btn',\n                popupId: 'tour-video-popup',\n                closeBtnSelector: '[data-popup-close-btn=\"' + groupId + '\"]',\n                contentsSelector: '[data-popup-contents=\"' + groupId + '\"]',\n                containerSelector: '[data-popup-container=\"' + groupId + '\"]',\n\n                handleOpenClick: function(e) {\n                    this.contents.play();\n                    this.contents.volume = 0.5;\n                },\n                handleCloseClick: function(e) {\n                    this.contents.pause();\n                    this.contents.currentTime = 0;\n                },\n            })\n\n            const galleryPopupId = 'gallery-popup';\n            const galleryPopup = document.getElementById('gallery-popup');\n            const galleryPopupContainer = document.getElementById('gallery-popup-container');\n            const galleryPopupBackdrop = document.getElementById('gallery-popup-backdrop');\n            const galleryPopupOpenBtns = document.querySelectorAll('[data-gallery-popup-open-btn]');\n            const galleryPopupImgBtns = document.querySelectorAll('[data-gallery-popup-img-btn]');\n            const galleryPopupImg = document.getElementById('gallery-popup-img');\n            const galleryPopupCloseBtn = document.getElementById('gallery-popup-close-btn');\n            const galleryPopupTl = gsap.timeline({paused: true, defaults: {duration: 0.4, ease: \"power2.out\"}});\n\n            galleryPopupTl.set(galleryPopup, {\n                visibility: 'visible',\n            })\n                .to(galleryPopupBackdrop, {\n                    opacity: 1,\n                })\n                .to(galleryPopupContainer, {\n                    opacity: 1,\n                    y: '0%',\n                }, \"0+=0.05\")\n\n            for (let openBtn of galleryPopupOpenBtns) {\n                openBtn.addEventListener('click', function(e) {\n                    const imgSrc = openBtn.dataset.galleryPopupOpenBtn;\n                    galleryPopupImg.src = imgSrc;\n                    galleryPopupTl.play();\n                    galleryPopup.dataset.galleryPopup = 'open';\n                });\n            }\n            for (let imgBtn of galleryPopupImgBtns) {\n                imgBtn.addEventListener('click', function(e) {\n                    const imgSrc = imgBtn.dataset.galleryPopupImgBtn;\n                    galleryPopupImg.src = imgSrc;\n                });\n            }\n\n            galleryPopupCloseBtn.addEventListener('click', function(e) {\n                galleryPopupTl.reverse();\n                galleryPopup.dataset.galleryPopup = 'closed';\n            });\n            galleryPopupBackdrop.addEventListener('click', function(e) {\n                galleryPopupTl.reverse();\n                galleryPopup.dataset.galleryPopup = 'closed';\n            });\n\n            document.querySelectorAll(\"[data-view-animate]\").forEach(function (elem) {\n                gsap.to(elem, {\n                    opacity: 1,\n                    y: \"0rem\",\n                    duration: 1,\n                    ease: \"power1.out\",\n                    scrollTrigger: elem,\n                    delay: 0.3,\n                });\n            });\n        });\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+var allGalleryImages = []string{
+	"/static/assets/chenacolo_1.jpeg",
+	"/static/assets/chenacolo_2.jpeg",
+	"/static/assets/chenacolo_3.jpeg",
+	"/static/assets/chenacolo_4.jpeg",
+	"/static/assets/chenacolo_5.jpeg",
+	"/static/assets/chenacolo_6.jpeg",
+	"/static/assets/chenacolo_7.jpeg",
+	"/static/assets/chenacolo_8.jpeg",
+	"/static/assets/chenacolo_9.jpeg",
+	"/static/assets/chenacolo_10.jpeg",
+	"/static/assets/chenacolo_11.jpeg",
+	"/static/assets/chenacolo_12.jpeg",
+	"/static/assets/chenacolo_13.jpeg",
+	"/static/assets/chenacolo_14.jpeg",
+	"/static/assets/chenacolo_15.jpeg",
+	"/static/assets/chenacolo_16.jpeg",
+	"/static/assets/chenacolo_17.jpeg",
+	"/static/assets/chenacolo_18.jpeg",
+	"/static/assets/chenacolo_19.jpeg",
+	"/static/assets/chenacolo_20.jpeg",
+	"/static/assets/chenacolo_21.jpeg",
+	"/static/assets/chenacolo_22.jpeg",
+	"/static/assets/chenacolo_24.jpeg",
+	"/static/assets/chenacolo_25.jpeg",
+	"/static/assets/chenacolo_26.jpeg",
+	"/static/assets/chenacolo_27.jpeg",
+	"/static/assets/chenacolo_28.jpeg",
+	"/static/assets/chenacolo_29.jpeg",
+	"/static/assets/chenacolo_30.jpeg",
+	"/static/assets/chenacolo_31.jpeg",
 }
 
 var _ = templruntime.GeneratedTemplate

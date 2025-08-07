@@ -178,8 +178,8 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 }
 
 templ ProductModal(product *db.Product, availableCategories []db.Category, err string) {
-	<div id="products-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
-		<div class="flex-1 flex justify-between items-center">
+	<div id="products-modal-content" class="h-full flex flex-col bg-stone-50 rounded-sm shadow p-2">
+		<div class="flex-1 flex justify-between items-center px-2 border-b border-gray-200">
 			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
 				if err != "" {
 					Ocurrió un error al cargar el producto
@@ -196,8 +196,25 @@ templ ProductModal(product *db.Product, availableCategories []db.Category, err s
 				@components.TimesIcon("w-8 mx-auto", nil)
 			</button>
 		</div>
+		<div id="products-modal-tab-selector" class="flex gap-2 p-2 bg-gray-200 rounded-sm">
+			<button
+				data-products-modal-tab="products-modal-form"
+				data-click-handler-selector="[data-products-modal-tab]"
+				class="flex-1 basis-1/2 p-2 bg-gray-700 rounded-sm text-light cursor-pointer hover:bg-gray-700/80 hover:text-light"
+			>
+				Datos
+			</button>
+			<div class="w-px h-4/5 bg-gray-700/60 my-auto"></div>
+			<button
+				data-products-modal-tab="products-modal-qrcode"
+				data-click-handler-selector="[data-products-modal-tab]"
+				class="flex-1 basis-1/2 p-2 bg-gray-700/0 rounded-sm text-gray-700 cursor-pointer hover:bg-gray-700/80 hover:text-light"
+			>
+				QR Code
+			</button>
+		</div>
 		if err != "" {
-			<div class="flex-1 basis-full w-full overflow-hidden">
+			<div class="flex-1 basis-full w-full overflow-hidden mt-2">
 				<div class="flex flex-col items-center justify-center h-full">
 					<p class="text-red-700/70 mx-auto">
 						@components.TimesIcon("w-10 mx-auto", nil)
@@ -206,9 +223,22 @@ templ ProductModal(product *db.Product, availableCategories []db.Category, err s
 				</div>
 			</div>
 		} else {
-			@ProductEditForm(product, availableCategories)
+			<div class="flex-1 basis-full grid grid-cols-1 grid-rows-1 overflow-hidden">
+				<div
+					id="products-modal-form"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-auto flex flex-col z-10"
+				>
+					@ProductEditForm(product, availableCategories)
+				</div>
+				<div
+					id="products-modal-qrcode"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
+				>
+					@ProductQRCode(product, false)
+				</div>
+			</div>
 		}
-		<div class="flex-1 flex gap-2 justify-end items-center">
+		<div class="flex-1 flex gap-2 justify-end items-center my-2">
 			<button
 				id="products-modal-back"
 				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
@@ -335,6 +365,58 @@ templ ProductEditForm(product *db.Product, availableCategories []db.Category) {
 			</button>
 		</div>
 	</form>
+}
+
+templ ProductQRCode(product *db.Product, tabOnly bool) {
+	<div
+		class="flex-1 flex flex-col text-gray-700"
+		id="products-modal-qrcode-tab"
+	>
+		<div class="flex-1 pt-4 px-4">
+			<h3 class="text-lg font-medium line-clamp-2 text-ellipsis">Codigo QR de { product.Name }</h3>
+			<p class="text-current/60">Scanea, descarga o comparte este código de acceso directo al producto: { product.Name }</p>
+		</div>
+		<div id="products-modal-qrcode-img" class="flex-1 basis-full">
+			if product.QRCodeFilename == "" {
+				<div class="flex flex-col gap-2 items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-24 mx-auto", nil)
+					</p>
+					<p class="text-red-700 text-xl font-medium text-center mx-auto">
+						Aún no se ha generado el código QR
+					</p>
+				</div>
+			} else {
+				<img src={ fmt.Sprintf("/static/qrcodes/%s", product.QRCodeFilename) } alt={ product.Name } class="w-full h-full object-contain"/>
+			}
+		</div>
+		<div class="flex-1 flex flex-col gap-2 px-4" hx-ext="response-targets">
+			<button
+				id="products-generate-qrcode-btn"
+				class="bg-gray-700 text-light px-4 py-2 rounded-sm"
+				hx-put={ fmt.Sprintf("/panel/productos/%s/qrcode", product.ID) }
+				hx-target="#products-modal"
+				hx-target-error="#products-modal"
+				hx-swap="outerHTML"
+				hx-indicator="#global-loading-indicator"
+			>
+				Generar QR
+			</button>
+			<a
+				href={ fmt.Sprintf("https://villachenacolo.com/static/qrcodes/%s", product.QRCodeFilename) }
+				class={
+					"text-center px-4 py-2 text-light bg-accent rounded-sm ",
+					templ.KV(
+						"opacity-80 brightness-90 cursor-not-allowed",
+						product.QRCodeFilename == "",
+					),
+				}
+				download={ product.Name }
+			>
+				Descargar
+			</a>
+		</div>
+	</div>
 }
 
 templ ProductCreateModal(availableCategories []db.Category, err string) {

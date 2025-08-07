@@ -21,6 +21,7 @@ type Category struct {
 	HeaderImg       string `db:"header_img" json:"headerImg"`
 	DisplayImg      string `db:"display_img" json:"displayImg"`
 	ProductCount    int    `db:"product_count" json:"productCount"`
+	QRCodeFilename  string `db:"qrcode_filename" json:"qrcodeFilename"`
 }
 
 type CategoryFilterParams struct {
@@ -66,15 +67,19 @@ func CreateCategory(category *Category) error {
 		Valid:  category.DisplayImg != "",
 	}
 
+	args := pgx.NamedArgs{
+		"id":              id.String(),
+		"name":            category.Name,
+		"slug":            category.Slug,
+		"description":     category.Description,
+		"header_img":      headerImg,
+		"display_img":     displayImg,
+		"qrcode_filename": category.QRCodeFilename,
+	}
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO categories (id, name, slug, description, header_img, display_img) VALUES ($1, $2, $3, $4, $5, $6)`,
-		id.String(),
-		category.Name,
-		category.Slug,
-		category.Description,
-		headerImg,
-		displayImg,
+		`INSERT INTO categories (id, name, slug, description, header_img, display_img, qrcode_filename) VALUES (@id, @name, @slug, @description, @header_img, @display_img, @qrcode_filename)`,
+		args,
 	)
 	if err != nil {
 		return err
@@ -103,7 +108,8 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
 			header.filename AS header_img,
-			display.filename AS display_img
+			display.filename AS display_img,
+			ctg.qrcode_filename
 		FROM categories ctg
 			JOIN images header ON header.id = ctg.header_img
 			JOIN images display ON display.id = ctg.display_img
@@ -116,6 +122,7 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		&category.Description,
 		&headerImg,
 		&displayImg,
+		&category.QRCodeFilename,
 	)
 	if err != nil {
 		return nil, err
@@ -151,7 +158,8 @@ func FindCategoryByID(id string) (*Category, error) {
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
 			header.filename AS header_img,
-			display.filename AS display_img
+			display.filename AS display_img,
+			qrcode_filename
 		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
@@ -164,6 +172,7 @@ func FindCategoryByID(id string) (*Category, error) {
 		&category.Description,
 		&headerImg,
 		&displayImg,
+		&category.QRCodeFilename,
 	)
 	if err != nil {
 		return nil, err
@@ -193,7 +202,8 @@ func FindAllCategories() ([]*Category, error) {
 		`SELECT
 			ctg.id, ctg.name, ctg.slug, ctg.description, 
 			header.filename AS header_img,
-			display.filename AS display_img
+			display.filename AS display_img,
+			ctg.qrcode_filename
 		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
 			LEFT JOIN images display ON display.id = ctg.display_img
@@ -219,6 +229,7 @@ func FindAllCategories() ([]*Category, error) {
 			&category.Description,
 			&headerImg,
 			&displayImg,
+			&category.QRCodeFilename,
 		)
 		if err != nil {
 			return nil, err
@@ -254,17 +265,21 @@ func UpdateCategory(category *Category) error {
 		String: category.DisplayImg,
 		Valid:  category.DisplayImg != "",
 	}
+	args := pgx.NamedArgs{
+		"id":              category.ID,
+		"name":            category.Name,
+		"slug":            category.Slug,
+		"description":     category.Description,
+		"header_img":      headerImg,
+		"display_img":     displayImg,
+		"qrcode_filename": category.QRCodeFilename,
+	}
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE categories SET
-			name = $1, slug = $2, description = $3, header_img = $4, display_img = $5 
-		WHERE id = $6`,
-		category.Name,
-		category.Slug,
-		category.Description,
-		headerImg,
-		displayImg,
-		category.ID,
+			name = @name, slug = @slug, description = @description, header_img = @header_img, display_img = @display_img, qrcode_filename = @qrcode_filename
+		WHERE id = @id`,
+		args,
 	)
 	if err != nil {
 		return err
@@ -353,9 +368,10 @@ func FilterCategories(filters CategoryFilterParams) (*CategoryFilterResult, erro
 			header.filename as header_img,
 			display.filename as display_img,
 			COUNT(p.id) as product_count,
+			ctg.qrcode_filename,
 			%s
 		%s GROUP BY ctg.id, ctg.name, ctg.slug, ctg.description, ctg.long_description,
-		header.filename, display.filename %s
+		header.filename, display.filename, ctg.qrcode_filename %s
 		LIMIT @limit OFFSET @offset`,
 		buildCategorySearchRankSelect(filters), baseQuery, orderBy)
 
@@ -478,6 +494,7 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&headerImg,
 				&displayImg,
 				&category.ProductCount,
+				&category.QRCodeFilename,
 				&searchRank,
 			)
 			if err != nil {
@@ -493,6 +510,7 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&headerImg,
 				&displayImg,
 				&category.ProductCount,
+				&category.QRCodeFilename,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)
 			if err != nil {

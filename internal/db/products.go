@@ -33,6 +33,7 @@ type Product struct {
 	CategoryID      string   `db:"category_id" json:"categoryId"`
 	Available       bool     `db:"available" json:"available"`
 	Quantity        int      `db:"quantity" json:"quantity"`
+	QRCodeFilename  string   `db:"qrcode_filename" json:"qrcodeFilename"`
 }
 
 // SearchMode defines how search should behave
@@ -103,12 +104,13 @@ func CreateProduct(product *Product) error {
 		"category":         product.CategoryID,
 		"available":        product.Available,
 		"quantity":         product.Quantity,
+		"qrcode_filename":  product.QRCodeFilename,
 	}
 	_, err = tx.Exec(
 		ctx,
 		`INSERT INTO products 
-		(id, name, slug, description, long_description, main_img, category, available, quantity)
-		VALUES (@id, @name, @slug, @description, @long_description, @main_img, @category, @available, @quantity)`,
+		(id, name, slug, description, long_description, main_img, category, available, quantity, qrcode_filename)
+		VALUES (@id, @name, @slug, @description, @long_description, @main_img, @category, @available, @quantity, @qrcode_filename)`,
 		args,
 	)
 	if err != nil {
@@ -152,6 +154,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 			ctg.id AS category_id,
 			main.filename AS main_img,
 			prod.available, prod.quantity,
+			prod.qrcode_filename,
 			ARRAY_AGG(img.filename) AS gallery
 		FROM products prod 
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
@@ -159,7 +162,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id, prod.qrcode_filename`,
 		slug,
 	).Scan(
 		&product.ID,
@@ -172,6 +175,7 @@ func FindProductBySlug(slug string) (*Product, error) {
 		&mainImg,
 		&product.Available,
 		&product.Quantity,
+		&product.QRCodeFilename,
 		&gallery,
 	)
 	if err != nil {
@@ -216,6 +220,7 @@ func FindProductByID(id string) (*Product, error) {
 			ctg.id AS category_id,
 			main.filename AS main_img,
 			prod.available, prod.quantity,
+			prod.qrcode_filename,
 			ARRAY_AGG(img.filename) AS gallery
 		FROM products prod
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
@@ -223,7 +228,7 @@ func FindProductByID(id string) (*Product, error) {
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id, prod.qrcode_filename`,
 		id,
 	).Scan(
 		&product.ID,
@@ -236,6 +241,7 @@ func FindProductByID(id string) (*Product, error) {
 		&mainImg,
 		&product.Available,
 		&product.Quantity,
+		&product.QRCodeFilename,
 		&gallery,
 	)
 	if err != nil {
@@ -275,6 +281,7 @@ func FindAllProducts() ([]*Product, error) {
 			ctg.id AS category_id,
 			img.filename AS main_img
 			prod.available, prod.quantity,
+			prod.qrcode_filename
 		FROM products prod
 			LEFT JOIN images img ON img.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category`,
@@ -300,6 +307,7 @@ func FindAllProducts() ([]*Product, error) {
 			&mainImg,
 			&product.Available,
 			&product.Quantity,
+			&product.QRCodeFilename,
 		)
 		if err != nil {
 			return nil, err
@@ -339,13 +347,15 @@ func UpdateProduct(product *Product) error {
 		"main_img":         mainImg,
 		"available":        product.Available,
 		"quantity":         product.Quantity,
+		"qrcode_filename":  product.QRCodeFilename,
 	}
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE products SET
 			name = @name, slug = @slug, description = @description,
 			long_description = @long_description, category = @category,
-			main_img = @main_img, available = @available, quantity = @quantity
+			main_img = @main_img, available = @available, quantity = @quantity,
+			qrcode_filename = @qrcode_filename
 		WHERE id = @id`,
 		args,
 	)
@@ -434,11 +444,11 @@ func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 	selectQuery := fmt.Sprintf(`
 		SELECT 
 			prod.id, prod.name, prod.description, prod.long_description, ctg.id as category_id, ctg.name as category,
-			img.filename as main_img, prod.available, prod.quantity,
+			img.filename as main_img, prod.available, prod.quantity, prod.qrcode_filename,
 			COALESCE(ARRAY_AGG(imgs.filename) FILTER (WHERE imgs.filename IS NOT NULL), '{}') as images,
 			%s
 		%s GROUP BY prod.id, prod.name, prod.description, prod.long_description,
-		ctg.id, ctg.name, img.filename, prod.available, prod.quantity %s
+		ctg.id, ctg.name, img.filename, prod.available, prod.quantity, prod.qrcode_filename %s
 		LIMIT @limit OFFSET @offset`,
 		buildSearchRankSelect(filters), baseQuery, orderBy)
 
@@ -585,6 +595,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&mainImg,
 				&product.Available,
 				&product.Quantity,
+				&product.QRCodeFilename,
 				&images,
 				&searchRank,
 			)
@@ -601,6 +612,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&mainImg,
 				&product.Available,
 				&product.Quantity,
+				&product.QRCodeFilename,
 				&images,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)

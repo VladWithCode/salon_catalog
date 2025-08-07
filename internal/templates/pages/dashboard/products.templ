@@ -335,7 +335,7 @@ templ productsScript() {
                     const target = e.target.matches('[data-multi-selection-mode]')
                         ? e.target
                         : e.target.closest('[data-multi-selection-mode]');
-                        
+
                     const mode = target.dataset.multiSelectionMode;
                     switch (mode) {
                         case 'none':
@@ -357,6 +357,36 @@ templ productsScript() {
                             });
                             updateProductsTableSelection();
                             break;
+                    }
+                })
+                .registerClick('[data-products-modal-tab]', function (e) {
+                    const activeBgValues = "54 65 83";
+                    const target = e.target.matches('[data-products-modal-tab]')
+                        ? e.target
+                        : e.target.closest('[data-products-modal-tab]');
+                    const tab = target.dataset.productsModalTab;
+                    const modal = document.getElementById('products-modal');
+                    const form = document.getElementById('products-modal-form');
+                    const qrcode = document.getElementById('products-modal-qrcode');
+                    const tl = gsap.timeline({defaults: {duration: 0.3, ease: 'power2.out'}});
+
+                    switch (tab) {
+                    case 'products-modal-form':
+                        tl.set(form, {zIndex: 10})
+                            .set(qrcode, {zIndex: 0})
+                        tl.to('[data-products-modal-tab="products-modal-form"]', {backgroundColor: `rgb(${activeBgValues})`, color: `rgb(240 240 240)`})
+                            .to('[data-products-modal-tab="products-modal-qrcode"]', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`}, "<")
+                            .to(form, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
+                            .to(qrcode, {opacity: 0, x: '15rem', pointEvents: 'none'}, '-=0.1');
+                        break;
+                    case 'products-modal-qrcode':
+                        tl.set(qrcode, {zIndex: 10})
+                            .set(form, {zIndex: 0})
+                        tl.to('[data-products-modal-tab="products-modal-form"]', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`})
+                            .to('[data-products-modal-tab="products-modal-qrcode"]', {backgroundColor: `rgb(${activeBgValues})`, color: "rgb(225 225 225)"}, "<")
+                            .to(qrcode, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
+                            .to(form, {opacity: 0, x: '15rem', pointEvents: 'none'}, '-=0.1');
+                        break;
                     }
                 });
 

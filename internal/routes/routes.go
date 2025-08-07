@@ -23,7 +23,7 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /productos/{slug}", RenderProductDetail)
 	router.HandleFunc("GET /servicios", RenderServices)
 	router.HandleFunc("GET /reservaciones", RenderReservations)
-	router.HandleFunc("GET /salon", RenderSalon)
+	router.HandleFunc("GET /experiencia", RenderSalon)
 	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
 
 	RegisterDashboardRoutes(router)
