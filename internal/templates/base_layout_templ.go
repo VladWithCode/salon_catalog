@@ -95,7 +95,7 @@ func BaseLayout(title string, contents templ.Component, isMainPage bool) templ.C
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link href=\"https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap\" rel=\"stylesheet\"><script src=\"/static/js/htmx.js\"></script> <script src=\"/static/js/htmx-response-targets.js\"></script> <script src=\"/static/js/htmx-json-enc.js\"></script> <script src=\"/static/js/gsap.js\"></script> <script src=\"/static/js/eventManager.js\" defer></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link href=\"https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap\" rel=\"stylesheet\"><script src=\"/static/js/htmx.js\"></script> <script src=\"/static/js/htmx-response-targets.js\"></script> <script src=\"/static/js/htmx-json-enc.js\"></script> <script src=\"https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js\" defer></script> <script src=\"/static/js/gsap.js\"></script> <script src=\"/static/js/eventManager.js\" defer></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
