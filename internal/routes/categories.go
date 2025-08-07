@@ -28,6 +28,9 @@ func RegisterCategoriesRoutes(router *customServeMux) {
 	router.HandleFunc("DELETE /categorias", auth.ValidateAuth(DeleteCategoriesAndReturnTable))
 	router.HandleFunc("DELETE /categorias/{id}", auth.ValidateAuth(DeleteCategoryAndReturnTable))
 
+	// Dashboard specific routes
+	router.HandleFunc("GET /panel/categorias/select", RenderCategorySelect)
+
 	// Legacy JSON API routes
 	router.HandleFunc("GET /api/categories", GetCategories)
 	router.HandleFunc("POST /api/categories", CreateCategory)
@@ -366,6 +369,36 @@ func DeleteCategoriesAndReturnTable(w http.ResponseWriter, r *http.Request, a *a
 		log.Printf("failed to render response: %v\n", err)
 		return
 	}
+}
+
+func RenderCategorySelect(w http.ResponseWriter, r *http.Request) {
+	selectedCategory := r.URL.Query().Get("selected")
+	params := components.CategorySelectParams{
+		Selected:  selectedCategory,
+		ValueType: components.CategorySelectValueTypeID,
+		Args:      map[string]string{},
+	}
+
+	rawArgs := r.URL.Query().Get("withHtmxAttrs")
+	args := map[string]string{}
+	err := json.Unmarshal([]byte(rawArgs), &args)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		components.CategorySelect([]db.Category{}, &params).Render(r.Context(), w)
+		log.Printf("failed to unmarshal withHtmxAttrs: %v\n", err)
+		return
+	}
+	params.Args = args
+
+	ctgs, err := db.FindAllCategories()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		components.CategorySelect([]db.Category{}, &params).Render(r.Context(), w)
+		log.Printf("failed to find categories: %v\n", err)
+		return
+	}
+
+	components.CategorySelect(internal.PtrSliceToPlainSlice(ctgs), &params).Render(r.Context(), w)
 }
 
 func GetCategories(w http.ResponseWriter, r *http.Request) {

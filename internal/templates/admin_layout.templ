@@ -18,6 +18,11 @@ templ AdminLayout(title string, headerTitle string) {
 			</title>
 			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
 			@headHandle.Once() {
+				<script src="/static/js/htmx.js"></script>
+				<script src="/static/js/htmx-response-targets.js"></script>
+				<script src="/static/js/htmx-json-enc.js"></script>
+				<script src="/static/js/gsap.js"></script>
+				<script src="/static/js/eventManager.js" defer></script>
 				<link rel="dns-prefetch" href={ `//fonts.googleapis.com` }/>
 				<link rel="dns-prefetch" href={ `//fonts.gstatic.com` }/>
 				<link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -27,11 +32,6 @@ templ AdminLayout(title string, headerTitle string) {
 					rel="stylesheet"
 				/>
 				<link rel="stylesheet" href="/static/css/styles.css"/>
-				<script src="/static/js/htmx.js"></script>
-				<script src="/static/js/htmx-response-targets.js"></script>
-				<script src="/static/js/htmx-json-enc.js"></script>
-				<script src="/static/js/gsap.js"></script>
-				<script src="/static/js/eventManager.js" defer></script>
 			}
 		</head>
 		<body>
