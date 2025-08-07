@@ -897,6 +897,9 @@
   .max-w-none {
     max-width: none;
   }
+  .max-w-screen {
+    max-width: 100vw;
+  }
   .max-w-screen-xl {
     max-width: var(--breakpoint-xl);
   }
@@ -3881,9 +3884,19 @@
       height: 90vh;
     }
   }
+  .lg\:h-\[fit-content\] {
+    @media (width >= 64rem) {
+      height: fit-content;
+    }
+  }
   .lg\:h-auto {
     @media (width >= 64rem) {
       height: auto;
+    }
+  }
+  .lg\:h-fit {
+    @media (width >= 64rem) {
+      height: fit-content;
     }
   }
   .lg\:w-1\/2 {

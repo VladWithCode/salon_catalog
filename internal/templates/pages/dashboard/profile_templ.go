@@ -51,7 +51,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-col gap-2 px-0.5 pb-0.5\" hx-ext=\"response-targets\"><div class=\"flex-1 gap-4 px-2\"><h2 class=\"text-3xl tracking-tight\">Perfil</h2><p class=\"text-sm text-current/50\">Revisa y edita tu perfil.</p></div><div class=\"flex-1 basis-full flex flex-col bg-gray-50 border border-gray-200 rounded-sm shadow-sm max-h-full overflow-hidden px-2\"><div class=\"flex-1 py-8 space-y-4\"><div class=\"flex items-center justify-center w-48 text-7xl aspect-square rounded-full bg-blue-500 text-light mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-col gap-2 px-0.5 pb-0.5\" hx-ext=\"response-targets\"><div class=\"flex-1 gap-4 px-2\"><h2 class=\"text-3xl tracking-tight\">Perfil</h2><p class=\"text-sm text-current/50\">Revisa y edita tu perfil.</p></div><div class=\"flex-1 basis-full flex flex-col bg-gray-50 border border-gray-200 rounded-sm shadow-sm max-h-full max-w-2xl lg:basis-fit overflow-hidden px-2\"><div class=\"flex-1 py-8 space-y-4\"><div class=\"flex items-center justify-center w-48 text-7xl aspect-square rounded-full bg-blue-500 text-light mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -64,7 +64,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div><div class=\"flex-1 basis-full grid grid-cols-1 grid-rows-1\"><div class=\"col-start-1 row-start-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div><div class=\"flex-1 basis-full grid grid-cols-1 grid-rows-1\"><div class=\"col-start-1 row-start-1 py-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,7 +80,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				var templ_7745c5c3_Var5 = []any{"space-y-2",
+				var templ_7745c5c3_Var5 = []any{"space-y-2 h-full lg:flex lg:flex-col",
 					templ.KV("-translate-x-48 opacity-0 pointer-events-none", formState.IsSuccessful() || formState.HasErrors()),
 				}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
@@ -152,7 +152,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p></div><div class=\"flex flex-col items-end justify-end gap-2 mt-4\"><button id=\"edit-profile-btn\" data-toggle-edit-form=\"edit-profile\" data-click-handler-selector=\"[data-toggle-edit-form]\" class=\"px-4 py-2 bg-gray-700 text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors cursor-pointer\">Editar mi perfil</button> <button id=\"edit-pass-btn\" data-toggle-edit-form=\"edit-pass\" data-click-handler-selector=\"[data-toggle-edit-form]\" class=\"px-4 py-2 bg-gray-700 text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors cursor-pointer\">Cambiar contraseña</button></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p></div><div class=\"flex flex-col items-end justify-end gap-2 mt-4 lg:flex-row lg:mt-auto\"><button id=\"edit-profile-btn\" data-toggle-edit-form=\"edit-profile\" data-click-handler-selector=\"[data-toggle-edit-form]\" class=\"px-4 py-2 bg-gray-700 text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors cursor-pointer\">Editar mi perfil</button> <button id=\"edit-pass-btn\" data-toggle-edit-form=\"edit-pass\" data-click-handler-selector=\"[data-toggle-edit-form]\" class=\"px-4 py-2 bg-gray-700 text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors cursor-pointer\">Cambiar contraseña</button></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -178,7 +178,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				var templ_7745c5c3_Var12 = []any{"space-y-2",
+				var templ_7745c5c3_Var12 = []any{"space-y-2 h-full lg:flex lg:flex-col",
 					templ.KV(
 						"translate-x-48 opacity-0 pointer-events-none",
 						!(formState.IsSubmitted() && formState.HasErrors()) || formState.IsSuccessful(),
@@ -385,7 +385,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div><div class=\"flex items-end justify-end gap-2 mt-4\"><button data-cancel-user-edit=\"profile\" data-click-handler-selector=\"[data-cancel-user-edit]\" type=\"button\" class=\"py-2 px-4 bg-red-600 text-white rounded-sm font-bold cursor-pointer hover:bg-accent\">Cancelar</button> <button type=\"submit\" class=\"py-2 px-4 bg-gray-700 text-white rounded-sm font-bold cursor-pointer hover:bg-accent\">Enviar</button></div></form>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div><div class=\"flex items-end justify-end gap-2 mt-4 lg:flex-row lg:mt-auto\"><button data-cancel-user-edit=\"profile\" data-click-handler-selector=\"[data-cancel-user-edit]\" type=\"button\" class=\"py-2 px-4 bg-red-600 text-white rounded-sm font-bold cursor-pointer hover:bg-accent\">Cancelar</button> <button type=\"submit\" class=\"py-2 px-4 bg-gray-700 text-white rounded-sm font-bold cursor-pointer hover:bg-accent\">Enviar</button></div></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -411,7 +411,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				var templ_7745c5c3_Var27 = []any{"space-y-2",
+				var templ_7745c5c3_Var27 = []any{"space-y-2 h-full lg:flex lg:flex-col",
 					templ.KV(
 						"translate-x-48 opacity-0 pointer-events-none",
 						!(formState.IsSubmitted() && formState.HasErrors()) || formState.IsSuccessful(),
@@ -618,7 +618,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</div><div class=\"flex items-end justify-end gap-2 mt-4\"><button type=\"button\" class=\"py-2 px-4 bg-red-600 text-white rounded-sm font-bold cursor-pointer hover:bg-red-500\" data-cancel-user-edit=\"pass\" data-click-handler-selector=\"[data-cancel-user-edit]\">Cancelar</button> <button type=\"submit\" class=\"py-2 px-4 bg-gray-700 text-white rounded-sm font-bold cursor-pointer hover:bg-gray-600\">Enviar</button></div></form>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</div><div class=\"flex items-end justify-end gap-2 mt-4 lg:flex-row lg:mt-auto\"><button type=\"button\" class=\"py-2 px-4 bg-red-600 text-white rounded-sm font-bold cursor-pointer hover:bg-red-500\" data-cancel-user-edit=\"pass\" data-click-handler-selector=\"[data-cancel-user-edit]\">Cancelar</button> <button type=\"submit\" class=\"py-2 px-4 bg-gray-700 text-white rounded-sm font-bold cursor-pointer hover:bg-gray-600\">Enviar</button></div></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
