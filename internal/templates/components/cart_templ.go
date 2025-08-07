@@ -65,7 +65,7 @@ func CartSidebar(items []db.CartItem) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col h-full w-full\"><!-- Header --><div class=\"p-6 border-b bg-brand-1 from-primary to-accent text-white\"><div class=\"flex items-center justify-between\"><h2 class=\"text-xl font-bold\">Tu Selección</h2><button class=\"text-white hover:text-gray-200 transition-colors\" data-click-handler-selector=\"cart-close\" data-cart-close><div class=\"p-4\"><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></div></button></div><p class=\"text-white/90 text-sm mt-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col h-full w-full\"><!-- Header --><div class=\"p-6 border-b bg-brand-1 from-primary to-accent text-white\"><div class=\"flex items-center justify-between\"><h2 class=\"text-xl font-bold\">Tu evento</h2><button class=\"text-white hover:text-gray-200 transition-colors\" data-click-handler-selector=\"cart-close\" data-cart-close><div class=\"p-4\"><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></div></button></div><p class=\"text-white/90 text-sm mt-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +108,7 @@ func CartSidebar(items []db.CartItem) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(items) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"border-t p-6 bg-gray-50\"><!-- Action Buttons --><div class=\"space-y-3\"><button class=\"w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors\" hx-get=\"/contact?source=cart\" hx-target=\"body\" hx-push-url=\"/contacto\">Solicitar Cotización</button> <button class=\"w-full text-gray-600 py-2 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors\" hx-post=\"/cart/clear\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Estás seguro de que quieres limpiar tu selección?\" data-cart-clear>Limpiar Todo</button></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"border-t p-6 bg-gray-50\"><!-- Action Buttons --><div class=\"space-y-3\"><a href=\"/solicitar-cotizacion\" class=\"w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-center block\" data-cart-close>Solicitar Cotización</a> <button class=\"w-full text-gray-600 py-2 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors\" hx-post=\"/cart/clear\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Estás seguro de que quieres limpiar tu selección?\" data-cart-clear>Limpiar Todo</button></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -149,7 +149,7 @@ func CartItem(item db.CartItem) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.ProductID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 130, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 129, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -162,7 +162,7 @@ func CartItem(item db.CartItem) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 137, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 136, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -175,7 +175,7 @@ func CartItem(item db.CartItem) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 143, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 142, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -188,7 +188,7 @@ func CartItem(item db.CartItem) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Category)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 144, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 143, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -246,7 +246,7 @@ func CartItem(item db.CartItem) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ProductID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 168, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 167, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -259,7 +259,7 @@ func CartItem(item db.CartItem) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Quantity))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 173, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 172, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -272,7 +272,7 @@ func CartItem(item db.CartItem) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ProductID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 177, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 176, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -290,7 +290,7 @@ func CartItem(item db.CartItem) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/cart/remove/%s", item.ProductID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 187, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 186, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -325,7 +325,7 @@ func EmptyCart() templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"flex flex-col items-center justify-center h-full text-center py-12\"><div class=\"text-gray-300 mb-6\"><svg class=\"w-20 h-20 mx-auto\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z\"></path></svg></div><h3 class=\"text-xl font-semibold text-gray-500 mb-2\">No has seleccionado nada aún</h3><p class=\"text-gray-400 mb-6\">Explora nuestro catálogo o usa el asistente para comenzar</p><div class=\"space-y-3\"><button class=\"px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors\" data-cart-close data-click-handler-selector=\"wizard-trigger\" data-start-wizard>Usar Asistente</button> <button class=\"block px-6 py-2 text-primary hover:text-primary/80 transition-colors font-medium\" data-cart-close data-click-handler-selector=\"browse-trigger,cart-close\" data-browse-catalog>Ver Catálogo</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"flex flex-col items-center justify-center h-full text-center py-12\"><div class=\"text-gray-300 mb-6\"><svg class=\"w-20 h-20 mx-auto\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z\"></path></svg></div><h3 class=\"text-xl font-semibold text-gray-500 mb-2\">No has seleccionado nada aún</h3><p class=\"text-gray-400 mb-6\">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p><div class=\"space-y-3\"><button class=\"block px-6 py-2 text-light bg-primary rounded-sm hover:text-primary/80 transition-colors font-medium\" data-cart-close data-click-handler-selector=\"browse-trigger,cart-close\" data-browse-catalog>Ver Catálogo</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

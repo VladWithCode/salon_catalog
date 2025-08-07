@@ -8,8 +8,11 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
-import "fmt"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"sort"
+)
 
 type CatalogListings map[string][]db.CatalogProd
 
@@ -39,8 +42,8 @@ func CatalogSection(listings map[string][]db.CatalogProd) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(listings) > 0 {
-			for category, listing := range listings {
-				templ_7745c5c3_Err = CatalogListing(category, listing).Render(ctx, templ_7745c5c3_Buffer)
+			for _, category := range sortedListings(listings) {
+				templ_7745c5c3_Err = CatalogListing(category, listings[category]).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -87,7 +90,7 @@ func CatalogListing(listingTitle string, listing []db.CatalogProd) templ.Compone
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(listingTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 56, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 59, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -103,7 +106,20 @@ func CatalogListing(listingTitle string, listing []db.CatalogProd) templ.Compone
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 templ.SafeURL
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/catalogo?search=%s", listingTitle))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 65, Col: 59}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"block relative grow-0 shrink-0 basis-48 sm:basis-56 lg:basis-64 aspect-square overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-lg\" data-intsc-animate-item=\"catalog-section\"><div class=\"absolute inset-0 flex flex-col items-center justify-center h-full gap-1 sm:gap-2 bg-stone-200/90 text-dark text-start p-3 sm:p-4 z-10\"><h3 class=\"text-sm sm:text-lg lg:text-xl font-bold uppercase text-ellipsis line-clamp-2\">Ver todos</h3></div></a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -127,64 +143,64 @@ func CatalogListingItem(item db.CatalogProd) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/productos/%s", item.Slug))
+		var templ_7745c5c3_Var6 templ.SafeURL
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/productos/%s", item.Slug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 67, Col: 48}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"block relative grow-0 shrink-0 basis-48 sm:basis-56 lg:basis-64 aspect-square overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-lg\" data-intsc-animate-item=\"catalog-section\"><img src=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getMainImg(item))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 72, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 81, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" alt=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"block relative grow-0 shrink-0 basis-48 sm:basis-56 lg:basis-64 aspect-square overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-lg\" data-intsc-animate-item=\"catalog-section\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Imagen principal del producto %s.", item.Name))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getMainImg(item))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 73, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 86, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"absolute inset-0 w-full object-cover object-center z-0 pointer-events-none select-none\"><div class=\"absolute bottom-0 inset-x-0 h-2/5 flex flex-col gap-1 sm:gap-2 bg-stone-200/90 text-dark text-start p-3 sm:p-4 z-10\"><h3 class=\"text-sm sm:text-lg lg:text-xl font-bold uppercase text-ellipsis line-clamp-2 flex-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" alt=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Imagen principal del producto %s.", item.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 79, Col: 110}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 87, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</h3><p class=\"text-[4px] group-hover:text-xs sm:group-hover:text-sm group-active:text-xs sm:group-active:text-sm group-hover:opacity-100 group-active:opacity-100 transition-[font-size,opacity] opacity-0 underline duration-120\">Ver detalles</p></div></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"absolute inset-0 w-full object-cover object-center z-0 pointer-events-none select-none\"><div class=\"absolute bottom-0 inset-x-0 h-2/5 flex flex-col gap-1 sm:gap-2 bg-stone-200/90 text-dark text-start p-3 sm:p-4 z-10\"><h3 class=\"text-sm sm:text-lg lg:text-xl font-bold uppercase text-ellipsis line-clamp-2 flex-1\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog_section.templ`, Line: 93, Col: 110}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</h3><p class=\"text-[4px] group-hover:text-xs sm:group-hover:text-sm group-active:text-xs sm:group-active:text-sm group-hover:opacity-100 group-active:opacity-100 transition-[font-size,opacity] opacity-0 underline duration-120\">Ver detalles</p></div></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,6 +213,20 @@ func getMainImg(item db.CatalogProd) string {
 		return fmt.Sprintf("/static/uploads/%s", item.ImageURL)
 	}
 	return "/static/assets/chenacolo_24.jpeg"
+}
+
+func sortedListings(listings map[string][]db.CatalogProd) []string {
+	titles := make([]string, len(listings))
+
+	i := 0
+	for k, _ := range listings {
+		titles[i] = k
+		i++
+	}
+
+	sort.Strings(titles)
+
+	return titles
 }
 
 var _ = templruntime.GeneratedTemplate

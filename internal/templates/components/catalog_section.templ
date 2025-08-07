@@ -1,7 +1,10 @@
 package components
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
-import "fmt"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"sort"
+)
 
 type CatalogListings map[string][]db.CatalogProd
 
@@ -24,8 +27,8 @@ templ CatalogSection(listings map[string][]db.CatalogProd) {
 				</p>
 				<div class="space-y-6 sm:space-y-8">
 					if len(listings) > 0 {
-						for category, listing := range listings {
-							@CatalogListing(category, listing)
+						for _, category := range sortedListings(listings) {
+							@CatalogListing(category, listings[category])
 						}
 					} else {
 						<a
@@ -58,6 +61,17 @@ templ CatalogListing(listingTitle string, listing []db.CatalogProd) {
 			for _, item := range listing {
 				@CatalogListingItem(item)
 			}
+			<a
+				href={ fmt.Sprintf("/catalogo?search=%s", listingTitle) }
+				class="block relative grow-0 shrink-0 basis-48 sm:basis-56 lg:basis-64 aspect-square overflow-hidden transition-[scale] group hover:scale-110 active:scale-110 translate-y-6 opacity-0 rounded-lg"
+				data-intsc-animate-item="catalog-section"
+			>
+				<div
+					class="absolute inset-0 flex flex-col items-center justify-center h-full gap-1 sm:gap-2 bg-stone-200/90 text-dark text-start p-3 sm:p-4 z-10"
+				>
+					<h3 class="text-sm sm:text-lg lg:text-xl font-bold uppercase text-ellipsis line-clamp-2">Ver todos</h3>
+				</div>
+			</a>
 		</div>
 	</div>
 }
@@ -89,4 +103,18 @@ func getMainImg(item db.CatalogProd) string {
 		return fmt.Sprintf("/static/uploads/%s", item.ImageURL)
 	}
 	return "/static/assets/chenacolo_24.jpeg"
+}
+
+func sortedListings(listings map[string][]db.CatalogProd) []string {
+	titles := make([]string, len(listings))
+
+	i := 0
+	for k, _ := range listings {
+		titles[i] = k
+		i++
+	}
+
+	sort.Strings(titles)
+
+	return titles
 }

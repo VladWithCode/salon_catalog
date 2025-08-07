@@ -58,7 +58,7 @@ templ CartSidebar(items []db.CartItem) {
 		<!-- Header -->
 		<div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
 			<div class="flex items-center justify-between">
-				<h2 class="text-xl font-bold">Tu Selección</h2>
+				<h2 class="text-xl font-bold">Tu evento</h2>
 				<button
 					class="text-white hover:text-gray-200 transition-colors"
 					data-click-handler-selector="cart-close"
@@ -101,14 +101,13 @@ templ CartSidebar(items []db.CartItem) {
                     >
                         Guardar Selección
                     </button> */
-					<button
-						class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-						hx-get="/contact?source=cart"
-						hx-target="body"
-						hx-push-url="/contacto"
+					<a
+						href="/solicitar-cotizacion"
+						class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-center block"
+						data-cart-close
 					>
 						Solicitar Cotización
-					</button>
+					</a>
 					<button
 						class="w-full text-gray-600 py-2 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors"
 						hx-post="/cart/clear"
@@ -210,18 +209,10 @@ templ EmptyCart() {
 			</svg>
 		</div>
 		<h3 class="text-xl font-semibold text-gray-500 mb-2">No has seleccionado nada aún</h3>
-		<p class="text-gray-400 mb-6">Explora nuestro catálogo o usa el asistente para comenzar</p>
+		<p class="text-gray-400 mb-6">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p>
 		<div class="space-y-3">
 			<button
-				class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-colors"
-				data-cart-close
-				data-click-handler-selector="wizard-trigger"
-				data-start-wizard
-			>
-				Usar Asistente
-			</button>
-			<button
-				class="block px-6 py-2 text-primary hover:text-primary/80 transition-colors font-medium"
+				class="block px-6 py-2 text-light bg-primary rounded-sm hover:text-primary/80 transition-colors font-medium"
 				data-cart-close
 				data-click-handler-selector="browse-trigger,cart-close"
 				data-browse-catalog
