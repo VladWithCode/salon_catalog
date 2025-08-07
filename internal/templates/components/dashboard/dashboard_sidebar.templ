@@ -9,14 +9,14 @@ templ DashboardSidebar() {
 	@sidebarScript()
 	<div
 		id="sidebar-dropshadow"
-		class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none xl:hidden"
+		class="fixed inset-0 z-50 bg-dark/30 opacity-0 pointer-events-none lg:hidden"
 		data-click-handler-selector="sidebar-toggle"
 		data-sidebar-toggle
 		data-sidebar-force="close"
 	></div>
 	<aside
 		id="sidebar"
-		class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 xl:block xl:static xl:translate-x-0 xl:z-10 transition-[height] duration-100"
+		class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static lg:translate-x-0 lg:z-10 transition-[height] duration-100"
 		data-sidebar-open="false"
 	>
 		<div class="w-full h-full bg-secondary text-primary/90 rounded-xs">
@@ -97,7 +97,7 @@ templ DashboardSidebar() {
 					}
 					<!-- Contact Requests -->
 					<a
-						href="/panel/contacts"
+						href="/panel/solicitudes"
 						class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
 					>
 						@components.ChatIcon("w-5 mr-3", nil)
