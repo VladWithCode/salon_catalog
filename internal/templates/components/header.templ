@@ -12,14 +12,19 @@ templ Header(isMainPage bool) {
 	></div>
 	<header
 		id="header"
-		class="absolute top-0 left-0 right-0 h-12 z-40 flex items-center justify-between text-stone-50 px-4"
+		class="absolute top-0 left-0 right-0 h-12 lg:h-16 z-40 flex items-center justify-between text-stone-50 px-4"
 	>
 		<div class="flex items-center">
 			<a href="/" class="flex items-center gap-4">
-				<svg class="w-8 h-8 fill-current">
+				<svg class="w-8 h-8 lg:hidden fill-current">
 					<use href="/static/assets/logo.svg#logo"></use>
 				</svg>
-				// <img src="/static/assets/logo_name.png" alt="Logotipo del Villa Chenacolo" class="h-8 invert w-auto" />
+				<img
+					id="logo-name-img"
+					src="/static/assets/logo_name.webp"
+					alt="Logotipo del Villa Chenacolo"
+					class="hidden lg:block invert h-12 w-auto"
+				/>
 			</a>
 		</div>
 		@DesktopNavigation(isMainPage)
@@ -317,29 +322,32 @@ templ Script() {
 	<script>
     document.addEventListener("DOMContentLoaded", function () {
         // Animations
-        const tl = gsap.timeline({defaults: {duration: 0.4, ease: "power2.out"}});
+        const tl = gsap.timeline({paused: true, defaults: {duration: 0.4, ease: "power2.out"}});
+        tl.to("#header", {
+            position: "fixed",
+            backgroundColor: "var(--color-secondary)",
+            color: "var(--color-dark)",
+            boxShadow: "var(--shadow-sm)",
+        }, "<+=0.2")
+        tl.to("#logo-name-img", {
+            filter: "invert(0)",
+        }, "<");
+
         const pageTopObserver = new IntersectionObserver(entries => {
             const ent = entries[0];
 
             if (!ent.isIntersecting) {
-                tl.fromTo("#header", {
+                gsap.fromTo("#header", {
                     y: "-20rem"
                 }, {
                     y: "0rem",
                 })
-                tl.to("#header", {
-                    position: "fixed",
-                    backgroundColor: "var(--color-secondary)",
-                    color: "var(--color-dark)",
-                    boxShadow: "var(--shadow-sm)",
-                }, "<+=0.2")
+                tl.play();
             } else {
-                tl.to("#header", {
-                    position: "",
-                    backgroundColor: "",
-                    color: "",
-                    boxShadow: "",
-                })
+                gsap.to("#header", {
+                    y: "0rem",
+                });
+                tl.reverse();
             }
         });
         pageTopObserver.observe(document.getElementById("top-observer-target"))

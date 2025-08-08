@@ -1,14 +1,14 @@
 package components
 
 templ DesktopNavigation(isMainPage bool) {
-	<nav class="hidden lg:flex items-center space-x-6 xl:space-x-8">
+	<nav class="hidden lg:flex items-center space-x-6 lg:space-x-8">
 		<a
 			if isMainPage {
 				href="#seccion-hero"
 			} else {
 				href="/"
 			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
 			data-section="hero"
 		>
 			Inicio
@@ -19,7 +19,7 @@ templ DesktopNavigation(isMainPage bool) {
 			} else {
 				href="/servicios"
 			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
 			data-section="oferta"
 		>
 			Servicios
@@ -30,39 +30,36 @@ templ DesktopNavigation(isMainPage bool) {
 			} else {
 				href="/catalogo"
 			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
 			data-section="catalogo"
 		>
 			Catálogo
 		</a>
-		<a
-			href="/experiencia"
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
-			data-section="galeria"
-		>
-			Experiencia
-		</a>
-		<a
-			if isMainPage {
-				href="#seccion-contacto"
-			} else {
-				href="/reservaciones"
-			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
-			data-section="contacto"
-		>
-			Agendar
-		</a>
+		if isMainPage {
+			<a
+				href="#seccion-galeria"
+				class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+				data-section="galeria"
+			>
+				Galería
+			</a>
+		}
 		<a
 			if isMainPage {
 				href="#seccion-contacto"
 			} else {
 				href="/contacto"
 			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
 			data-section="contacto"
 		>
 			Contacto
+		</a>
+		<a
+			href="/experiencia"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+		>
+			Experiencia
 		</a>
 	</nav>
 }
