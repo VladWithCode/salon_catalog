@@ -73,7 +73,7 @@ func Salon() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"block relative grow-0 shrink-0 basis-72 aspect-1/2 overflow-hidden rounded-lg cursor-pointer transition-[transform] duration-300 rotate-0 hover:rotate-1\"><img src=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"block relative grow-0 shrink-0 basis-80 aspect-2/3 overflow-hidden rounded-lg cursor-pointer transition-[transform] duration-300 rotate-0 hover:rotate-1\"><img src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
