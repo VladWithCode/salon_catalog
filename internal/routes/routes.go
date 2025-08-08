@@ -19,7 +19,7 @@ func NewRouter() http.Handler {
 	router := NewCustomServeMux()
 
 	router.HandleFunc("GET /{$}", publicMiddleware(RenderIndex))
-	router.HandleFunc("GET /catalogo", publicMiddleware(RenderCatalaog))
+	router.HandleFunc("GET /catalogo", publicMiddleware(RenderCatalog))
 	router.HandleFunc("GET /productos/{slug}", publicMiddleware(RenderProductDetail))
 	router.HandleFunc("GET /servicios", publicMiddleware(RenderServices))
 	router.HandleFunc("GET /reservaciones", publicMiddleware(RenderReservations))
@@ -76,29 +76,30 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
-	cartID, err := uuid.NewV7()
-	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to generate cart id err: %v\n", err)
-		return
-	}
+func RenderCatalog(w http.ResponseWriter, r *http.Request) {
+	cartID := uuid.Must(uuid.NewV7())
 
-	_, err = r.Cookie("cart_id")
+	search := r.URL.Query().Get("buscar")
+	category := r.URL.Query().Get("categoria")
+
+	_, err := r.Cookie("cart_id")
 	if err != nil {
 		http.SetCookie(w, &http.Cookie{
 			Name:    "cart_id",
 			Value:   cartID.String(),
 			Expires: time.Now().Add(time.Hour * 24 * 30),
 			Path:    "/",
-			Secure:  true,
 		})
 	}
-	err = pages.Catalog().Render(r.Context(), w)
+
+	state := &pages.CatalogState{
+		Search:         search,
+		ActiveCategory: category,
+	}
+	err = pages.Catalog(state).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
+		w.Write([]byte("Algo salió mal"))
 		log.Printf("failed to render Catalog err: %v\n", err)
 	}
 }

@@ -9,12 +9,42 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"encoding/json"
 	"github.com/vladwithcode/salon_catalog/internal/templates"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"net/http"
 )
 
-// import "github.com/vladwithcode/salon_catalog/internal/templates/components"
-func Catalog() templ.Component {
+type CatalogState struct {
+	Search         string `json:"buscar,omitempty"`
+	ActiveCategory string `json:"categoria,omitempty"`
+	Page           string `json:"pagina,omitempty"`
+	Limit          string `json:"por_pagina,omitempty"`
+}
+
+func NewCatalogStateFromRequest(r *http.Request) *CatalogState {
+	return &CatalogState{
+		Search:         r.URL.Query().Get("buscar"),
+		ActiveCategory: r.URL.Query().Get("categoria"),
+		Page:           r.URL.Query().Get("pagina"),
+		Limit:          r.URL.Query().Get("por_pagina"),
+	}
+}
+
+func (s *CatalogState) HasParams() bool {
+	return s.Search != "" || s.ActiveCategory != "" || s.Page != "" || s.Limit != ""
+}
+
+func (s *CatalogState) Serialize() string {
+	data, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
+
+	return string(data)
+}
+
+func Catalog(state *CatalogState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -55,11 +85,42 @@ func Catalog() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.SearchBar().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.SearchBar(state.Search).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></section><!-- Category Filters --><div class=\"h-px w-screen\" id=\"scroll-filters-threshold\"></div><section class=\"relative py-4 px-4 bg-white z-20\" id=\"category-filters\" data-active-category=\"\"><div class=\"max-w-6xl mx-auto\"><div hx-get=\"/catalog/categories\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"innerHTML\" data-ctg-filters-container><p class=\"text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8\"><span class=\"animate-spin rounded-full h-8 w-8 border-b-2 border-accent\"></span> Cargando categorías...</p><!-- Categories loaded here --></div></div></section><!-- Products Grid --><section class=\"relative grid\" id=\"catalog-products\"><div data-products-spinner class=\"absolute h-full w-full bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10\"><div class=\"flex flex-col items-center pt-8 gap-4 py-24 text-xl font-bold text-primary\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></section><!-- Category Filters --><div class=\"h-px w-screen\" id=\"scroll-filters-threshold\"></div><section class=\"relative py-4 px-4 bg-white z-20\" id=\"category-filters\" data-active-category=\"\"><div class=\"max-w-6xl mx-auto\"><div hx-get=\"/catalog/categories\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"innerHTML\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if state.HasParams() {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " hx-vals=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(state.Serialize())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 129, Col: 34}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " data-ctg-filters-container><p class=\"text-xl font-bold text-primary flex items-center justify-center gap-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.LoadingIcon("h-8", nil).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "Cargando categorías...</p><!-- Categories loaded here --></div></div></section><!-- Products Grid --><section class=\"relative grid\" id=\"catalog-products\"><div data-products-spinner class=\"col-start-1 row-start-1 py-32 bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10\"><div class=\"flex flex-col items-center pt-8 gap-4 py-24 text-xl font-bold text-primary\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -67,7 +128,30 @@ func Catalog() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<p class=\"text-lg\">Cargando productos...</p></div></div><div id=\"products\" class=\"max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto\"><div hx-get=\"/catalog/products\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"outerHTML\" hx-indicator=\"[data-products-spinner]\"></div></div></section></div><!-- Product Modal Container --> <div id=\"product-modal\"></div><!-- Floating Cart --> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<p class=\"text-lg\">Cargando productos...</p></div></div><div id=\"products\" class=\"relative z-0 max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto\"><div hx-get=\"/catalog/products\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"outerHTML\" hx-indicator=\"[data-products-spinner]\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if state.HasParams() {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " hx-vals=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(state.Serialize())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 160, Col: 34}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "></div></div></section></div><!-- Product Modal Container --> <div id=\"product-modal\"></div><!-- Floating Cart --> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -75,7 +159,7 @@ func Catalog() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <!-- Wizard Modal --> <div id=\"wizard-modal\" class=\"fixed inset-0 bg-black/50 z-50 hidden opacity-0 pointer-events-none\"><!-- Wizard content loaded here --></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " <!-- Wizard Modal --> <div id=\"wizard-modal\" class=\"fixed inset-0 bg-black/50 z-50 hidden opacity-0 pointer-events-none\"><!-- Wizard content loaded here --></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -105,12 +189,12 @@ func CatalogScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n    let currentAnimations = [];\n\n    document.addEventListener('DOMContentLoaded', function () {\n        window.eventManager\n            .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)\n            .register('afterSwap', 'product-modal', handleProductModal)\n            .register('beforeRequest', 'category-filter', handleCategoryFilterBeforeRequest)\n            .register('beforeRequest', 'search-input', handleSearchBeforeRequest)\n            .register('afterRequest', 'add-to-cart', handleCartAfterRequest)\n            .register('configRequest', 'search-input', handleCatalogSearchConfigRequest)\n            .register('configRequest', 'category-filter', handleCatalogCtgFilterConfigRequest)\n            .registerClick('browse-trigger', handleBrowseTrigger)\n            .registerClick('close-modal', closeProductModal)\n            .registerClick('category-filter', handleCategoryFilterClick);\n\n        function handleCategoryFilterClick(e) {\n            window.scrollTo(0, 0);\n            document.getElementById('category-filters').dataset.activeCategory = e.target.dataset.categoryFilter;\n        }\n        function handleBrowseTrigger(e) {\n            gsap.to('#catalog-intro', {\n                opacity: 0,\n                y: -20,\n                duration: 0.3,\n            });\n            gsap.set('#catalog-intro', {display: 'none'});\n            gsap.set('#catalog-browse', {display: 'block'})\n            gsap.fromTo(['#catalog-search', '#category-filters', '#catalog-products'],\n                {opacity: 0, y: 20},\n                {opacity: 1, y: 0, duration: 0.4, stagger: 0.1}\n            );\n            window.scrollTo(0, 0);\n        }\n        function handleProductsBeforeSwap(e) {\n            if (e.detail.xhr.status !== 200) {\n                return;\n            }\n\n            // Prevent animation overlap\n            currentAnimations.forEach(anim => anim.kill());\n            currentAnimations = [];\n\n            setTimeout(() => animateProducts(), 50);\n        }\n        function animateProducts() {\n            const container = document.querySelector('[data-products-container]');\n            const products = document.querySelectorAll('[data-product-id]');\n\n            if (!container || products.length === 0) return;\n\n            // Clear previous animations\n            gsap.killTweensOf(products);\n            gsap.killTweensOf(container);\n\n            // Set initial state\n            gsap.set(products, {opacity: 0, y: 30});\n            gsap.to(container, {opacity: 1, height: 'auto'});\n\n            // Animate products in\n            const tl = gsap.timeline({defaults: {duration: 0.4, ease: \"power2.out\"}});\n            const anim = tl.to(products, {\n                opacity: 1,\n                y: 0,\n                stagger: 0.05,\n            });\n\n            currentAnimations.push(anim);\n        }\n\n        function handleCategoryFilterBeforeRequest(e) {\n            // Remove active state from all filters\n            document.querySelectorAll('[data-category-filter]').forEach(btn => {\n                btn.className = btn.className\n                    .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');\n            });\n\n            // Add active state to clicked filter  \n            e.detail.elt.className = e.detail.elt.className\n                .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');\n        }\n\n        function handleCatalogSearchConfigRequest(e) {\n            const activeCtg = document.querySelector('[data-active-category]').dataset.activeCategory;\n            e.detail.parameters.set('category', activeCtg);\n        }\n        function handleCatalogCtgFilterConfigRequest(e) {\n            const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;\n            e.detail.parameters.set('search', activeSearch);\n        }\n\n        function handleSearchBeforeRequest(e) {\n            const container = document.querySelector('[data-products-container]');\n            if (container) {\n                gsap.to(container, {opacity: 0.5, duration: 0.2});\n            }\n            document.getElementById('catalog-search').dataset.activeSearch = e.detail.elt.value;\n        }\n\n        function handleCartBeforeRequest(e) {\n            if (e.detail.elt.matches('[data-add-to-cart]')) {\n                startAddItemLoad(e.detail.elt);\n            } else if (e.detail.elt.closest('[data-add-to-cart]')) {\n                startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));\n            }\n        }\n\n        function handleCartAfterRequest(e) {\n            let success = e.detail.xhr.status === 200;\n\n            if (e.detail.elt.matches('[data-add-to-cart]')) {\n                stopAddItemLoad(e.detail.elt, success);\n            } else if (e.detail.elt.closest('[data-add-to-cart]')) {\n                stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);\n            }\n        }\n\n        function showWizardModal() {\n            const modal = document.getElementById('wizard-modal');\n            modal.classList.remove('hidden');\n            gsap.to(modal, {\n                opacity: 1,\n                duration: 0.3,\n                onComplete: () => {\n                    modal.classList.remove('pointer-events-none');\n                }\n            });\n        }\n        function closeWizardModal() {\n            const modal = document.getElementById('wizard-modal');\n            modal.classList.add('pointer-events-none');\n            gsap.to(modal, {\n                opacity: 0,\n                duration: 0.3,\n                onComplete: () => {\n                    modal.classList.add('hidden');\n                    modal.innerHTML = '';\n                }\n            });\n        }\n\n        function handleProductModal(e) {\n            const modal = document.getElementById('product-modal');\n            gsap.fromTo(modal,\n                {opacity: 0, scale: 0.9},\n                {opacity: 1, scale: 1, duration: 0.3, ease: \"back.out(1.7)\"}\n            );\n        }\n        function closeProductModal() {\n            const modal = document.getElementById('product-modal');\n            gsap.to(modal, {\n                opacity: 0,\n                scale: 0.9,\n                duration: 0.2,\n                onComplete: () => {\n                    modal.innerHTML = '';\n                }\n            });\n        }\n\n        function startAddItemLoad(button) {\n            gsap.to('[data-add-item-label]', {\n                height: '0%',\n                duration: 0.3,\n                ease: 'power2.out',\n            });\n            gsap.to('[data-add-item-spinner]', {\n                height: '',\n                duration: 0.3,\n                ease: 'power2.out',\n            }, \"-=0.15\");\n        }\n\n        function stopAddItemLoad(button, success) {\n            const feedback = success\n                ? button.querySelector('[data-add-item-success]')\n                : button.querySelector('[data-add-item-error]');\n\n            // Animate button\n            gsap.to(feedback, {\n                opacity: 1,\n                duration: 0.3,\n                ease: 'power2.out',\n            });\n            setTimeout(() => {\n                gsap.set('[data-add-item-label]', {\n                    height: '',\n                });\n                gsap.set('[data-add-item-spinner]', {\n                    height: '0%',\n                });\n                gsap.to(feedback, {\n                    opacity: 0,\n                    duration: 0.3,\n                    ease: 'power2.out',\n                });\n            }, 1500);\n        }\n\n        const scrollTopBtn = document.getElementById('scroll-top-btn');\n        const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');\n        const obsv = new IntersectionObserver(function (entries, observer) {\n            entries.forEach(entry => {\n                if (!entry.isIntersecting) {\n                    gsap.to(scrollTopBtn, {\n                        opacity: 1,\n                        duration: 0.3,\n                        ease: \"power2.out\",\n                        pointerEvents: \"auto\",\n                    });\n                } else {\n                    gsap.to(scrollTopBtn, {\n                        opacity: 0,\n                        duration: 0.3,\n                        ease: \"power2.out\",\n                        pointerEvents: \"none\",\n                    });\n                }\n            });\n        }, {\n            threshold: 0.25\n        });\n        obsv.observe(scrollTopBtnThreshold);\n        scrollTopBtn.addEventListener('click', function (e) {\n            window.scrollTo(0, 0);\n        });\n\n        const ctgFiltersObsv = new IntersectionObserver(function (entries, observer) {\n            entries.forEach(entry => {\n                if (!entry.isIntersecting) {\n                    gsap.to('#category-filters', {\n                        position: \"fixed\",\n                        top: \"3rem\",\n                        left: 0,\n                        right: 0,\n                    });\n                } else {\n                    gsap.to('#category-filters', {\n                        position: \"\",\n                        top: \"\",\n                        left: \"\",\n                        right: \"\",\n                    });\n                }\n            });\n        });\n        ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));\n    });\n\n    \n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<script>\n    let currentAnimations = [];\n\n    document.addEventListener('DOMContentLoaded', function () {\n        window.eventManager\n            .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)\n            .register('afterSwap', 'product-modal', handleProductModal)\n            .register('beforeRequest', 'category-filter', handleCategoryFilterBeforeRequest)\n            .register('beforeRequest', 'search-input', handleSearchBeforeRequest)\n            .register('afterRequest', 'add-to-cart', handleCartAfterRequest)\n            .register('configRequest', 'search-input', handleCatalogSearchConfigRequest)\n            .register('configRequest', 'category-filter', handleCatalogCtgFilterConfigRequest)\n            .registerClick('browse-trigger', handleBrowseTrigger)\n            .registerClick('close-modal', closeProductModal)\n            .registerClick('category-filter', handleCategoryFilterClick);\n\n        function handleCategoryFilterClick(e) {\n            window.scrollTo(0, 0);\n            document.getElementById('category-filters').dataset.activeCategory = e.target.dataset.categoryFilter;\n        }\n        function handleBrowseTrigger(e) {\n            gsap.to('#catalog-intro', {\n                opacity: 0,\n                y: -20,\n                duration: 0.3,\n            });\n            gsap.set('#catalog-intro', {display: 'none'});\n            gsap.set('#catalog-browse', {display: 'block'})\n            gsap.fromTo(['#catalog-search', '#category-filters', '#catalog-products'],\n                {opacity: 0, y: 20},\n                {opacity: 1, y: 0, duration: 0.4, stagger: 0.1}\n            );\n            window.scrollTo(0, 0);\n        }\n        function handleProductsBeforeSwap(e) {\n            if (e.detail.xhr.status !== 200) {\n                return;\n            }\n\n            // Prevent animation overlap\n            currentAnimations.forEach(anim => anim.kill());\n            currentAnimations = [];\n\n            setTimeout(() => animateProducts(), 50);\n        }\n        function animateProducts() {\n            const container = document.querySelector('[data-products-container]');\n            const products = document.querySelectorAll('[data-product-id]');\n\n            if (!container || products.length === 0) return;\n\n            // Clear previous animations\n            gsap.killTweensOf(products);\n            gsap.killTweensOf(container);\n\n            // Set initial state\n            gsap.set(products, {opacity: 0, y: 30});\n            gsap.to(container, {opacity: 1, height: 'auto'});\n\n            // Animate products in\n            const tl = gsap.timeline({defaults: {duration: 0.4, ease: \"power2.out\"}});\n            const anim = tl.to(products, {\n                opacity: 1,\n                y: 0,\n                stagger: 0.05,\n            });\n\n            currentAnimations.push(anim);\n        }\n\n        function handleCategoryFilterBeforeRequest(e) {\n            // Remove active state from all filters\n            document.querySelectorAll('[data-category-filter]').forEach(btn => {\n                btn.className = btn.className\n                    .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');\n            });\n\n            // Add active state to clicked filter  \n            e.detail.elt.className = e.detail.elt.className\n                .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');\n        }\n\n        function handleCatalogSearchConfigRequest(e) {\n            const activeCtg = document.querySelector('[data-active-category]').dataset.activeCategory;\n            e.detail.parameters.set('category', activeCtg);\n        }\n        function handleCatalogCtgFilterConfigRequest(e) {\n            const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;\n            e.detail.parameters.set('search', activeSearch);\n        }\n\n        function handleSearchBeforeRequest(e) {\n            const container = document.querySelector('[data-products-container]');\n            if (container) {\n                gsap.to(container, {opacity: 0.5, duration: 0.2});\n            }\n            document.getElementById('catalog-search').dataset.activeSearch = e.detail.elt.value;\n        }\n\n        function handleCartBeforeRequest(e) {\n            if (e.detail.elt.matches('[data-add-to-cart]')) {\n                startAddItemLoad(e.detail.elt);\n            } else if (e.detail.elt.closest('[data-add-to-cart]')) {\n                startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));\n            }\n        }\n\n        function handleCartAfterRequest(e) {\n            let success = e.detail.xhr.status === 200;\n\n            if (e.detail.elt.matches('[data-add-to-cart]')) {\n                stopAddItemLoad(e.detail.elt, success);\n            } else if (e.detail.elt.closest('[data-add-to-cart]')) {\n                stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);\n            }\n        }\n\n        function showWizardModal() {\n            const modal = document.getElementById('wizard-modal');\n            modal.classList.remove('hidden');\n            gsap.to(modal, {\n                opacity: 1,\n                duration: 0.3,\n                onComplete: () => {\n                    modal.classList.remove('pointer-events-none');\n                }\n            });\n        }\n        function closeWizardModal() {\n            const modal = document.getElementById('wizard-modal');\n            modal.classList.add('pointer-events-none');\n            gsap.to(modal, {\n                opacity: 0,\n                duration: 0.3,\n                onComplete: () => {\n                    modal.classList.add('hidden');\n                    modal.innerHTML = '';\n                }\n            });\n        }\n\n        function handleProductModal(e) {\n            const modal = document.getElementById('product-modal');\n            gsap.fromTo(modal,\n                {opacity: 0, scale: 0.9},\n                {opacity: 1, scale: 1, duration: 0.3, ease: \"back.out(1.7)\"}\n            );\n        }\n        function closeProductModal() {\n            const modal = document.getElementById('product-modal');\n            gsap.to(modal, {\n                opacity: 0,\n                scale: 0.9,\n                duration: 0.2,\n                onComplete: () => {\n                    modal.innerHTML = '';\n                }\n            });\n        }\n\n        function startAddItemLoad(button) {\n            gsap.to('[data-add-item-label]', {\n                height: '0%',\n                duration: 0.3,\n                ease: 'power2.out',\n            });\n            gsap.to('[data-add-item-spinner]', {\n                height: '',\n                duration: 0.3,\n                ease: 'power2.out',\n            }, \"-=0.15\");\n        }\n\n        function stopAddItemLoad(button, success) {\n            const feedback = success\n                ? button.querySelector('[data-add-item-success]')\n                : button.querySelector('[data-add-item-error]');\n\n            // Animate button\n            gsap.to(feedback, {\n                opacity: 1,\n                duration: 0.3,\n                ease: 'power2.out',\n            });\n            setTimeout(() => {\n                gsap.set('[data-add-item-label]', {\n                    height: '',\n                });\n                gsap.set('[data-add-item-spinner]', {\n                    height: '0%',\n                });\n                gsap.to(feedback, {\n                    opacity: 0,\n                    duration: 0.3,\n                    ease: 'power2.out',\n                });\n            }, 1500);\n        }\n\n        const scrollTopBtn = document.getElementById('scroll-top-btn');\n        const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');\n        const obsv = new IntersectionObserver(function (entries, observer) {\n            entries.forEach(entry => {\n                if (!entry.isIntersecting) {\n                    gsap.to(scrollTopBtn, {\n                        opacity: 1,\n                        duration: 0.3,\n                        ease: \"power2.out\",\n                        pointerEvents: \"auto\",\n                    });\n                } else {\n                    gsap.to(scrollTopBtn, {\n                        opacity: 0,\n                        duration: 0.3,\n                        ease: \"power2.out\",\n                        pointerEvents: \"none\",\n                    });\n                }\n            });\n        }, {\n            threshold: 0.25\n        });\n        obsv.observe(scrollTopBtnThreshold);\n        scrollTopBtn.addEventListener('click', function (e) {\n            window.scrollTo(0, 0);\n        });\n\n        const ctgFiltersObsv = new IntersectionObserver(function (entries, observer) {\n            entries.forEach(entry => {\n                if (!entry.isIntersecting) {\n                    gsap.to('#category-filters', {\n                        position: \"fixed\",\n                        top: getTopNavHeight() + \"px\",\n                        left: 0,\n                        right: 0,\n                    });\n                } else {\n                    gsap.to('#category-filters', {\n                        position: \"\",\n                        top: \"\",\n                        left: \"\",\n                        right: \"\",\n                    });\n                }\n            });\n        });\n        ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));\n\n        function getTopNavHeight() {\n            return String(document.getElementById('header').clientHeight);\n        }\n    });\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

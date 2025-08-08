@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 )
@@ -15,20 +17,16 @@ func RegisterCatalogRoutes(router *customServeMux) {
 }
 
 func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
-	responseTempl := components.CategoryFilters
-	categories, err := db.FindCatalogCategories()
+	activeCtg := r.URL.Query().Get("categoria")
+
+	ctgs, err := db.FindCatalogCategories("")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to find catalog categories"))
-		log.Printf("failed to find catalog categories: %v\n", err)
+		components.CategoryFilters(internal.PtrSliceToPlainSlice(ctgs), activeCtg).Render(r.Context(), w)
 		return
 	}
 
-	plainCtgs := make([]db.CatalogCtg, len(categories))
-	for i, ctg := range categories {
-		plainCtgs[i] = *ctg
-	}
-	err = responseTempl(plainCtgs, "").Render(context.Background(), w)
+	err = components.CategoryFilters(internal.PtrSliceToPlainSlice(ctgs), activeCtg).Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to render catalog categories"))
@@ -38,9 +36,26 @@ func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCatalogProducts(w http.ResponseWriter, r *http.Request) {
-	categoryID := r.URL.Query().Get("category")
-	search := r.URL.Query().Get("search")
-	products, err := db.FindCatalogProducts(categoryID, search)
+	categoryID := r.URL.Query().Get("categoria")
+	search := r.URL.Query().Get("buscar")
+
+	// Parse pagination parameters
+	page := 1
+	limit := db.DefaultCatalogPageSize
+
+	if pageStr := r.URL.Query().Get("pagina"); pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	if limitStr := r.URL.Query().Get("por_pagina"); limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
+			limit = l
+		}
+	}
+
+	result, err := db.FindCatalogProducts(categoryID, search, page, limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to find catalog products"))
@@ -48,12 +63,7 @@ func GetCatalogProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plainProducts := make([]db.CatalogProd, len(products))
-	for i, prod := range products {
-		plainProducts[i] = *prod
-	}
-
-	err = components.ProductGrid(plainProducts, false, 0).Render(context.Background(), w)
+	err = components.ProductGrid(result).Render(context.Background(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to render catalog products"))

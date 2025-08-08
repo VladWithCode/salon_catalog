@@ -18,7 +18,7 @@ SELECT
     p.id,
     p.name,
     p.description,
-    p.long_description as long_description, -- You may want to add a separate long_description column later
+    p.long_description,
     p.category as category_id,
     p.slug,
     c.name as category_name,

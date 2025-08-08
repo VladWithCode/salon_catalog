@@ -70,11 +70,12 @@ CREATE VIEW catalog_categories AS
 SELECT 
     c.id,
     c.name,
+    c.slug,
     c.search_vector,
     COUNT(p.id) as product_count
 FROM public.categories c
 LEFT JOIN public.products p ON c.id = p.category
-GROUP BY c.id, c.name, c.search_vector
+GROUP BY c.id, c.name, c.slug, c.search_vector
 ORDER BY c.name;
 
 -- Recreate catalog_products view with search vector
@@ -88,6 +89,7 @@ SELECT
     c.name as category_name,
     COALESCE(main_img.filename, '') as image_url,
     p.available,
+    p.slug,
     p.search_vector,
     -- Aggregate gallery images as JSON array
     COALESCE(
@@ -129,11 +131,12 @@ SELECT
     p.id,
     p.name,
     p.description,
-    p.description as long_description,
+    p.long_description,
     p.category as category_id,
     c.name as category_name,
     COALESCE(main_img.filename, '') as image_url,
     p.available,
+    p.slug,
     COALESCE(
         (
             SELECT json_agg(i.filename ORDER BY i.filename)

@@ -7,6 +7,13 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+)
+
+const (
+	DefaultCatalogPageSize = 16
 )
 
 type CatalogCtg struct {
@@ -28,12 +35,7 @@ type CatalogProd struct {
 	Available       bool     `json:"available"`
 }
 
-type Specification struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-func FindCatalogCategories() ([]*CatalogCtg, error) {
+func FindCatalogCategories(search string) ([]*CatalogCtg, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -42,13 +44,35 @@ func FindCatalogCategories() ([]*CatalogCtg, error) {
 	}
 	defer conn.Release()
 
-	rows, err := conn.Query(
-		ctx,
-		`SELECT 
-			id, name, product_count
-		FROM catalog_categories
-		ORDER BY name`,
-	)
+	// Build query conditionally
+	query := `SELECT 
+		id, name, product_count
+	FROM catalog_categories WHERE 1=1`
+
+	var args []any
+	var conditions []string
+	argIndex := 1
+
+	// Add search filter if provided
+	if search != "" {
+		conditions = append(conditions, fmt.Sprintf("search_vector @@ plainto_tsquery('spanish', $%d)", argIndex))
+		args = append(args, search)
+		argIndex++
+	}
+
+	// Append conditions to query
+	if len(conditions) > 0 {
+		query += " AND " + strings.Join(conditions, " AND ")
+	}
+
+	// Add ordering - prioritize search ranking if search is provided
+	if search != "" {
+		query += " ORDER BY ts_rank(search_vector, plainto_tsquery('spanish', $1)) DESC, name ASC"
+	} else {
+		query += " ORDER BY name"
+	}
+
+	rows, err := conn.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +137,20 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 	return &product, nil
 }
 
-func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+type CatalogProductFilterResult struct {
+	Products    []*CatalogProd `json:"products"`
+	Total       int            `json:"total"`
+	Page        int            `json:"page"`
+	Limit       int            `json:"limit"`
+	TotalPages  int            `json:"total_pages"`
+	HasNext     bool           `json:"has_next"`
+	HasPrevious bool           `json:"has_previous"`
+	HasError    bool           `json:"has_error"`
+	Error       string         `json:"error"`
+}
+
+func FindCatalogProducts(categoryID string, search string, page int, limit int) (*CatalogProductFilterResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	conn, err := GetConn()
@@ -123,42 +159,75 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 	}
 	defer conn.Release()
 
-	// Build query conditionally
-	query := `SELECT 
-		id, name, description, long_description, category_id, category_name, 
-		image_url, available, images
-		FROM catalog_products WHERE 1=1`
+	// Set defaults
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = DefaultCatalogPageSize
+	}
 
-	var args []any
+	// Build base query conditions
 	var conditions []string
-	argIndex := 1
+	args := pgx.NamedArgs{}
 
 	// Add category filter if provided
 	if categoryID != "" {
-		conditions = append(conditions, fmt.Sprintf("category_id = $%d", argIndex))
-		args = append(args, categoryID)
-		argIndex++
+		if _, err := uuid.Parse(categoryID); err == nil {
+			conditions = append(conditions, "category_id = @category_id")
+			args["category_id"] = categoryID
+		} else {
+			conditions = append(conditions, "category_name = @category_name")
+			args["category_name"] = categoryID
+		}
 	}
 
 	// Add search filter if provided
 	if search != "" {
-		searchPattern := "%" + search + "%"
-		conditions = append(conditions, fmt.Sprintf("(name ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex))
-		args = append(args, searchPattern)
-		argIndex++
+		conditions = append(conditions, "search_vector @@ plainto_tsquery('spanish', @search)")
+		args["search"] = search
 	}
 
-	// Append conditions to query
+	// Build WHERE clause
+	whereClause := ""
 	if len(conditions) > 0 {
-		query += " AND " + strings.Join(conditions, " AND ")
+		whereClause = " AND " + strings.Join(conditions, " AND ")
 	}
 
-	// Add ordering
-	query += " ORDER BY name"
-
-	rows, err := conn.Query(ctx, query, args...)
+	// Get total count
+	countQuery := `SELECT COUNT(*) FROM catalog_products WHERE 1=1` + whereClause
+	var total int
+	err = conn.QueryRow(ctx, countQuery, args).Scan(&total)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	// Calculate pagination
+	offset := (page - 1) * limit
+	totalPages := int((total + limit - 1) / limit) // Ceiling division
+
+	// Add pagination parameters
+	args["limit"] = limit
+	args["offset"] = offset
+
+	// Build main query with ordering and pagination
+	query := `SELECT 
+		id, name, description, long_description, category_id, category_name, 
+		image_url, available, images, slug
+		FROM catalog_products WHERE 1=1` + whereClause
+
+	// Add ordering - prioritize search ranking if search is provided
+	if search != "" {
+		query += " ORDER BY ts_rank(search_vector, plainto_tsquery('spanish', @search)) DESC, name ASC"
+	} else {
+		query += " ORDER BY name"
+	}
+
+	query += " LIMIT @limit OFFSET @offset"
+
+	rows, err := conn.Query(ctx, query, args)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -176,10 +245,11 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 			&product.CategoryName,
 			&product.ImageURL,
 			&product.Available,
-			&imagesJSON, // Scan JSON as bytes first
+			&imagesJSON,
+			&product.Slug,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan product: %w", err)
 		}
 
 		// Unmarshal JSON fields
@@ -192,10 +262,21 @@ func FindCatalogProducts(categoryID string, search string) ([]*CatalogProd, erro
 
 	// Check for iteration errors
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
 
-	return products, nil
+	// Build result
+	result := &CatalogProductFilterResult{
+		Products:    products,
+		Total:       total,
+		Page:        page,
+		Limit:       limit,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}
+
+	return result, nil
 }
 
 func FindCatalogListings() (map[string][]*CatalogProd, error) {

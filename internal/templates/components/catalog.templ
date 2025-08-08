@@ -12,7 +12,7 @@ func getTotalProductCount(categories []db.CatalogCtg) int {
 }
 
 templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
-	<div class="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+	<div class="flex overflow-x-auto gap-2 scrollbar-hide">
 		<!-- All Categories -->
 		<button
 			class={
@@ -24,6 +24,7 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 			hx-target="#products"
 			hx-swap="innerHTML"
 			hx-indicator="[data-products-spinner]"
+			hx-push-url="/catalogo"
 			data-click-handler-selector="category-filter"
 			data-category-filter=""
 		>
@@ -34,13 +35,14 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 			<button
 				class={
 					"px-4 py-2 rounded-full font-medium whitespace-nowrap transition-colors flex-shrink-0",
-					templ.KV("bg-accent text-white", activeCategory == category.ID),
-					templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != category.ID),
+					templ.KV("bg-accent text-white", activeCategory == category.Name),
+					templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", activeCategory != category.Name),
 				}
-				hx-get={ fmt.Sprintf("/catalog/products?category=%s", category.ID) }
+				hx-get={ fmt.Sprintf("/catalog/products?categoria=%s", category.Name) }
 				hx-target="#products"
 				hx-swap="innerHTML"
 				hx-indicator="[data-products-spinner]"
+				hx-push-url={ fmt.Sprintf("/catalogo?categoria=%s", category.Name) }
 				data-click-handler-selector="category-filter"
 				data-category-filter={ category.ID }
 			>
@@ -57,55 +59,88 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
     </div> */
 }
 
-templ ProductGrid(products []db.CatalogProd, hasMore bool, page int) {
+templ ProductGrid(result *db.CatalogProductFilterResult) {
 	<div class="space-y-6" id="products-grid-content">
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-products-container>
-			for _, product := range products {
+			for _, product := range result.Products {
 				@ProductCard(product)
 			}
 		</div>
 		<!-- Load More / Pagination -->
-		if hasMore {
-			<div class="text-center mt-8">
+		if result.TotalPages > 1 {
+			<div class="flex gap-2 items-stretch justify-center mt-8">
 				<button
-					class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-					hx-get={ fmt.Sprintf("/catalog/products?page=%d", page+1) }
-					hx-target="#products-grid"
-					hx-swap="beforeend"
-					hx-indicator="#load-more-indicator"
-					data-load-more
+					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
+					disabled?={ !result.HasPrevious }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page-1) }
+					hx-target="#products-grid-content"
+					hx-indicator="[data-products-spinner]"
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page-1) }
 				>
-					<span class="htmx-indicator" id="load-more-indicator">
-						<div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-					</span>
-					Cargar más productos
+					@ChevronIcon("h-6 rotate-90", nil)
+				</button>
+				<div class="max-w-fit flex-1 flex items-stretch px-2 py-1 bg-accent text-light rounded-lg">
+					for i := 1; i <= result.TotalPages; i++ {
+						{{ isCurrent := i == result.Page }}
+						<button
+							class={
+								"px-4 flex text-light items-center justify-center rounded-lg",
+								templ.KV("bg-primary hover:bg-primary/90", isCurrent),
+								templ.KV("bg-transparent hover:bg-primary/90", !isCurrent),
+							}
+							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", i) }
+							hx-target="#products-grid-content"
+							hx-indicator="[data-products-spinner]"
+							hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", i) }
+						>
+							{ i }
+						</button>
+					}
+				</div>
+				<button
+					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
+					disabled?={ !result.HasNext }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page+1) }
+					hx-target="#products-grid-content"
+					hx-indicator="[data-products-spinner]"
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page+1) }
+				>
+					@ChevronIcon("h-6 -rotate-90", nil)
 				</button>
 			</div>
 		}
 	</div>
 }
 
-templ ProductCard(product db.CatalogProd) {
+templ ProductCard(product *db.CatalogProd) {
 	<div
-		class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 group opacity-0 translate-y-6"
+		class="bg-gray-50 flex flex-col rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 group opacity-0 translate-y-6"
 		data-product-id={ product.ID }
 	>
 		<!-- Product Image -->
 		<div class="aspect-square overflow-hidden bg-gray-100 relative">
 			// src="/static/assets/chenacolo_24.jpeg"
-			<img
-				src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
-				alt={ product.Name }
-				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-				loading="lazy"
-			/>
+			<button
+				class="w-full aspect-square xl:pointer-events-none"
+				hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+				hx-target="#product-modal"
+				hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+			>
+				<img
+					src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
+					alt={ product.Name }
+					class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+					loading="lazy"
+				/>
+			</button>
 			<!-- Quick Actions Overlay -->
-			<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+			<div class="invisible xl:visible absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
 				<div class="space-x-2">
 					<button
 						class="p-2 bg-white rounded-full text-primary hover:bg-gray-100 transition-colors"
-						hx-get={ fmt.Sprintf("/catalog/product/%s", product.ID) }
+						hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 						hx-target="#product-modal"
+						hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 						title="Ver detalles"
 					>
 						<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,59 +178,63 @@ templ ProductCard(product db.CatalogProd) {
 			}
 		</div>
 		<!-- Product Info -->
-		<div class="p-4">
-			<h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">{ product.Name }</h3>
-			<p class="text-sm text-gray-600 mb-3 line-clamp-2">{ product.Description }</p>
+		<div class="flex-1 flex flex-col p-4">
+			<div class="flex-1 basis-full">
+				<h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">{ product.Name }</h3>
+				<p class="text-sm text-gray-600 mb-3 line-clamp-2">{ product.Description }</p>
+			</div>
 			<!-- Action Button -->
-			<button
-				class={
-					"grid grid-cols-1 grid-rows-1 place-items-center w-full py-2 rounded-lg font-medium transition-colors cart-item-add-btn relative",
-					templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
-					templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
-				}
-				if product.Available {
-					hx-post="/cart/add"
-					hx-vals={ fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID) }
-					hx-target="#cart-sidebar"
-					data-add-to-cart
-				}
-				disabled?={ !product.Available }
-			>
-				<div
-					class="absolute inset-0 flex items-center justify-center bg-red-500 rounded-lg text-white text-xl opacity-0 z-10"
-					data-add-item-error
-				>
-					✗  Error al añadir al carrito
-				</div>
-				<div
-					class="absolute inset-0 flex items-center justify-center bg-green-500 rounded-lg text-white text-xl opacity-0 z-10"
-					data-add-item-success
-				>
-					✓  Añadido al carrito
-				</div>
-				<div
-					class="flex items-center col-start-1 row-start-1 place-self-center overflow-hidden z-0"
-					data-add-item-label
-				>
-					if product.Available {
-						Añadir a Selección
-					} else {
-						No Disponible
+			<div class="flex-1">
+				<button
+					class={
+						"grid grid-cols-1 grid-rows-1 place-items-center w-full py-2 rounded-lg font-medium transition-colors cart-item-add-btn relative",
+						templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
+						templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
 					}
-				</div>
-				<div
-					class="col-start-1 row-start-1 place-self-center overflow-hidden"
-					style="height: 0%;"
-					data-add-item-spinner
+					if product.Available {
+						hx-post="/cart/add"
+						hx-vals={ fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID) }
+						hx-target="#cart-sidebar"
+						data-add-to-cart
+					}
+					disabled?={ !product.Available }
 				>
-					@LoadingIcon("h-8", nil)
-				</div>
-			</button>
+					<div
+						class="absolute inset-0 flex items-center justify-center bg-red-500 rounded-lg text-white text-xl opacity-0 z-10"
+						data-add-item-error
+					>
+						✗  Error al añadir al carrito
+					</div>
+					<div
+						class="absolute inset-0 flex items-center justify-center bg-green-500 rounded-lg text-white text-xl opacity-0 z-10"
+						data-add-item-success
+					>
+						✓  Añadido al carrito
+					</div>
+					<div
+						class="flex items-center col-start-1 row-start-1 place-self-center overflow-hidden z-0"
+						data-add-item-label
+					>
+						if product.Available {
+							Añadir a Selección
+						} else {
+							No Disponible
+						}
+					</div>
+					<div
+						class="col-start-1 row-start-1 place-self-center overflow-hidden"
+						style="height: 0%;"
+						data-add-item-spinner
+					>
+						@LoadingIcon("h-8", nil)
+					</div>
+				</button>
+			</div>
 		</div>
 	</div>
 }
 
-templ ProductModal(product db.CatalogProd) {
+templ ProductModal(product *db.CatalogProd) {
 	<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" id="product-modal-overlay">
 		<div
 			class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
@@ -286,7 +325,7 @@ templ ProductModal(product db.CatalogProd) {
 	</div>
 }
 
-templ SearchBar() {
+templ SearchBar(search string) {
 	<div class="relative max-w-md mx-auto">
 		<input
 			type="search"
@@ -297,8 +336,9 @@ templ SearchBar() {
 			hx-swap="innerHTML"
 			hx-trigger="input changed delay:300ms"
 			hx-indicator="[data-products-spinner]"
-			name="search"
+			name="buscar"
 			data-search-input
+			value={ search }
 		/>
 		<div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
 			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

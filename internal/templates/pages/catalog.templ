@@ -1,12 +1,42 @@
 package pages
 
 import (
+	"encoding/json"
 	"github.com/vladwithcode/salon_catalog/internal/templates"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"net/http"
 )
 
-// import "github.com/vladwithcode/salon_catalog/internal/templates/components"
-templ Catalog() {
+type CatalogState struct {
+	Search         string `json:"buscar,omitempty"`
+	ActiveCategory string `json:"categoria,omitempty"`
+	Page           string `json:"pagina,omitempty"`
+	Limit          string `json:"por_pagina,omitempty"`
+}
+
+func NewCatalogStateFromRequest(r *http.Request) *CatalogState {
+	return &CatalogState{
+		Search:         r.URL.Query().Get("buscar"),
+		ActiveCategory: r.URL.Query().Get("categoria"),
+		Page:           r.URL.Query().Get("pagina"),
+		Limit:          r.URL.Query().Get("por_pagina"),
+	}
+}
+
+func (s *CatalogState) HasParams() bool {
+	return s.Search != "" || s.ActiveCategory != "" || s.Page != "" || s.Limit != ""
+}
+
+func (s *CatalogState) Serialize() string {
+	data, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
+
+	return string(data)
+}
+
+templ Catalog(state *CatalogState) {
 	@templates.BaseLayout("Catálogo - Villa Chenacolo", nil, false) {
 		@CatalogScript()
 		<div class="fixed bottom-20 right-4 z-40">
@@ -83,7 +113,7 @@ templ Catalog() {
 			<!-- Search Bar -->
 			<section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
 				<div class="max-w-6xl mx-auto">
-					@components.SearchBar()
+					@components.SearchBar(state.Search)
 				</div>
 			</section>
 			<!-- Category Filters -->
@@ -95,10 +125,13 @@ templ Catalog() {
 						hx-trigger="load"
 						hx-target="this"
 						hx-swap="innerHTML"
+						if state.HasParams() {
+							hx-vals={ state.Serialize() }
+						}
 						data-ctg-filters-container
 					>
-						<p class="text-xl font-bold text-primary flex items-center justify-center gap-4 pb-8">
-							<span class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></span>
+						<p class="text-xl font-bold text-primary flex items-center justify-center gap-4">
+							@components.LoadingIcon("h-8", nil)
 							Cargando categorías...
 						</p>
 						<!-- Categories loaded here -->
@@ -109,20 +142,23 @@ templ Catalog() {
 			<section class="relative grid" id="catalog-products">
 				<div
 					data-products-spinner
-					class="absolute h-full w-full bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
+					class="col-start-1 row-start-1 py-32 bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
 				>
 					<div class="flex flex-col items-center pt-8 gap-4 py-24 text-xl font-bold text-primary">
 						@components.LoadingIcon("h-16", nil)
 						<p class="text-lg">Cargando productos...</p>
 					</div>
 				</div>
-				<div id="products" class="max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto">
+				<div id="products" class="relative z-0 max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto">
 					<div
 						hx-get="/catalog/products"
 						hx-trigger="load"
 						hx-target="this"
 						hx-swap="outerHTML"
 						hx-indicator="[data-products-spinner]"
+						if state.HasParams() {
+							hx-vals={ state.Serialize() }
+						}
 					></div>
 				</div>
 			</section>
@@ -371,7 +407,7 @@ templ CatalogScript() {
                 if (!entry.isIntersecting) {
                     gsap.to('#category-filters', {
                         position: "fixed",
-                        top: "3rem",
+                        top: getTopNavHeight() + "px",
                         left: 0,
                         right: 0,
                     });
@@ -386,8 +422,10 @@ templ CatalogScript() {
             });
         });
         ctgFiltersObsv.observe(document.getElementById('scroll-filters-threshold'));
-    });
 
-    
+        function getTopNavHeight() {
+            return String(document.getElementById('header').clientHeight);
+        }
+    });
 </script>
 }
