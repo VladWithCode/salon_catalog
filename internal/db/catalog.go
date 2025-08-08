@@ -95,7 +95,7 @@ func FindCatalogCategories(search string) ([]*CatalogCtg, error) {
 	return categories, nil
 }
 
-func FindCatalogProductByID(id string) (*CatalogProd, error) {
+func FindCatalogProductDetail(id string) (*CatalogProd, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := GetConn()
@@ -104,17 +104,28 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 	}
 	defer conn.Release()
 
+	baseQuery := `SELECT 
+		id, name, description, long_description, category_id, category_name, 
+		image_url, available, images, slug
+	FROM catalog_products WHERE`
+	args := pgx.NamedArgs{}
+
+	if _, err := uuid.Parse(id); err == nil {
+		baseQuery += " id = @id"
+		args["id"] = id
+	} else {
+		baseQuery += " slug = @slug"
+		args["slug"] = id
+	}
+
 	var (
 		product    CatalogProd
 		imagesJSON []byte
 	)
 	err = conn.QueryRow(
 		ctx,
-		`SELECT 
-			id, name, description, long_description, category_id, category_name, 
-			image_url, available, images
-		FROM catalog_products WHERE id = $1`,
-		id,
+		baseQuery,
+		args,
 	).Scan(
 		&product.ID,
 		&product.Name,
@@ -125,6 +136,7 @@ func FindCatalogProductByID(id string) (*CatalogProd, error) {
 		&product.ImageURL,
 		&product.Available,
 		&imagesJSON,
+		&product.Slug,
 	)
 	if err != nil {
 		return nil, err

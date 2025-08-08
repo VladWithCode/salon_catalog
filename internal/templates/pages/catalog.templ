@@ -12,6 +12,8 @@ type CatalogState struct {
 	ActiveCategory string `json:"categoria,omitempty"`
 	Page           string `json:"pagina,omitempty"`
 	Limit          string `json:"por_pagina,omitempty"`
+
+	ProductModalState *components.ProductModalState
 }
 
 func NewCatalogStateFromRequest(r *http.Request) *CatalogState {
@@ -164,7 +166,9 @@ templ Catalog(state *CatalogState) {
 			</section>
 		</div>
 		<!-- Product Modal Container -->
-		<div id="product-modal"></div>
+		<div id="product-modal-wrapper">
+			@components.ProductModal(state.ProductModalState)
+		</div>
 		<!-- Floating Cart -->
 		@components.FloatingCart()
 		<!-- Wizard Modal -->
@@ -181,19 +185,21 @@ templ CatalogScript() {
     document.addEventListener('DOMContentLoaded', function () {
         window.eventManager
             .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)
-            .register('afterSwap', 'product-modal', handleProductModal)
-            .register('beforeRequest', 'category-filter', handleCategoryFilterBeforeRequest)
-            .register('beforeRequest', 'search-input', handleSearchBeforeRequest)
             .register('afterRequest', 'add-to-cart', handleCartAfterRequest)
-            .register('configRequest', 'search-input', handleCatalogSearchConfigRequest)
-            .register('configRequest', 'category-filter', handleCatalogCtgFilterConfigRequest)
             .registerClick('browse-trigger', handleBrowseTrigger)
-            .registerClick('close-modal', closeProductModal)
             .registerClick('category-filter', handleCategoryFilterClick);
 
         function handleCategoryFilterClick(e) {
             window.scrollTo(0, 0);
             document.getElementById('category-filters').dataset.activeCategory = e.target.dataset.categoryFilter;
+            document.querySelectorAll('[data-category-filter]').forEach(btn => {
+                btn.className = btn.className
+                    .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+            });
+
+            // Add active state to clicked filter  
+            e.target.className = e.target.className
+                .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
         }
         function handleBrowseTrigger(e) {
             gsap.to('#catalog-intro', {
@@ -245,33 +251,8 @@ templ CatalogScript() {
             currentAnimations.push(anim);
         }
 
-        function handleCategoryFilterBeforeRequest(e) {
+        function handleCategoryFilterChange(e) {
             // Remove active state from all filters
-            document.querySelectorAll('[data-category-filter]').forEach(btn => {
-                btn.className = btn.className
-                    .replace('bg-accent text-white', 'bg-gray-200 text-gray-700 hover:bg-gray-300');
-            });
-
-            // Add active state to clicked filter  
-            e.detail.elt.className = e.detail.elt.className
-                .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
-        }
-
-        function handleCatalogSearchConfigRequest(e) {
-            const activeCtg = document.querySelector('[data-active-category]').dataset.activeCategory;
-            e.detail.parameters.set('category', activeCtg);
-        }
-        function handleCatalogCtgFilterConfigRequest(e) {
-            const activeSearch = document.querySelector('[data-active-search]').dataset.activeSearch;
-            e.detail.parameters.set('search', activeSearch);
-        }
-
-        function handleSearchBeforeRequest(e) {
-            const container = document.querySelector('[data-products-container]');
-            if (container) {
-                gsap.to(container, {opacity: 0.5, duration: 0.2});
-            }
-            document.getElementById('catalog-search').dataset.activeSearch = e.detail.elt.value;
         }
 
         function handleCartBeforeRequest(e) {
@@ -311,25 +292,6 @@ templ CatalogScript() {
                 duration: 0.3,
                 onComplete: () => {
                     modal.classList.add('hidden');
-                    modal.innerHTML = '';
-                }
-            });
-        }
-
-        function handleProductModal(e) {
-            const modal = document.getElementById('product-modal');
-            gsap.fromTo(modal,
-                {opacity: 0, scale: 0.9},
-                {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)"}
-            );
-        }
-        function closeProductModal() {
-            const modal = document.getElementById('product-modal');
-            gsap.to(modal, {
-                opacity: 0,
-                scale: 0.9,
-                duration: 0.2,
-                onComplete: () => {
                     modal.innerHTML = '';
                 }
             });
@@ -426,6 +388,74 @@ templ CatalogScript() {
         function getTopNavHeight() {
             return String(document.getElementById('header').clientHeight);
         }
+
+        // Product modal logic
+        const modal = document.getElementById('product-modal');
+        if (modal?.dataset.productModalOpen === 'open') {
+            document.body.style.overflow = 'hidden';
+
+            const modalWrapper = document.getElementById('product-modal-wrapper');
+            modalWrapper.dataset.productModalOpen = 'true';
+
+                gsap.to('#product-modal-overlay', {
+                    autoAlpha: 1,
+                    y: "0%",
+                    duration: 0.5,
+                    ease: "power3.out",
+                    onComplete: () => {
+                        document.body.style.overflow = 'hidden';
+                }
+            });
+            const animatables = gsap.utils.toArray('[data-modal-animate-enter]', modal);
+            const animateEnterTl = gsap.timeline({defaults: {duration: 0.5, ease: "power3.out"}});
+
+            animateEnterTl.to(animatables, {
+                opacity: 1,
+                y: "0%",
+                stagger: 0.1,
+                delay: 0.3,
+            });
+        }
+
+        eventManager
+            .register('beforeRequest', '#product-modal', function(e) {
+                const modalWrapper = document.getElementById('product-modal-wrapper');
+                modalWrapper.dataset.productModalOpen = 'true';
+                const openModalTl = gsap.timeline({defaults: {duration: 0.5, ease: "power3.out"}});
+
+                openModalTl
+                    .to('#product-modal-overlay', {
+                        autoAlpha: 1,
+                        y: "0%",
+                        onComplete: () => {
+                            document.body.style.overflow = 'hidden';
+                        }
+                    })
+            })
+            .register('afterSwap', '#product-modal', function(e) {
+                const modal = document.getElementById('product-modal');
+                const animatables = gsap.utils.toArray('[data-modal-animate-enter]', modal);
+                const animateEnterTl = gsap.timeline({defaults: {duration: 0.5, ease: "power3.out"}});
+
+                animateEnterTl.to(animatables, {
+                    opacity: 1,
+                    y: "0%",
+                    stagger: 0.1,
+                    delay: 0.3,
+                });
+            })
+            .registerClick('[data-close-modal="product-modal"]', function(e) {
+                const overlay = document.getElementById('product-modal-overlay');
+                gsap.to(overlay, {
+                    opacity: 0,
+                    y: "100%",
+                    duration: 0.5,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        document.body.style.overflow = '';
+                    }
+                });
+            })
     });
 </script>
 }

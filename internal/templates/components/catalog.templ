@@ -1,7 +1,9 @@
 package components
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
-import "fmt"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
 
 func getTotalProductCount(categories []db.CatalogCtg) int {
 	total := 0
@@ -24,7 +26,6 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 			hx-target="#products"
 			hx-swap="innerHTML"
 			hx-indicator="[data-products-spinner]"
-			hx-push-url="/catalogo"
 			data-click-handler-selector="category-filter"
 			data-category-filter=""
 		>
@@ -42,7 +43,6 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 				hx-target="#products"
 				hx-swap="innerHTML"
 				hx-indicator="[data-products-spinner]"
-				hx-push-url={ fmt.Sprintf("/catalogo?categoria=%s", category.Name) }
 				data-click-handler-selector="category-filter"
 				data-category-filter={ category.ID }
 			>
@@ -75,7 +75,6 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page-1) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
-					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page-1) }
 				>
 					@ChevronIcon("h-6 rotate-90", nil)
 				</button>
@@ -91,7 +90,6 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", i) }
 							hx-target="#products-grid-content"
 							hx-indicator="[data-products-spinner]"
-							hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", i) }
 						>
 							{ i }
 						</button>
@@ -103,7 +101,6 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page+1) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
-					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page+1) }
 				>
 					@ChevronIcon("h-6 -rotate-90", nil)
 				</button>
@@ -124,7 +121,8 @@ templ ProductCard(product *db.CatalogProd) {
 				class="w-full aspect-square xl:pointer-events-none"
 				hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 				hx-target="#product-modal"
-				hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+				hx-swap="outerHTML"
+				hx-indicator="#product-modal-loading"
 			>
 				<img
 					src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
@@ -140,7 +138,8 @@ templ ProductCard(product *db.CatalogProd) {
 						class="p-2 bg-white rounded-full text-primary hover:bg-gray-100 transition-colors"
 						hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 						hx-target="#product-modal"
-						hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+						hx-indicator="#product-modal-loading"
+						hx-swap="outerHTML"
 						title="Ver detalles"
 					>
 						<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -234,94 +233,76 @@ templ ProductCard(product *db.CatalogProd) {
 	</div>
 }
 
-templ ProductModal(product *db.CatalogProd) {
-	<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" id="product-modal-overlay">
-		<div
-			class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
-			data-product-modal
-		>
-			<!-- Header -->
-			<div class="flex items-center justify-between p-6 border-b">
-				<div>
-					<h2 class="text-2xl font-bold text-gray-800">{ product.Name }</h2>
-					<span class="text-sm text-gray-500">{ product.CategoryName }</span>
-				</div>
-				<button
-					class="text-gray-400 hover:text-gray-600 transition-colors"
-					data-close-modal
-				>
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-					</svg>
-				</button>
-			</div>
-			<!-- Content -->
-			<div class="flex flex-col lg:flex-row max-h-[calc(90vh-140px)]">
-				<!-- Images -->
-				<div class="lg:w-1/2 p-6">
-					<div class="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+type ProductModalState struct {
+	Product         db.CatalogProd    `json:"-"`
+	RelatedProducts []*db.CatalogProd `json:"-"`
+	Error           string            `json:"-"`
+}
+
+templ ProductModal(state *ProductModalState) {
+	<div class="fixed inset-0 z-50 translate-y-full invisible" id="product-modal-overlay">
+		<div class="absolute inset-0 z-40 h-full bg-light flex items-center justify-center flex-col gap-4 text-primary opacity-0 pointer-events-none htmx-indicator" id="product-modal-loading">
+			@LoadingIcon("h-16", nil)
+			<p class="text-lg font-bold">Cargando producto...</p>
+		</div>
+		<div class="absolute top-2 right-2 z-40">
+			<button
+				class="text-secondary rounded-full cursor-pointer rotate-0 hover:rotate-90 transition-[rotate]"
+				data-close-modal="product-modal"
+				data-click-handler-selector='[data-close-modal="product-modal"]'
+			>
+				@TimesIcon("h-10", nil)
+			</button>
+		</div>
+		@templ.Fragment("productModalContent") {
+			<div
+				id="product-modal"
+				class="relative z-0 bg-light w-full h-full xl:h-3/5 xl:flex overflow-y-auto overflow-x-hidden shadow-2xl"
+				if state != nil {
+					data-product-modal-open="open"
+				} else {
+					data-product-modal-open="closed"
+				}
+			>
+				if state != nil {
+					{{ product := state.Product }}
+					<!-- Header Img -->
+					<div class="fixed top-0 h-2/3 inset-x-0 z-0">
 						<img
-							src={ product.ImageURL }
-							alt={ product.Name }
-							class="w-full h-full object-cover"
+							src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
+							alt=""
+							class="h-full object-cover object-center translate-y-6 opacity-0"
+							data-modal-animate-enter
 						/>
 					</div>
-					<!-- Thumbnail Gallery (if multiple images) -->
-					if len(product.Images) > 1 {
-						<div class="grid grid-cols-4 gap-2">
-							for _, image := range product.Images {
-								<div class="aspect-square bg-gray-100 rounded cursor-pointer overflow-hidden hover:opacity-75 transition-opacity">
-									<img
-										src={ image }
-										alt="Vista adicional"
-										class="w-full h-full object-cover"
-									/>
-								</div>
-							}
+					<div class="fixed inset-0 z-10 min-h-full bg-linear-to-t from-light/100 from-35% to-light/0 pt-[130%]"></div>
+					<!-- Content -->
+					<div class="relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-t from-light/100 from-35% to-light/0 pt-[130%]">
+						<div class="text-primary p-4 py-2 translate-y-6 opacity-0" data-modal-animate-enter>
+							<span class="text-xs text-current/60">{ product.CategoryName }</span>
+							<h2 class="text-3xl font-medium">{ product.Name }</h2>
 						</div>
-					}
-				</div>
-				<!-- Details -->
-				<div class="lg:w-1/2 p-6 overflow-y-auto">
-					<div class="space-y-6">
-						<!-- Description -->
-						<div>
-							<h3 class="text-lg font-semibold mb-2">Descripción</h3>
-							<p class="text-gray-600 leading-relaxed">{ product.LongDescription }</p>
-						</div>
-						<!-- Actions -->
-						<div class="space-y-3">
-							<button
-								class={
-									"w-full py-3 px-6 rounded-lg font-semibold transition-colors",
-									templ.KV("bg-accent text-white hover:bg-accent/90", product.Available),
-									templ.KV("bg-gray-300 text-gray-500 cursor-not-allowed", !product.Available),
-								}
+						<div class="flex gap-4 justify-center items-center text-xs font-medium translate-y-6 opacity-0" data-modal-animate-enter>
+							<p class="text-current/80">
 								if product.Available {
-									hx-post="/cart/add"
-									hx-vals={ fmt.Sprintf(`{"product_id": "%s", "source": "catalog"}`, product.ID) }
-									hx-target="#cart-sidebar"
-									data-add-to-cart
-								}
-								disabled?={ !product.Available }
-							>
-								if product.Available {
-									Añadir a Selección
+									Disponible
 								} else {
 									No Disponible
 								}
-							</button>
-							<button
-								class="w-full py-3 px-6 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-								data-close-modal
-							>
-								Cerrar
-							</button>
+							</p>
+						</div>
+						<div class="flex flex-col lg:flex-row">
+							<div class="space-y-6">
+								<!-- Description -->
+								<div class="translate-y-6 opacity-0" data-modal-animate-enter>
+									<p class="text-neutral/80 leading-relaxed">{ product.LongDescription }</p>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
+				}
 			</div>
-		</div>
+		}
 	</div>
 }
 

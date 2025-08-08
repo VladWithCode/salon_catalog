@@ -6,14 +6,17 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 )
 
 func RegisterCatalogRoutes(router *customServeMux) {
 	router.HandleFunc("GET /catalog/categories", GetCatalogCategories)
 	router.HandleFunc("GET /catalog/products", GetCatalogProducts)
+	router.HandleFunc("GET /catalogo/producto/{id}", GetProductDetail)
 }
 
 func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
@@ -69,5 +72,64 @@ func GetCatalogProducts(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to render catalog products"))
 		log.Printf("failed to render catalog products: %v\n", err)
 		return
+	}
+}
+
+func GetProductDetail(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	isAjax := r.Header.Get("HX-Request") == "true"
+	modalState := &components.ProductModalState{}
+	product, err := db.FindCatalogProductDetail(id)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		modalState.Error = "No se encontró el producto"
+
+		if isAjax {
+			templ.RenderFragments(
+				r.Context(),
+				w,
+				components.ProductModal(modalState),
+				"productModalContent",
+			)
+		} else {
+			renderCatalogWithModal(w, r, modalState)
+		}
+		log.Printf("/catalogo/producto/%s: %v\n", id, err)
+		return
+	}
+
+	modalState.Product = *product
+	if isAjax {
+		err = templ.RenderFragments(
+			r.Context(),
+			w,
+			components.ProductModal(modalState),
+			"productModalContent",
+		)
+	} else {
+		renderCatalogWithModal(w, r, modalState)
+		return
+	}
+	if err != nil {
+		reqWithErr := r.WithContext(context.WithValue(r.Context(), "error", err))
+		http.Redirect(w, reqWithErr, "/error", http.StatusInternalServerError)
+		log.Printf("failed to render product detail: %v\n", err)
+	}
+}
+
+func renderCatalogWithModal(w http.ResponseWriter, r *http.Request, modalState *components.ProductModalState) {
+	state := &pages.CatalogState{
+		Search:            r.URL.Query().Get("buscar"),
+		ActiveCategory:    r.URL.Query().Get("categoria"),
+		Page:              r.URL.Query().Get("pagina"),
+		Limit:             r.URL.Query().Get("por_pagina"),
+		ProductModalState: modalState,
+	}
+
+	err := pages.Catalog(state).Render(r.Context(), w)
+	if err != nil {
+		reqWithErr := r.WithContext(context.WithValue(r.Context(), "error", err))
+		http.Redirect(w, reqWithErr, "/error", http.StatusInternalServerError)
 	}
 }

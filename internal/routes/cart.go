@@ -50,7 +50,7 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 	if itemPtr != nil {
 		itemPtr.Quantity++
 	} else {
-		prod, err := db.FindCatalogProductByID(productID)
+		prod, err := db.FindCatalogProductDetail(productID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Failed to find product"))
