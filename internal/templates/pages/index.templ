@@ -19,7 +19,7 @@ templ Index(catalogListings components.CatalogListings) {
 				></video>
 			</div>
 			<div class="bg-gradient-to-br from-primary/60 to-primary/60 flex flex-col items-center justify-center h-[70vh] sm:h-[80vh] lg:h-[90vh]">
-				<h1 class="text-stone-50/90 text-6xl font-serif lg:text-7xl xl:text-8xl text-center font-semibold px-4 sm:px-6 lg:px-8 mb-4 sm:mb-6 opacity-0 translate-y-6" data-hero-item>
+				<h1 class="text-light/90 text-6xl font-serif lg:text-7xl xl:text-8xl text-center font-semibold px-4 sm:px-6 lg:px-8 mb-4 sm:mb-6 opacity-0 translate-y-6" data-hero-item>
 					<div class="sr-only">Villa Chenacolo</div>
 					<img src="/static/assets/logo_name.png" alt="Logotipo del Villa Chenacolo" class="h-24 md:h-40 max-w-full invert w-auto"/>
 				</h1>
@@ -33,42 +33,43 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-oferta" class="px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12 lg:mb-16">
-			<h2 class="text-2xl sm:text-3xl lg:text-4xl text-center font-bold mb-4 sm:mb-6 translate-y-6 opacity-0 uppercase" data-intsc-animate-item="offer-section">Nuestra oferta</h2>
-			<p class="text-center text-base sm:text-lg mb-8 sm:mb-12 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">
+			<h2 class="text-2xl sm:text-3xl lg:text-4xl text-center font-bold mb-2 sm:mb-4 translate-y-6 opacity-0 uppercase" data-intsc-animate-item="offer-section">Nuestra oferta</h2>
+			<p class="text-center text-neutral/70 text-base sm:text-lg mb-8 sm:mb-12 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">
 				Conoce todas las opciones que tenemos para ti.
 			</p>
-			<h3 class="text-lg sm:text-xl text-center font-bold tracking-wide uppercase mb-4 sm:mb-6 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">
+			<h3 class="text-lg sm:text-xl text-center font-bold tracking-wide uppercase mb-2 sm:mb-4 translate-y-6 opacity-0" data-intsc-animate-item="offer-section">
 				Un lugar que eleva cualquier celebración.
 			</h3>
-			<p class="text-center sm:text-lg translate-y-6 opacity-0 mb-8 sm:mb-12" data-intsc-animate-item="offer-section">
+			<p class="text-center text-neutral/70 sm:text-lg translate-y-6 opacity-0 mb-8 sm:mb-12" data-intsc-animate-item="offer-section">
 				En Villa Chenacolo no organizamos tu evento: te entregamos el escenario perfecto para que lo vivas como lo imaginaste, sin complicaciones. Nuestra renta de salón incluye un espacio de alto nivel, con cada detalle pensado para brindar comodidad, elegancia y funcionalidad. Tú eliges a tus proveedores, nosotros ponemos lo mejor para recibirlos.
 			</p>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+			<div class="grid grid-cols-1 md:grid-cols-2 items-center lg:grid-cols-3 auto-rows-fr gap-6 lg:gap-8 max-w-7xl mx-auto">
 				<div
-					class="relative shadow shadow-stone-800/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden"
+					class="relative col-span-1 shadow shadow-dark/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden"
 					data-intsc-animate-item="offer-section"
 				>
 					<img
-						src="/static/assets/chenacolo_11.jpeg"
+						src="/static/assets/chenacolo-st-2.jpg"
 						alt="Imagen del recibidor del salon de eventos"
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
+						class="bg-dark/50 text-light relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
-						<h3 class="text-lg sm:text-xl font-bold tracking-wide uppercase mb-4 sm:mb-6">
+						<h3 class="sm:text-xl font-bold tracking-wide uppercase mb-4 sm:mb-6">
 							Te ayudamos con cualquier tipo de experiencia
 						</h3>
-						<p class="text-sm sm:text-base max-w-[24ch]">
+						<p class="text-current/80 sm:text-lg max-w-[24ch]">
 							Para bodas, bautizos, graduaciones, quinceañeras. Te ayudamos con todo para que tu experiencia en Villa Chenacolo sea inolvidable.
 						</p>
 					</div>
-					<a href="/servicios" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-stone-50 underline">
+					<a href="/servicios" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-light underline">
 						Conoce nuestros servicios >
 					</a>
 				</div>
+				// 
 				<div
-					class="relative shadow shadow-stone-800/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden"
+					class="relative col-span-1 shadow shadow-dark/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden"
 					data-intsc-animate-item="offer-section"
 				>
 					<img
@@ -77,42 +78,44 @@ templ Index(catalogListings components.CatalogListings) {
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
+						class="bg-dark/50 text-light relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
-						<h3 class="text-lg sm:text-xl font-bold tracking-wide uppercase mb-4 sm:mb-6">El complemento perfecto</h3>
-						<p class="text-sm sm:text-base max-w-[24ch]">
+						<h3 class="sm:text-xl font-bold tracking-wide uppercase mb-4 sm:mb-6">
+							El complemento perfecto
+						</h3>
+						<p class="text-current/80 sm:text-lg max-w-[24ch]">
 							Elige entre una selección de mobiliario y piezas decorativas que combinan con el estilo del lugar y transforman cualquier montaje en una experiencia visual y funcional.
 						</p>
 					</div>
-					<a href="/catalogo" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-stone-50 underline">
+					<a href="/catalogo" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-light underline">
 						Conoce nuestro catalogo >
 					</a>
 				</div>
 				<div
-					class="relative shadow shadow-stone-800/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden md:col-span-2 lg:col-span-1"
+					class="relative col-span1 shadow shadow-dark/50 aspect-[5/4] z-0 transition-[scale] group hover:scale-105 hover:cursor-pointer active:scale-105 active:cursor-pointer translate-y-6 opacity-0 rounded-lg overflow-hidden"
 					data-intsc-animate-item="offer-section"
 				>
 					<img
-						src="/static/assets/chenacolo_8.jpeg"
+						src="/static/assets/chenacolo-st-5.jpg"
 						alt="Imagen del area de descanso del salon de eventos"
 						class="absolute inset-0 w-full h-full object-cover object-center z-0"
 					/>
 					<div
-						class="bg-stone-800/50 text-stone-50 relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
+						class="bg-dark/50 text-light relative w-full h-full z-10 p-4 sm:p-6 transition-[background] group-hover:bg-primary/80 group-active:bg-primary/80"
 					>
-						<h3 class="text-lg sm:text-xl font-bold tracking-wide uppercase mb-4 sm:mb-6">El escenario perfecto</h3>
-						<p class="text-sm sm:text-base max-w-[24ch]">
+						<h3 class="sm:text-lg font-bold tracking-wide uppercase mb-4 sm:mb-6">El escenario perfecto</h3>
+						<p class="text-current/80 sm:text-base max-w-[24ch]">
 							Capilla, salón, jardines, cocina y mucho más. Todo conectado en un entorno privado, elegante y armonioso.
 						</p>
 					</div>
-					<a href="/salon" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-stone-50 underline">
+					<a href="/salon" class="absolute text-sm sm:text-lg font-semibold bottom-4 right-4 z-10 text-light underline">
 						Conoce nuestro salón >
 					</a>
 				</div>
 			</div>
 		</section>
 		<section id="seccion-bodas" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo_11.jpeg"
 					alt="Imagen del recibidor del salon de eventos"
@@ -123,11 +126,11 @@ templ Index(catalogListings components.CatalogListings) {
 						<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
 						Bodas
 					</h2>
-					<p class="tracking-wide text-gray-700/80">
+					<p class="tracking-wide text-dark/80">
 						El ‘sí’ más importante merece un lugar como este.
 						Capilla íntima y elegante, salón cerrado con aire acondicionado, acústica impecable y áreas exteriores que se integran con armonía.
 					</p>
-					<ul class="text-gray-700/80 list-disc list-inside">
+					<ul class="text-dark/80 list-disc list-inside">
 						<li>Renta de salón y capilla</li>
 						<li>Espacio con capacidad ampliable (hasta 200 personas más al abrirse)</li>
 						<li>Climatización total</li>
@@ -136,7 +139,7 @@ templ Index(catalogListings components.CatalogListings) {
 						<li>Estacionamiento amplio dentro y fuera de la villa</li>
 						<li>Personal de asistencia, valet y seguridad</li>
 					</ul>
-					<p class="tracking-wide text-gray-700/80">
+					<p class="tracking-wide text-dark/80">
 						🛠️ Todo el mobiliario disponible se renta por separado.
 					</p>
 					<a
@@ -153,9 +156,9 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-quinceaneras" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
-					src="/static/assets/chenacolo_15.jpeg"
+					src="/static/assets/chenacolo-st-7.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
 					class="w-full aspect-[3/2] object-cover object-bottom rounded-lg mb-8"
 				/>
@@ -164,7 +167,7 @@ templ Index(catalogListings components.CatalogListings) {
 						<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
 						QUINCEAÑERAS & CELEBRACIONES
 					</h2>
-					<p class="tracking-wide text-stone-50/80">
+					<p class="tracking-wide text-light/80">
 						Diseña la fiesta de tus sueños en un espacio que se transforma contigo.
 						Desde temáticas juveniles hasta cenas formales, el salón se adapta a tu visión.
 					</p>
@@ -189,9 +192,9 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-bautizos" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
-					src="/static/assets/chenacolo_10.jpeg"
+					src="/static/assets/chenacolo-st-9.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
 					class="w-full aspect-[3/2] object-cover object-bottom rounded-lg mb-8"
 				/>
@@ -200,11 +203,11 @@ templ Index(catalogListings components.CatalogListings) {
 						<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
 						BAUTIZOS Y COMUNIONES
 					</h2>
-					<p class="tracking-wide text-gray-700/80">
+					<p class="tracking-wide text-dark/80">
 						Celebraciones con alma y buen gusto.
 						La capilla es perfecta para ceremonias familiares, seguida de un evento en salón o jardín.
 					</p>
-					<ul class="text-gray-700/80 list-disc list-inside">
+					<ul class="text-dark/80 list-disc list-inside">
 						<li>Renta de capilla y salón (opcional por separado)</li>
 						<li>Espacios ideales para fotos y reuniones familiares</li>
 						<li>Cocina equipada para preparar o calentar alimentos</li>
@@ -225,9 +228,9 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-corporativos" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
-					src="/static/assets/chenacolo_8.jpeg"
+					src="/static/assets/chenacolo-st-4.png"
 					alt="Imagen de un árbol en el fondo de un jardín"
 					class="w-full aspect-[3/2] object-cover object-center rounded-lg mb-8"
 				/>
@@ -260,10 +263,10 @@ templ Index(catalogListings components.CatalogListings) {
 				</div>
 			</div>
 		</section>
-		<section id="seccion-graduaciones" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+		<section id="seccion-graduaciones" class="relative z-0 px-4 py-16 text-dark space-y-4 -mb-px">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
-					src="/static/assets/chenacolo_13.jpeg"
+					src="/static/assets/chenacolo-st-5.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
 					class="w-full aspect-[3/2] object-cover object-center rounded-lg mb-8"
 				/>
@@ -297,9 +300,9 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-privadas" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px">
-			<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
-					src="/static/assets/chenacolo_4.jpeg"
+					src="/static/assets/chenacolo-st-3.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
 					class="w-full aspect-[3/2] object-cover object-center rounded-lg mb-8"
 				/>
@@ -404,7 +407,7 @@ templ Index(catalogListings components.CatalogListings) {
 					Si deseas conocer la disponibilidad, precios o agendar una visita, dejanos tus datos. Te contactaremos lo antes posible.
 				</p>
 				<div class="flex flex-col lg:flex-row lg:gap-8 items-center lg:items-stretch justify-center">
-					<form class="bg-paper text-gray-700 rounded-t-lg lg:rounded-lg w-full max-w-md lg:max-w-lg lg:flex lg:flex-col px-4 sm:px-6 py-8 pb-12 lg:pb-8">
+					<form class="bg-paper text-dark rounded-t-lg lg:rounded-lg w-full max-w-md lg:max-w-lg lg:flex lg:flex-col px-4 sm:px-6 py-8 pb-12 lg:pb-8">
 						<h3 class="text-xl sm:text-2xl font-extrabold mb-4 uppercase">Queremos ayudarte a crear algo inolvidable</h3>
 						<p class="mb-6 sm:mb-8 text-sm sm:text-base text-current/80">
 							Uno de nuestros asesores te dará seguimiento directo.
@@ -416,7 +419,7 @@ templ Index(catalogListings components.CatalogListings) {
 									type="text"
 									id="name"
 									name="name"
-									class="bg-light text-dark border-stone-400 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 w-full outline-primary text-sm sm:text-base"
+									class="bg-light text-dark border-neutral/40 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 w-full outline-primary text-sm sm:text-base"
 									required
 								/>
 							</div>
@@ -426,7 +429,7 @@ templ Index(catalogListings components.CatalogListings) {
 									type="tel"
 									id="phone"
 									name="phone"
-									class="bg-light text-dark border-stone-400 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 w-full outline-primary text-sm sm:text-base"
+									class="bg-light text-dark border-neutral/40 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 w-full outline-primary text-sm sm:text-base"
 									required
 								/>
 							</div>
