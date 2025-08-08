@@ -1,0 +1,300 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+type QuoteRequestFormState struct {
+	NameValue        string
+	NameError        string
+	PhoneValue       string
+	PhoneError       string
+	EmailValue       string
+	EmailError       string
+	EventDateValue   string
+	EventDateError   string
+	EventTypeValue   string
+	EventTypeError   string
+	CommentsValue    string
+	CommentsError    string
+	ServerError      string
+}
+
+templ QuoteRequest(formState *QuoteRequestFormState) {
+	@templates.BaseLayout("Solicitar Cotización | Villa Chenacolo", nil, false) {
+		@components.Toaster()
+		<main class="relative min-h-screen z-0 bg-brand-1-lg overflow-hidden" hx-ext="response-targets">
+			<div class="absolute inset-0 z-0 bg-paper" style="clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);"></div>
+			<div class="absolute flex items-center justify-center inset-0 z-0 px-4 py-8">
+				<div class="w-full max-w-2xl">
+					<form
+						id="quote-request-form"
+						hx-post="/api/solicitar-cotizacion"
+						hx-select="#quote-request-form"
+						hx-target-5xx="#quote-request-form"
+						hx-target-4xx="#quote-request-form"
+						hx-swap="outerHTML"
+						hx-indicator=".form-loading"
+						class="bg-stone-50 w-full rounded-xs shadow-sm shadow-stone-800/30 px-6 py-8 space-y-6"
+						if formState.NameError != "" || formState.PhoneError != "" || formState.EmailError != "" || formState.EventDateError != "" || formState.EventTypeError != "" || formState.CommentsError != "" {
+							data-invalid="true"
+						}
+					>
+						<div class="text-center mb-8">
+							<h1 class="text-3xl font-bold tracking-wide text-primary mb-2">Solicitar Cotización</h1>
+							<p class="text-gray-600">Completa el formulario y nos pondremos en contacto contigo</p>
+						</div>
+
+						<!-- Hidden field for cart data -->
+						<input type="hidden" name="cart_data" id="cart-data-input" />
+
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div class="space-y-4">
+								@components.Input(components.InputProps{
+									Name:     "name",
+									Type:     "text",
+									Value:    formState.NameValue,
+									Label:    "Nombre completo",
+									Required: true,
+									Icon:     components.IconUser,
+									Error:    formState.NameError,
+									Placeholder: "Tu nombre completo",
+								})
+								@components.Input(components.InputProps{
+									Name:     "phone",
+									Type:     "tel",
+									Value:    formState.PhoneValue,
+									Label:    "Teléfono",
+									Required: true,
+									Icon:     components.IconPhone,
+									Error:    formState.PhoneError,
+									Placeholder: "Tu número de teléfono",
+								})
+								@components.Input(components.InputProps{
+									Name:     "email",
+									Type:     "email",
+									Value:    formState.EmailValue,
+									Label:    "Correo electrónico",
+									Required: true,
+									Icon:     components.IconEmail,
+									Error:    formState.EmailError,
+									Placeholder: "tu@email.com",
+								})
+							</div>
+							<div class="space-y-4">
+								@components.Input(components.InputProps{
+									Name:     "event_date",
+									Type:     "datetime-local",
+									Value:    formState.EventDateValue,
+									Label:    "Fecha y hora del evento",
+									Required: true,
+									Error:    formState.EventDateError,
+									HelpText: "Fecha aproximada de tu evento",
+								})
+								<div class="form-group space-y-1">
+									<label for="event_type" class={ "block text-sm font-medium transition-colors duration-200", templ.KV("text-red-700", formState.EventTypeError != ""), templ.KV("text-gray-700", formState.EventTypeError == "") }>
+										Tipo de evento
+										<span class="text-red-500 ml-1">*</span>
+									</label>
+									<select
+										name="event_type"
+										id="event_type"
+										required
+										class={ "block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition-all duration-200", templ.KV("input-error", formState.EventTypeError != ""), templ.KV("input-base", formState.EventTypeError == "") }
+									>
+										<option value="">Selecciona el tipo de evento</option>
+										<option value="boda" if formState.EventTypeValue == "boda" { selected }>Boda</option>
+										<option value="quinceanos" if formState.EventTypeValue == "quinceanos" { selected }>XV Años</option>
+										<option value="bautizo" if formState.EventTypeValue == "bautizo" { selected }>Bautizo</option>
+										<option value="cumpleanos" if formState.EventTypeValue == "cumpleanos" { selected }>Cumpleaños</option>
+										<option value="graduacion" if formState.EventTypeValue == "graduacion" { selected }>Graduación</option>
+										<option value="aniversario" if formState.EventTypeValue == "aniversario" { selected }>Aniversario</option>
+										<option value="corporativo" if formState.EventTypeValue == "corporativo" { selected }>Evento Corporativo</option>
+										<option value="otro" if formState.EventTypeValue == "otro" { selected }>Otro</option>
+									</select>
+									if formState.EventTypeError != "" {
+										<div class="error-message">
+											<p class="mt-1 text-sm text-red-600 flex items-center">
+												<svg class="h-4 w-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+													<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+												</svg>
+												{ formState.EventTypeError }
+											</p>
+										</div>
+									}
+								</div>
+							</div>
+						</div>
+
+						<div class="space-y-4">
+							<div class="form-group space-y-1">
+								<label for="comments" class={ "block text-sm font-medium transition-colors duration-200", templ.KV("text-red-700", formState.CommentsError != ""), templ.KV("text-gray-700", formState.CommentsError == "") }>
+									Comentarios adicionales
+								</label>
+								<textarea
+									name="comments"
+									id="comments"
+									rows="4"
+									placeholder="Cuéntanos más detalles sobre tu evento, número de invitados, preferencias especiales, etc."
+									class={ "block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 resize-y", templ.KV("input-error", formState.CommentsError != ""), templ.KV("input-base", formState.CommentsError == "") }
+								>{ formState.CommentsValue }</textarea>
+								if formState.CommentsError != "" {
+									<div class="error-message">
+										<p class="mt-1 text-sm text-red-600 flex items-center">
+											<svg class="h-4 w-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+												<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+											</svg>
+											{ formState.CommentsError }
+										</p>
+									</div>
+								}
+							</div>
+						</div>
+
+						<!-- Cart Summary -->
+						<div id="cart-summary" class="bg-gray-50 rounded-md p-4 border border-gray-200">
+							<h3 class="text-lg font-semibold text-gray-800 mb-3">Productos seleccionados</h3>
+							<div id="cart-items" class="space-y-2">
+								<p class="text-gray-500 text-sm">Cargando productos del carrito...</p>
+							</div>
+						</div>
+
+						<!-- Server Error -->
+						if formState.ServerError != "" {
+							<div class="bg-red-50 border border-red-200 rounded-md p-4">
+								<div class="flex">
+									<svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+									</svg>
+									<p class="text-sm text-red-700">{ formState.ServerError }</p>
+								</div>
+							</div>
+						}
+
+						<div class="flex flex-col sm:flex-row gap-4 pt-4">
+							<a
+								href="/catalogo"
+								class="flex-1 bg-gray-200 text-gray-700 text-lg font-bold py-3 px-6 rounded text-center hover:bg-gray-300 transition-colors"
+							>
+								Volver al Catálogo
+							</a>
+							<button
+								type="submit"
+								class="flex-1 bg-accent text-lg text-light font-bold py-3 px-6 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500 relative"
+							>
+								<span class="form-loading htmx-indicator absolute inset-0 flex items-center justify-center">
+									@components.LoadingIcon("w-8 text-light", nil)
+								</span>
+								<span class="form-submit-text">Solicitar Cotización</span>
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</main>
+		@quoteRequestScript()
+	}
+}
+
+templ quoteRequestScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Populate cart data from localStorage
+			function populateCartData() {
+				const cartData = localStorage.getItem('cart');
+				const cartInput = document.getElementById('cart-data-input');
+				const cartItemsContainer = document.getElementById('cart-items');
+				
+				if (cartData && cartInput && cartItemsContainer) {
+					try {
+						const cart = JSON.parse(cartData);
+						cartInput.value = cartData;
+						
+						// Display cart items
+						if (cart && cart.items && cart.items.length > 0) {
+							let itemsHtml = '';
+							let totalItems = 0;
+							
+							cart.items.forEach(item => {
+								totalItems += item.quantity;
+								itemsHtml += `
+									<div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+										<div class="flex-1">
+											<p class="font-medium text-gray-800">${item.name}</p>
+											<p class="text-sm text-gray-600">Cantidad: ${item.quantity}</p>
+										</div>
+									</div>
+								`;
+							});
+							
+							cartItemsContainer.innerHTML = `
+								<div class="mb-3">
+									<p class="text-sm font-medium text-gray-700">Total de productos: ${totalItems}</p>
+								</div>
+								${itemsHtml}
+							`;
+						} else {
+							cartItemsContainer.innerHTML = `
+								<p class="text-gray-500 text-sm">No hay productos en el carrito. 
+									<a href="/catalogo" class="text-accent hover:underline">Agregar productos</a>
+								</p>
+							`;
+						}
+					} catch (e) {
+						console.error('Error parsing cart data:', e);
+						cartItemsContainer.innerHTML = `
+							<p class="text-gray-500 text-sm">Error al cargar el carrito. 
+								<a href="/catalogo" class="text-accent hover:underline">Ir al catálogo</a>
+							</p>
+						`;
+					}
+				}
+			}
+			
+			// Initialize cart data
+			populateCartData();
+			
+			// Handle form submission animations
+			const form = document.getElementById('quote-request-form');
+			if (form) {
+				form.addEventListener('htmx:beforeRequest', function() {
+					const submitText = form.querySelector('.form-submit-text');
+					const loadingIndicator = form.querySelector('.form-loading');
+					
+					if (submitText && loadingIndicator) {
+						submitText.style.opacity = '0';
+						loadingIndicator.style.opacity = '1';
+					}
+				});
+				
+				form.addEventListener('htmx:afterRequest', function(e) {
+					const submitText = form.querySelector('.form-submit-text');
+					const loadingIndicator = form.querySelector('.form-loading');
+					
+					if (submitText && loadingIndicator) {
+						submitText.style.opacity = '1';
+						loadingIndicator.style.opacity = '0';
+					}
+					
+					// If successful, show success message and clear cart
+					if (e.detail.xhr.status === 200) {
+						// Clear cart from localStorage
+						localStorage.removeItem('cart');
+						
+						// Show success toast (will be handled by server response)
+						setTimeout(() => {
+							window.location.href = '/';
+						}, 2000);
+					}
+				});
+			}
+			
+			// Form animations
+			gsap.from('.bg-stone-50', {
+				y: 50,
+				opacity: 0,
+				duration: 0.6,
+				ease: "power2.out"
+			});
+		});
+	</script>
+}
