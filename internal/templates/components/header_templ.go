@@ -92,7 +92,7 @@ func Header(isMainPage bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary stroke-current menu-icon\"><use href=\"/static/assets/briefcase.svg#briefcase\"></use></svg> <span class=\"font-medium\">Experiencia</span></a></li><li class=\"menu-item\"><a")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary stroke-current menu-icon\"><use href=\"/static/assets/briefcase.svg#briefcase\"></use></svg> <span class=\"font-medium\">Servicios</span></a></li><li class=\"menu-item\"><a")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -122,7 +122,7 @@ func Header(isMainPage bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary menu-icon\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\"></path></svg> <span class=\"font-medium\">Experiencía</span></a></li><li class=\"menu-item\"><a")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary menu-icon\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M3 8.976C3 4.05476 4.05476 3 8.976 3H15.024C19.9452 3 21 4.05476 21 8.976V15.024C21 19.9452 19.9452 21 15.024 21H8.976C4.05476 21 3 19.9452 3 15.024V8.976Z\" stroke-width=\"2\"></path> <path d=\"M17.0045 16.5022L12.7279 12.2256C9.24808 8.74578 7.75642 8.74578 4.27658 12.2256L3 13.5022\" stroke-width=\"2\" stroke-linecap=\"round\"></path> <path d=\"M21 13.6702C18.9068 12.0667 17.4778 12.2919 15.198 14.3459\" stroke=\"#323232\" stroke-width=\"2\" stroke-linecap=\"round\"></path> <path d=\"M17 8C17 8.55228 16.5523 9 16 9C15.4477 9 15 8.55228 15 8C15 7.44772 15.4477 7 16 7C16.5523 7 17 7.44772 17 8Z\" stroke-width=\"2\"></path></svg> <span class=\"font-medium\">Experiencía</span></a></li><li class=\"menu-item\"><a")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
