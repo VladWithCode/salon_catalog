@@ -74,67 +74,37 @@ func DesktopNavigation(isMainPage bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"catalogo\">Catálogo</a> <a")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"catalogo\">Catálogo</a> <a href=\"/experiencia\" class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"galeria\">Experiencia</a> <a")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if isMainPage {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " href=\"#seccion-oferta\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " href=\"#seccion-contacto\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " href=\"/salon\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " href=\"/reservaciones\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"oferta\">Salón</a> <a")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Agendar</a> <a")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if isMainPage {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " href=\"#seccion-galeria\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " href=\"#seccion-contacto\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " href=\"/galeria\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " href=\"/contacto\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"galeria\">Galería</a> <a")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if isMainPage {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " href=\"#seccion-contacto\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " href=\"/reservaciones\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Agendar</a> <a")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if isMainPage {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " href=\"#seccion-contacto\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " href=\"/contacto\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Contacto</a></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " class=\"text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Contacto</a></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

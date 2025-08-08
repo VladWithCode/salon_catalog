@@ -36,26 +36,11 @@ templ DesktopNavigation(isMainPage bool) {
 			Catálogo
 		</a>
 		<a
-			if isMainPage {
-				href="#seccion-oferta"
-			} else {
-				href="/salon"
-			}
-			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
-			data-section="oferta"
-		>
-			Salón
-		</a>
-		<a
-			if isMainPage {
-				href="#seccion-galeria"
-			} else {
-				href="/galeria"
-			}
+			href="/experiencia"
 			class="text-sm xl:text-base font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
 			data-section="galeria"
 		>
-			Galería
+			Experiencia
 		</a>
 		<a
 			if isMainPage {
