@@ -18,13 +18,13 @@ import (
 func NewRouter() http.Handler {
 	router := NewCustomServeMux()
 
-	router.HandleFunc("GET /{$}", RenderIndex)
-	router.HandleFunc("GET /catalogo", RenderCatalaog)
-	router.HandleFunc("GET /productos/{slug}", RenderProductDetail)
-	router.HandleFunc("GET /servicios", RenderServices)
-	router.HandleFunc("GET /reservaciones", RenderReservations)
-	router.HandleFunc("GET /experiencia", RenderSalon)
-	router.HandleFunc("GET /iniciar-sesion", auth.PopulateAuth(RenderSignIn))
+	router.HandleFunc("GET /{$}", publicMiddleware(RenderIndex))
+	router.HandleFunc("GET /catalogo", publicMiddleware(RenderCatalaog))
+	router.HandleFunc("GET /productos/{slug}", publicMiddleware(RenderProductDetail))
+	router.HandleFunc("GET /servicios", publicMiddleware(RenderServices))
+	router.HandleFunc("GET /reservaciones", publicMiddleware(RenderReservations))
+	router.HandleFunc("GET /experiencia", publicMiddleware(RenderSalon))
+	router.HandleFunc("GET /iniciar-sesion", publicMiddleware(auth.PopulateAuth(RenderSignIn)))
 
 	RegisterDashboardRoutes(router)
 	RegisterImagesRoutes(router)
@@ -37,6 +37,7 @@ func NewRouter() http.Handler {
 	RegisterCatalogRoutes(router)
 	RegisterCartRoutes(router)
 	RegisterUserRoutes(router)
+	RegisterQuoteRequestsRoutes(router)
 
 	// Api
 	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))
@@ -67,7 +68,7 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = pages.Index(listings).Render(context.Background(), w)
+	err = pages.Index(listings).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -94,7 +95,7 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 			Secure:  true,
 		})
 	}
-	err = pages.Catalog().Render(context.Background(), w)
+	err = pages.Catalog().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -103,7 +104,7 @@ func RenderCatalaog(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderServices(w http.ResponseWriter, r *http.Request) {
-	err := pages.Services().Render(context.Background(), w)
+	err := pages.Services().Render(r.Context(), w)
 	if err != nil {
 		log.Printf("failed to render Services err: %v\n", err)
 		w.WriteHeader(500)
@@ -112,7 +113,7 @@ func RenderServices(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderSalon(w http.ResponseWriter, r *http.Request) {
-	err := pages.Salon().Render(context.Background(), w)
+	err := pages.Salon().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -121,7 +122,7 @@ func RenderSalon(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderReservations(w http.ResponseWriter, r *http.Request) {
-	err := pages.Reservations().Render(context.Background(), w)
+	err := pages.Reservations().Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -137,7 +138,7 @@ func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 
 	err := pages.SignIn(
 		&pages.FormState{},
-	).Render(context.Background(), w)
+	).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -157,7 +158,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = signinPage(&pages.FormState{
 			ServerError: "Error inesperado",
-		}).Render(context.Background(), w)
+		}).Render(r.Context(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
@@ -174,7 +175,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 			UserError:     "El nombre de usuario es requerido",
 			UserValue:     username,
 			PasswordError: "La contraseña es requerida",
-		}).Render(context.Background(), w)
+		}).Render(r.Context(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
@@ -189,7 +190,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 			UserError:     "Revisa que el nombre de usuario sea correcto",
 			UserValue:     username,
 			PasswordError: "Revisa que la contraseña sea correcta",
-		}).Render(context.Background(), w)
+		}).Render(r.Context(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
@@ -204,7 +205,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 			UserError:     "Revisa que el nombre de usuario sea correcto",
 			UserValue:     username,
 			PasswordError: "Revisa que la contraseña sea correcta",
-		}).Render(context.Background(), w)
+		}).Render(r.Context(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
@@ -217,7 +218,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = signinPage(&pages.FormState{
 			ServerError: "Error inesperado",
-		}).Render(context.Background(), w)
+		}).Render(r.Context(), w)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Error inesperado"))
@@ -253,7 +254,7 @@ func RenderProductDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = pages.Product(product).Render(context.Background(), w)
+	err = pages.Product(product).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Something went wrong"))
@@ -264,4 +265,11 @@ func RenderProductDetail(w http.ResponseWriter, r *http.Request) {
 func render404Page(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("404 page not found"))
+}
+
+func publicMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqWithPath := r.WithContext(context.WithValue(r.Context(), "urlPath", r.URL.Path))
+		next(w, reqWithPath)
+	})
 }

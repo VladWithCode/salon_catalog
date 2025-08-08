@@ -1,5 +1,10 @@
 package components
 
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/templates/util"
+)
+
 templ Footer() {
 	<footer class="col-start-1 -col-end-1 w-full overflow-hidden bg-paper text-dark">
 		<div class="container mx-auto px-4 py-12">
@@ -28,56 +33,8 @@ templ Footer() {
 						</a>
 					</div>
 				</div>
-				<div class="space-y-4">
-					<h4 class="font-medium text-current/80">Servicios</h4>
-					<ul class="space-y-2 text-sm">
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Planeacion de Bodas
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Eventos Corporativos
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Fiestas de Cumpleaños
-							</a>
-						</li>
-					</ul>
-				</div>
-				<div class="space-y-4">
-					<h4 class="font-medium text-current/80">Quick as</h4>
-					<ul class="space-y-2 text-sm">
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Acerca de Nosotros
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Portafolio
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Testimonios
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Blog
-							</a>
-						</li>
-						<li>
-							<a href="#" class="text-dark hover:text-accent transition-colors">
-								Contacto
-							</a>
-						</li>
-					</ul>
-				</div>
+				@footerServices()
+				@footerNav()
 				<div class="space-y-4">
 					<h4 class="font-medium text-current/80">Información de Contacto</h4>
 					<div class="space-y-3 text-sm">
@@ -129,4 +86,67 @@ templ Footer() {
 			</div>
 		</div>
 	</footer>
+}
+
+var footerServiceLinks = [][2]string{
+	{"Bodas", "#seccion-bodas"},
+	{"Quinceañeras y Celebraciones", "#seccion-quinceaneras"},
+	{"Bautizos y Comuniones", "#seccion-bautizos"},
+	{"Eventos Corporativos", "#seccion-corporativos"},
+	{"Graduaciones", "#seccion-graduaciones"},
+	{"Fiestas Privadas", "#seccion-privadas"},
+}
+
+templ footerServices() {
+	{{ isMainPage := util.ExtractURLPath(ctx) == "/" }}
+	<div class="space-y-4">
+		<h4 class="font-medium text-current/80">Servicios</h4>
+		<ul class="space-y-2 text-sm">
+			for _, service := range footerServiceLinks {
+				<li>
+					<a
+						if isMainPage {
+							href={ service[1] }
+						} else {
+							href={ fmt.Sprintf("/%s", service[1]) }
+						}
+						class="text-dark hover:text-accent transition-colors"
+					>
+						{ service[0] }
+					</a>
+				</li>
+			}
+		</ul>
+	</div>
+}
+
+var footerNavLinks = [][2]string{
+	{"Inicio", "#seccion-hero"},
+	{"Catálogo", "#seccion-catalogo"},
+	{"Acerca de Nosotros", "#seccion-oferta"},
+	{"Galeria", "#seccion-galeria"},
+	{"Contacto", "#seccion-contacto"},
+}
+
+templ footerNav() {
+	{{ isMainPage := util.ExtractURLPath(ctx) == "/" }}
+	<div class="space-y-4">
+		<h4 class="font-medium text-current/80">Navegación</h4>
+		<ul class="space-y-2 text-sm">
+			for _, link := range footerNavLinks {
+				<li>
+					<a
+						if isMainPage {
+							href={ link[1] }
+						} else {
+							href={ fmt.Sprintf("/%s", link[1]) }
+						}
+						class="text-dark hover:text-accent transition-colors"
+					>
+						{ link[0] }
+					</a>
+				</li>
+			}
+		</ul>
+	</div>
 }
