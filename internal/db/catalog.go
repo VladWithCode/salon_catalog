@@ -35,6 +35,7 @@ type CatalogProd struct {
 	ImageURL        string   `json:"image_url"`
 	Images          []string `json:"images"`
 	Available       bool     `json:"available"`
+	Quantity        int      `json:"quantity"`
 }
 
 func FindCatalogCategories(search string) ([]*CatalogCtg, error) {
@@ -108,7 +109,7 @@ func FindCatalogProductDetail(id string) (*CatalogProd, error) {
 
 	baseQuery := `SELECT 
 		id, name, description, long_description, category_id, category_name, 
-		image_url, available, images, slug
+		image_url, available, images, slug, quantity
 	FROM catalog_products WHERE`
 	args := pgx.NamedArgs{}
 
@@ -139,6 +140,7 @@ func FindCatalogProductDetail(id string) (*CatalogProd, error) {
 		&product.Available,
 		&imagesJSON,
 		&product.Slug,
+		&product.Quantity,
 	)
 	if err != nil {
 		return nil, err
@@ -227,7 +229,7 @@ func FindCatalogProducts(categoryID string, search string, page int, limit int) 
 	// Build main query with ordering and pagination
 	query := `SELECT 
 		id, name, description, long_description, category_id, category_name, 
-		image_url, available, images, slug
+		image_url, available, images, slug, quantity
 		FROM catalog_products WHERE 1=1` + whereClause
 
 	// Add ordering - prioritize search ranking if search is provided
@@ -261,6 +263,7 @@ func FindCatalogProducts(categoryID string, search string, page int, limit int) 
 			&product.Available,
 			&imagesJSON,
 			&product.Slug,
+			&product.Quantity,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan product: %w", err)
