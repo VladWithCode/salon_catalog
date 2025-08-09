@@ -225,165 +225,159 @@ templ EmptyCart() {
 
 templ CartScript() {
 	<script>
-        class CartManager {
-            constructor() {
-                this.isOpen = false;
-                this.registerEvents();
-                this.updateCartCount();
-            }
-
-            registerEvents() {
-                // Register with global event manager
-                window.eventManager
-                    .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))
-                    .registerClick('cart-toggle', (e) => this.toggleCart(e))
-                    .registerClick('cart-close', (e) => this.closeCart())
-                    .registerClick('cart-backdrop', (e) => this.closeCart())
-                    .registerClick('browse-catalog', (e) => this.closeCart());
-            }
-
-            toggleCart() {
-                if (this.isOpen) {
-                    this.closeCart();
-                } else {
-                    this.openCart();
-                }
-            }
-
-            onCartUpdate(event) {
-                this.updateCartCount();
-                this.animateCartUpdate();
-                
-                if (event.detail.xhr.status !== 200) {
-                    return;
-                }
-                // Check if this was triggered by add to cart
-                if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
-                    this.showCartNotification();
-                }
-            }
-
-            openCart() {
-                const sidebar = document.getElementById('cart-sidebar');
-                const backdrop = document.getElementById('cart-backdrop');
-                
-                this.isOpen = true;
-
-                backdrop.classList.remove('pointer-events-none');
-                gsap.to(backdrop, { opacity: 1, duration: 0.3 });
-                gsap.to(sidebar, { 
-                    x: 0, 
-                    duration: 0.4, 
-                    ease: "power2.out" 
-                });
-
-                // Prevent body scroll
-                document.body.style.overflow = 'hidden';
-            }
-
-            closeCart() {
-                const sidebar = document.getElementById('cart-sidebar');
-                const backdrop = document.getElementById('cart-backdrop');
-                
-                this.isOpen = false;
-                
-                // Hide backdrop
-                gsap.to(backdrop, { 
-                    opacity: 0, 
-                    duration: 0.3,
-                    onComplete: () => {
-                        backdrop.classList.add('pointer-events-none');
-                    }
-                });
-                
-                // Slide out sidebar
-                gsap.to(sidebar, { 
-                    x: '100%', 
-                    duration: 0.4, 
-                    ease: "power2.in" 
-                });
-
-                // Restore body scroll
-                document.body.style.overflow = '';
-            }
-
-            updateCartCount() {
-                const cartItems = document.querySelectorAll('[data-cart-item]');
-                const countBadge = document.querySelector('[data-cart-count]');
-                const count = cartItems.length;
-
-                countBadge.textContent = count;
-
-                if (count > 0) {
-                    gsap.fromTo(countBadge, 
-                        { scale: 1.5 },
-                        { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
-                    );
-                    countBadge.classList.remove('opacity-0', 'scale-0');
-                    countBadge.classList.add('opacity-100', 'scale-100');
-                } else {
-                    countBadge.classList.add('opacity-0', 'scale-0');
-                    countBadge.classList.remove('opacity-100', 'scale-100');
-                }
-            }
-
-            animateCartUpdate() {
-                const cartItems = document.querySelectorAll('[data-cart-item]');
-                
-                gsap.fromTo(cartItems, 
-                    { opacity: 0, x: 20 },
-                    { 
-                        opacity: 1, 
-                        x: 0, 
-                        duration: 0.3, 
-                        stagger: 0.05,
-                        ease: "power2.out" 
-                    }
-                );
-            }
-
-            showCartNotification() {
-                // Create temporary notification
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';
-                notification.textContent = 'Elementos añadidos al carrito';
-                document.body.appendChild(notification);
-
-                // Animate in and out
-                gsap.timeline()
-                    .to(notification, { opacity: 1, y: 0, duration: 0.3 })
-                    .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })
-                    .call(() => notification.remove());
-            }
-
-            // Public method to add items programmatically
-            addToCart(productId, source = 'catalog') {
-                fetch('/cart/add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        source: source
-                    })
-                })
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('cart-sidebar').innerHTML = html;
-                    this.updateCartCount();
-                    this.showCartNotification();
-                });
-            }
-        }
-
-        // Initialize cart manager
-        let cartManager;
         document.addEventListener('DOMContentLoaded', function() {
-            cartManager = new CartManager();
-        });
+            class CartManager {
+                constructor() {
+                    this.isOpen = false;
+                    this.registerEvents();
+                    this.updateCartCount();
+                }
 
-        // Export for wizard integration
-        window.cartManager = cartManager;
+                registerEvents() {
+                    // Register with global event manager
+                    window.eventManager
+                        .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))
+                        .registerClick('cart-toggle', (e) => this.toggleCart(e))
+                        .registerClick('cart-close', (e) => this.closeCart())
+                        .registerClick('cart-backdrop', (e) => this.closeCart())
+                        .registerClick('browse-catalog', (e) => this.closeCart());
+                }
+
+                toggleCart() {
+                    if (this.isOpen) {
+                        this.closeCart();
+                    } else {
+                        this.openCart();
+                    }
+                }
+
+                onCartUpdate(event) {
+                    this.updateCartCount();
+                    this.animateCartUpdate();
+                    
+                    if (event.detail.xhr.status !== 200) {
+                        return;
+                    }
+                    // Check if this was triggered by add to cart
+                    if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
+                        this.showCartNotification();
+                    }
+                }
+
+                openCart() {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const backdrop = document.getElementById('cart-backdrop');
+                    
+                    this.isOpen = true;
+
+                    backdrop.classList.remove('pointer-events-none');
+                    gsap.to(backdrop, { opacity: 1, duration: 0.3 });
+                    gsap.to(sidebar, { 
+                        x: 0, 
+                        duration: 0.4, 
+                        ease: "power2.out" 
+                    });
+
+                    // Prevent body scroll
+                    document.body.style.overflow = 'hidden';
+                }
+
+                closeCart() {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const backdrop = document.getElementById('cart-backdrop');
+                    
+                    this.isOpen = false;
+                    
+                    // Hide backdrop
+                    gsap.to(backdrop, { 
+                        opacity: 0, 
+                        duration: 0.3,
+                        onComplete: () => {
+                            backdrop.classList.add('pointer-events-none');
+                        }
+                    });
+                    
+                    // Slide out sidebar
+                    gsap.to(sidebar, { 
+                        x: '100%', 
+                        duration: 0.4, 
+                        ease: "power2.in" 
+                    });
+
+                    // Restore body scroll
+                    document.body.style.overflow = '';
+                }
+
+                updateCartCount() {
+                    const cartItems = document.querySelectorAll('[data-cart-item]');
+                    const countBadge = document.querySelector('[data-cart-count]');
+                    const count = cartItems.length;
+
+                    countBadge.textContent = count;
+
+                    if (count > 0) {
+                        gsap.fromTo(countBadge, 
+                            { scale: 1.5 },
+                            { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                        );
+                        countBadge.classList.remove('opacity-0', 'scale-0');
+                        countBadge.classList.add('opacity-100', 'scale-100');
+                    } else {
+                        countBadge.classList.add('opacity-0', 'scale-0');
+                        countBadge.classList.remove('opacity-100', 'scale-100');
+                    }
+                }
+
+                animateCartUpdate() {
+                    const cartItems = document.querySelectorAll('[data-cart-item]');
+                    
+                    gsap.fromTo(cartItems, 
+                        { opacity: 0, x: 20 },
+                        { 
+                            opacity: 1, 
+                            x: 0, 
+                            duration: 0.3, 
+                            stagger: 0.05,
+                            ease: "power2.out" 
+                        }
+                    );
+                }
+
+                showCartNotification() {
+                    // Create temporary notification
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';
+                    notification.textContent = 'Elementos añadidos al carrito';
+                    document.body.appendChild(notification);
+
+                    // Animate in and out
+                    gsap.timeline()
+                        .to(notification, { opacity: 1, y: 0, duration: 0.3 })
+                        .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })
+                        .call(() => notification.remove());
+                }
+
+                // Public method to add items programmatically
+                addToCart(productId, source = 'catalog') {
+                    fetch('/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            source: source
+                        })
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('cart-sidebar').innerHTML = html;
+                        this.updateCartCount();
+                        this.showCartNotification();
+                    });
+                }
+            }
+            window.cartManager = new CartManager();
+        });
     </script>
 }

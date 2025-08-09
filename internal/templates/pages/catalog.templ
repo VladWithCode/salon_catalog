@@ -13,7 +13,7 @@ type CatalogState struct {
 	Page           string `json:"pagina,omitempty"`
 	Limit          string `json:"por_pagina,omitempty"`
 
-	ProductModalState *components.ProductModalState
+	ProductModalState *components.ProductModalState `json:"-"`
 }
 
 func NewCatalogStateFromRequest(r *http.Request) *CatalogState {
@@ -126,7 +126,7 @@ templ Catalog(state *CatalogState) {
 						hx-get="/catalog/categories"
 						hx-trigger="load"
 						hx-target="this"
-						hx-swap="innerHTML"
+						hx-swap="outerHTML"
 						if state.HasParams() {
 							hx-vals={ state.Serialize() }
 						}
@@ -180,14 +180,15 @@ templ Catalog(state *CatalogState) {
 
 templ CatalogScript() {
 	<script>
-    let currentAnimations = [];
-
     document.addEventListener('DOMContentLoaded', function () {
+        gsap.registerPlugin(ScrollTrigger);
+        let currentAnimations = [];
         window.eventManager
             .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)
             .register('afterRequest', 'add-to-cart', handleCartAfterRequest)
             .registerClick('browse-trigger', handleBrowseTrigger)
-            .registerClick('category-filter', handleCategoryFilterClick);
+            .registerClick('category-filter', handleCategoryFilterClick)
+            .registerClick('catalog-pagination', () => window.scrollTo(0, 0));
 
         function handleCategoryFilterClick(e) {
             window.scrollTo(0, 0);
@@ -444,7 +445,7 @@ templ CatalogScript() {
                     delay: 0.3,
                 });
             })
-            .registerClick('[data-close-modal="product-modal"]', function(e) {
+            .registerClick('close-product-modal', function(e) {
                 const overlay = document.getElementById('product-modal-overlay');
                 gsap.to(overlay, {
                     opacity: 0,
@@ -455,6 +456,7 @@ templ CatalogScript() {
                         document.body.style.overflow = '';
                     }
                 });
+                history.pushState({}, '/catalogo', '/catalogo')
             })
     });
 </script>

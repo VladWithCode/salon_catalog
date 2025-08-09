@@ -270,7 +270,9 @@ func render404Page(w http.ResponseWriter, r *http.Request) {
 
 func publicMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqWithPath := r.WithContext(context.WithValue(r.Context(), "urlPath", r.URL.Path))
-		next(w, reqWithPath)
+		req := r.WithContext(context.WithValue(r.Context(), "urlPath", r.URL.Path))
+		req = r.WithContext(context.WithValue(r.Context(), "urlQueryParams", r.URL.Query()))
+
+		next(w, req)
 	})
 }

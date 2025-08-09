@@ -26,6 +26,7 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 			hx-target="#products"
 			hx-swap="innerHTML"
 			hx-indicator="[data-products-spinner]"
+			hx-push-url="/catalogo"
 			data-click-handler-selector="category-filter"
 			data-category-filter=""
 		>
@@ -43,6 +44,7 @@ templ CategoryFilters(categories []db.CatalogCtg, activeCategory string) {
 				hx-target="#products"
 				hx-swap="innerHTML"
 				hx-indicator="[data-products-spinner]"
+				hx-push-url={ fmt.Sprintf("/catalogo?categoria=%s", category.Name) }
 				data-click-handler-selector="category-filter"
 				data-category-filter={ category.ID }
 			>
@@ -75,6 +77,9 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page-1) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page-1) }
+					data-click-handler-selector="catalog-pagination"
+					data-catalog-pagination="prev"
 				>
 					@ChevronIcon("h-6 rotate-90", nil)
 				</button>
@@ -90,6 +95,8 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", i) }
 							hx-target="#products-grid-content"
 							hx-indicator="[data-products-spinner]"
+							data-click-handler-selector="catalog-pagination"
+							data-catalog-pagination="page"
 						>
 							{ i }
 						</button>
@@ -101,6 +108,9 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page+1) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page+1) }
+					data-click-handler-selector="catalog-pagination"
+					data-catalog-pagination="next"
 				>
 					@ChevronIcon("h-6 -rotate-90", nil)
 				</button>
@@ -123,6 +133,7 @@ templ ProductCard(product *db.CatalogProd) {
 				hx-target="#product-modal"
 				hx-swap="outerHTML"
 				hx-indicator="#product-modal-loading"
+				hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 			>
 				<img
 					src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
@@ -139,6 +150,7 @@ templ ProductCard(product *db.CatalogProd) {
 						hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 						hx-target="#product-modal"
 						hx-indicator="#product-modal-loading"
+						hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
 						hx-swap="outerHTML"
 						title="Ver detalles"
 					>
@@ -249,7 +261,7 @@ templ ProductModal(state *ProductModalState) {
 			<button
 				class="text-secondary rounded-full cursor-pointer rotate-0 hover:rotate-90 transition-[rotate]"
 				data-close-modal="product-modal"
-				data-click-handler-selector='[data-close-modal="product-modal"]'
+				data-click-handler-selector="close-product-modal"
 			>
 				@TimesIcon("h-10", nil)
 			</button>
@@ -275,9 +287,9 @@ templ ProductModal(state *ProductModalState) {
 							data-modal-animate-enter
 						/>
 					</div>
-					<div class="fixed inset-0 z-10 min-h-full bg-linear-to-t from-light/100 from-35% to-light/0 pt-[130%]"></div>
+					<div class="fixed inset-0 z-10 min-h-full bg-linear-to-t from-light/100 from-30% to-light/0 pt-[130%]"></div>
 					<!-- Content -->
-					<div class="relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-t from-light/100 from-35% to-light/0 pt-[130%]">
+					<div class="relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-t from-light/100 from-30% to-light/0 pt-[130%]">
 						<div class="text-primary p-4 py-2 translate-y-6 opacity-0" data-modal-animate-enter>
 							<span class="text-xs text-current/60">{ product.CategoryName }</span>
 							<h2 class="text-3xl font-medium">{ product.Name }</h2>
@@ -317,6 +329,7 @@ templ SearchBar(search string) {
 			hx-swap="innerHTML"
 			hx-trigger="input changed delay:300ms"
 			hx-indicator="[data-products-spinner]"
+			hx-push-url="/catalogo"
 			name="buscar"
 			data-search-input
 			value={ search }
