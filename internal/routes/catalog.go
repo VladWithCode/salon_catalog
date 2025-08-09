@@ -17,6 +17,9 @@ func RegisterCatalogRoutes(router *customServeMux) {
 	router.HandleFunc("GET /catalog/categories", publicMiddleware(GetCatalogCategories))
 	router.HandleFunc("GET /catalog/products", publicMiddleware(GetCatalogProducts))
 	router.HandleFunc("GET /catalogo/producto/{id}", publicMiddleware(GetProductDetail))
+
+	// Compat for old printed QR codes
+	router.HandleFunc("GET /productos/{id}", publicMiddleware(GetProductDetail))
 }
 
 func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
