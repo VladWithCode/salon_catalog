@@ -255,85 +255,142 @@ type ProductModalState struct {
 }
 
 templ ProductModal(state *ProductModalState) {
-	<div class="fixed inset-0 z-50 translate-y-full invisible" id="product-modal-overlay">
+	<div class="fixed w-full inset-0 z-50 translate-y-full invisible overflow-hidden" id="product-modal-overlay">
 		<div class="absolute inset-0 z-40 h-full bg-light flex items-center justify-center flex-col gap-4 text-primary opacity-0 pointer-events-none htmx-indicator" id="product-modal-loading">
 			@LoadingIcon("h-16", nil)
 			<p class="text-lg font-bold">Cargando producto...</p>
 		</div>
-		<div class="absolute top-2 right-2 z-40">
-			<button
-				class="text-secondary rounded-full cursor-pointer rotate-0 hover:rotate-90 transition-[rotate]"
-				data-close-modal="product-modal"
-				data-click-handler-selector="close-product-modal"
-			>
-				@TimesIcon("h-10", nil)
-			</button>
-		</div>
 		@templ.Fragment("productModalContent") {
 			<div
 				id="product-modal"
-				class="relative z-0 bg-light w-full h-full xl:h-3/5 xl:flex overflow-y-auto overflow-x-hidden shadow-2xl"
+				class="relative z-0 bg-light w-full h-full xl:absolute xl:inset-x-0 xl:bottom-0 xl:h-4/5 xl:flex overflow-y-auto overflow-x-visible shadow-2xl xl:rounded-t-3xl"
 				if state != nil {
 					data-product-modal-open="open"
 				} else {
 					data-product-modal-open="closed"
 				}
 			>
+				<div class="absolute top-2 right-2 z-40">
+					<button
+						class="text-secondary xl:text-primary rounded-full cursor-pointer rotate-0 hover:rotate-90 transition-[rotate]"
+						data-close-modal="product-modal"
+						data-click-handler-selector="close-product-modal"
+					>
+						@TimesIcon("h-10", nil)
+					</button>
+				</div>
 				if state != nil {
 					{{ product := state.Product }}
 					<!-- Header Img -->
-					<div class="fixed top-0 h-2/3 inset-x-0 z-0">
+					<div class="fixed xl:relative top-0 h-2/3 xl:h-full xl:p-4 xl:flex-1 inset-x-0 z-0">
 						<img
+							id="product-modal-main-img"
 							src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
-							alt=""
-							class="h-full object-cover object-center translate-y-6 opacity-0"
+							alt={ fmt.Sprintf("Imagen de producto %s", product.Name) }
+							class="h-full object-cover object-center translate-y-6 opacity-0 xl:rounded-xl"
 							data-modal-animate-enter
 						/>
+						<button class="absolute inset-0 h-full z-10 bg-light/60 opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in cursor-pointer">
+							<p class="text-4xl text-dark rounded-xl">Ver Galería</p>
+						</button>
+					</div>
+					<div
+						id="product-modal-gallery-popup"
+						class="hidden xl:block xl:invisible fixed inset-0 z-30 p-4"
+					></div>
+					<!-- Add to Cart -->
+					<div class="fixed inset-x-0 xl:left-1/2 bottom-0 xl:w-1/2 z-30 px-4 py-2">
+						<button class="w-full bg-accent text-light text-xl font-bold rounded-lg shadow p-2">Añadir al carrito</button>
 					</div>
 					<!-- Content -->
-					<div class="relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-b from-light/0 to-light to-[50vh] pt-[50vh]">
+					<div class="relative z-10 min-h-full w-full xl:flex-1 flex flex-col gap-4 px-4 pb-18 text-center overflow-hidden xl:overflow-y-auto bg-linear-to-b from-light/0 to-light to-[50vh] xl:from-light pt-[50vh] xl:pt-4">
 						<div class="text-primary p-4 py-2 translate-y-6 opacity-0" data-modal-animate-enter>
-							<span class="text-xs text-current/60">{ product.CategoryName }</span>
-							<h2 class="text-3xl font-medium">{ product.Name }</h2>
+							<span class="font-light text-current/80 sm:text-lg">{ product.CategoryName }</span>
+							<h2 class="text-3xl sm:text-4xl md:text-5xl font-medium">{ product.Name }</h2>
 						</div>
-						<div class="flex gap-4 justify-center items-center text-xs font-medium translate-y-6 opacity-0" data-modal-animate-enter>
-							<p class="text-current/80">
+						<div class="flex gap-4 justify-center items-center font-medium translate-y-6 opacity-0" data-modal-animate-enter>
+							<p class="flex items-center gap-1 text-current/80 sm:text-lg">
 								if product.Available {
-									Disponible
+									@CheckIcon("h-5", nil)
+									<span>Disponible</span>
 								} else {
-									No Disponible
+									@TimesIcon("h-5", nil)
+									<span>No Disponible</span>
 								}
 							</p>
 						</div>
-						<div class="flex flex-col lg:flex-row">
-							<div class="space-y-6">
-								<!-- Description -->
-								<div class="translate-y-6 opacity-0" data-modal-animate-enter>
-									<p class="text-neutral/80 leading-relaxed">{ product.LongDescription }</p>
-								</div>
+						<div class="translate-y-6 opacity-0 sm:text-lg" data-modal-animate-enter>
+							<p
+								id="product-modal-description"
+								class="text-neutral/80 leading-relaxed line-clamp-3"
+							>{ product.LongDescription }</p>
+							<button
+								class="text-neutral font-medium"
+								data-product-modal-read-more="collapsed"
+								data-click-handler-selector="product-modal-read-more"
+							>Leer más</button>
+						</div>
+						<!-- Gallery -->
+						<div class="xl:hidden space-y-4 py-4">
+							<h3 class="text-lg md:text-xl font-medium text-primary">Galería</h3>
+							<div class="flex gap-4 h-52 sm:h-64 md:h-72 overflow-x-auto overflow-y-hidden">
+								for i, img := range state.Product.Images {
+									<button
+										data-product-modal-gallery-img={ i }
+										data-click-handler-selector="product-modal-gallery-img"
+										class="h-full aspect-square rounded-lg drop-shadow-lg cursor-pointer scale-100 hover:scale-105 transition-[scale]"
+									>
+										<img
+											src={ fmt.Sprintf("/static/uploads/%s", img) }
+											alt={ fmt.Sprintf("Imagen de producto %s No. %d", state.Product.Name, i) }
+											class="w-full h-full object-cover rounded-lg"
+										/>
+									</button>
+								}
+							</div>
+							<div
+								id="product-modal-gallery-wrapper"
+								class="flex flex-col gap-4 h-0 overflow-hidden"
+								data-product-modal-gallery="collapsed"
+							>
+								<img
+									id="product-modal-gallery-display"
+									class="w-full object-cover rounded-lg"
+									src={ fmt.Sprintf("/static/uploads/%s", state.Product.ImageURL) }
+								/>
+								<button
+									data-product-modal-gallery-close
+									data-click-handler-selector="product-modal-gallery-close"
+									class="bg-primary text-light rounded-lg p-2 font-medium"
+								>
+									Cerrar Galería
+								</button>
 							</div>
 						</div>
 						if len(state.RelatedProducts) > 0 {
-							<div class="flex gap-2 h-52 overflow-x-auto mt-8">
-								for _, product := range state.RelatedProducts {
-									<button
-										class="relative shrink-0 grow-0 h-full aspect-square rounded-lg shadow overflow-hidden"
-										hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.ID) }
-										hx-target="#product-modal"
-										hx-swap="outerHTML"
-										hx-indicator="#product-modal-loading"
-										hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
-									>
-										<img
-											src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
-											alt={ product.Name }
-											class="w-full h-full object-cover"
-										/>
-										<div class="absolute bg-light/80 text-primary p-2 inset-x-0 bottom-0 min-h-1/4">
-											<p class="text-sm font-medium line-clamp-2">{ product.Name }</p>
-										</div>
-									</button>
-								}
+							<div class="space-y-4 py-4">
+								<h3 class="text-lg md:text-xl font-medium text-primary">Relacionados</h3>
+								<div class="flex gap-2 h-52 md:h-64 lg:h-72 overflow-x-auto">
+									for _, product := range state.RelatedProducts {
+										<button
+											class="relative shrink-0 grow-0 h-full aspect-square rounded-lg shadow overflow-hidden"
+											hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.ID) }
+											hx-target="#product-modal"
+											hx-swap="outerHTML"
+											hx-indicator="#product-modal-loading"
+											hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+										>
+											<img
+												src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
+												alt={ product.Name }
+												class="w-full h-full object-cover"
+											/>
+											<div class="absolute bg-light/80 text-primary p-2 inset-x-0 bottom-0 min-h-1/4">
+												<p class="text-sm md:text-base font-medium line-clamp-2">{ product.Name }</p>
+											</div>
+										</button>
+									}
+								</div>
 							</div>
 						}
 					</div>

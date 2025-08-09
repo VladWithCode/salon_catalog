@@ -339,6 +339,9 @@ templ CatalogScript() {
 
         const scrollTopBtn = document.getElementById('scroll-top-btn');
         const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');
+        const scroll = ScrollTrigger.create({
+            trigger: scrollTopBtnThreshold,
+        });
         const obsv = new IntersectionObserver(function (entries, observer) {
             entries.forEach(entry => {
                 if (!entry.isIntersecting) {
@@ -397,14 +400,13 @@ templ CatalogScript() {
 
             const modalWrapper = document.getElementById('product-modal-wrapper');
             modalWrapper.dataset.productModalOpen = 'true';
-
-                gsap.to('#product-modal-overlay', {
-                    autoAlpha: 1,
-                    y: "0%",
-                    duration: 0.5,
-                    ease: "power3.out",
-                    onComplete: () => {
-                        document.body.style.overflow = 'hidden';
+            gsap.to('#product-modal-overlay', {
+                autoAlpha: 1,
+                y: "0%",
+                duration: 0.5,
+                ease: "power3.out",
+                onComplete: () => {
+                    document.body.style.overflow = 'hidden';
                 }
             });
             const animatables = gsap.utils.toArray('[data-modal-animate-enter]', modal);
@@ -416,6 +418,10 @@ templ CatalogScript() {
                 stagger: 0.1,
                 delay: 0.3,
             });
+            const readMoreSection = document.getElementById('product-modal-description');
+            if (readMoreSection.clientHeight === readMoreSection.scrollHeight) {
+                document.querySelector('[data-product-modal-read-more]').classList.add('hidden');
+            }
         }
 
         eventManager
@@ -437,6 +443,10 @@ templ CatalogScript() {
                 const modal = document.getElementById('product-modal');
                 const animatables = gsap.utils.toArray('[data-modal-animate-enter]', modal);
                 const animateEnterTl = gsap.timeline({defaults: {duration: 0.5, ease: "power3.out"}});
+                const readMoreSection = document.getElementById('product-modal-description');
+                if (readMoreSection.clientHeight === readMoreSection.scrollHeight) {
+                    document.querySelector('[data-product-modal-read-more]').classList.add('hidden');
+                }
 
                 animateEnterTl.to(animatables, {
                     opacity: 1,
@@ -457,6 +467,57 @@ templ CatalogScript() {
                     }
                 });
                 history.pushState({}, '/catalogo', '/catalogo')
+            })
+            .registerClick('product-modal-read-more', function(e) {
+                const readMore = document.getElementById('product-modal-description');
+
+                if (e.target.dataset.productModalReadMore === 'collapsed') {
+                    e.target.dataset.productModalReadMore = 'expanded';
+                    gsap.set(readMore, {lineClamp: "none"});
+                    gsap.set(e.target, {textContent: "Leer menos"});
+                } else {
+                    e.target.dataset.productModalReadMore = 'collapsed';
+                    gsap.set(readMore, {lineClamp: ""});
+                    gsap.set(e.target, {textContent: "Leer más"});
+                }
+            })
+            .registerClick('product-modal-gallery-close', function(e) {
+                const galleryWrapper = document.getElementById('product-modal-gallery-wrapper');
+
+                gsap.to(galleryWrapper, {
+                    height: 0,
+                    onComplete: () => {
+                        galleryWrapper.dataset.productModalGallery = 'collapsed';
+                    }
+                })
+            })
+            .registerClick('product-modal-gallery-img', function(e) {
+                const galleryWrapper = document.getElementById('product-modal-gallery-wrapper');
+                const galleryDisplay = document.getElementById('product-modal-gallery-display');
+                const imgSrc = e.target.matches('img') ? e.target.src : e.target.querySelector('img').src;
+                const tl = gsap.timeline({defaults: {duration: 0.3, ease: "power2.out"}});
+
+                if (galleryWrapper.dataset.productModalGallery === 'expanded') {
+                    tl.to(galleryWrapper, {
+                        height: 0,
+                        onComplete: () => {
+                            galleryDisplay.src = imgSrc;
+                        }
+                    }).to(galleryDisplay, {
+                        opacity: 0,
+                    }, "<");
+                } else {
+                    galleryDisplay.src = imgSrc;
+                    galleryWrapper.dataset.productModalGallery = 'expanded';
+                }
+
+                tl.to(galleryWrapper, {
+                    height: 'auto',
+                    ease: "power1.in",
+                }).to(galleryDisplay, {
+                    opacity: 1,
+                    ease: "power1.in",
+                }, "-=0.2");
             })
     });
 </script>
