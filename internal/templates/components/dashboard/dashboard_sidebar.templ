@@ -85,16 +85,16 @@ templ DashboardSidebar() {
 						components.ImageIcon("h-5 mr-3", nil),
 					) {
 						@SidebarSectionNavItem("Imagenes", "/panel/imagenes", templ.Attributes{})
-						@SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{})
+						<!-- @SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{}) -->
 					}
 					<!-- Wizard Section -->
-					@SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)) {
+					/* @SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)) {
 						@SidebarSectionNavItem("Ver Asistentes", "/panel/asistente", templ.Attributes{})
 						<div class="border-b border-accent/70">
 							<p class="sr-only">sidebar separator</p>
 						</div>
 						@SidebarSectionNavItem("Pasos", "/panel/asistente/pasos", templ.Attributes{})
-					}
+					} */
 					<!-- Contact Requests -->
 					<a
 						href="/panel/solicitudes"
