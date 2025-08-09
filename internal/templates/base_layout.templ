@@ -10,6 +10,7 @@ templ BaseLayout(title string, contents templ.Component, isMainPage bool) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="htmx-config" content='{"historyRestoreAsHxRequest": false, "historyEnabled": false, "refreshOnHistoryMiss": true}'/>
 			<title>
 				if title == "" {
 					Villa Chenacolo
