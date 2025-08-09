@@ -111,8 +111,6 @@
     --radius-xl: 0.75rem;
     --radius-3xl: 1.5rem;
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --ease-in: cubic-bezier(0.4, 0, 1, 1);
-    --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-spin: spin 1s linear infinite;
     --blur-sm: 8px;
@@ -1558,10 +1556,10 @@
   .bg-yellow-100 {
     background-color: var(--color-yellow-100);
   }
-  .bg-linear-to-t {
-    --tw-gradient-position: to top;
+  .bg-linear-to-b {
+    --tw-gradient-position: to bottom;
     @supports (background-image: linear-gradient(in lab, red, red)) {
-      --tw-gradient-position: to top in oklab;
+      --tw-gradient-position: to bottom in oklab;
     }
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
@@ -1588,8 +1586,11 @@
     }
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
-  .from-light\/100 {
-    --tw-gradient-from: var(--color-light);
+  .from-light\/0 {
+    --tw-gradient-from: color-mix(in srgb, #efe5d2 0%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-gradient-from: color-mix(in oklab, var(--color-light) 0%, transparent);
+    }
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .from-primary {
@@ -1614,9 +1615,6 @@
     --tw-gradient-from: transparent;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
-  .from-30\% {
-    --tw-gradient-from-position: 30%;
-  }
   .to-accent {
     --tw-gradient-to: var(--color-accent);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -1635,11 +1633,8 @@
     }
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
-  .to-light\/0 {
-    --tw-gradient-to: color-mix(in srgb, #efe5d2 0%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      --tw-gradient-to: color-mix(in oklab, var(--color-light) 0%, transparent);
-    }
+  .to-light {
+    --tw-gradient-to: var(--color-light);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .to-primary\/60 {
@@ -1652,6 +1647,9 @@
   .to-transparent {
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-\[50vh\] {
+    --tw-gradient-to-position: 50vh;
   }
   .bg-contain {
     background-size: contain;
@@ -1788,8 +1786,8 @@
   .pt-32 {
     padding-top: calc(var(--spacing) * 32);
   }
-  .pt-\[130\%\] {
-    padding-top: 130%;
+  .pt-\[50vh\] {
+    padding-top: 50vh;
   }
   .pr-3 {
     padding-right: calc(var(--spacing) * 3);
@@ -2071,6 +2069,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       color: color-mix(in oklab, var(--color-light) 90%, transparent);
     }
+  }
+  .text-neutral {
+    color: var(--color-neutral);
   }
   .text-neutral\/70 {
     color: color-mix(in srgb, #544940 70%, transparent);

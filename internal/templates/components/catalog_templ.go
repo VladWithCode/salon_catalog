@@ -758,7 +758,7 @@ func ProductModal(state *ProductModalState) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\" alt=\"\" class=\"h-full object-cover object-center translate-y-6 opacity-0\" data-modal-animate-enter></div><div class=\"fixed inset-0 z-10 min-h-full bg-linear-to-t from-light/100 from-30% to-light/0 pt-[130%]\"></div><!-- Content --> <div class=\"relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-t from-light/100 from-30% to-light/0 pt-[130%]\"><div class=\"text-primary p-4 py-2 translate-y-6 opacity-0\" data-modal-animate-enter><span class=\"text-xs text-current/60\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\" alt=\"\" class=\"h-full object-cover object-center translate-y-6 opacity-0\" data-modal-animate-enter></div><!-- Content --> <div class=\"relative z-10 min-h-full flex flex-col gap-4 px-4 pb-8 text-center bg-linear-to-b from-light/0 to-light to-[50vh] pt-[50vh]\"><div class=\"text-primary p-4 py-2 translate-y-6 opacity-0\" data-modal-animate-enter><span class=\"font-light text-current/80\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
