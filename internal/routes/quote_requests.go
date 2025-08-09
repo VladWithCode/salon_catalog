@@ -20,7 +20,7 @@ func RegisterQuoteRequestsRoutes(router *customServeMux) {
 }
 
 func RenderQuoteRequest(w http.ResponseWriter, r *http.Request) {
-	err := pages.QuoteRequest(&pages.QuoteRequestFormState{}).Render(context.Background(), w)
+	err := pages.QuoteRequest(&pages.QuoteRequestFormState{}).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
@@ -153,7 +153,7 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 	)
 
 	// Render both the form and the toast
-	err = components.ToasterToast(successToast).Render(context.Background(), w)
+	err = components.ToasterToast(successToast).Render(r.Context(), w)
 	if err != nil {
 		log.Printf("failed to render success toast: %v\n", err)
 	}

@@ -14,9 +14,9 @@ import (
 )
 
 func RegisterCatalogRoutes(router *customServeMux) {
-	router.HandleFunc("GET /catalog/categories", GetCatalogCategories)
-	router.HandleFunc("GET /catalog/products", GetCatalogProducts)
-	router.HandleFunc("GET /catalogo/producto/{id}", GetProductDetail)
+	router.HandleFunc("GET /catalog/categories", publicMiddleware(GetCatalogCategories))
+	router.HandleFunc("GET /catalog/products", publicMiddleware(GetCatalogProducts))
+	router.HandleFunc("GET /catalogo/producto/{id}", publicMiddleware(GetProductDetail))
 }
 
 func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func GetCatalogCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = components.CategoryFilters(internal.PtrSliceToPlainSlice(ctgs), activeCtg).Render(context.Background(), w)
+	err = components.CategoryFilters(internal.PtrSliceToPlainSlice(ctgs), activeCtg).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to render catalog categories"))
@@ -66,7 +66,7 @@ func GetCatalogProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = components.ProductGrid(result).Render(context.Background(), w)
+	err = components.ProductGrid(result).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to render catalog products"))

@@ -14,7 +14,7 @@
 - **Naming**: Use camelCase for variables, PascalCase for exported functions/types
 - **HTTP handlers**: Follow pattern `func HandlerName(w http.ResponseWriter, r *http.Request)`
 - **Database**: Use pgx/v5 with connection pooling, context.Background() for queries
-- **Templates**: Use templ library, render with `.Render(context.Background(), w)`
+- **Templates**: Use templ library, render with `.Render(r.Context(), w)`
 - **Routes**: Use new Go 1.22 HTTP routing with method prefixes (e.g., "GET /path")
 - **Auth**: Custom JWT middleware with auth.PopulateAuth wrapper
 - **Static files**: Serve from `web/static/` directory

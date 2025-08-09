@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -86,7 +85,7 @@ func GetProductsTable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dashboard.ProductsTable(prods).Render(context.Background(), w)
+	err = dashboard.ProductsTable(prods).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Something went wrong"))
