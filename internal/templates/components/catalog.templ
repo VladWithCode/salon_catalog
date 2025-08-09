@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/util"
 )
 
 func getTotalProductCount(categories []db.CatalogCtg) int {
@@ -74,10 +75,11 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 				<button
 					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
 					disabled?={ !result.HasPrevious }
-					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page-1) }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
-					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page-1) }
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")) }
+					hx-vals={ fmt.Sprintf(`"categoria": "%s"`, util.ExtractURLQuery(ctx).Get("categoria")) }
 					data-click-handler-selector="catalog-pagination"
 					data-catalog-pagination="prev"
 				>
@@ -92,9 +94,10 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 								templ.KV("bg-primary hover:bg-primary/90", isCurrent),
 								templ.KV("bg-transparent hover:bg-primary/90", !isCurrent),
 							}
-							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", i) }
+							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", i, util.ExtractURLQuery(ctx).Get("categoria")) }
 							hx-target="#products-grid-content"
 							hx-indicator="[data-products-spinner]"
+							hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", i, util.ExtractURLQuery(ctx).Get("categoria")) }
 							data-click-handler-selector="catalog-pagination"
 							data-catalog-pagination="page"
 						>
@@ -105,10 +108,10 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 				<button
 					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
 					disabled?={ !result.HasNext }
-					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d", result.Page+1) }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
-					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d", result.Page+1) }
+					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")) }
 					data-click-handler-selector="catalog-pagination"
 					data-catalog-pagination="next"
 				>
@@ -312,10 +315,10 @@ templ ProductModal(state *ProductModalState) {
 							</div>
 						</div>
 						if len(state.RelatedProducts) > 0 {
-							<div class="flex gap-2 h-48 overflow-x-auto mt-8">
+							<div class="flex gap-2 h-52 overflow-x-auto mt-8">
 								for _, product := range state.RelatedProducts {
 									<button
-										class="relative shrink-0 grow-0 h-full aspect-square rounded-lg overflow-hidden"
+										class="relative shrink-0 grow-0 h-full aspect-square rounded-lg shadow overflow-hidden"
 										hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.ID) }
 										hx-target="#product-modal"
 										hx-swap="outerHTML"
@@ -327,8 +330,8 @@ templ ProductModal(state *ProductModalState) {
 											alt={ product.Name }
 											class="w-full h-full object-cover"
 										/>
-										<div class="absolute bg-accent/80 text-light px-2 pt-2 inset-x-0 bottom-0 h-1/2">
-											<p class="text-sm font-medium line-clamp-3">{ product.Name }</p>
+										<div class="absolute bg-light/80 text-primary p-2 inset-x-0 bottom-0 min-h-1/4">
+											<p class="text-sm font-medium line-clamp-2">{ product.Name }</p>
 										</div>
 									</button>
 								}
