@@ -718,6 +718,9 @@
   .h-24 {
     height: calc(var(--spacing) * 24);
   }
+  .h-48 {
+    height: calc(var(--spacing) * 48);
+  }
   .h-\[70vh\] {
     height: 70vh;
   }
@@ -1416,6 +1419,18 @@
     background-color: color-mix(in srgb, #9C7B56 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-accent) 10%, transparent);
+    }
+  }
+  .bg-accent\/60 {
+    background-color: color-mix(in srgb, #9C7B56 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-accent) 60%, transparent);
+    }
+  }
+  .bg-accent\/80 {
+    background-color: color-mix(in srgb, #9C7B56 80%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-accent) 80%, transparent);
     }
   }
   .bg-black {

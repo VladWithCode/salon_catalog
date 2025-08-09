@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -358,4 +360,379 @@ func FindCatalogListings() (map[string][]*CatalogProd, error) {
 	}
 
 	return listings, nil
+}
+
+// FindRelatedProducts finds products related to a given product ID
+// It uses the pre-calculated similarity scores from the product_similarities materialized view
+// for optimal performance. Falls back to category-based recommendations if needed.
+func FindRelatedProducts(productID string, limit int) ([]*CatalogProd, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	// Set default limit
+	if limit < 1 || limit > 20 {
+		limit = 8
+	}
+
+	// First, resolve the product ID if a slug was provided
+	var resolvedID string
+	if _, err = uuid.Parse(productID); err == nil {
+		err = conn.QueryRow(ctx, `
+			SELECT id FROM products 
+			WHERE id = $1
+		`, productID).Scan(&resolvedID)
+	} else {
+		err = conn.QueryRow(ctx, `
+			SELECT id FROM products 
+			WHERE slug = $1
+		`, productID).Scan(&resolvedID)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("product not found: %w", err)
+	}
+
+	// Query using the materialized view for pre-calculated similarities
+	query := `
+		SELECT 
+			p.id,
+			p.name,
+			p.description,
+			p.long_description,
+			p.category as category_id,
+			c.name as category_name,
+			COALESCE(i.filename, '') as image_url,
+			p.available,
+			p.slug,
+			COALESCE(
+				(
+					SELECT json_agg(img.filename ORDER BY img.filename)
+					FROM images_products ip
+					JOIN images img ON ip.image_id = img.id
+					WHERE ip.product_id = p.id
+				),
+				'[]'::json
+			) as images,
+			ps.similarity_score
+		FROM product_similarities ps
+		JOIN products p ON ps.related_id = p.id
+		LEFT JOIN categories c ON p.category = c.id
+		LEFT JOIN images i ON p.main_img = i.id
+		WHERE ps.product_id = $1
+			AND p.available = true
+		ORDER BY ps.similarity_score DESC, p.name
+		LIMIT $2
+	`
+
+	rows, err := conn.Query(ctx, query, resolvedID, limit)
+	if err != nil {
+		log.Printf("main strat failed: %v\n", err)
+		// If the materialized view doesn't exist or has issues, fall back to direct calculation
+		return findRelatedProductsFallback(ctx, conn, resolvedID, limit)
+	}
+	defer rows.Close()
+
+	var products []*CatalogProd
+	for rows.Next() {
+		var product CatalogProd
+		var imagesJSON []byte
+		var similarityScore float64
+
+		err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Description,
+			&product.LongDescription,
+			&product.CategoryID,
+			&product.CategoryName,
+			&product.ImageURL,
+			&product.Available,
+			&product.Slug,
+			&imagesJSON,
+			&similarityScore, // We can use this for debugging or display if needed
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan related product: %w", err)
+		}
+
+		// Unmarshal JSON fields
+		if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
+		}
+
+		products = append(products, &product)
+	}
+
+	// If we don't have enough related products, fill with products from the same category
+	if len(products) < limit {
+		remainingLimit := limit - len(products)
+
+		// Get the current product's category
+		var currentCategoryID string
+		err = conn.QueryRow(ctx, `
+			SELECT category FROM products WHERE id = $1
+		`, resolvedID).Scan(&currentCategoryID)
+
+		if err == nil && currentCategoryID != "" {
+			// Get product IDs we already have
+			existingIDs := make([]string, len(products)+1)
+			existingIDs[0] = resolvedID // Don't include the current product
+			for i, p := range products {
+				existingIDs[i+1] = p.ID
+			}
+
+			// Query for additional products from the same category
+			fallbackQuery := `
+				SELECT 
+					p.id,
+					p.name,
+					p.description,
+					p.long_description,
+					p.category as category_id,
+					c.name as category_name,
+					COALESCE(i.filename, '') as image_url,
+					p.available,
+					p.slug,
+					COALESCE(
+						(
+							SELECT json_agg(img.filename ORDER BY img.filename)
+							FROM images_products ip
+							JOIN images img ON ip.image_id = img.id
+							WHERE ip.product_id = p.id
+						),
+						'[]'::json
+					) as images
+				FROM products p
+				LEFT JOIN categories c ON p.category = c.id
+				LEFT JOIN images i ON p.main_img = i.id
+				WHERE p.category = $1
+					AND p.available = true
+					AND p.id != ALL($2)
+				ORDER BY RANDOM() -- Random for variety
+				LIMIT $3
+			`
+
+			fallbackRows, err := conn.Query(ctx, fallbackQuery, currentCategoryID, existingIDs, remainingLimit)
+			if err == nil {
+				defer fallbackRows.Close()
+
+				for fallbackRows.Next() {
+					var product CatalogProd
+					var imagesJSON []byte
+
+					err = fallbackRows.Scan(
+						&product.ID,
+						&product.Name,
+						&product.Description,
+						&product.LongDescription,
+						&product.CategoryID,
+						&product.CategoryName,
+						&product.ImageURL,
+						&product.Available,
+						&product.Slug,
+						&imagesJSON,
+					)
+					if err == nil {
+						if err = json.Unmarshal(imagesJSON, &product.Images); err == nil {
+							products = append(products, &product)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return products, nil
+}
+
+// findRelatedProductsFallback is used when the materialized view is not available
+// It calculates similarities on-the-fly (slower but always works)
+func findRelatedProductsFallback(ctx context.Context, conn *pgxpool.Conn, productID string, limit int) ([]*CatalogProd, error) {
+	query := `
+		WITH current_product AS (
+			SELECT id, category, search_vector
+			FROM products 
+			WHERE id = $1
+		)
+		SELECT 
+			p.id,
+			p.name,
+			p.description,
+			p.long_description,
+			p.category as category_id,
+			c.name as category_name,
+			COALESCE(i.filename, '') as image_url,
+			p.available,
+			p.slug,
+			COALESCE(
+				(
+					SELECT json_agg(img.filename ORDER BY img.filename)
+					FROM images_products ip
+					JOIN images img ON ip.image_id = img.id
+					WHERE ip.product_id = p.id
+				),
+				'[]'::json
+			) as images
+		FROM products p
+		CROSS JOIN current_product cp
+		LEFT JOIN categories c ON p.category = c.id
+		LEFT JOIN images i ON p.main_img = i.id
+		WHERE p.id != cp.id
+			AND p.available = true
+			AND (
+				p.category = cp.category  -- Same category
+				OR ts_rank(p.search_vector, cp.search_vector) > 0.1  -- Or similar content
+			)
+		ORDER BY 
+			CASE WHEN p.category = cp.category THEN 0 ELSE 1 END,  -- Prioritize same category
+			ts_rank(p.search_vector, cp.search_vector) DESC,
+			p.name
+		LIMIT $2
+	`
+
+	rows, err := conn.Query(ctx, query, productID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("fallback query failed: %w", err)
+	}
+	defer rows.Close()
+
+	var products []*CatalogProd
+	for rows.Next() {
+		var product CatalogProd
+		var imagesJSON []byte
+
+		err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Description,
+			&product.LongDescription,
+			&product.CategoryID,
+			&product.CategoryName,
+			&product.ImageURL,
+			&product.Available,
+			&product.Slug,
+			&imagesJSON,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan fallback product: %w", err)
+		}
+
+		if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
+		}
+
+		products = append(products, &product)
+	}
+
+	return products, nil
+}
+
+// RefreshProductSimilarities triggers a refresh of the materialized view
+// Call this periodically (e.g., via a cron job) or after bulk product updates
+func RefreshProductSimilarities() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) // Longer timeout for refresh
+	defer cancel()
+
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, "REFRESH MATERIALIZED VIEW CONCURRENTLY product_similarities")
+	if err != nil {
+		return fmt.Errorf("failed to refresh product similarities: %w", err)
+	}
+
+	return nil
+}
+
+// Alternative: Simpler version focusing on category-based recommendations
+func FindRelatedProductsSimple(productID string, limit int) ([]*CatalogProd, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	if limit < 1 || limit > 20 {
+		limit = 8
+	}
+
+	// Simple query: get products from the same category
+	query := `
+		SELECT 
+			p.id,
+			p.name,
+			p.description,
+			p.long_description,
+			p.category as category_id,
+			c.name as category_name,
+			COALESCE(i.filename, '') as image_url,
+			p.available,
+			p.slug,
+			COALESCE(
+				(
+					SELECT json_agg(img.filename ORDER BY img.filename)
+					FROM images_products ip
+					JOIN images img ON ip.image_id = img.id
+					WHERE ip.product_id = p.id
+				),
+				'[]'::json
+			) as images
+		FROM products p
+		JOIN products current_p ON (current_p.id = $1 OR current_p.slug = $1)
+		LEFT JOIN categories c ON p.category = c.id
+		LEFT JOIN images i ON p.main_img = i.id
+		WHERE p.category = current_p.category
+			AND p.id != current_p.id
+			AND p.available = true
+		ORDER BY RANDOM()  -- Random selection for variety
+		LIMIT $2
+	`
+
+	rows, err := conn.Query(ctx, query, productID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find related products: %w", err)
+	}
+	defer rows.Close()
+
+	var products []*CatalogProd
+	for rows.Next() {
+		var product CatalogProd
+		var imagesJSON []byte
+
+		err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Description,
+			&product.LongDescription,
+			&product.CategoryID,
+			&product.CategoryName,
+			&product.ImageURL,
+			&product.Available,
+			&product.Slug,
+			&imagesJSON,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan related product: %w", err)
+		}
+
+		if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
+		}
+
+		products = append(products, &product)
+	}
+
+	return products, nil
 }

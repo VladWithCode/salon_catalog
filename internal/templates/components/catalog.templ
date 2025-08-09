@@ -311,6 +311,29 @@ templ ProductModal(state *ProductModalState) {
 								</div>
 							</div>
 						</div>
+						if len(state.RelatedProducts) > 0 {
+							<div class="flex gap-2 h-48 overflow-x-auto mt-8">
+								for _, product := range state.RelatedProducts {
+									<button
+										class="relative shrink-0 grow-0 h-full aspect-square rounded-lg overflow-hidden"
+										hx-get={ fmt.Sprintf("/catalogo/producto/%s", product.ID) }
+										hx-target="#product-modal"
+										hx-swap="outerHTML"
+										hx-indicator="#product-modal-loading"
+										hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", product.Slug) }
+									>
+										<img
+											src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
+											alt={ product.Name }
+											class="w-full h-full object-cover"
+										/>
+										<div class="absolute bg-accent/80 text-light px-2 pt-2 inset-x-0 bottom-0 h-1/2">
+											<p class="text-sm font-medium line-clamp-3">{ product.Name }</p>
+										</div>
+									</button>
+								}
+							</div>
+						}
 					</div>
 				}
 			</div>

@@ -100,6 +100,11 @@ func GetProductDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	modalState.Product = *product
+	modalState.RelatedProducts, err = db.FindRelatedProducts(product.ID, 6)
+	if err != nil {
+		log.Printf("failed to find related products: %v\n", err)
+	}
+
 	if isAjax {
 		err = templ.RenderFragments(
 			r.Context(),
