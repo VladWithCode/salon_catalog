@@ -157,9 +157,7 @@ func (c *Cart) UpdateItemQty(itemID string, quantity int) {
 
 	for i, item := range c.Items {
 		if itemID == item.ProductID {
-			if quantity > item.MaxQty {
-				quantity = item.MaxQty
-			}
+			item.Quantity = min(quantity, item.MaxQty)
 			c.Items[i].Quantity = quantity
 			break
 		}
@@ -223,7 +221,7 @@ func (c *Cart) Save(ctx context.Context) error {
 
 	// Insert/update cart data only if it's a new cart or there are updated fields
 	// skip for saves with only item updates
-	if c.isNew || len(c.updatedFields) > 0 && !(len(c.updatedFields) == 1 && c.updatedFields["items"]) {
+	if (c.isNew || len(c.updatedFields) > 0) && !(len(c.updatedFields) == 1 && c.updatedFields["items"]) {
 		baseQuery := `INSERT INTO carts`
 		args := pgx.NamedArgs{"id": c.ID}
 
@@ -257,6 +255,7 @@ func (c *Cart) Save(ctx context.Context) error {
 		tx.Rollback(ctx)
 		return fmt.Errorf("failed to save cart: %w", err)
 	}
+	c.isNew = false
 
 	if c.updatedFields["items"] {
 		for _, item := range c.Items {
