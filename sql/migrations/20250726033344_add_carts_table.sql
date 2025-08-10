@@ -8,11 +8,13 @@ CREATE TABLE carts (
 
 CREATE TABLE cart_items (
     cart_id UUID REFERENCES carts(id) ON DELETE CASCADE,
-    product_id UUID REFERENCES catalog_products(id) ON DELETE CASCADE,
+    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 1,
     source VARCHAR(8),  -- "wizard" or "catalog"
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT cart_items_pkey PRIMARY KEY (cart_items.cart_id, cart_items.product_id)
 );
 
 CREATE TRIGGER cart_items_set_updated_at BEFORE UPDATE ON cart_items

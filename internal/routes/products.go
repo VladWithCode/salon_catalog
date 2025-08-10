@@ -44,7 +44,7 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("DELETE /api/products/{id}", auth.ValidateAuth(DeleteProduct))
 	router.HandleFunc("DELETE /api/products/{id}/images", auth.ValidateAuth(DeleteProductImages))
 
-	router.HandleFunc("POST /api/special/products", sCreateProducts)
+	router.HandleFunc("POST /api/special/products", auth.ValidateAuth(sCreateProducts))
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -399,7 +399,7 @@ func DeleteProductImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func sCreateProducts(w http.ResponseWriter, r *http.Request) {
+func sCreateProducts(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	products := make([]*db.Product, 0)
 	err := json.NewDecoder(r.Body).Decode(&products)
 	if err != nil {

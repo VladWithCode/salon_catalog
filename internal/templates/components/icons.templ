@@ -166,6 +166,12 @@ templ PlusIcon(class string, attr templ.Attributes) {
 	</svg>
 }
 
+templ MinusIcon(class string, attr templ.Attributes) {
+	<svg class={ "aspect-square ", class } viewBox="0 0 24 24" fill="none" { attr... }>
+		<path d="M6 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+	</svg>
+}
+
 templ ChevronIcon(class string, attr templ.Attributes) {
 	<svg class={ "aspect-square" , class, } fill="none" stroke="currentColor" viewBox="0 0 24 24" { attr... }>
 		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>

@@ -231,6 +231,11 @@ func render404Page(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("404 page not found"))
 }
 
+func render500Page(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 Server Error"))
+}
+
 func publicMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Gives templ's ctx access to the request path and query params

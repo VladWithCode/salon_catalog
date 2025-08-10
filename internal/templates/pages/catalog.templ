@@ -170,7 +170,7 @@ templ Catalog(state *CatalogState) {
 			@components.ProductModal(state.ProductModalState)
 		</div>
 		<!-- Floating Cart -->
-		@components.FloatingCart()
+		@components.FloatingCart(0, false)
 		<!-- Wizard Modal -->
 		<div id="wizard-modal" class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 pointer-events-none">
 			<!-- Wizard content loaded here -->

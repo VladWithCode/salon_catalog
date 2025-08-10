@@ -65,7 +65,7 @@
     }
     .bg-brand-1 {
         background: 
-            radial-gradient(circle at 50% 50%, --alpha(var(--color-stone-950) / 60%), --alpha(var(--color-stone-950) / 80%)),
+            linear-gradient(to bottom, --alpha(var(--color-primary)/80%), --alpha(var(--color-primary)/80%)),
             url("/static/assets/bg_repeat_1.png");
         background-repeat: no-repeat, repeat;
         background-size: cover, 10rem;

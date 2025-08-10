@@ -105,7 +105,7 @@ func BaseLayout(title string, contents templ.Component, isMainPage bool) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</head><body><div class=\"grid grid-rows-page grid-cols-1 min-h-screen w-full overflow-x-hidden overflow-y-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</head><body><div class=\"grid grid-rows-page grid-cols-1 min-h-screen w-full overflow-x-hidden overflow-y-auto\" hx-ext=\"response-targets\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -118,6 +118,10 @@ func BaseLayout(title string, contents templ.Component, isMainPage bool) templ.C
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.Footer().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.Toaster().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

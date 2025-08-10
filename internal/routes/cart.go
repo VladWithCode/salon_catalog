@@ -1,133 +1,285 @@
 package routes
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"github.com/vladwithcode/salon_catalog/internal/templates/util"
 )
 
-var cart []db.CartItem
-
 func RegisterCartRoutes(router *customServeMux) {
-	router.HandleFunc("GET /cart", GetCart)
-	router.HandleFunc("POST /cart/add", AddToCart)
-	router.HandleFunc("POST /cart/update-quantity/{id}", UpdateCartQuantity)
-	router.HandleFunc("POST /cart/clear", ClearCart)
-	router.HandleFunc("DELETE /cart/remove/{id}", RemoveFromCart)
+	router.HandleFunc("GET /carrito", publicMiddleware(GetCart))
+	router.HandleFunc("PUT /carrito", publicMiddleware(AddToCart))
+	router.HandleFunc("PATCH /carrito/items", publicMiddleware(UpdateCartQuantity))
+	router.HandleFunc("DELETE /carrito/items", publicMiddleware(ClearCart))
+	router.HandleFunc("DELETE /carrito/items/{id}", publicMiddleware(RemoveFromCart))
 }
 
 func GetCart(w http.ResponseWriter, r *http.Request) {
-	err := components.CartSidebar(cart).Render(r.Context(), w)
+	cartID, err := db.GetCartIDFromRequest(r)
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to render CartSidebar err: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		handleCartUpdateError(w, r, err, true)
+		return
 	}
+
+	cart, err := db.GetOrCreateCart(r.Context(), cartID)
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cartState := components.CartState{
+		Cart: cart,
+	}
+	renderCart(w, r, cartState, false)
 }
 
 func AddToCart(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form"))
-		log.Printf("failed to parse form: %v\n", err)
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cartID, err := db.GetCartIDFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cart, err := db.GetOrCreateCart(r.Context(), cartID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		handleCartUpdateError(w, r, err, true)
 		return
 	}
 
 	productID := r.FormValue("product_id")
 	source := r.FormValue("source")
-	var itemPtr *db.CartItem
 
-	for _, item := range cart {
+	// Check if item already exists in cart
+	existingItem := false
+	for _, item := range cart.Items {
 		if item.ProductID == productID {
-			itemPtr = &item
+			existingItem = true
 			break
 		}
 	}
 
-	if itemPtr != nil {
-		itemPtr.Quantity++
+	if existingItem {
+		// Update quantity of existing item
+		newQty := cart.GetItemQuantity(productID) + 1
+		cart.UpdateItemQty(productID, newQty)
 	} else {
+		// Add new item to cart
 		prod, err := db.FindCatalogProductDetail(productID)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to find product"))
-			log.Printf("failed to find product: %v\n", err)
+			handleCartUpdateError(w, r, err, true)
 			return
 		}
 
-		cartItem := db.CartItem{
+		cartItem := &db.CartItem{
 			ProductID: productID,
 			Source:    source,
 			Name:      prod.Name,
 			Category:  prod.CategoryName,
 			ImageURL:  prod.ImageURL,
 			Quantity:  1,
+			MaxQty:    prod.Quantity,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
-		cart = append(cart, cartItem)
+		cart.AddItem(cartItem)
 	}
 
-	err = components.CartSidebar(cart).Render(r.Context(), w)
+	// Save cart to database
+	err = cart.Save(r.Context())
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to render CartSidebar err: %v\n", err)
+		handleCartUpdateError(w, r, err, true)
+		return
 	}
+
+	cartState := components.CartState{
+		Cart:      cart,
+		HasUpdate: true,
+		UpdateMsg: "Se añadió el producto al carrito",
+	}
+	renderCart(w, r, cartState, true)
 }
 
 func UpdateCartQuantity(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	action := r.URL.Query().Get("action")
-	var item *db.CartItem
-
-	for i, cartItem := range cart {
-		if cartItem.ProductID == id {
-			item = &cart[i]
-			break
-		}
+	cartID, err := db.GetCartIDFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		handleCartUpdateError(w, r, err, true)
+		return
 	}
+
+	cart, err := db.GetOrCreateCart(r.Context(), cartID)
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	updateMsg := "Se actualizó el carrito"
+	productID := r.FormValue("id")
+	action := r.FormValue("action")
+
+	currentQty := cart.GetItemQuantity(productID)
+	var newQty int
 
 	switch action {
 	case "increase":
-		item.Quantity++
+		newQty = currentQty + 1
 	case "decrease":
-		item.Quantity--
+		newQty = currentQty - 1
+	case "set":
+		newQty, _ = strconv.Atoi(r.FormValue("quantity"))
+	default:
+		handleCartUpdateError(w, r, fmt.Errorf("invalid action: %s", action), true)
+		return
 	}
 
-	w.Header().Add("HX-Trigger", "cart-sidebar")
-	w.Header().Add("HX-Target", "cart-sidebar")
-	w.Header().Add("HX-Swap", "innerHTML")
-	w.WriteHeader(http.StatusOK)
+	cart.UpdateItemQty(productID, newQty)
+	if newQty > cart.GetItemMaxQty(productID) {
+		updateMsg = "Ya has elegido el máximo posible para este producto"
+	}
+
+	// Save cart to database
+	err = cart.Save(r.Context())
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cartState := components.CartState{
+		Cart:      cart,
+		HasUpdate: true,
+		UpdateMsg: updateMsg,
+	}
+	renderCart(w, r, cartState, true)
 }
 
 func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	newCart := make([]db.CartItem, 0, len(cart))
-	for _, item := range cart {
-		if item.ProductID != id {
-			newCart = append(newCart, item)
-		}
-	}
-	cart = newCart
-
-	err := components.CartSidebar(cart).Render(r.Context(), w)
+	cartID, err := db.GetCartIDFromRequest(r)
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to render CartSidebar err: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		handleCartUpdateError(w, r, err, true)
+		return
 	}
+
+	cart, err := db.GetOrCreateCart(r.Context(), cartID)
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	productID := r.PathValue("id")
+	cart.RemoveItem(productID)
+
+	// Save cart to database
+	err = cart.Save(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cartState := components.CartState{
+		Cart:      cart,
+		HasUpdate: true,
+		UpdateMsg: "Se eliminó el producto del carrito",
+	}
+	renderCart(w, r, cartState, true)
 }
 
 func ClearCart(w http.ResponseWriter, r *http.Request) {
-	cart = make([]db.CartItem, 0)
-
-	err := components.CartSidebar(cart).Render(r.Context(), w)
+	cartID, err := db.GetCartIDFromRequest(r)
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
-		log.Printf("failed to render CartSidebar err: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		handleCartUpdateError(w, r, err, true)
+		return
 	}
+
+	cart, err := db.FindCartByID(r.Context(), cartID)
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	// Delete the entire cart from database
+	cart.ClearCart()
+
+	err = cart.Save(r.Context())
+	if err != nil {
+		handleCartUpdateError(w, r, err, true)
+		return
+	}
+
+	cartState := components.CartState{
+		Cart:      cart,
+		HasUpdate: true,
+		UpdateMsg: "Se limpió el carrito",
+	}
+	renderCart(w, r, cartState, true)
+}
+
+func renderCart(w http.ResponseWriter, r *http.Request, cartState components.CartState, includeToast bool) {
+	comps := []*templ.Component{}
+
+	fc := components.FloatingCart(len(cartState.Cart.Items), false)
+	cs := components.CartSidebar(cartState)
+	comps = append(comps, &fc, &cs)
+
+	if includeToast {
+		w.Header().Add("X-Includes-Toast", "true")
+		toastData := components.NewToastData(cartState.UpdateMsg, components.ToastSuccess, 3000, true, false)
+		t := components.ToasterToast(toastData)
+		comps = append(comps, &t)
+	}
+
+	mixedConf := util.WithMixedFragmentsConf{
+		JoinTemplates: comps,
+		Fragments:     []any{"toaster-toast", "cartToggle", "cartSidebar"},
+	}
+	util.RenderMixedWithFragments(r.Context(), w, mixedConf)
+}
+
+func handleCartUpdateError(w http.ResponseWriter, r *http.Request, err error, includeToast bool) {
+	w.WriteHeader(http.StatusInternalServerError)
+
+	cartState := components.CartState{}
+	cartState.HasError = true
+	cartState.ErrorMsg = "Error al actualizar el carrito"
+	if r.Method == http.MethodGet {
+		cartState.ErrorMsg = "Error al cargar el carrito"
+	}
+
+	cs := components.CartSidebar(cartState)
+	comps := []*templ.Component{
+		&cs,
+	}
+	if includeToast {
+		w.Header().Add("X-Includes-Toast", "true")
+		toastData := components.NewToastData(cartState.ErrorMsg, components.ToastError, 3000, true, false)
+		t := components.ToasterToast(toastData)
+		comps = append(comps, &t)
+	}
+
+	mixedConf := util.WithMixedFragmentsConf{
+		JoinTemplates: comps,
+		Fragments:     []any{"toaster-toast", "cartError"},
+	}
+	util.RenderMixedWithFragments(r.Context(), w, mixedConf)
+	log.Printf("failed to process cart update err: %v\n", err)
 }

@@ -2,8 +2,10 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -42,6 +44,7 @@ type CartItem struct {
 	Category  string    `json:"category"`
 	ImageURL  string    `json:"image_url"`
 	Quantity  int       `json:"quantity"`
+	MaxQty    int       `json:"max_quantity"`
 	Source    string    `json:"source"`               // "wizard" or "catalog"
 	StepIndex int       `json:"step_index,omitempty"` // For wizard items
 	CreatedAt time.Time `json:"created_at"`           // AddedAt
@@ -154,6 +157,9 @@ func (c *Cart) UpdateItemQty(itemID string, quantity int) {
 
 	for i, item := range c.Items {
 		if itemID == item.ProductID {
+			if quantity > item.MaxQty {
+				quantity = item.MaxQty
+			}
 			c.Items[i].Quantity = quantity
 			break
 		}
@@ -175,6 +181,32 @@ func (c *Cart) RemoveItem(itemID string) {
 	}
 }
 
+func (c *Cart) ClearCart() {
+	for _, item := range c.Items {
+		c.removedItems = append(c.removedItems, item.ProductID)
+	}
+
+	c.Items = make([]*CartItem, 0)
+}
+
+func (c *Cart) GetItemQuantity(itemID string) int {
+	for _, item := range c.Items {
+		if item.ProductID == itemID {
+			return item.Quantity
+		}
+	}
+	return 0
+}
+
+func (c *Cart) GetItemMaxQty(itemID string) int {
+	for _, item := range c.Items {
+		if item.ProductID == itemID {
+			return item.MaxQty
+		}
+	}
+	return 0
+}
+
 func (c *Cart) Save(ctx context.Context) error {
 	if c.ID == "" {
 		return ErrCartIDInvalidMissing
@@ -191,7 +223,7 @@ func (c *Cart) Save(ctx context.Context) error {
 
 	// Insert/update cart data only if it's a new cart or there are updated fields
 	// skip for saves with only item updates
-	if c.isNew || len(c.updatedFields) > 0 || !(len(c.updatedFields) == 1 && c.updatedFields["items"]) {
+	if c.isNew || len(c.updatedFields) > 0 && !(len(c.updatedFields) == 1 && c.updatedFields["items"]) {
 		baseQuery := `INSERT INTO carts`
 		args := pgx.NamedArgs{"id": c.ID}
 
@@ -200,6 +232,9 @@ func (c *Cart) Save(ctx context.Context) error {
 		updtStr := "ON CONFLICT (id) DO UPDATE SET"
 		updtFields := make([]string, 0)
 		for fld, updated := range c.updatedFields {
+			if fld == "items" {
+				continue
+			}
 			if updated {
 				columnStr += ", " + fld
 				argStr += ", @" + fld
@@ -210,14 +245,17 @@ func (c *Cart) Save(ctx context.Context) error {
 		columnStr += ")"
 		argStr += ")"
 		updtStr += " " + strings.Join(updtFields, ", ")
-		baseQuery = fmt.Sprintf("%s %s VALUES %s %s", baseQuery, columnStr, argStr, updtStr)
+		baseQuery = fmt.Sprintf("%s %s VALUES %s", baseQuery, columnStr, argStr)
+		if len(updtFields) > 0 {
+			baseQuery += " " + updtStr
+		}
 
 		_, err = tx.Exec(ctx, baseQuery, args)
 	}
 
 	if err != nil {
 		tx.Rollback(ctx)
-		return ErrCartSaveFailedData
+		return fmt.Errorf("failed to save cart: %w", err)
 	}
 
 	if c.updatedFields["items"] {
@@ -231,8 +269,8 @@ func (c *Cart) Save(ctx context.Context) error {
 			}
 			_, err = tx.Exec(
 				ctx,
-				`INSERT INTO cart_items (cart_id, product_id, catalog_product_id, quantity, source, created_at, updated_at)
-				VALUES (@cart_id, @product_id, @catalog_product_id, @quantity, @source, @created_at, @updated_at)
+				`INSERT INTO cart_items (cart_id, product_id, quantity, source, created_at, updated_at)
+				VALUES (@cart_id, @product_id, @quantity, @source, @created_at, NOW())
 				ON CONFLICT (cart_id, product_id) DO UPDATE SET
 					quantity = @quantity,
 					source = @source,
@@ -242,7 +280,7 @@ func (c *Cart) Save(ctx context.Context) error {
 			)
 			if err != nil {
 				tx.Rollback(ctx)
-				return ErrCartSaveFailedItems
+				return fmt.Errorf("failed to add items to cart: %w", err)
 			}
 		}
 	}
@@ -256,9 +294,136 @@ func (c *Cart) Save(ctx context.Context) error {
 		)
 		if err != nil {
 			tx.Rollback(ctx)
-			return ErrCartSaveFailedRemovedItems
+			return fmt.Errorf("failed to remove items from cart: %w", err)
 		}
 	}
 
 	return tx.Commit(ctx)
+}
+
+// LoadItems loads all items for this cart from the database
+func (c *Cart) LoadItems(ctx context.Context) error {
+	conn, err := GetConnWithContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	rows, err := conn.Query(ctx, `
+		SELECT ci.product_id, ci.quantity, ci.source, ci.created_at, ci.updated_at,
+		       cp.name, cp.category_name, cp.image_url, cp.quantity as max_quantity
+		FROM cart_items ci
+		JOIN catalog_products cp ON ci.product_id = cp.id
+		WHERE ci.cart_id = $1
+		ORDER BY ci.created_at
+	`, c.ID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	c.Items = make([]*CartItem, 0)
+	for rows.Next() {
+		item := &CartItem{}
+		err = rows.Scan(
+			&item.ProductID, &item.Quantity, &item.Source, &item.CreatedAt, &item.UpdatedAt,
+			&item.Name, &item.Category, &item.ImageURL, &item.MaxQty,
+		)
+		if err != nil {
+			return err
+		}
+		c.Items = append(c.Items, item)
+	}
+
+	return rows.Err()
+}
+
+// FindCartByID loads a cart from the database by ID, including all its items
+func FindCartByID(ctx context.Context, cartID string) (*Cart, error) {
+	if cartID == "" {
+		return nil, ErrCartIDInvalidMissing
+	}
+
+	conn, err := GetConnWithContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	// Load cart data
+	cart := &Cart{
+		ID:            cartID,
+		updatedFields: make(map[string]bool),
+		removedItems:  make([]string, 0),
+		isNew:         false,
+	}
+
+	row := conn.QueryRow(ctx, `
+		SELECT customer_name, customer_email, customer_phone, created_at, is_submitted
+		FROM carts WHERE id = $1
+	`, cartID)
+
+	customerName := sql.NullString{}
+	customerEmail := sql.NullString{}
+	customerPhone := sql.NullString{}
+
+	err = row.Scan(&customerName, &customerEmail, &customerPhone, &cart.CreatedAt, &cart.IsSubmitted)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, ErrCartNotFound
+		}
+		return nil, err
+	}
+	cart.CustomerName = customerName.String
+	cart.CustomerEmail = customerEmail.String
+	cart.CustomerPhone = customerPhone.String
+
+	// Load cart items
+	err = cart.LoadItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return cart, nil
+}
+
+// GetOrCreateCart gets an existing cart or creates a new one if it doesn't exist
+func GetOrCreateCart(ctx context.Context, cartID string) (*Cart, error) {
+	cart, err := FindCartByID(ctx, cartID)
+	if err == ErrCartNotFound {
+		// Create new cart
+		cart = NewCart(cartID)
+		err = cart.Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return cart, nil
+	}
+	return cart, err
+}
+
+// DeleteCart removes a cart and all its items from the database
+func DeleteCart(ctx context.Context, cartID string) error {
+	if cartID == "" {
+		return ErrCartIDInvalidMissing
+	}
+
+	conn, err := GetConnWithContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	// Delete cart (items will be deleted automatically due to CASCADE)
+	_, err = conn.Exec(ctx, `DELETE FROM carts WHERE id = $1`, cartID)
+	return err
+}
+
+// GetCartIDFromRequest extracts the cart ID from the request cookie
+func GetCartIDFromRequest(r *http.Request) (string, error) {
+	cookie, err := r.Cookie("cart_id")
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
 }

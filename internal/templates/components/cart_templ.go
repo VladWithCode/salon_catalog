@@ -10,8 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 import "github.com/vladwithcode/salon_catalog/internal/db"
+import "errors"
 
-func FloatingCart() templ.Component {
+func FloatingCart(cartCount int, hasError bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,7 +37,86 @@ func FloatingCart() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Floating Cart Button --><div class=\"fixed bottom-2 right-4 z-40\" id=\"floating-cart\"><button class=\"bg-accent text-white rounded-full p-3.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative group\" data-click-handler-selector=\"cart-toggle\" data-cart-toggle hx-get=\"/cart\" hx-target=\"#cart-sidebar\" hx-trigger=\"click\"><!-- Cart Icon --><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5H19\"></path></svg><!-- Item Count Badge --><div class=\"absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 opacity-0 scale-0 transition-all duration-200\" data-cart-count>0</div><!-- Tooltip --><div class=\"absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap\">Ver selección</div></button></div><!-- Cart Sidebar --><div class=\"fixed inset-y-0 right-0 w-96 max-w-[90vw] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50\" id=\"cart-sidebar\"><!-- Cart content will be loaded here --></div><!-- Backdrop --><div class=\"fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40\" id=\"cart-backdrop\" data-click-handler-selector=\"cart-backdrop\" data-cart-close></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Floating Cart Button --><div class=\"fixed bottom-2 right-4 z-40 cur\" id=\"floating-cart\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button class=\"bg-accent text-white rounded-full p-3.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative group cursor-pointer\" id=\"floating-cart-toggle\" data-click-handler-selector=\"cart-toggle\" data-cart-toggle hx-get=\"/carrito\" hx-target=\"#cart-sidebar\" hx-indicator=\"#floating-cart-loading\" hx-swap-oob=\"outerHTML:#floating-cart-toggle\"><div id=\"floating-cart-loading\" class=\"absolute inset-0 z-10 bg-secondary duration-300 htmx-indicator\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = LoadingIcon("h-6", nil).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Cart Icon --><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5H19\"></path></svg><!-- Item Count Badge -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 = []any{"absolute -top-2 -right-2 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1",
+				templ.KV("opacity-0 scale-0 bg-accent transition-all duration-200", !hasError),
+				templ.KV("bg-red-500", hasError),
+			}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var3).String())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 1, Col: 0}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-cart-count>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if !hasError {
+				templ_7745c5c3_Err = TimesIcon("w-5", nil).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cartCount))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 46, Col: 36}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><!-- Tooltip --><div class=\"absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none\">Ver selección</div></button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = templ.Fragment("cartToggle").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><!-- Backdrop --><div class=\"fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40\" id=\"cart-backdrop\" data-click-handler-selector=\"cart-backdrop\" data-cart-close></div><!-- Cart Sidebar --><div class=\"fixed inset-y-0 right-0 w-96 max-w-[90vw] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-40\" id=\"cart-sidebar\"><!-- Cart content will be loaded here --></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,7 +124,19 @@ func FloatingCart() templ.Component {
 	})
 }
 
-func CartSidebar(items []db.CartItem) templ.Component {
+var (
+	ErrNilCart = errors.New("Provided cart is nil")
+)
+
+type CartState struct {
+	Cart      *db.Cart `json:"cart"`
+	HasError  bool     `json:"has_error"`
+	ErrorMsg  string   `json:"error"`
+	HasUpdate bool     `json:"has_update"`
+	UpdateMsg string   `json:"update_msg"`
+}
+
+func CartSidebar(state CartState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -60,60 +152,152 @@ func CartSidebar(items []db.CartItem) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col h-full w-full\"><!-- Header --><div class=\"p-6 border-b bg-brand-1 from-primary to-accent text-white\"><div class=\"flex items-center justify-between\"><h2 class=\"text-xl font-bold\">Tu evento</h2><button class=\"text-white hover:text-gray-200 transition-colors\" data-click-handler-selector=\"cart-close\" data-cart-close><div class=\"p-4\"><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></div></button></div><p class=\"text-white/90 text-sm mt-1\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+
+		if state.Cart == nil {
+			return ErrNilCart
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(items)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 75, Col: 35}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " elemento(s) seleccionado(s)</p></div><!-- Cart Items --><div class=\"flex-1 overflow-y-auto p-4\" data-cart-items>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if len(items) == 0 {
-			templ_7745c5c3_Err = EmptyCart().Render(ctx, templ_7745c5c3_Buffer)
+		items := state.Cart.Items
+		templ_7745c5c3_Var7 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex flex-col h-full w-full\"><!-- Header --><div class=\"p-6 border-b bg-brand-1 from-primary to-accent text-white\"><div class=\"flex items-center justify-between\"><h2 class=\"text-xl font-bold uppercase\">Tu evento</h2><button class=\"text-white hover:text-gray-200 transition-colors\" data-click-handler-selector=\"cart-close\" data-cart-close><div class=\"p-4\"><svg class=\"w-6 h-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></div></button></div><p id=\"cart-count-header\" class=\"flex gap-2 items-center text-white/90 text-sm mt-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"space-y-4\">")
+			templ_7745c5c3_Err = BoxIcon("w-5", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, item := range items {
-				templ_7745c5c3_Err = CartItem(item).Render(ctx, templ_7745c5c3_Buffer)
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(items)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 111, Col: 36}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " elemento(s) seleccionado(s)</p></div><!-- Cart Items --><div class=\"flex-1 overflow-y-auto p-4\" data-cart-items>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(items) == 0 {
+				templ_7745c5c3_Err = EmptyCart().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"space-y-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				for _, item := range items {
+					templ_7745c5c3_Err = CartItem(*item).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><!-- Footer -->")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if len(items) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"border-t p-6 bg-gray-50\"><!-- Action Buttons --><div class=\"space-y-3\"><a href=\"/solicitar-cotizacion\" class=\"w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-center block\" data-cart-close>Solicitar Cotización</a> <button class=\"w-full text-gray-600 py-2 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors\" hx-post=\"/cart/clear\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Estás seguro de que quieres limpiar tu selección?\" data-cart-clear>Limpiar Todo</button></div></div>")
+			templ_7745c5c3_Var9 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"cart-sidebar-error\" class=\"h-0 opacity-0\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if state.HasError {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"flex gap-6 items-center justify-center py-6 bg-red-500/30 text-red-700 px-4\"><div class=\"shrink-0 bg-current/80 rounded-full p-1\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = TimesIcon("w-12 text-gray-50", nil).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><p class=\"text-lg font-medium\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var10 string
+					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(state.ErrorMsg)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 136, Col: 54}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</p><button id=\"close-cart-error\" class=\"my-auto\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = TimesIcon("w-8", nil).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</button></div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = templ.Fragment("cartError").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<!-- Footer -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(items) > 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"p-4 bg-gray-50\"><!-- Action Buttons --><div class=\"space-y-2\"><a href=\"/solicitar-cotizacion\" class=\"w-full bg-accent/90 text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent transition-[background,_transform] text-center block active:bg-accent active:scale-95\" data-cart-close>Solicitar Cotización</a> <button class=\"w-full text-neutral/60 py-2 px-6 rounded-lg font-medium hover:bg-red-500/30 hover:text-red-500 active:bg-red-500/40 active:text-red-500 transition-colors\" hx-delete=\"/carrito/items\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Estás seguro de que quieres limpiar tu selección?\" data-cart-clear>Limpiar Todo</button></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = templ.Fragment("cartSidebar").Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -137,166 +321,283 @@ func CartItem(item db.CartItem) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm\" data-cart-item=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"relative z-0 grid grid-cols-[8rem_1fr] grid-rows-1 gap-4 h-32 pr-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden\" data-cart-item=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.ProductID)
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(item.ProductID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 129, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 187, Col: 33}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><!-- Product Image --><div class=\"w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0\"><img src=\"/static/assets/chenacolo_24.jpeg\" alt=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 136, Col: 19}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><div class=\"absolute inset-0 z-20 bg-gray-100 flex flex-col items-center justify-center gap-4 text-accent htmx-indicator\" data-cart-items-loading=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-full h-full object-cover\"></div><!-- Product Info --><div class=\"flex-1 min-w-0\"><h4 class=\"font-semibold text-gray-800 truncate\">")
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(item.ProductID)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 191, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 142, Col: 63}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</h4><p class=\"text-sm text-gray-600 truncate\">")
+		templ_7745c5c3_Err = LoadingIcon("w-12", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Category)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 143, Col: 60}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p><!-- Source Badge -->")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 = []any{"inline-block px-2 py-1 text-xs font-medium rounded-full mt-2",
-			templ.KV("bg-purple-100 text-purple-800", item.Source == "wizard"),
-			templ.KV("bg-blue-100 text-blue-800", item.Source == "catalog"),
-		}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var9...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<span class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var9).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if item.Source == "wizard" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "Asistente")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "Catálogo")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div><!-- Actions --><div class=\"flex flex-col gap-2\"><!-- Quantity (if applicable) -->")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if item.Quantity > 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"flex items-center gap-2\"><button class=\"w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold\" hx-post=\"/cart/update-quantity\" hx-vals=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ProductID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 167, Col: 81}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-target=\"#cart-sidebar\">−</button> <span class=\"text-sm font-medium w-8 text-center\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Quantity))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 172, Col: 89}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</span> <button class=\"w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors flex items-center justify-center text-sm font-bold\" hx-post=\"/cart/update-quantity\" hx-vals=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ProductID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 176, Col: 81}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-target=\"#cart-sidebar\">+</button></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- Remove Button --><button class=\"text-red-500 hover:text-red-700 transition-colors p-1\" hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "Cargando...</div><div class=\"row-span-1 col-start-1 h-full aspect-square shrink-0 grow-0 bg-gray-100 rounded-l-lg overflow-hidden\"><button class=\"w-full h-full\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/cart/remove/%s", item.ProductID))
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalogo/producto/%s", item.ProductID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 186, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 199, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Remover este elemento?\" title=\"Remover elemento\"><svg class=\"w-4 h-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-target=\"#product-modal\" hx-swap=\"outerHTML\" hx-indicator=\"#product-modal-loading\" hx-push-url=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalogo/producto/%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 203, Col: 70}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"><img src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", item.ImageURL))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 206, Col: 59}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" alt=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 207, Col: 20}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" class=\"w-full h-full object-cover\"></button></div><div class=\"row-span-1 col-start-2 flex flex-col py-2 gap-2\"><div class=\"flex-1\"><h4 class=\"font-semibold text-gray-800 line-clamp-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 214, Col: 68}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</h4><p class=\"text-sm text-gray-600 truncate\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(item.Category)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 215, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</p></div><div class=\"flex overflow-hidden\"><div class=\"flex border border-gray-200 rounded-lg items-stretch justify-start\"><button class=\"px-2 py-0.5 rounded-l-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors font-bold\" hx-patch=\"/carrito/items\" hx-vals=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 222, Col: 81}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" hx-target=\"#cart-sidebar\" hx-indicator=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var21 string
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 224, Col: 82}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = MinusIcon("w-4", nil).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</button> <input type=\"text\" class=\"block px-2 py-0.5 text-center w-12\" hx-patch=\"/carrito/items\" hx-vals=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "set"}`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 232, Col: 76}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"#cart-sidebar\" hx-indicator=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var23 string
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 234, Col: 82}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" max=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(item.MaxQty)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 235, Col: 23}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" min=\"1\" id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("quantity-%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 237, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" name=\"quantity\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Quantity))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 239, Col: 46}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\"> <button class=\"px-2 py-0.5 rounded-r-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors font-bold\" hx-patch=\"/carrito/items\" hx-vals=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 244, Col: 81}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" hx-target=\"#cart-sidebar\" hx-indicator=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var28 string
+		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 246, Col: 82}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = PlusIcon("w-4", nil).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</button></div><button class=\"text-red-500 hover:text-red-700 transition-colors p-1\" hx-delete=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var29 string
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/carrito/items/%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 253, Col: 65}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" hx-target=\"#cart-sidebar\" hx-confirm=\"¿Remover este elemento?\" hx-indicator=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var30 string
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cart.templ`, Line: 256, Col: 81}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" title=\"Remover elemento\"><svg class=\"w-4 h-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -320,12 +621,12 @@ func EmptyCart() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var31 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var31 == nil {
+			templ_7745c5c3_Var31 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"flex flex-col items-center justify-center h-full text-center py-12\"><div class=\"text-gray-300 mb-6\"><svg class=\"w-20 h-20 mx-auto\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z\"></path></svg></div><h3 class=\"text-xl font-semibold text-gray-500 mb-2\">No has seleccionado nada aún</h3><p class=\"text-gray-400 mb-6\">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p><div class=\"space-y-3\"><button class=\"block px-6 py-2 text-light bg-primary rounded-sm hover:text-primary/80 transition-colors font-medium\" data-cart-close data-click-handler-selector=\"browse-trigger,cart-close\" data-browse-catalog>Ver Catálogo</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div class=\"flex flex-col items-center justify-center h-full text-center py-12\"><div class=\"text-gray-300 mb-6\"><svg class=\"w-20 h-20 mx-auto\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z\"></path></svg></div><h3 class=\"text-xl font-semibold text-gray-500 mb-2\">No has seleccionado nada aún</h3><p class=\"text-gray-400 mb-6\">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p><div class=\"space-y-2\"><button class=\"block px-6 py-2 text-light bg-primary/90 rounded-sm cursor-pointer hover:bg-primary hover:scale-102 active:scale-95 transition-[background,_transform] font-medium\" data-cart-close data-click-handler-selector=\"browse-trigger,cart-close\" data-browse-catalog>Ver Catálogo</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -349,12 +650,12 @@ func CartScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var16 == nil {
-			templ_7745c5c3_Var16 = templ.NopComponent
+		templ_7745c5c3_Var32 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var32 == nil {
+			templ_7745c5c3_Var32 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<script>\n        document.addEventListener('DOMContentLoaded', function() {\n            class CartManager {\n                constructor() {\n                    this.isOpen = false;\n                    this.registerEvents();\n                    this.updateCartCount();\n                }\n\n                registerEvents() {\n                    // Register with global event manager\n                    window.eventManager\n                        .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))\n                        .registerClick('cart-toggle', (e) => this.toggleCart(e))\n                        .registerClick('cart-close', (e) => this.closeCart())\n                        .registerClick('cart-backdrop', (e) => this.closeCart())\n                        .registerClick('browse-catalog', (e) => this.closeCart());\n                }\n\n                toggleCart() {\n                    if (this.isOpen) {\n                        this.closeCart();\n                    } else {\n                        this.openCart();\n                    }\n                }\n\n                onCartUpdate(event) {\n                    this.updateCartCount();\n                    this.animateCartUpdate();\n                    \n                    if (event.detail.xhr.status !== 200) {\n                        return;\n                    }\n                    // Check if this was triggered by add to cart\n                    if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {\n                        this.showCartNotification();\n                    }\n                }\n\n                openCart() {\n                    const sidebar = document.getElementById('cart-sidebar');\n                    const backdrop = document.getElementById('cart-backdrop');\n                    \n                    this.isOpen = true;\n\n                    backdrop.classList.remove('pointer-events-none');\n                    gsap.to(backdrop, { opacity: 1, duration: 0.3 });\n                    gsap.to(sidebar, { \n                        x: 0, \n                        duration: 0.4, \n                        ease: \"power2.out\" \n                    });\n\n                    // Prevent body scroll\n                    document.body.style.overflow = 'hidden';\n                }\n\n                closeCart() {\n                    const sidebar = document.getElementById('cart-sidebar');\n                    const backdrop = document.getElementById('cart-backdrop');\n                    \n                    this.isOpen = false;\n                    \n                    // Hide backdrop\n                    gsap.to(backdrop, { \n                        opacity: 0, \n                        duration: 0.3,\n                        onComplete: () => {\n                            backdrop.classList.add('pointer-events-none');\n                        }\n                    });\n                    \n                    // Slide out sidebar\n                    gsap.to(sidebar, { \n                        x: '100%', \n                        duration: 0.4, \n                        ease: \"power2.in\" \n                    });\n\n                    // Restore body scroll\n                    document.body.style.overflow = '';\n                }\n\n                updateCartCount() {\n                    const cartItems = document.querySelectorAll('[data-cart-item]');\n                    const countBadge = document.querySelector('[data-cart-count]');\n                    const count = cartItems.length;\n\n                    countBadge.textContent = count;\n\n                    if (count > 0) {\n                        gsap.fromTo(countBadge, \n                            { scale: 1.5 },\n                            { scale: 1, duration: 0.3, ease: \"back.out(1.7)\" }\n                        );\n                        countBadge.classList.remove('opacity-0', 'scale-0');\n                        countBadge.classList.add('opacity-100', 'scale-100');\n                    } else {\n                        countBadge.classList.add('opacity-0', 'scale-0');\n                        countBadge.classList.remove('opacity-100', 'scale-100');\n                    }\n                }\n\n                animateCartUpdate() {\n                    const cartItems = document.querySelectorAll('[data-cart-item]');\n                    \n                    gsap.fromTo(cartItems, \n                        { opacity: 0, x: 20 },\n                        { \n                            opacity: 1, \n                            x: 0, \n                            duration: 0.3, \n                            stagger: 0.05,\n                            ease: \"power2.out\" \n                        }\n                    );\n                }\n\n                showCartNotification() {\n                    // Create temporary notification\n                    const notification = document.createElement('div');\n                    notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';\n                    notification.textContent = 'Elementos añadidos al carrito';\n                    document.body.appendChild(notification);\n\n                    // Animate in and out\n                    gsap.timeline()\n                        .to(notification, { opacity: 1, y: 0, duration: 0.3 })\n                        .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })\n                        .call(() => notification.remove());\n                }\n\n                // Public method to add items programmatically\n                addToCart(productId, source = 'catalog') {\n                    fetch('/cart/add', {\n                        method: 'POST',\n                        headers: {\n                            'Content-Type': 'application/json',\n                        },\n                        body: JSON.stringify({\n                            product_id: productId,\n                            source: source\n                        })\n                    })\n                    .then(response => response.text())\n                    .then(html => {\n                        document.getElementById('cart-sidebar').innerHTML = html;\n                        this.updateCartCount();\n                        this.showCartNotification();\n                    });\n                }\n            }\n            window.cartManager = new CartManager();\n        });\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<script>\n        document.addEventListener('DOMContentLoaded', function() {\n            class CartManager {\n                constructor() {\n                    this.isOpen = false;\n                    this.registerEvents();\n                    this.updateCartCount();\n                }\n\n                registerEvents() {\n                    // Register with global event manager\n                    window.eventManager\n                        .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))\n                        .registerClick('cart-toggle', (e) => this.toggleCart(e))\n                        .registerClick('cart-close', (e) => this.closeCart())\n                        .registerClick('cart-backdrop', (e) => this.closeCart())\n                        .registerClick('browse-catalog', (e) => this.closeCart());\n                }\n\n                toggleCart() {\n                    if (this.isOpen) {\n                        this.closeCart();\n                    } else {\n                        this.openCart();\n                    }\n                }\n\n                onCartUpdate(event) {\n                    this.updateCartCount();\n                    this.animateCartUpdate();\n                    \n                    if (event.detail.xhr.status !== 200) {\n                        return;\n                    }\n                    // Check if this was triggered by add to cart\n                    if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {\n                        this.showCartNotification();\n                    }\n                }\n\n                openCart() {\n                    const sidebar = document.getElementById('cart-sidebar');\n                    const backdrop = document.getElementById('cart-backdrop');\n                    \n                    this.isOpen = true;\n\n                    backdrop.classList.remove('pointer-events-none');\n                    gsap.to(backdrop, { opacity: 1, duration: 0.3 });\n                    gsap.to(sidebar, { \n                        x: 0, \n                        duration: 0.4, \n                        ease: \"power2.out\" \n                    });\n\n                    // Prevent body scroll\n                    document.body.style.overflow = 'hidden';\n                }\n\n                closeCart() {\n                    const sidebar = document.getElementById('cart-sidebar');\n                    const backdrop = document.getElementById('cart-backdrop');\n                    \n                    this.isOpen = false;\n                    \n                    // Hide backdrop\n                    gsap.to(backdrop, { \n                        opacity: 0, \n                        duration: 0.3,\n                        onComplete: () => {\n                            backdrop.classList.add('pointer-events-none');\n                        }\n                    });\n                    \n                    // Slide out sidebar\n                    gsap.to(sidebar, { \n                        x: '100%', \n                        duration: 0.4, \n                        ease: \"power2.in\" \n                    });\n\n                    // Restore body scroll\n                    document.body.style.overflow = '';\n                }\n\n                updateCartCount() {\n                    const cartItems = document.querySelectorAll('[data-cart-item]');\n                    const countBadge = document.querySelector('[data-cart-count]');\n                    const count = cartItems.length;\n\n                    countBadge.textContent = count;\n\n                    if (count > 0) {\n                        gsap.fromTo(countBadge, \n                            { scale: 1.5 },\n                            { scale: 1, duration: 0.3, ease: \"back.out(1.7)\" }\n                        );\n                        countBadge.classList.remove('opacity-0', 'scale-0');\n                        countBadge.classList.add('opacity-100', 'scale-100');\n                    } else {\n                        countBadge.classList.add('opacity-0', 'scale-0');\n                        countBadge.classList.remove('opacity-100', 'scale-100');\n                    }\n                }\n\n                animateCartUpdate() {\n                    const cartItems = document.querySelectorAll('[data-cart-item]');\n                    \n                    gsap.fromTo(cartItems, \n                        { opacity: 0, x: 20 },\n                        { \n                            opacity: 1, \n                            x: 0, \n                            duration: 0.3, \n                            stagger: 0.05,\n                            ease: \"power2.out\" \n                        }\n                    );\n                }\n\n                showCartNotification() {\n                    // Create temporary notification\n                    const notification = document.createElement('div');\n                    notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';\n                    notification.textContent = 'Elementos añadidos al carrito';\n                    document.body.appendChild(notification);\n\n                    // Animate in and out\n                    gsap.timeline()\n                        .to(notification, { opacity: 1, y: 0, duration: 0.3 })\n                        .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })\n                        .call(() => notification.remove());\n                }\n\n                // Public method to add items programmatically\n                addToCart(productId, source = 'catalog') {\n                    fetch('/cart/add', {\n                        method: 'POST',\n                        headers: {\n                            'Content-Type': 'application/json',\n                        },\n                        body: JSON.stringify({\n                            product_id: productId,\n                            source: source\n                        })\n                    })\n                    .then(response => response.text())\n                    .then(html => {\n                        document.getElementById('cart-sidebar').innerHTML = html;\n                        this.updateCartCount();\n                        this.showCartNotification();\n                    });\n                }\n            }\n            window.cartManager = new CartManager();\n        });\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

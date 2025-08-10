@@ -35,10 +35,11 @@ templ BaseLayout(title string, contents templ.Component, isMainPage bool) {
 			}
 		</head>
 		<body>
-			<div class="grid grid-rows-page grid-cols-1 min-h-screen w-full overflow-x-hidden overflow-y-auto">
+			<div class="grid grid-rows-page grid-cols-1 min-h-screen w-full overflow-x-hidden overflow-y-auto" hx-ext="response-targets">
 				@components.Header(isMainPage)
 				{ children... }
 				@components.Footer()
+				@components.Toaster()
 			</div>
 		</body>
 	</html>
