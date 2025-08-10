@@ -433,42 +433,6 @@ class EventManager {
         return this;
     }
 
-    // Helper method to register product grid animations without interference
-    registerProductGridAnimations() {
-        // Only animate when the grid itself is being updated, not child elements
-        this.register(
-            "afterSwap",
-            "products-grid",
-            (event, context) => {
-                // Only animate if this is a direct grid update (filters, pagination)
-                if (
-                    context.isDirect ||
-                    !context.triggerElement?.matches("[data-add-to-cart]")
-                ) {
-                    this.animateProductCards();
-                }
-            },
-            {
-                preventBubble: true, // Don't trigger on child events
-                excludeSelectors: ["[data-add-to-cart]", "[data-quick-view]"], // Exclude specific actions
-            },
-        );
-    }
-
-    animateProductCards() {
-        // Your animation logic here
-        const cards = document.querySelectorAll(".product-card");
-        cards.forEach((card, index) => {
-            card.style.opacity = "0";
-            card.style.transform = "translateY(20px)";
-            setTimeout(() => {
-                card.style.transition = "all 0.3s ease";
-                card.style.opacity = "1";
-                card.style.transform = "translateY(0)";
-            }, index * 50);
-        });
-    }
-
     // Utility method to debug event flow
     debug(enabled = true) {
         if (enabled) {
