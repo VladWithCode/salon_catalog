@@ -42,6 +42,10 @@ func GetConn() (*pgxpool.Conn, error) {
 	return dbPool.Acquire(context.Background())
 }
 
+func GetConnWithContext(ctx context.Context) (*pgxpool.Conn, error) {
+	return dbPool.Acquire(ctx)
+}
+
 type PaginationData struct {
 	CurrentPage  int   `json:"current_page"`
 	TotalPages   int   `json:"total_pages"`

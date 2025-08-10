@@ -76,26 +76,14 @@ func RenderIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderCatalog(w http.ResponseWriter, r *http.Request) {
-	cartID := uuid.Must(uuid.NewV7())
-
 	search := r.URL.Query().Get("buscar")
 	category := r.URL.Query().Get("categoria")
-
-	_, err := r.Cookie("cart_id")
-	if err != nil {
-		http.SetCookie(w, &http.Cookie{
-			Name:    "cart_id",
-			Value:   cartID.String(),
-			Expires: time.Now().Add(time.Hour * 24 * 30),
-			Path:    "/",
-		})
-	}
 
 	state := &pages.CatalogState{
 		Search:         search,
 		ActiveCategory: category,
 	}
-	err = pages.Catalog(state).Render(r.Context(), w)
+	err := pages.Catalog(state).Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte("Algo salió mal"))
@@ -245,9 +233,20 @@ func render404Page(w http.ResponseWriter, r *http.Request) {
 
 func publicMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Gives templ's ctx access to the request path and query params
 		req := r.WithContext(context.WithValue(r.Context(), "urlPath", r.URL.Path))
 		req = r.WithContext(context.WithValue(r.Context(), "urlQueryParams", r.URL.Query()))
 
+		// Ensure there's a cart id for the catalog to use
+		_, err := r.Cookie("cart_id")
+		if err != nil {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "cart_id",
+				Value:   uuid.Must(uuid.NewV7()).String(),
+				Expires: time.Now().Add(time.Hour * 24 * 30),
+				Path:    "/",
+			})
+		}
 		next(w, req)
 	})
 }
