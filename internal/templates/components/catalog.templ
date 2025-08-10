@@ -177,19 +177,23 @@ templ ProductCard(product *db.CatalogProd) {
 				</div>
 			</div>
 			<!-- Category Badge -->
-			<div class="absolute top-3 left-3">
-				<span class="px-2 py-1 bg-white/90 text-xs font-medium text-gray-700 rounded-full">
+			<div class="absolute top-3 left-3 text-center flex flex-col gap-3">
+				<span class="px-3 py-1 bg-light/90 text-xs font-medium text-primary rounded-full">
 					{ product.CategoryName }
 				</span>
-			</div>
-			<!-- Availability Badge -->
-			if !product.Available {
-				<div class="absolute top-3 right-3">
-					<span class="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
+				<span class="px-3 py-1 bg-light/90 text-xs font-medium text-primary rounded-full">
+					{ product.Quantity } pcs
+				</span>
+				if !product.Available {
+					<span class="px-2 py-1 bg-neutral text-white text-xs font-medium rounded-full">
 						No disponible
 					</span>
-				</div>
-			}
+				} else {
+					<span class="px-2 py-1 bg-accent text-white text-xs font-medium rounded-full">
+						Disponible
+					</span>
+				}
+			</div>
 		</div>
 		<!-- Product Info -->
 		<div class="flex-1 flex flex-col p-4">
@@ -217,13 +221,15 @@ templ ProductCard(product *db.CatalogProd) {
 						class="absolute inset-0 flex items-center justify-center bg-red-500 rounded-lg text-white text-xl opacity-0 z-10"
 						data-add-item-error
 					>
-						✗  Error al añadir al carrito
+						@TimesIcon("w-10 mx-auto", nil)
+						<span>Error al añadir al carrito</span>
 					</div>
 					<div
 						class="absolute inset-0 flex items-center justify-center bg-green-500 rounded-lg text-white text-xl opacity-0 z-10"
 						data-add-item-success
 					>
-						✓  Añadido al carrito
+						@CheckIcon("w-10 mx-auto", nil)
+						<span>Añadido al carrito</span>
 					</div>
 					<div
 						class="flex items-center col-start-1 row-start-1 place-self-center overflow-hidden z-0"
@@ -317,6 +323,10 @@ templ ProductModal(state *ProductModalState) {
 									@TimesIcon("h-5", nil)
 									<span>No Disponible</span>
 								}
+							</p>
+							<p class="flex items-center gap-1 text-current80 sm:text-lg">
+								@BoxIcon("h-5", nil)
+								<span>{ product.Quantity } pcs</span>
 							</p>
 						</div>
 						<div class="translate-y-6 opacity-0 sm:text-lg" data-modal-animate-enter>

@@ -52,9 +52,9 @@ templ Catalog(state *CatalogState) {
 		<!-- Hero Section -->
 		<section class="relative overflow-hidden">
 			<div class="absolute inset-0">
-				<img src="/static/assets/chenacolo-st-1.jpg" alt="Catálogo de equipos" class="w-full h-full object-cover"/>
+				<img src="/static/assets/chenacolo-st-1.jpg" alt="Catálogo de equipos" class="w-full h-full object-cover brightness-80"/>
 			</div>
-			<div class="bg-gradient-to-br from-primary/70 to-accent/70 relative pt-32 pb-20 z-10">
+			<div class="bg-primary/60 relative pt-32 pb-20 z-10">
 				<h1 class="text-4xl leading-tight font-bold text-white px-4 uppercase">
 					Catálogo 
 					<span class="whitespace-nowrap">Villa Chenacolo</span>
@@ -183,12 +183,6 @@ templ CatalogScript() {
     document.addEventListener('DOMContentLoaded', function () {
         gsap.registerPlugin(ScrollTrigger);
         let currentAnimations = [];
-        window.eventManager
-            .register('beforeSwap', 'products-grid', handleProductsBeforeSwap)
-            .register('afterRequest', 'add-to-cart', handleCartAfterRequest)
-            .registerClick('browse-trigger', handleBrowseTrigger)
-            .registerClick('category-filter', handleCategoryFilterClick)
-            .registerClick('catalog-pagination', () => window.scrollTo(0, 0));
 
         function handleCategoryFilterClick(e) {
             window.scrollTo(0, 0);
@@ -252,28 +246,6 @@ templ CatalogScript() {
             currentAnimations.push(anim);
         }
 
-        function handleCategoryFilterChange(e) {
-            // Remove active state from all filters
-        }
-
-        function handleCartBeforeRequest(e) {
-            if (e.detail.elt.matches('[data-add-to-cart]')) {
-                startAddItemLoad(e.detail.elt);
-            } else if (e.detail.elt.closest('[data-add-to-cart]')) {
-                startAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'));
-            }
-        }
-
-        function handleCartAfterRequest(e) {
-            let success = e.detail.xhr.status === 200;
-
-            if (e.detail.elt.matches('[data-add-to-cart]')) {
-                stopAddItemLoad(e.detail.elt, success);
-            } else if (e.detail.elt.closest('[data-add-to-cart]')) {
-                stopAddItemLoad(e.detail.elt.closest('[data-add-to-cart]'), success);
-            }
-        }
-
         function showWizardModal() {
             const modal = document.getElementById('wizard-modal');
             modal.classList.remove('hidden');
@@ -296,45 +268,6 @@ templ CatalogScript() {
                     modal.innerHTML = '';
                 }
             });
-        }
-
-        function startAddItemLoad(button) {
-            gsap.to('[data-add-item-label]', {
-                height: '0%',
-                duration: 0.3,
-                ease: 'power2.out',
-            });
-            gsap.to('[data-add-item-spinner]', {
-                height: '',
-                duration: 0.3,
-                ease: 'power2.out',
-            }, "-=0.15");
-        }
-
-        function stopAddItemLoad(button, success) {
-            const feedback = success
-                ? button.querySelector('[data-add-item-success]')
-                : button.querySelector('[data-add-item-error]');
-
-            // Animate button
-            gsap.to(feedback, {
-                opacity: 1,
-                duration: 0.3,
-                ease: 'power2.out',
-            });
-            setTimeout(() => {
-                gsap.set('[data-add-item-label]', {
-                    height: '',
-                });
-                gsap.set('[data-add-item-spinner]', {
-                    height: '0%',
-                });
-                gsap.to(feedback, {
-                    opacity: 0,
-                    duration: 0.3,
-                    ease: 'power2.out',
-                });
-            }, 1500);
         }
 
         const scrollTopBtn = document.getElementById('scroll-top-btn');
@@ -424,7 +357,12 @@ templ CatalogScript() {
             }
         }
 
-        eventManager
+        window.eventManager
+            .register('beforeSwap', 'products-grid', handleProductsBeforeSwap, {preventExternal: true})
+            .registerClick('browse-trigger', handleBrowseTrigger)
+            .registerClick('category-filter', handleCategoryFilterClick)
+            .registerClick('catalog-pagination', () => window.scrollTo(0, 0))
+            // Product modal events
             .register('beforeRequest', '#product-modal', function(e) {
                 const modalWrapper = document.getElementById('product-modal-wrapper');
                 modalWrapper.dataset.productModalOpen = 'true';
