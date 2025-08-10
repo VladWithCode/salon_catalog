@@ -14,7 +14,7 @@ CREATE TABLE cart_items (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT cart_items_pkey PRIMARY KEY (cart_items.cart_id, cart_items.product_id)
+    CONSTRAINT cart_items_pkey PRIMARY KEY (cart_id, product_id)
 );
 
 CREATE TRIGGER cart_items_set_updated_at BEFORE UPDATE ON cart_items
