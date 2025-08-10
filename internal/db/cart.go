@@ -157,8 +157,7 @@ func (c *Cart) UpdateItemQty(itemID string, quantity int) {
 
 	for i, item := range c.Items {
 		if itemID == item.ProductID {
-			item.Quantity = min(quantity, item.MaxQty)
-			c.Items[i].Quantity = quantity
+			c.Items[i].Quantity = min(quantity, item.MaxQty)
 			break
 		}
 	}
