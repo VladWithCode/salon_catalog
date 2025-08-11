@@ -56,7 +56,7 @@ func Input(props InputProps) templ.Component {
 		if props.Label != "" {
 			var templ_7745c5c3_Var2 = []any{"block text-sm font-medium transition-colors duration-200",
 				templ.KV("text-red-700", props.Error != ""),
-				templ.KV("text-gray-700", props.Error == "")}
+			}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -94,7 +94,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 33, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 34, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -150,7 +150,7 @@ func Input(props InputProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 49, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 50, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -163,7 +163,7 @@ func Input(props InputProps) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 50, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 51, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -176,7 +176,7 @@ func Input(props InputProps) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getID(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 51, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 52, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -189,7 +189,7 @@ func Input(props InputProps) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 52, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 53, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +202,7 @@ func Input(props InputProps) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 53, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 54, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -232,7 +232,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 57, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 58, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -251,7 +251,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 60, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 61, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -270,7 +270,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 63, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 64, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -289,7 +289,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 66, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 67, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -325,7 +325,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 86, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 87, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -348,7 +348,7 @@ func Input(props InputProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.HelpText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 92, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/form_input.templ`, Line: 93, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {

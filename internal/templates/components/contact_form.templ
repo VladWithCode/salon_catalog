@@ -1,0 +1,78 @@
+package components
+
+type ContactFormState struct {
+	NameValue    string
+	NameError    string
+	PhoneValue   string
+	PhoneError   string
+	ServerError  string
+	IsSuccessful bool
+}
+
+templ ContactForm(formState *ContactFormState) {
+	<form
+		id="contact-form"
+		hx-post="/solicitar-contacto"
+		hx-swap="outerHTML"
+		hx-target="#contact-form"
+		hx-target-error="#contact-form"
+		hx-indicator="#contact-form-loading"
+		class="relative z-0 bg-light/20 backdrop-blur-[2px] text-light rounded-t-lg lg:rounded-lg w-full max-w-md lg:max-w-lg lg:flex lg:flex-col px-4 sm:px-6 py-8 pb-12 lg:pb-8 space-y-4"
+	>
+		<div
+			id="contact-form-loading"
+			class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-light h-full rounded-lg htmx-indicator"
+		>
+			@LoadingIcon("h-12 text-primary mx-auto", nil)
+			<p class="mt-2 text-gray-500">Enviando solicitud...</p>
+		</div>
+		<h3 class="text-xl sm:text-2xl font-extrabold uppercase">Queremos ayudarte a crear algo inolvidable</h3>
+		<p class="text-sm sm:text-base text-current/80">
+			Uno de nuestros asesores te dará seguimiento directo.
+		</p>
+		<div class="space-y-4 sm:space-y-6 text-light">
+			@Input(InputProps{
+				Name:        "name",
+				Type:        "text",
+				Value:       formState.NameValue,
+				Label:       "Nombre completo",
+				Required:    true,
+				Icon:        IconUser,
+				Error:       formState.NameError,
+				Placeholder: "Tu nombre completo",
+			})
+			@Input(InputProps{
+				Name:        "phone",
+				Type:        "tel",
+				Value:       formState.PhoneValue,
+				Label:       "Teléfono",
+				Required:    true,
+				Icon:        IconPhone,
+				Error:       formState.PhoneError,
+				Placeholder: "Tu número de teléfono",
+			})
+		</div>
+		if formState.IsSuccessful {
+			<div class="my-auto py-4 flex items-center gap-4 pl-3 border-l-4 border-green-200 bg-green-50 rounded-lg">
+				<div class="rounded-full bg-green-700 p-0.5">
+					@CheckIcon("w-8 text-light", nil)
+				</div>
+				<p class="text-green-500 font-medium">¡Se ha enviado tu solicitud!</p>
+			</div>
+		}
+		if formState.ServerError != "" {
+			<div class="my-auto py-4 flex items-center gap-4 pl-3 border-l-4 border-red-200 bg-red-50 rounded-lg">
+				<div class="rounded-full bg-red-700 p-0.5">
+					@TimesIcon("w-8 text-light", nil)
+				</div>
+				<p class="text-red-700 font-bold">{ formState.ServerError }</p>
+			</div>
+		}
+		<div class="mt-6 sm:mt-8 lg:mt-auto">
+			<button
+				type="submit"
+				class="w-full bg-accent text-base sm:text-lg text-light font-bold py-3 sm:py-4 px-4 rounded-lg hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95"
+			>Solicitar Contacto</button>
+		</div>
+	</form>
+}

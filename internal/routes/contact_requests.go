@@ -1,16 +1,14 @@
 package routes
 
 import (
-	"context"
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
@@ -36,18 +34,17 @@ func RegisterContactRequestsRoutes(router *customServeMux) {
 	// Public quote request form routes
 	router.HandleFunc("GET /solicitar-cotizacion", RenderQuoteRequest)
 	router.HandleFunc("POST /solicitar-cotizacion", HandleQuoteRequestSubmission)
+	router.HandleFunc("POST /solicitar-contacto", HandleContactFormSubmission)
 
 	// Cart management endpoints for quote form
-	router.HandleFunc("GET /cotizacion/carrito", GetQuoteCart)
-	router.HandleFunc("PUT /cotizacion/carrito/{id}", UpdateQuoteCartItem)
-	router.HandleFunc("DELETE /cotizacion/carrito/{id}", RemoveFromQuoteCart)
+	router.HandleFunc("PUT /cotizacion/carrito/items/{id}", UpdateQuoteCartItem)
+	router.HandleFunc("DELETE /cotizacion/carrito/items/{id}", RemoveFromQuoteCart)
 }
 
 func RenderContactRequestsPage(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	err := dashboardPages.ContactRequests().Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
 		log.Printf("failed to render ContactRequests page err: %v\n", err)
 	}
 }
@@ -124,19 +121,13 @@ func RenderContactRequest(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 	component := dashboardComponents.ContactRequestModal(quote, "")
 	err = component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Something went wrong"))
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
 		log.Printf("failed to render ContactRequestModal err: %v\n", err)
 	}
 }
 
 func RenderEditContactRequestForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Quote ID is required"))
-		return
-	}
 
 	quote, err := db.FindQuoteByID(id)
 	if err != nil {
@@ -164,12 +155,6 @@ func RenderEditContactRequestForm(w http.ResponseWriter, r *http.Request, a *aut
 
 func UpdateContactRequestAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Quote ID is required"))
-		return
-	}
-
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -224,12 +209,6 @@ func UpdateContactRequestAndReturnTable(w http.ResponseWriter, r *http.Request, 
 
 func DeleteContactRequestAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Quote ID is required"))
-		return
-	}
-
 	err := db.DeleteQuote(id)
 	if err != nil {
 		log.Printf("failed to delete quote: %v\n", err)
@@ -350,12 +329,22 @@ func RenderQuoteRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Solicitud enviada con éxito. Serás redirigido en breve.", components.ToastSuccess, 3000, true, false)
+	formState := &pages.QuoteRequestFormState{}
 	err := r.ParseForm()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		renderQuoteRequestError(w, &pages.QuoteRequestFormState{
-			ServerError: "Error inesperado al procesar el formulario",
-		})
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "Error al actualizar el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "quoteRequestForm")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
@@ -378,14 +367,12 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate form data
-	formState := &pages.QuoteRequestFormState{
-		NameValue:      name,
-		PhoneValue:     phone,
-		EventDateValue: eventDate,
-		EventTypeValue: eventType,
-		Cart:           cart.Items,
-		EventKinds:     eventKinds,
-	}
+	formState.NameValue = name
+	formState.PhoneValue = phone
+	formState.EventDateValue = eventDate
+	formState.EventTypeValue = eventType
+	formState.Cart = cart.Items
+	formState.EventKinds = eventKinds
 
 	hasErrors := false
 
@@ -406,22 +393,29 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 		hasErrors = true
 	}
 
-	if eventDate == "" {
-		formState.EventDateError = "La fecha del evento es requerida"
-		hasErrors = true
-	}
-	eventTime, err := time.Parse("2006-01-02T15:04", eventDate)
-	if err != nil {
-		formState.EventDateError = "La fecha del evento no es válida"
-		hasErrors = true
-	} else if eventTime.Before(time.Now()) {
-		formState.EventDateError = "La fecha del evento debe ser en el futuro"
-		hasErrors = true
+	var eventTime time.Time
+	if eventDate != "" {
+		eventTime, err = time.Parse("2006-01-02T15:04", eventDate)
+		if err != nil {
+			formState.EventDateError = "La fecha del evento no es válida"
+			hasErrors = true
+		} else if eventTime.Before(time.Now()) {
+			formState.EventDateError = "La fecha del evento debe ser en el futuro"
+			hasErrors = true
+		}
 	}
 
 	if hasErrors {
 		w.WriteHeader(http.StatusBadRequest)
-		renderQuoteRequestError(w, formState)
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al enviar la solicitud"
+		formState.ServerError = "Ocurrió un error al procesar el formulario"
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "quoteRequestForm")
+		log.Println("form validation failed")
 		return
 	}
 
@@ -447,169 +441,258 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 	// Save quote to database
 	err = db.CreateQuote(quote)
 	if err != nil {
-		log.Printf("failed to create quote: %v\n", err)
-		formState.ServerError = "Error al guardar la cotización. Por favor, inténtalo de nuevo."
-		w.WriteHeader(http.StatusInternalServerError)
-		renderQuoteRequestError(w, formState)
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al guardar la solicitud"
+		formState.ServerError = "Ocurrió un error al guardar la solicitud"
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "quoteRequestForm")
 		return
 	}
 
-	// Success response with toast
-	w.Header().Set("X-Includes-Toast", "true")
-	w.WriteHeader(http.StatusOK)
-
-	// Render success form with toast
-	successToast := components.NewToastData(
-		"¡Cotización enviada exitosamente! Nos pondremos en contacto contigo pronto.",
-		components.ToastSuccess,
-		5000,
-		true,
-		false,
+	formState.IsSuccessful = true
+	combined := templ.Join(
+		components.ToasterToast(toastData),
+		pages.QuoteRequest(formState),
 	)
-
-	// Render both the form and the toast
-	err = components.ToasterToast(successToast).Render(r.Context(), w)
+	err = templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "quoteRequestForm")
 	if err != nil {
-		log.Printf("failed to render success toast: %v\n", err)
-	}
-
-	// Render success form state
-	successForm := &pages.QuoteRequestFormState{}
-	err = pages.QuoteRequest(successForm).Render(r.Context(), w)
-	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
 		log.Printf("failed to render success form: %v\n", err)
 	}
 }
 
-func renderQuoteRequestError(w http.ResponseWriter, formState *pages.QuoteRequestFormState) {
-	err := pages.QuoteRequest(formState).Render(context.Background(), w)
+func HandleContactFormSubmission(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Solicitud enviada con éxito", components.ToastSuccess, 3000, true, false)
+	formState := &components.ContactFormState{}
+	err := r.ParseForm()
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte("Error inesperado"))
-		log.Printf("failed to render QuoteRequest error form: %v\n", err)
-	}
-}
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
 
-// GetQuoteCart returns the cart items for the quote form
-func GetQuoteCart(w http.ResponseWriter, r *http.Request) {
-	cartID, err := db.GetCartIDFromRequest(r)
-	if err != nil {
-		cartID = ""
-	}
-
-	cart, err := db.GetOrCreateCart(r.Context(), cartID)
-	if err != nil {
-		log.Printf("failed to get cart: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error al cargar el carrito"))
+		templ.Join(
+			components.ToasterToast(toastData),
+			components.ContactForm(formState),
+		).Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
-	// Render cart items
-	cartItemsHTML := ""
-	for _, item := range cart.Items {
-		// This would need to be implemented as a separate template component
-		// For now, return a simple response
-		cartItemsHTML += fmt.Sprintf(`
-			<div class="cart-item" data-product-id="%s">
-				<span>%s - Cantidad: %d</span>
-			</div>
-		`, item.ProductID, item.Name, item.Quantity)
+	// Extract form values
+	name := strings.TrimSpace(r.FormValue("name"))
+	phone := strings.TrimSpace(r.FormValue("phone"))
+	hasErrors := false
+	formState.NameValue = name
+	formState.PhoneValue = phone
+
+	// Validate
+	if name == "" {
+		formState.NameError = "El nombre es requerido"
+		hasErrors = true
+	} else if len(name) < 2 {
+		formState.NameError = "El nombre debe tener al menos 2 caracteres"
+		hasErrors = true
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(cartItemsHTML))
+	if phone == "" {
+		formState.PhoneError = "El teléfono es requerido"
+		hasErrors = true
+	} else if len(phone) < 10 {
+		formState.PhoneError = "El teléfono debe tener al menos 10 dígitos"
+		hasErrors = true
+	}
+
+	if hasErrors {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al enviar la solicitud"
+		formState.ServerError = "El formulario contiene información inválida"
+		templ.Join(
+			components.ToasterToast(toastData),
+			components.ContactForm(formState),
+		).Render(r.Context(), w)
+		log.Printf("form validation failed: %v\n", formState)
+		return
+	}
+
+	// Create quote object
+	quote := &db.Quote{
+		CustomerName:  name,
+		CustomerPhone: phone,
+		RequestType:   db.QuoteRequestTypeContact,
+		Status:        db.QuoteStatusPending,
+	}
+
+	// Save quote to database
+	err = db.CreateQuote(quote)
+	if err != nil {
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al guardar la solicitud"
+		formState.ServerError = "Ocurrió un error al guardar la solicitud"
+		templ.Join(
+			components.ToasterToast(toastData),
+			components.ContactForm(formState),
+		).Render(r.Context(), w)
+		return
+	}
+
+	formState.IsSuccessful = true
+	err = templ.Join(
+		components.ToasterToast(toastData),
+		components.ContactForm(formState),
+	).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render success form: %v\n", err)
+	}
 }
 
 // UpdateQuoteCartItem updates the quantity of a cart item
 func UpdateQuoteCartItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se actualizó el carrito", components.ToastSuccess, 3000, true, false)
+	formState := &pages.QuoteRequestFormState{ShouldOobSwapItems: true}
+
 	itemID := r.PathValue("id")
-	if itemID == "" {
+	cartID, err := db.GetCartIDFromRequest(r)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Item ID is required"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "Error al actualizar el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to get cart id: %v\n", err)
 		return
 	}
 
-	err := r.ParseForm()
+	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid form data"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "Error al actualizar el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
 	quantityStr := r.FormValue("quantity")
-	if quantityStr == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Quantity is required"))
-		return
-	}
-
-	quantity, err := strconv.Atoi(quantityStr)
-	if err != nil || quantity < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid quantity"))
-		return
-	}
-
-	// Get cart and update item
-	cartID, err := db.GetCartIDFromRequest(r)
+	qty, err := strconv.Atoi(quantityStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Cart not found"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.CartError = "La cantidad no es válida"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
 	cart, err := db.GetOrCreateCart(r.Context(), cartID)
 	if err != nil {
-		log.Printf("failed to get cart: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error al actualizar el carrito"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "No se encontró el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
-	// Update item quantity
-	for _, item := range cart.Items {
-		if item.ProductID == itemID {
-			item.Quantity = quantity
-			break
-		}
-	}
-
-	cart.SetField("items", cart.Items)
+	cart.UpdateItemQty(itemID, qty)
 	err = cart.Save(r.Context())
 	if err != nil {
-		log.Printf("failed to save cart: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error al guardar el carrito"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "No se encontró el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
-	// Return updated cart items (redirect to GetQuoteCart)
-	GetQuoteCart(w, r)
+	formState.Cart = cart.Items
+	combined := templ.Join(
+		components.ToasterToast(toastData),
+		pages.QuoteRequest(formState),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render cartItems: %v\n", err)
+	}
 }
 
 // RemoveFromQuoteCart removes an item from the cart
 func RemoveFromQuoteCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se eliminó el producto del carrito", components.ToastSuccess, 3000, true, false)
+	formState := &pages.QuoteRequestFormState{ShouldOobSwapItems: true}
 	itemID := r.PathValue("id")
-	if itemID == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Item ID is required"))
-		return
-	}
 
 	// Get cart
 	cartID, err := db.GetCartIDFromRequest(r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Cart not found"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "No se encontró el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
 	cart, err := db.GetOrCreateCart(r.Context(), cartID)
 	if err != nil {
-		log.Printf("failed to get cart: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error al cargar el carrito"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "No se encontró el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
@@ -617,56 +700,28 @@ func RemoveFromQuoteCart(w http.ResponseWriter, r *http.Request) {
 	cart.RemoveItem(itemID)
 	err = cart.Save(r.Context())
 	if err != nil {
-		log.Printf("failed to save cart: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error al guardar el carrito"))
+		toastData.Type = components.ToastError
+		toastData.Message = "Error al actualizar el carrito"
+		formState.ServerError = "Ocurrió un error inesperado"
+		formState.CartError = "No se encontró el carrito"
+
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+			pages.QuoteRequest(formState),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
-	// Return updated cart items
-	GetQuoteCart(w, r)
-}
-
-func isValidEmail(email string) bool {
-	// Simple email validation
-	return strings.Contains(email, "@") && strings.Contains(email, ".") && len(email) > 5
-}
-
-func buildQuoteComments(email, eventType, comments, cartData string) string {
-	var parts []string
-
-	parts = append(parts, "Email: "+email)
-	parts = append(parts, "Tipo de evento: "+eventType)
-
-	if comments != "" {
-		parts = append(parts, "Comentarios: "+comments)
+	formState.Cart = cart.Items
+	combined := templ.Join(
+		components.ToasterToast(toastData),
+		pages.QuoteRequest(formState),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "toaster-toast", "cartItems")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render cartItems: %v\n", err)
 	}
-
-	// Parse and include cart data if available
-	if cartData != "" {
-		var cart map[string]interface{}
-		if err := json.Unmarshal([]byte(cartData), &cart); err == nil {
-			if items, ok := cart["items"].([]interface{}); ok && len(items) > 0 {
-				parts = append(parts, "Productos seleccionados:")
-				for _, item := range items {
-					if itemMap, ok := item.(map[string]interface{}); ok {
-						name, _ := itemMap["name"].(string)
-						quantity, _ := itemMap["quantity"].(float64)
-						if name != "" {
-							parts = append(parts, "- "+name+" (Cantidad: "+formatQuantity(quantity)+")")
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return strings.Join(parts, "\n")
-}
-
-func formatQuantity(quantity float64) string {
-	if quantity == float64(int(quantity)) {
-		return fmt.Sprintf("%.0f", quantity)
-	}
-	return fmt.Sprintf("%.1f", quantity)
 }

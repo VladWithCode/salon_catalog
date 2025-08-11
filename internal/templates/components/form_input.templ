@@ -26,9 +26,10 @@ templ Input(props InputProps) {
 		if props.Label != "" {
 			<label
 				for={ getID(props) }
-				class={ "block text-sm font-medium transition-colors duration-200",
-                    templ.KV("text-red-700", props.Error != ""),
-                    templ.KV("text-gray-700", props.Error == "") }
+				class={
+					"block text-sm font-medium transition-colors duration-200",
+					templ.KV("text-red-700", props.Error != ""),
+				}
 			>
 				{ props.Label }
 				if props.Required {
