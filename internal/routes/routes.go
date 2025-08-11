@@ -24,6 +24,7 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /reservaciones", publicMiddleware(RenderReservations))
 	router.HandleFunc("GET /experiencia", publicMiddleware(RenderSalon))
 	router.HandleFunc("GET /iniciar-sesion", publicMiddleware(auth.PopulateAuth(RenderSignIn)))
+	router.HandleFunc("GET /cerrar-sesion", publicMiddleware(auth.PopulateAuth(SignOut)))
 
 	RegisterDashboardRoutes(router)
 	RegisterImagesRoutes(router)
@@ -223,6 +224,19 @@ func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	})
 
 	internal.HandleRedirect("/panel", http.StatusFound, w, r)
+}
+
+func SignOut(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Expires:  time.Now().Add(time.Hour * -24),
+		Path:     "/",
+		HttpOnly: true,
+		// Secure:   true,
+	})
+
+	internal.HandleRedirect("/", http.StatusFound, w, r)
 }
 
 func render404Page(w http.ResponseWriter, r *http.Request) {

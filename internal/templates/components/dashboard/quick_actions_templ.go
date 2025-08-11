@@ -55,15 +55,7 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a> <a href=\"/panel/reportes\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.GraphIcon("w-5 h-5 text-purple-600", nil).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div><p class=\"font-medium text-gray-900\">Ver reportes</p><p class=\"text-sm text-gray-600\">Panel de analíticas</p></div></a></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
