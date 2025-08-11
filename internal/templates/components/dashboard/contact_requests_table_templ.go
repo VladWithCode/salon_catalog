@@ -219,11 +219,11 @@ func ContactRequestTableRow(quote *db.Quote) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if quote.EventKindName != "" {
+		if quote.EventKindName.String != "" {
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(quote.EventKindName)
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(quote.EventKindName.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 100, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 100, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -396,7 +396,7 @@ func ContactRequestTableRow(quote *db.Quote) templ.Component {
 	})
 }
 
-func StatusBadge(status string) templ.Component {
+func StatusBadge(status db.QuoteStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -417,7 +417,7 @@ func StatusBadge(status string) templ.Component {
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		switch status {
+		switch string(status) {
 		case "pendiente":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800\">Pendiente</span>")
 			if templ_7745c5c3_Err != nil {
@@ -834,11 +834,11 @@ func ContactRequestDetails(quote *db.Quote) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if quote.EventKindName != "" {
+		if quote.EventKindName.String != "" {
 			var templ_7745c5c3_Var39 string
-			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(quote.EventKindName)
+			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(quote.EventKindName.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 322, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 322, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -914,15 +914,15 @@ func ContactRequestDetails(quote *db.Quote) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if quote.Comments != "" {
+		if quote.Comments.String != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<div class=\"space-y-2\"><label class=\"block text-sm font-medium text-gray-700\">Comentarios</label><div class=\"px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm whitespace-pre-wrap\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var43 string
-			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(quote.Comments)
+			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(quote.Comments.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 358, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 358, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
@@ -1154,7 +1154,7 @@ func ContactRequestEditForm(quote *db.Quote, eventKinds []*db.EventKind) templ.C
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if quote.EventKindID != nil && *quote.EventKindID == eventKind.ID {
+			if !quote.EventKindID.Valid && quote.EventKindID.String == eventKind.ID {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1272,9 +1272,9 @@ func ContactRequestEditForm(quote *db.Quote, eventKinds []*db.EventKind) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var58 string
-		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(quote.Comments)
+		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(quote.Comments.String)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 536, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 536, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {

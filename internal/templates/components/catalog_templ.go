@@ -236,9 +236,9 @@ func ProductGrid(result *db.CatalogProductFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 78, Col: 126}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 78, Col: 128}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -310,9 +310,9 @@ func ProductGrid(result *db.CatalogProductFilterResult) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var18 string
-				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=", i, util.ExtractURLQuery(ctx).Get("categoria")))
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", i, util.ExtractURLQuery(ctx).Get("categoria")))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 97, Col: 116}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 97, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -364,9 +364,9 @@ func ProductGrid(result *db.CatalogProductFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")))
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 111, Col: 126}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/catalog.templ`, Line: 111, Col: 128}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {

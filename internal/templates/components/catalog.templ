@@ -75,7 +75,7 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 				<button
 					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
 					disabled?={ !result.HasPrevious }
-					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")) }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
 					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", result.Page-1, util.ExtractURLQuery(ctx).Get("categoria")) }
@@ -94,7 +94,7 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 								templ.KV("bg-primary hover:bg-primary/90", isCurrent),
 								templ.KV("bg-transparent hover:bg-primary/90", !isCurrent),
 							}
-							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", i, util.ExtractURLQuery(ctx).Get("categoria")) }
+							hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", i, util.ExtractURLQuery(ctx).Get("categoria")) }
 							hx-target="#products-grid-content"
 							hx-indicator="[data-products-spinner]"
 							hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", i, util.ExtractURLQuery(ctx).Get("categoria")) }
@@ -108,7 +108,7 @@ templ ProductGrid(result *db.CatalogProductFilterResult) {
 				<button
 					class="p-2 bg-accent text-light rounded-lg disabled:opacity-80 disabled:brightness-90"
 					disabled?={ !result.HasNext }
-					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")) }
+					hx-get={ fmt.Sprintf("/catalog/products?pagina=%d&categoria=%s", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")) }
 					hx-target="#products-grid-content"
 					hx-indicator="[data-products-spinner]"
 					hx-push-url={ fmt.Sprintf("/catalogo?pagina=%d&categoria=%s", result.Page+1, util.ExtractURLQuery(ctx).Get("categoria")) }

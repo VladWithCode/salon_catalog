@@ -18,20 +18,39 @@ type EventKindDetails struct {
 	Description string `json:"description"`
 }
 
+type QuoteRequestType string
+
+const (
+	QuoteRequestTypeReservation QuoteRequestType = "reservación"
+	QuoteRequestTypeBudget      QuoteRequestType = "cotización"
+	QuoteRequestTypeContact     QuoteRequestType = "contacto"
+)
+
+type QuoteStatus string
+
+const (
+	QuoteStatusPending   QuoteStatus = "pendiente"
+	QuoteStatusProcessed QuoteStatus = "procesada"
+	QuoteStatusProgress  QuoteStatus = "en_progreso"
+	QuoteStatusCancelled QuoteStatus = "cancelada"
+)
+
 type Quote struct {
-	ID            string     `json:"id"`
-	CustomerName  string     `json:"customer_name"`
-	CustomerPhone string     `json:"customer_phone"`
-	TimeStart     *time.Time `json:"time_start"`
-	TimeEnd       *time.Time `json:"time_end"`
-	RequestType   string     `json:"request_type"`
-	Status        string     `json:"status"`
-	Comments      string     `json:"comments"`
-	CartID        *string    `json:"cart_id"`
-	EventKindID   *string    `json:"event_kind_id"`
-	EventKindName string     `json:"event_kind_name"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	ID            string           `json:"id"`
+	CustomerName  string           `json:"customer_name"`
+	CustomerPhone string           `json:"customer_phone"`
+	CustomerEmail string           `json:"customer_email"`
+	TimeStart     *time.Time       `json:"time_start"`
+	TimeEnd       *time.Time       `json:"time_end"`
+	RequestType   QuoteRequestType `json:"request_type"`
+	Status        QuoteStatus      `json:"status"`
+	Comments      sql.NullString   `json:"comments"`
+	CartID        sql.NullString   `json:"cart_id"`
+	Cart          *Cart            `json:"cart"`
+	EventKindID   sql.NullString   `json:"event_kind_id"`
+	EventKindName sql.NullString   `json:"event_kind_name"`
+	CreatedAt     time.Time        `json:"created_at"`
+	UpdatedAt     time.Time        `json:"updated_at"`
 }
 
 type QuoteFilterParams struct {
@@ -61,23 +80,6 @@ type QuoteFilterResult struct {
 	Error       string   `json:"error"`
 }
 
-type QuoteRequestType string
-
-const (
-	QuoteRequestTypeReservation QuoteRequestType = "reservación"
-	QuoteRequestTypeBudget      QuoteRequestType = "cotización"
-	QuoteRequestTypeContact     QuoteRequestType = "contacto"
-)
-
-type QuoteStatus string
-
-const (
-	QuoteStatusPending   QuoteStatus = "pendiente"
-	QuoteStatusProcessed QuoteStatus = "procesada"
-	QuoteStatusProgress  QuoteStatus = "en_progreso"
-	QuoteStatusCancelled QuoteStatus = "cancelada"
-)
-
 func CreateQuote(quote *Quote) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -100,16 +102,6 @@ func CreateQuote(quote *Quote) error {
 		timeEnd = sql.NullTime{Time: *quote.TimeEnd, Valid: true}
 	}
 
-	var cartID, eventKindID sql.NullString
-	if quote.CartID != nil {
-		cartID = sql.NullString{String: *quote.CartID, Valid: true}
-	}
-	if quote.EventKindID != nil {
-		eventKindID = sql.NullString{String: *quote.EventKindID, Valid: true}
-	}
-
-	comments := sql.NullString{String: quote.Comments, Valid: quote.Comments != ""}
-
 	_, err = conn.Exec(
 		ctx,
 		`INSERT INTO quotes (
@@ -121,10 +113,10 @@ func CreateQuote(quote *Quote) error {
 		timeStart,
 		timeEnd,
 		quote.Status,
-		comments,
-		cartID,
+		quote.Comments,
+		quote.CartID,
 		quote.RequestType,
-		eventKindID,
+		quote.EventKindID,
 	)
 	if err != nil {
 		return err
@@ -144,8 +136,6 @@ func FindQuoteByID(id string) (*Quote, error) {
 
 	var quote Quote
 	var timeStart, timeEnd sql.NullTime
-	var comments sql.NullString
-	var cartID, eventKindID, eventKindName sql.NullString
 
 	err = conn.QueryRow(
 		ctx,
@@ -164,11 +154,11 @@ func FindQuoteByID(id string) (*Quote, error) {
 		&timeStart,
 		&timeEnd,
 		&quote.Status,
-		&comments,
-		&cartID,
+		&quote.Comments,
+		&quote.CartID,
 		&quote.RequestType,
-		&eventKindID,
-		&eventKindName,
+		&quote.EventKindID,
+		&quote.EventKindName,
 		&quote.CreatedAt,
 		&quote.UpdatedAt,
 	)
@@ -182,18 +172,6 @@ func FindQuoteByID(id string) (*Quote, error) {
 	}
 	if timeEnd.Valid {
 		quote.TimeEnd = &timeEnd.Time
-	}
-	if comments.Valid {
-		quote.Comments = comments.String
-	}
-	if cartID.Valid {
-		quote.CartID = &cartID.String
-	}
-	if eventKindID.Valid {
-		quote.EventKindID = &eventKindID.String
-	}
-	if eventKindName.Valid {
-		quote.EventKindName = eventKindName.String
 	}
 
 	return &quote, nil
@@ -248,32 +226,24 @@ func UpdateQuote(quote *Quote) error {
 		timeEnd = sql.NullTime{Time: *quote.TimeEnd, Valid: true}
 	}
 
-	var cartID, eventKindID sql.NullString
-	if quote.CartID != nil {
-		cartID = sql.NullString{String: *quote.CartID, Valid: true}
+	args := pgx.NamedArgs{
+		"time_start":    timeStart,
+		"time_end":      timeEnd,
+		"cart_id":       quote.CartID,
+		"request_type":  quote.RequestType,
+		"event_kind_id": quote.EventKindID,
+		"status":        quote.Status,
+		"comments":      quote.Comments,
+		"id":            quote.ID,
 	}
-	if quote.EventKindID != nil {
-		eventKindID = sql.NullString{String: *quote.EventKindID, Valid: true}
-	}
-
-	comments := sql.NullString{String: quote.Comments, Valid: quote.Comments != ""}
-
 	_, err = conn.Exec(
 		ctx,
 		`UPDATE quotes SET
-			customer_name = $1, customer_phone = $2, time_start = $3, time_end = $4, 
-			cart_id = $5, request_type = $6, event_kind_id = $7, status = $8, comments = $9
-		WHERE id = $10`,
-		quote.CustomerName,
-		quote.CustomerPhone,
-		timeStart,
-		timeEnd,
-		cartID,
-		quote.RequestType,
-		eventKindID,
-		quote.Status,
-		comments,
-		quote.ID,
+			time_start = @time_start, time_end = @time_end, cart_id = @cart_id, 
+			request_type = @request_type, event_kind_id = @event_kind_id, status = @status, 
+			comments = @comments
+		WHERE id = @id`,
+		args,
 	)
 	if err != nil {
 		return err
@@ -524,10 +494,6 @@ func scanQuotes(rows pgx.Rows) ([]*Quote, error) {
 		var quote Quote
 		var timeStart sql.NullTime
 		var timeEnd sql.NullTime
-		var comments sql.NullString
-		var cartID sql.NullString
-		var eventKindID sql.NullString
-		var eventKindName sql.NullString
 
 		err := rows.Scan(
 			&quote.ID,
@@ -537,10 +503,10 @@ func scanQuotes(rows pgx.Rows) ([]*Quote, error) {
 			&timeEnd,
 			&quote.RequestType,
 			&quote.Status,
-			&comments,
-			&cartID,
-			&eventKindID,
-			&eventKindName,
+			&quote.Comments,
+			&quote.CartID,
+			&quote.EventKindID,
+			&quote.EventKindName,
 			&quote.CreatedAt,
 			&quote.UpdatedAt,
 		)
@@ -554,18 +520,6 @@ func scanQuotes(rows pgx.Rows) ([]*Quote, error) {
 		}
 		if timeEnd.Valid {
 			quote.TimeEnd = &timeEnd.Time
-		}
-		if comments.Valid {
-			quote.Comments = comments.String
-		}
-		if cartID.Valid {
-			quote.CartID = &cartID.String
-		}
-		if eventKindID.Valid {
-			quote.EventKindID = &eventKindID.String
-		}
-		if eventKindName.Valid {
-			quote.EventKindName = eventKindName.String
 		}
 
 		quotes = append(quotes, &quote)

@@ -96,8 +96,8 @@ templ ContactRequestTableRow(quote *db.Quote) {
 		</td>
 		<td class="px-4 py-4">
 			<div class="text-sm text-gray-900">
-				if quote.EventKindName != "" {
-					{ quote.EventKindName }
+				if quote.EventKindName.String != "" {
+					{ quote.EventKindName.String }
 				} else {
 					<span class="text-gray-400 italic">Sin especificar</span>
 				}
@@ -161,8 +161,8 @@ templ ContactRequestTableRow(quote *db.Quote) {
 	</tr>
 }
 
-templ StatusBadge(status string) {
-	switch status {
+templ StatusBadge(status db.QuoteStatus) {
+	switch string(status) {
 		case "pendiente":
 			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
 				Pendiente
@@ -195,7 +195,7 @@ templ ContactRequestsPagination(result *db.QuoteFilterResult) {
 			}
 			hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", result.Page-1) }
 			hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
-            hx-indicator="#contact-requests-table-loading"
+			hx-indicator="#contact-requests-table-loading"
 			hx-target="#contact-requests-table"
 		>
 			@components.ChevronIcon("w-6 rotate-90", nil)
@@ -208,7 +208,7 @@ templ ContactRequestsPagination(result *db.QuoteFilterResult) {
 					hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", i) }
 					hx-target="#contact-requests-table"
 					hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
-                    hx-indicator="#contact-requests-table-loading"
+					hx-indicator="#contact-requests-table-loading"
 					disabled?={ i==result.Page }
 				>
 					{ fmt.Sprintf("%d", i) }
@@ -223,7 +223,7 @@ templ ContactRequestsPagination(result *db.QuoteFilterResult) {
 			hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", result.Page+1) }
 			hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
 			hx-target="#contact-requests-table"
-            hx-indicator="#contact-requests-table-loading"
+			hx-indicator="#contact-requests-table-loading"
 		>
 			@components.ChevronIcon("w-6 -rotate-90", nil)
 		</button>
@@ -318,8 +318,8 @@ templ ContactRequestDetails(quote *db.Quote) {
 			<div class="space-y-2">
 				<label class="block text-sm font-medium text-gray-700">Tipo de Evento</label>
 				<div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm">
-					if quote.EventKindName != "" {
-						{ quote.EventKindName }
+					if quote.EventKindName.String != "" {
+						{ quote.EventKindName.String }
 					} else {
 						<span class="text-gray-400 italic">Sin especificar</span>
 					}
@@ -351,11 +351,11 @@ templ ContactRequestDetails(quote *db.Quote) {
 				</div>
 			</div>
 		</div>
-		if quote.Comments != "" {
+		if quote.Comments.String != "" {
 			<div class="space-y-2">
 				<label class="block text-sm font-medium text-gray-700">Comentarios</label>
 				<div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm whitespace-pre-wrap">
-					{ quote.Comments }
+					{ quote.Comments.String }
 				</div>
 			</div>
 		}
@@ -460,9 +460,9 @@ templ ContactRequestEditForm(quote *db.Quote, eventKinds []*db.EventKind) {
 				>
 					<option value="">Seleccionar tipo de evento</option>
 					for _, eventKind := range eventKinds {
-						<option 
-							value={ eventKind.ID } 
-							selected?={ quote.EventKindID != nil && *quote.EventKindID == eventKind.ID }
+						<option
+							value={ eventKind.ID }
+							selected?={ !quote.EventKindID.Valid && quote.EventKindID.String == eventKind.ID }
 						>
 							{ eventKind.Name }
 						</option>
@@ -533,7 +533,7 @@ templ ContactRequestEditForm(quote *db.Quote, eventKinds []*db.EventKind) {
 				rows="4"
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
 				placeholder="Comentarios adicionales..."
-			>{ quote.Comments }</textarea>
+			>{ quote.Comments.String }</textarea>
 		</div>
 		<div class="flex gap-2 pt-4">
 			<button

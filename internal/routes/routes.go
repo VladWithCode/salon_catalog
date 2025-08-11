@@ -36,7 +36,6 @@ func NewRouter() http.Handler {
 	RegisterCatalogRoutes(router)
 	RegisterCartRoutes(router)
 	RegisterUserRoutes(router)
-	RegisterQuoteRequestsRoutes(router)
 
 	// Api
 	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))

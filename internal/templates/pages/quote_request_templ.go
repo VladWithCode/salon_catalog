@@ -10,21 +10,31 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/vladwithcode/salon_catalog/internal/templates"
 import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+import "github.com/vladwithcode/salon_catalog/internal/db"
+import "fmt"
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 type QuoteRequestFormState struct {
 	NameValue      string
 	NameError      string
 	PhoneValue     string
 	PhoneError     string
-	EmailValue     string
-	EmailError     string
 	EventDateValue string
 	EventDateError string
 	EventTypeValue string
 	EventTypeError string
-	CommentsValue  string
-	CommentsError  string
 	ServerError    string
+
+	// New fields for database integration
+	Cart       []*db.CartItem
+	EventKinds []*db.EventKind
+	CartError  string
 }
 
 func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
@@ -64,17 +74,17 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-0 z-0 px-4 py-8\"><div class=\"w-full max-w-2xl\"><form id=\"quote-request-form\" hx-post=\"/api/solicitar-cotizacion\" hx-select=\"#quote-request-form\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 w-full rounded-xs shadow-sm shadow-stone-800/30 px-6 py-8 space-y-6\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-x-0 bottom-0 top-16 md:top-1/2 md:-translate-y-1/2 lg:h-fit z-0\"><div class=\"h-full w-full max-w-sm md:max-w-2xl\"><form id=\"quote-request-form\" hx-post=\"/solicitar-cotizacion\" hx-select=\"#quote-request-form\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 w-full rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 md:px-6 md:py-8 space-y-6 md:space-y-8\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if formState.NameError != "" || formState.PhoneError != "" || formState.EmailError != "" || formState.EventDateError != "" || formState.EventTypeError != "" || formState.CommentsError != "" {
+			if formState.NameError != "" || formState.PhoneError != "" || formState.EventDateError != "" || formState.EventTypeError != "" || formState.CartError != "" {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " data-invalid=\"true\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "><div class=\"text-center mb-8\"><h1 class=\"text-3xl font-bold tracking-wide text-primary mb-2\">Solicitar Cotización</h1><p class=\"text-gray-600\">Completa el formulario y nos pondremos en contacto contigo</p></div><!-- Hidden field for cart data --><input type=\"hidden\" name=\"cart_data\" id=\"cart-data-input\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-6\"><div class=\"space-y-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "><!-- Header Section --><div class=\"text-center space-y-2\"><h1 class=\"text-2xl md:text-3xl font-bold tracking-wide text-primary\">Solicitar Cotización</h1><p class=\"text-sm md:text-base text-gray-600\">Completa el formulario y nos pondremos en contacto contigo</p></div><!-- Form Fields: Mobile stacked, Desktop 2-column --><div class=\"space-y-4 md:grid md:grid-cols-2 md:grid-rows-2 md:gap-4 md:space-y-0\"><!-- Customer Info --><div class=\"space-y-4 md:grid md:grid-rows-subgrid md:row-span-2 md:space-y-0\"><div class=\"md:row-start-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -91,6 +101,10 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"md:row-start-2\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			templ_7745c5c3_Err = components.Input(components.InputProps{
 				Name:        "phone",
 				Type:        "tel",
@@ -104,20 +118,7 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Input(components.InputProps{
-				Name:        "email",
-				Type:        "email",
-				Value:       formState.EmailValue,
-				Label:       "Correo electrónico",
-				Required:    true,
-				Icon:        components.IconEmail,
-				Error:       formState.EmailError,
-				Placeholder: "tu@email.com",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"space-y-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Event Info --><div class=\"space-y-4 md:grid md:grid-rows-subgrid md:row-span-2 md:space-y-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -126,14 +127,15 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 				Type:     "datetime-local",
 				Value:    formState.EventDateValue,
 				Label:    "Fecha y hora del evento",
-				Required: true,
+				Required: false,
 				Error:    formState.EventDateError,
 				HelpText: "Fecha aproximada de tu evento",
+				Class:    "md:row-start-1",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"form-group space-y-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Event Type Selection --><div class=\"space-y-1 md:row-start-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -142,7 +144,7 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<label for=\"event_type\" class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<label for=\"event_type\" class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -155,16 +157,19 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">Tipo de evento <span class=\"text-red-500 ml-1\">*</span></label> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\">Tipo de evento <span class=\"text-gray-500 text-xs ml-1\">(opcional)</span></label> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 = []any{"block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition-all duration-200", templ.KV("input-error", formState.EventTypeError != ""), templ.KV("input-base", formState.EventTypeError == "")}
+			var templ_7745c5c3_Var5 = []any{"block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition-all duration-200",
+				templ.KV("input-error", formState.EventTypeError != ""),
+				templ.KV("input-base", formState.EventTypeError == ""),
+			}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<select name=\"event_type\" id=\"event_type\" required class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<select name=\"event_type\" id=\"event_type\" class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -177,221 +182,180 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><option value=\"\">Selecciona el tipo de evento</option> <option value=\"boda\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><option value=\"\">Sin Asignar</option> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if formState.EventTypeValue == "boda" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">Boda</option> <option value=\"quinceanos\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "quinceanos" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">XV Años</option> <option value=\"bautizo\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "bautizo" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ">Bautizo</option> <option value=\"cumpleanos\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "cumpleanos" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ">Cumpleaños</option> <option value=\"graduacion\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "graduacion" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, ">Graduación</option> <option value=\"aniversario\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "aniversario" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">Aniversario</option> <option value=\"corporativo\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "corporativo" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">Evento Corporativo</option> <option value=\"otro\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeValue == "otro" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, ">Otro</option></select> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.EventTypeError != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"error-message\"><p class=\"mt-1 text-sm text-red-600 flex items-center\"><svg class=\"h-4 w-4 mr-1 flex-shrink-0\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg> ")
+			for _, eventKind := range formState.EventKinds {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<option value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(formState.EventTypeError)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(eventKind.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 120, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 116, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if formState.EventTypeValue == eventKind.ID {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " selected")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(eventKind.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 121, Col: 28}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</option> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></div></div><div class=\"space-y-4\"><div class=\"form-group space-y-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<option value=\"otro\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 = []any{"block text-sm font-medium transition-colors duration-200", templ.KV("text-red-700", formState.CommentsError != ""), templ.KV("text-gray-700", formState.CommentsError == "")}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<label for=\"comments\" class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var8).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\">Comentarios adicionales</label> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 = []any{"block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 resize-y", templ.KV("input-error", formState.CommentsError != ""), templ.KV("input-base", formState.CommentsError == "")}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<textarea name=\"comments\" id=\"comments\" rows=\"4\" placeholder=\"Cuéntanos más detalles sobre tu evento, número de invitados, preferencias especiales, etc.\" class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var10).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formState.CommentsValue)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 139, Col: 34}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</textarea> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if formState.CommentsError != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div class=\"error-message\"><p class=\"mt-1 text-sm text-red-600 flex items-center\"><svg class=\"h-4 w-4 mr-1 flex-shrink-0\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(formState.CommentsError)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 146, Col: 36}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</p></div>")
+			if formState.EventTypeValue == "otro" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div></div><!-- Cart Summary --><div id=\"cart-summary\" class=\"bg-gray-50 rounded-md p-4 border border-gray-200\"><h3 class=\"text-lg font-semibold text-gray-800 mb-3\">Productos seleccionados</h3><div id=\"cart-items\" class=\"space-y-2\"><p class=\"text-gray-500 text-sm\">Cargando productos del carrito...</p></div></div><!-- Server Error -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, ">Otro</option></select> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if formState.EventTypeError != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<p class=\"mt-1 text-sm text-red-600 flex items-center\"><svg class=\"h-4 w-4 mr-1 flex-shrink-0\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(formState.EventTypeError)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 136, Col: 37}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div></div><!-- Cart Section: Full width on all screens --><div class=\"space-y-4\"><div class=\"bg-gray-50 rounded-md p-4 border border-gray-200\"><div class=\"flex items-center justify-between mb-4\"><h3 class=\"text-lg font-semibold text-gray-800\">Productos seleccionados</h3>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(formState.Cart) > 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<span class=\"text-sm text-gray-600\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d productos", len(formState.Cart)))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 148, Col: 96}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div><div id=\"cart-items\" class=\"space-y-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(formState.Cart) == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"text-center py-8 space-y-3\"><p class=\"text-gray-500\">No hay productos en el carrito</p><a href=\"/catalogo\" class=\"inline-flex items-center px-4 py-2 bg-accent text-white text-sm font-medium rounded-md hover:bg-accent/90 transition-colors\" onclick=\"return confirmNavigation()\">Explorar Catálogo</a></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				for _, item := range formState.Cart {
+					templ_7745c5c3_Err = quoteCartItem(item).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if formState.CartError != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"mt-3 p-3 bg-red-50 border border-red-200 rounded-md\"><p class=\"text-sm text-red-700 flex items-center\"><svg class=\"h-4 w-4 mr-1 flex-shrink-0\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var11 string
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(formState.CartError)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 175, Col: 32}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div><!-- Server Error -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if formState.ServerError != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"bg-red-50 border border-red-200 rounded-md p-4\"><div class=\"flex\"><svg class=\"h-5 w-5 text-red-400 mr-2\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg><p class=\"text-sm text-red-700\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"bg-red-50 border border-red-200 rounded-md p-4\"><div class=\"flex\"><svg class=\"h-5 w-5 text-red-400 mr-2\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg><p class=\"text-sm text-red-700\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(formState.ServerError)
+				var templ_7745c5c3_Var12 string
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formState.ServerError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 168, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 188, Col: 64}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</p></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</p></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<div class=\"flex flex-col sm:flex-row gap-4 pt-4\"><a href=\"/catalogo\" class=\"flex-1 bg-gray-200 text-gray-700 text-lg font-bold py-3 px-6 rounded text-center hover:bg-gray-300 transition-colors\">Volver al Catálogo</a> <button type=\"submit\" class=\"flex-1 bg-accent text-lg text-light font-bold py-3 px-6 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500 relative\"><span class=\"form-loading htmx-indicator absolute inset-0 flex items-center justify-center\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<!-- Actions: Mobile stacked, Desktop side-by-side --><div class=\"flex flex-col space-y-3 md:flex-row md:space-y-0 md:space-x-4 pt-4\"><a href=\"/catalogo\" onclick=\"return confirmNavigation()\" class=\"flex-1 bg-gray-200 text-gray-700 text-base md:text-lg font-bold py-3 px-6 rounded text-center hover:bg-gray-300 transition-colors\">Explorar Catálogo</a> <button type=\"submit\" class=\"flex-1 bg-accent text-base md:text-lg text-light font-bold py-3 px-6 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500 relative\"><span class=\"form-loading htmx-indicator absolute inset-0 flex items-center justify-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.LoadingIcon("w-8 text-light", nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.LoadingIcon("w-6 md:w-8 text-light", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</span> <span class=\"form-submit-text\">Solicitar Cotización</span></button></div></form></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</span> <span class=\"form-submit-text\">Solicitar Cotización</span></button></div></form></div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -402,6 +366,159 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = templates.BaseLayout("Solicitar Cotización | Villa Chenacolo", nil, false).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func quoteCartItem(item *db.CartItem) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div class=\"flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 md:items-center p-3 bg-white rounded-md border border-gray-200\"><div class=\"flex-1 min-w-0\"><h4 class=\"font-medium text-gray-900 truncate\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 222, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</h4>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if item.Category != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<p class=\"text-sm text-gray-600\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(item.Category)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 224, Col: 52}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div><div class=\"flex items-center space-x-3 justify-between md:justify-start\"><!-- Quantity Controls --><div class=\"flex items-center space-x-2\"><button type=\"button\" hx-put=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/cotizacion/carrito/%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 232, Col: 67}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" hx-vals=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"quantity": %d}`, max(1, item.Quantity-1)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 233, Col: 71}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" hx-target=\"#cart-items\" hx-swap=\"innerHTML\" class=\"w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md text-gray-600 hover:text-gray-800 transition-colors\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if item.Quantity <= 1 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, " disabled class=\"w-8 h-8 flex items-center justify-center bg-gray-50 rounded-md text-gray-400 cursor-not-allowed\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 12H4\"></path></svg></button> <span class=\"w-8 text-center font-medium text-gray-900\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Quantity))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 246, Col: 94}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</span> <button type=\"button\" hx-put=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/cotizacion/carrito/%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 249, Col: 67}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" hx-vals=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"quantity": %d}`, item.Quantity+1))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 250, Col: 63}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" hx-target=\"#cart-items\" hx-swap=\"innerHTML\" class=\"w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md text-gray-600 hover:text-gray-800 transition-colors\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 6v6m0 0v6m0-6h6m-6 0H6\"></path></svg></button></div><!-- Remove Button --><button type=\"button\" hx-delete=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var21 string
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/cotizacion/carrito/%s", item.ProductID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/quote_request.templ`, Line: 263, Col: 69}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" hx-target=\"#cart-items\" hx-swap=\"innerHTML\" hx-confirm=\"¿Eliminar este producto del carrito?\" class=\"w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 rounded-md text-red-600 hover:text-red-800 transition-colors\" title=\"Eliminar producto\"><svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -425,12 +542,12 @@ func quoteRequestScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Populate cart data from localStorage\n\t\t\tfunction populateCartData() {\n\t\t\t\tconst cartData = localStorage.getItem('cart');\n\t\t\t\tconst cartInput = document.getElementById('cart-data-input');\n\t\t\t\tconst cartItemsContainer = document.getElementById('cart-items');\n\t\t\t\t\n\t\t\t\tif (cartData && cartInput && cartItemsContainer) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst cart = JSON.parse(cartData);\n\t\t\t\t\t\tcartInput.value = cartData;\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Display cart items\n\t\t\t\t\t\tif (cart && cart.items && cart.items.length > 0) {\n\t\t\t\t\t\t\tlet itemsHtml = '';\n\t\t\t\t\t\t\tlet totalItems = 0;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tcart.items.forEach(item => {\n\t\t\t\t\t\t\t\ttotalItems += item.quantity;\n\t\t\t\t\t\t\t\titemsHtml += `\n\t\t\t\t\t\t\t\t\t<div class=\"flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0\">\n\t\t\t\t\t\t\t\t\t\t<div class=\"flex-1\">\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"font-medium text-gray-800\">${item.name}</p>\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"text-sm text-gray-600\">Cantidad: ${item.quantity}</p>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t`;\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tcartItemsContainer.innerHTML = `\n\t\t\t\t\t\t\t\t<div class=\"mb-3\">\n\t\t\t\t\t\t\t\t\t<p class=\"text-sm font-medium text-gray-700\">Total de productos: ${totalItems}</p>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t${itemsHtml}\n\t\t\t\t\t\t\t`;\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tcartItemsContainer.innerHTML = `\n\t\t\t\t\t\t\t\t<p class=\"text-gray-500 text-sm\">No hay productos en el carrito. \n\t\t\t\t\t\t\t\t\t<a href=\"/catalogo\" class=\"text-accent hover:underline\">Agregar productos</a>\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t`;\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tconsole.error('Error parsing cart data:', e);\n\t\t\t\t\t\tcartItemsContainer.innerHTML = `\n\t\t\t\t\t\t\t<p class=\"text-gray-500 text-sm\">Error al cargar el carrito. \n\t\t\t\t\t\t\t\t<a href=\"/catalogo\" class=\"text-accent hover:underline\">Ir al catálogo</a>\n\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t`;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\t// Initialize cart data\n\t\t\tpopulateCartData();\n\t\t\t\n\t\t\t// Handle form submission animations\n\t\t\tconst form = document.getElementById('quote-request-form');\n\t\t\tif (form) {\n\t\t\t\tform.addEventListener('htmx:beforeRequest', function() {\n\t\t\t\t\tconst submitText = form.querySelector('.form-submit-text');\n\t\t\t\t\tconst loadingIndicator = form.querySelector('.form-loading');\n\t\t\t\t\t\n\t\t\t\t\tif (submitText && loadingIndicator) {\n\t\t\t\t\t\tsubmitText.style.opacity = '0';\n\t\t\t\t\t\tloadingIndicator.style.opacity = '1';\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tform.addEventListener('htmx:afterRequest', function(e) {\n\t\t\t\t\tconst submitText = form.querySelector('.form-submit-text');\n\t\t\t\t\tconst loadingIndicator = form.querySelector('.form-loading');\n\t\t\t\t\t\n\t\t\t\t\tif (submitText && loadingIndicator) {\n\t\t\t\t\t\tsubmitText.style.opacity = '1';\n\t\t\t\t\t\tloadingIndicator.style.opacity = '0';\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\t// If successful, show success message and clear cart\n\t\t\t\t\tif (e.detail.xhr.status === 200) {\n\t\t\t\t\t\t// Clear cart from localStorage\n\t\t\t\t\t\tlocalStorage.removeItem('cart');\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Show success toast (will be handled by server response)\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.href = '/';\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\t\n\t\t\t// Form animations\n\t\t\tgsap.from('.bg-stone-50', {\n\t\t\t\ty: 50,\n\t\t\t\topacity: 0,\n\t\t\t\tduration: 0.6,\n\t\t\t\tease: \"power2.out\"\n\t\t\t});\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<script>\n\t\t// Form data change tracking\n\t\tlet formChanged = false;\n\t\t\n\t\t// Navigation confirmation\n\t\tfunction confirmNavigation() {\n\t\t\tif (formChanged) {\n\t\t\t\treturn confirm('¿Estás seguro de que quieres salir? Se perderán los datos del formulario.');\n\t\t\t}\n\t\t\treturn true;\n\t\t}\n\t\t\n\t\t// Make confirmNavigation globally available\n\t\twindow.confirmNavigation = confirmNavigation;\n\t\t\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tconst form = document.getElementById('quote-request-form');\n\t\t\t\n\t\t\t// Track form changes\n\t\t\tif (form) {\n\t\t\t\tform.addEventListener('input', function() {\n\t\t\t\t\tformChanged = true;\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tform.addEventListener('change', function() {\n\t\t\t\t\tformChanged = true;\n\t\t\t\t});\n\t\t\t}\n\t\t\t\n\t\t\t// Handle form submission animations\n\t\t\tif (form) {\n\t\t\t\tform.addEventListener('htmx:beforeRequest', function() {\n\t\t\t\t\tconst submitText = form.querySelector('.form-submit-text');\n\t\t\t\t\tconst loadingIndicator = form.querySelector('.form-loading');\n\t\t\t\t\t\n\t\t\t\t\tif (submitText && loadingIndicator) {\n\t\t\t\t\t\tsubmitText.style.opacity = '0';\n\t\t\t\t\t\tloadingIndicator.style.opacity = '1';\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tform.addEventListener('htmx:afterRequest', function(e) {\n\t\t\t\t\tconst submitText = form.querySelector('.form-submit-text');\n\t\t\t\t\tconst loadingIndicator = form.querySelector('.form-loading');\n\t\t\t\t\t\n\t\t\t\t\tif (submitText && loadingIndicator) {\n\t\t\t\t\t\tsubmitText.style.opacity = '1';\n\t\t\t\t\t\tloadingIndicator.style.opacity = '0';\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\t// If successful, reset form change tracking\n\t\t\t\t\tif (e.detail.xhr.status === 200) {\n\t\t\t\t\t\tformChanged = false;\n\t\t\t\t\t\t// Redirect will be handled by server response\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.href = '/';\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\t\n\t\t\t// Form animations\n\t\t\tif (typeof gsap !== 'undefined') {\n\t\t\t\tgsap.from('.bg-stone-50', {\n\t\t\t\t\ty: 50,\n\t\t\t\t\topacity: 0,\n\t\t\t\t\tduration: 0.6,\n\t\t\t\t\tease: \"power2.out\"\n\t\t\t\t});\n\t\t\t}\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
