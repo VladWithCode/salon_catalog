@@ -7,9 +7,9 @@ CREATE TABLE quotes (
     time_start TIMESTAMP,
     time_end TIMESTAMP,
     cart_id UUID REFERENCES carts(id) ON DELETE SET NULL,
-    request_type VARCHAR(64) NOT NULL,
-    status VARCHAR(64) NOT NULL DEFAULT 'pendiente',
-    comments VARCHAR(512),
+    request_type VARCHAR(64) NOT NULL, -- contacto, cotización, reservación -- contacto, cotizacion, reservación
+    status VARCHAR(64) NOT NULL DEFAULT 'pendiente', -- pendiente, procesada, en_progreso, cancelada
+    comments TEXT,
     event_kind_id UUID REFERENCES event_kinds(id) ON DELETE RESTRICT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
