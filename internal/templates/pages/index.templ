@@ -115,7 +115,7 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-bodas" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo_11.jpeg"
 					alt="Imagen del recibidor del salon de eventos"
@@ -156,7 +156,7 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-quinceaneras" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo-st-7.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
@@ -192,7 +192,7 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-bautizos" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo-st-9.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
@@ -228,7 +228,7 @@ templ Index(catalogListings components.CatalogListings) {
 			</div>
 		</section>
 		<section id="seccion-corporativos" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo-st-4.png"
 					alt="Imagen de un árbol en el fondo de un jardín"
@@ -263,8 +263,8 @@ templ Index(catalogListings components.CatalogListings) {
 				</div>
 			</div>
 		</section>
-		<section id="seccion-graduaciones" class="relative z-0 px-4 py-16 text-dark space-y-4 -mb-px">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+		<section id="seccion-graduaciones" class="relative z-0 px-4 py-16 text-dark space-y-4 -mb-px" data-view-animate="fadeIn">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo-st-5.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
@@ -299,8 +299,8 @@ templ Index(catalogListings components.CatalogListings) {
 				</div>
 			</div>
 		</section>
-		<section id="seccion-privadas" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px">
-			<div class="flex flex-col md:grid md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+		<section id="seccion-privadas" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px" data-view-animate="fadeIn">
+			<div class="flex flex-col lg:grid lg:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
 				<img
 					src="/static/assets/chenacolo-st-3.jpg"
 					alt="Imagen de un árbol en el fondo de un jardín"
@@ -405,11 +405,11 @@ templ Index(catalogListings components.CatalogListings) {
 				<img src="/static/assets/chenacolo_4.jpeg" alt="" class="w-auto h-full xl:w-full xl:h-auto object-cover object-center z-0 brightness-80" loading="lazy"/>
 			</div>
 			<div class="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 mx-auto bg-primary/80">
-				<h2 class="text-2xl sm:text-3xl lg:text-4xl text-center text-light font-bold mb-4 sm:mb-6 uppercase">Hablemos de tu evento</h2>
-				<p class="text-center text-base sm:text-lg text-secondary/60 mb-8 sm:mb-12">
+				<h2 class="text-2xl sm:text-3xl lg:text-4xl text-center text-light font-bold mb-4 sm:mb-6 uppercase translate-y-6 opacity-0" data-intsc-animate-item="contact-form-section">Hablemos de tu evento</h2>
+				<p class="text-center text-base sm:text-lg text-secondary/60 mb-8 sm:mb-12 translate-y-6 opacity-0" data-intsc-animate-item="contact-form-section">
 					Si deseas conocer la disponibilidad, precios o agendar una visita, dejanos tus datos. Te contactaremos lo antes posible.
 				</p>
-				<div class="relative z-10 flex flex-col lg:flex-row lg:gap-8 items-center lg:items-stretch justify-center">
+				<div class="relative z-10 flex flex-col lg:flex-row lg:gap-8 items-center lg:items-stretch justify-center translate-y-6 opacity-0" data-intsc-animate-item="contact-form-section">
 					@components.ContactForm(&components.ContactFormState{})
 					<div class="relative z-20 lg:flex lg:flex-col w-full max-w-md lg:max-w-lg -mt-4 lg:mt-0 px-4 sm:px-6 py-8 bg-primary text-light rounded-lg">
 						<h3 class="text-xl sm:text-2xl font-extrabold mb-4 uppercase">Encuentranos</h3>
@@ -490,6 +490,22 @@ templ Index(catalogListings components.CatalogListings) {
 				</div>
 			</div>
 		</section>
+		/* <section class="relative z-0 overflow-hidden">
+			<div class="flex flex-col items-center justify-center max-w-2xl lg:max-w-4xl xl:max-w-7xl gap-4 px-4 py-16 mx-auto">
+				.mx-auto
+				<div class="w-full overflow-hidden border-8 border-gray-50 rounded-lg">
+					<iframe
+						src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d116698.28450203186!2d-104.63981746057435!3d23.931377973209226!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869bbd61536ac9bf%3A0xf56b448c3f56e22f!2sVilla%20Chenacolo!5e0!3m2!1sen!2smx!4v1754934210370!5m2!1sen!2smx"
+						width="400"
+						height="600"
+						class="w-full rounded-lg brightness-90"
+						allowfullscreen=""
+						loading="lazy"
+						referrerpolicy="no-referrer-when-downgrade"
+					></iframe>
+				</div>
+			</div>
+		</section> */
 	}
 }
 
@@ -502,38 +518,38 @@ templ Script() {
             tl.to("[data-hero-item]", {
                 y: "0px",
                 opacity: 1,
-                duration: 0.4,
+                duration: 1,
                 stagger: 0.15,
+                ease: "power2.inOut",
+                delay: 0.2,
             });
 
-            const intscObsv = new IntersectionObserver(function (entries, observer) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        tl.to(entry.target, {
-                            y: "0px",
-                            opacity: 1,
-                            duration: 0.4,
-                            stagger: 0.15,
-                        }, ">");
-
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.25
+            ScrollTrigger.batch("[data-intsc-animate-item]", {
+                start: "top 70%",
+                batchMax: 6,
+                once: true,
+                onEnter: batch => {
+                    gsap.to(batch, {
+                        y: "0px",
+                        opacity: 1,
+                        duration: 0.6,
+                        stagger: 0.2,
+                        ease: "power2.inOut",
+                    });
+                },
             });
-
-            let observedElems = document.querySelectorAll("[data-intsc-animate-item]")
-            for (let elem of observedElems) {
-                intscObsv.observe(elem);
-            }
-            document.querySelectorAll("[data-view-animate]").forEach(function (elem) {
-                gsap.to(elem, {
-                    opacity: 1,
-                    duration: 1,
-                    ease: "power2.out",
-                    scrollTrigger: elem,
-                });
+            ScrollTrigger.batch("[data-view-animate]", {
+                start: "top 60%",
+                batchMax: 6,
+                once: true,
+                onEnter: batch => {
+                    gsap.to(batch, {
+                        opacity: 1,
+                        duration: 0.6,
+                        stagger: 0.2,
+                        ease: "power2.inOut",
+                    });
+                },
             });
         });
     </script>

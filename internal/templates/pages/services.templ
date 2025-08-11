@@ -15,17 +15,17 @@ templ Services() {
 						class="w-full h-full object-cover object-center brightness-90"
 					/>
 				</div>
-				<div class="relative text-secondary z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/60">
-					<div class="max-w-5xl mx-auto">
-						<h1 class="text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0" data-view-animate="fadeIn">Un lugar que eleva cualquier celebración.</h1>
-						<p class="tracking-wide text-current/80 translate-y-6 opacity-0" data-view-animate="fadeIn">
+				<div class="relative z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/60">
+					<div class="max-w-2xl lg:max-w-5xl xl:max-w-7xl mx-auto text-light">
+						<h1 class="text-3xl sm:text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0" data-view-animate="fadeIn">Un lugar que eleva cualquier celebración.</h1>
+						<p class="text-sm sm:text-base tracking-wide text-current/80 translate-y-6 opacity-0" data-view-animate="fadeIn">
 							En Villa Chenacolo no organizamos tu evento: te entregamos el escenario perfecto para que lo vivas como lo imaginaste, sin complicaciones. Nuestra renta de salón incluye un espacio de alto nivel, con cada detalle pensado para brindar comodidad, elegancia y funcionalidad. Tú eliges a tus proveedores, nosotros ponemos lo mejor para recibirlos.
 						</p>
 					</div>
 				</div>
 			</section>
 			<section id="seccion-bodas" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_11.jpeg"
 						alt="Imagen del recibidor del salon de eventos"
@@ -66,7 +66,7 @@ templ Services() {
 				</div>
 			</section>
 			<section id="seccion-quinceaneras" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_15.jpeg"
 						alt="Imagen de un árbol en el fondo de un jardín"
@@ -102,7 +102,7 @@ templ Services() {
 				</div>
 			</section>
 			<section id="seccion-bautizos" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_10.jpeg"
 						alt="Imagen de un árbol en el fondo de un jardín"
@@ -138,7 +138,7 @@ templ Services() {
 				</div>
 			</section>
 			<section id="seccion-corporativos" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_8.jpeg"
 						alt="Imagen de un árbol en el fondo de un jardín"
@@ -174,7 +174,7 @@ templ Services() {
 				</div>
 			</section>
 			<section id="seccion-graduaciones" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_13.jpeg"
 						alt="Imagen de un árbol en el fondo de un jardín"
@@ -210,7 +210,7 @@ templ Services() {
 				</div>
 			</section>
 			<section id="seccion-privadas" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px">
-				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 max-w-2xl xl:max-w-7xl mx-auto">
 					<img
 						src="/static/assets/chenacolo_4.jpeg"
 						alt="Imagen de un árbol en el fondo de un jardín"
@@ -254,15 +254,18 @@ templ servicesScript() {
 	<script>
     document.addEventListener("DOMContentLoaded", function() {
         gsap.registerPlugin(ScrollTrigger);
-        document.querySelectorAll("[data-view-animate]").forEach(function (elem) {
-            gsap.to(elem, {
-                opacity: 1,
-                y: "0rem",
-                duration: 1,
-                ease: "power1.out",
-                scrollTrigger: elem,
-                delay: 0.3,
-            });
+        ScrollTrigger.batch("[data-view-animate]", {
+            start: "top 60%",
+            batchMax: 6,
+            once: true,
+            onEnter: batch => {
+                gsap.to(batch, {
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: "power2.inOut",
+                });
+            },
         });
     });
     </script>

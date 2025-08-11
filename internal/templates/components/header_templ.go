@@ -117,12 +117,12 @@ func Header(isMainPage bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " href=\"/reservaciones\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " href=\"/solicitar-cotizacion\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary menu-icon\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg> <span class=\"font-medium\">Solicitar Cotización</span></a></li><li class=\"menu-item\"><a")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group\"><svg class=\"w-5 h-5 mr-3 text-primary menu-icon\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg> <span class=\"font-medium\">Solicitar cotización</span></a></li><li class=\"menu-item\"><a")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

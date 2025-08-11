@@ -193,12 +193,35 @@ templ Header(isMainPage bool) {
 							<span class="font-medium">Galería</span>
 						</a>
 					</li> */
+					/* if !isMainPage {
+						<li class="menu-item">
+							<a
+								href="/reservaciones"
+								class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+							>
+								<svg
+									class="w-5 h-5 mr-3 text-primary menu-icon"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									></path>
+								</svg>
+								<span class="font-medium">Consultar disponibilidad</span>
+							</a>
+						</li>
+					} */
 					<li class="menu-item">
 						<a
 							if isMainPage {
 								href="#seccion-contacto"
 							} else {
-								href="/reservaciones"
+								href="/solicitar-cotizacion"
 							}
 							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
 						>
@@ -215,7 +238,7 @@ templ Header(isMainPage bool) {
 									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 								></path>
 							</svg>
-							<span class="font-medium">Solicitar Cotización</span>
+							<span class="font-medium">Solicitar cotización</span>
 						</a>
 					</li>
 					<li class="menu-item">

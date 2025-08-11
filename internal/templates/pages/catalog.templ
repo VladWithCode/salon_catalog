@@ -54,11 +54,14 @@ templ Catalog(state *CatalogState) {
 			<div class="absolute inset-0">
 				<img src="/static/assets/chenacolo-st-1.jpg" alt="Catálogo de equipos" class="w-full h-full object-cover brightness-80"/>
 			</div>
-			<div class="bg-primary/60 relative pt-32 pb-20 z-10">
-				<h1 class="text-4xl leading-tight font-bold text-white px-4 uppercase">
+			<div class="bg-primary/60 relative text-light pt-32 pb-20 space-y-4 z-10">
+				<h1 class="text-4xl lg:text-6xl leading-tight font-bold max-w-2xl md:max-w-4xl xl:max-w-7xl px-4 mx-auto uppercase opacity-0" data-view-animate="fadeIn">
 					Catálogo 
 					<span class="whitespace-nowrap">Villa Chenacolo</span>
 				</h1>
+				<p class="text-current/80 max-w-2xl md:max-w-4xl xl:max-w-7xl px-4 mx-auto opacity-0" data-view-animate="fadeIn">
+					Explora nuestro catálogo de productos. Cada uno de ellos ha sido elegido buscando el balance perfecto para ser funcional y tener gran estilo.
+				</p>
 			</div>
 		</section>
 		<!-- Wizard vs Browse Choice -->
@@ -141,7 +144,7 @@ templ Catalog(state *CatalogState) {
 				</div>
 			</section>
 			<!-- Products Grid -->
-			<section class="relative grid" id="catalog-products">
+			<section class="relative grid max-w-2xl md:max-w-4xl xl:max-w-7xl mx-auto" id="catalog-products">
 				<div
 					data-products-spinner
 					class="col-start-1 row-start-1 py-32 bg-gray-100 opacity-0 pointer-events-none transition-[opacity] duration-300 [&.htmx-request]:opacity-100 [&.htmx-request]:pointer-events-auto z-10"
@@ -151,7 +154,7 @@ templ Catalog(state *CatalogState) {
 						<p class="text-lg">Cargando productos...</p>
 					</div>
 				</div>
-				<div id="products" class="relative z-0 max-w-6xl py-8 px-4 col-start-1 row-start-1 mx-auto">
+				<div id="products" class="relative z-0 max-w-full py-8 px-4 col-start-1 row-start-1 mx-auto">
 					<div
 						hx-get="/catalog/products"
 						hx-trigger="load"
@@ -183,6 +186,19 @@ templ CatalogScript() {
     document.addEventListener('DOMContentLoaded', function () {
         gsap.registerPlugin(ScrollTrigger);
         let currentAnimations = [];
+        ScrollTrigger.batch("[data-view-animate]", {
+            start: "top 60%",
+            batchMax: 6,
+            once: true,
+            onEnter: batch => {
+                gsap.to(batch, {
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: "power2.inOut",
+                });
+            },
+        });
 
         function handleCategoryFilterClick(e) {
             window.scrollTo(0, 0);
