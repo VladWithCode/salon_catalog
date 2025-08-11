@@ -70,7 +70,7 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-x-0 bottom-0 top-16 md:top-1/2 md:-translate-y-1/2 lg:h-fit z-0\"><div class=\"h-full w-full max-w-sm md:max-w-2xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <main class=\"relative min-h-screen lg:min-h-[80vh] flex flex-col items-center justify-center z-0 bg-brand-1-lg overflow-hidden pt-16 lg:pt-24 pb-8\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"relative z-10 flex items-center justify-center max-w-9/10 lg:h-fit\"><div class=\"h-full w-full max-w-sm md:max-w-2xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -86,7 +86,7 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"quote-request-form\" hx-post=\"/solicitar-cotizacion\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 w-full rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 md:px-6 md:py-8 space-y-6 md:space-y-8\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"quote-request-form\" hx-post=\"/solicitar-cotizacion\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 max-w-full w-min rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 md:px-6 md:py-8 space-y-6 md:space-y-8\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
