@@ -11,7 +11,7 @@ templ Categories() {
 	@templates.AdminLayout("Categorías | Panel Villa Chenacolo", "Administración de Categorías") {
 		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5" hx-ext="response-targets">
 			<div class="px-2">
-				<div class="flex gap-4 pb-2">
+				<div class="flex gap-4 justify-between pb-2">
 					<div class="space-y-0.5">
 						<h1 class="text-3xl tracking-tight">Categorías</h1>
 						<p class="text-xs text-current/50">Agrega, modifica y elimina categorías de tu catálogo.</p>
@@ -24,78 +24,80 @@ templ Categories() {
 						@components.BarsIcon("w-8", nil)
 					</button>
 				</div>
-				<div id="categories-actions-container" class="overflow-hidden h-0" data-categories-actions="closed">
+				<div id="categories-actions-container" class="overflow-hidden h-0 opacity-0 xl:h-auto xl:opacity-100" data-categories-actions="closed">
 					<div class="py-2 border-t border-primary/70">
-						<h4 class="text-lg font-medium text-gray-700 mb-2">Acciones</h4>
-						<ul class="flex flex-col items-center gap-2">
-							<li class="w-full">
-								<button
-									id="categories-actions-new"
-									hx-get="/categorias/nueva"
-									hx-target="#categories-modal"
-									hx-indicator="#global-loading-indicator"
-									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
-								>
-									@components.PlusIcon("w-5", nil)
-									Nueva Categoría
-								</button>
-							</li>
-							<li class="w-full">
-								<button
-									id="categories-multi-selection-delete"
-									data-categories-multi-action="delete"
-									hx-delete="/categorias"
-									hx-target="#categories-table"
-									hx-confirm="¿Eliminar las categorías seleccionadas? ADVERTENCIA: Esto también eliminará todos los productos de estas categorías."
-									hx-indicator="#categories-table-loading"
-									hx-include='[name="category-table-selection"]'
-									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
-									disabled
-								>
-									@components.BinIcon("w-5", nil)
-									Eliminar Selección
-								</button>
-							</li>
-						</ul>
-						<!-- Filters -->
-						<form
-							hx-get="/categorias"
-							hx-trigger="input changed delay:500ms"
-							hx-target="#categories-table"
-							hx-indicator="#categories-table-loading"
-							hx-include='[name="sort"]'
-							class="shrink grow-0 basis-auto pt-2 space-y-1"
-						>
-							<h3 class="font-light text-gray-700/70">Filtrar Categorías</h3>
-							<div class="flex items-center gap-0.5">
-								<div class="h-full flex-1 basis-full space-y-1">
-									<label for="search" class="block text-sm font-medium text-gray-700">Buscar Categorías</label>
-									<input
-										id="search"
-										name="search"
-										class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
-										type="text"
-										placeholder="Buscar por nombre o descripción..."
-									/>
+						<h4 class="text-lg font-medium text-gray-700 mb-2 xl:mb-0">Acciones</h4>
+						<div class="lg:flex items-center gap-4">
+							<ul class="lg:basis-1/3 flex flex-col items-center gap-2">
+								<li class="w-full">
+									<button
+										id="categories-actions-new"
+										hx-get="/categorias/nueva"
+										hx-target="#categories-modal"
+										hx-indicator="#global-loading-indicator"
+										class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+									>
+										@components.PlusIcon("w-5", nil)
+										Nueva Categoría
+									</button>
+								</li>
+								<li class="w-full">
+									<button
+										id="categories-multi-selection-delete"
+										data-categories-multi-action="delete"
+										hx-delete="/categorias"
+										hx-target="#categories-table"
+										hx-confirm="¿Eliminar las categorías seleccionadas? ADVERTENCIA: Esto también eliminará todos los productos de estas categorías."
+										hx-indicator="#categories-table-loading"
+										hx-include='[name="category-table-selection"]'
+										class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+										disabled
+									>
+										@components.BinIcon("w-5", nil)
+										Eliminar Selección
+									</button>
+								</li>
+							</ul>
+							<!-- Filters -->
+							<form
+								hx-get="/categorias"
+								hx-trigger="input changed delay:500ms"
+								hx-target="#categories-table"
+								hx-indicator="#categories-table-loading"
+								hx-include='[name="sort"]'
+								class="shrink grow-0 basis-auto lg:basis-full pt-2 space-y-1"
+							>
+								<h3 class="font-light text-gray-700/70">Filtrar Categorías</h3>
+								<div class="flex items-center gap-0.5">
+									<div class="h-full flex-1 basis-full space-y-1">
+										<label for="search" class="block text-sm font-medium text-gray-700">Buscar Categorías</label>
+										<input
+											id="search"
+											name="search"
+											class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+											type="text"
+											placeholder="Buscar por nombre o descripción..."
+										/>
+									</div>
 								</div>
-							</div>
-							<div class="flex items-center justify-end pt-1">
-								<button
-									type="button"
-									class="text-sm text-gray-700 font-bold tracking-wide"
-									hx-get="/categorias"
-									hx-target="#categories-table"
-									data-click-handler-selector="[data-categories-filter-clear]"
-									data-categories-filter-clear
-								>
-									Limpiar Filtros
-								</button>
-							</div>
-						</form>
+								<div class="flex items-center justify-end pt-1">
+									<button
+										type="button"
+										class="text-sm text-gray-700 font-bold tracking-wide"
+										hx-get="/categorias"
+										hx-target="#categories-table"
+										data-click-handler-selector="[data-categories-filter-clear]"
+										data-categories-filter-clear
+									>
+										Limpiar Filtros
+									</button>
+								</div>
+							</form>
+						</div>
 					</div>
 				</div>
 			</div>
-			<main class="flex-1 overflow-hidden">
+			<main class="relative z-0 flex-1 overflow-hidden">
 				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-categories-table-scroll>
 					<div
 						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
@@ -185,7 +187,7 @@ templ Categories() {
 						</div>
 					</div>
 					<div
-						class="fixed inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
+						class="absolute inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
 						id="categories-table-pagination"
 					></div>
 				</div>
@@ -215,7 +217,7 @@ templ categoriesScript() {
             gsap.registerPlugin(window.ScrollTrigger);
 
             const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
-            toggleActionsTl.fromTo('#categories-actions-container', {opacity: 0, height: '0px'}, {opacity: 1, height: 'auto'});
+            toggleActionsTl.to('#categories-actions-container', {opacity: 1, height: 'auto'});
 
             const modalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power3.out'}});
             modalTl.set('#categories-modal-container', {

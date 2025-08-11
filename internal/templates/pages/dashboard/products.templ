@@ -16,13 +16,13 @@ templ Products() {
 					</div>
 					<button
 						id="products-actions-toggle"
-						class="shrink flex items-center justify-center text-current/80 lg:hidden"
+						class="shrink flex items-center justify-center text-current/80 xl:hidden"
 						data-click-handler-selector="products-actions-toggle"
 					>
 						@components.BarsIcon("w-8", nil)
 					</button>
 				</div>
-				<div id="products-actions-container" class="overflow-hidden opacity-0 h-0 lg:h-auto lg:opacity-100" data-products-actions="closed">
+				<div id="products-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-products-actions="closed">
 					<div class="py-2 border-t border-primary/70">
 						<h4 class="text-lg font-medium text-gray-700 mb-2">Acciones</h4>
 						<div class="lg:flex gap-4">
@@ -106,7 +106,7 @@ templ Products() {
 					</div>
 				</div>
 			</div>
-			<main class="flex-1 overflow-hidden">
+			<main class="relative z-0 flex-1 overflow-hidden">
 				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-products-table-scroll>
 					<div
 						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
@@ -197,7 +197,7 @@ templ Products() {
 						</div>
 					</div>
 					<div
-						class="fixed inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
+						class="absolute inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
 						id="products-table-pagination"
 					></div>
 				</div>
