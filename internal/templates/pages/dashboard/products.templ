@@ -58,7 +58,7 @@ templ Products() {
 							</ul>
 							<!-- Filters -->
 							<form
-								hx-get="/productos"
+								hx-get="/panel/productos/table"
 								hx-trigger="input changed delay:500ms"
 								hx-target="#products-table"
 								hx-indicator="#products-table-loading"
@@ -84,7 +84,6 @@ templ Products() {
 											hx-swap="outerHTML"
 											hx-target="this"
 											hx-trigger="load"
-											hx-vals='{"withHtmxAttrs": {"get": "/panel/productos/table", "target": "#products-table", "include": "[name=\"search\"], [name=\"sort\"]", "trigger": "input", "indicator": "#products-table-loading"}}'
 											class="hidden"
 											id="category-select-container"
 										></div>

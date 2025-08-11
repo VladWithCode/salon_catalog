@@ -506,7 +506,7 @@ func buildQueryConditions(filters ProductFilterParams) ([]string, pgx.NamedArgs)
 
 	// Add category filter
 	if filters.Category != "" {
-		conditions = append(conditions, "category_id = @category_id")
+		conditions = append(conditions, "category = @category_id")
 		namedArgs["category_id"] = filters.Category
 	}
 

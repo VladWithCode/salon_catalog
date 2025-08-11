@@ -431,9 +431,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", result.Page-1))
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/table?page=%d", result.Page-1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 143, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 143, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -457,9 +457,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", i))
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/table?page=%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 155, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 155, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -522,9 +522,9 @@ func ProductsPagination(result *db.ProductFilterResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos?page=%d", result.Page+1))
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/productos/table?page=%d", result.Page+1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 170, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/products_table.templ`, Line: 170, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

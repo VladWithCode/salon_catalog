@@ -379,14 +379,17 @@ func RenderCategorySelect(w http.ResponseWriter, r *http.Request) {
 		Args:      map[string]string{},
 	}
 
+	var err error
 	rawArgs := r.URL.Query().Get("withHtmxAttrs")
 	args := map[string]string{}
-	err := json.Unmarshal([]byte(rawArgs), &args)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		components.CategorySelect([]db.Category{}, &params).Render(r.Context(), w)
-		log.Printf("failed to unmarshal withHtmxAttrs: %v\n", err)
-		return
+	if rawArgs != "" {
+		err = json.Unmarshal([]byte(rawArgs), &args)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			components.CategorySelect([]db.Category{}, &params).Render(r.Context(), w)
+			log.Printf("failed to unmarshal withHtmxAttrs: %v\n", err)
+			return
+		}
 	}
 	params.Args = args
 

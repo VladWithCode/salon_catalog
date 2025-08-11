@@ -16,7 +16,12 @@ type CategorySelectParams struct {
 }
 
 templ CategorySelect(categories []db.Category, params *CategorySelectParams) {
-	<select id="category-select" class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent" { getCategorySelectAttributes(params)... }>
+	<select
+		id="category-select"
+		class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+		name="category"
+		{ getCategorySelectAttributes(params)... }
+	>
 		<option value="" selected?={ params.Selected == "" }>Selecciona una categoría</option>
 		for _, ctg := range categories {
 			@CategorySelectOption(ctg, params)
