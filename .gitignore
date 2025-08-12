@@ -4,7 +4,9 @@
 web/style/node_modules
 
 web/static/uploads/*
+!web/static/uploads/.keep
 web/static/qrcodes/*
+!web/static/qrcodes/.keep
 
 dist/
 bin/
@@ -13,5 +15,3 @@ bin/
 tailwind.config.js
 
 sql/data_bk.sql
-
-!./**/*/.keep
