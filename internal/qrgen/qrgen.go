@@ -13,13 +13,13 @@ type QRCodeData struct {
 	Value    string `json:"value"`
 }
 
-func GenerateFromString(qrdata *QRCodeData) (string, error) {
+func GenerateFromString(qrdata *QRCodeData) (filename string, err error) {
 	qrc, err := qrcode.New(qrdata.Value)
 	if err != nil {
 		return "", err
 	}
 
-	filename := fmt.Sprintf("web/static/qrcodes/%s.jpeg", qrdata.Filename)
+	filename = fmt.Sprintf("web/static/qrcodes/%s-qrcode.jpeg", qrdata.Filename)
 	w, err := standard.New(filename)
 	if err != nil {
 		return "", err
