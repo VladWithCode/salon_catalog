@@ -28,7 +28,9 @@ type Product struct {
 	Description     string   `db:"description" json:"description"`
 	LongDescription string   `db:"long_description" json:"longDescription"`
 	MainImg         string   `db:"main_img" json:"mainImg"`
+	MainImgID       string   `db:"main_img_id" json:"mainImgId"`
 	Gallery         []string `db:"gallery" json:"gallery"`
+	GalleryIDs      []string `db:"gallery_ids" json:"galleryIds"`
 	Category        string   `db:"category" json:"category"`
 	CategoryID      string   `db:"category_id" json:"categoryId"`
 	Available       bool     `db:"available" json:"available"`
@@ -52,8 +54,9 @@ type ProductFilterParams struct {
 	Sort       string     `json:"sort"`
 	Page       int        `json:"page"`
 	Limit      int        `json:"limit"`
-	Available  int        `json:"available"`
+	Available  int        `json:"available"` // -1 = unavailable, 0 = all, 1 = available
 	Quantity   int        `json:"quantity"`
+	WithQRCode int        `json:"with_qr_code"` // -1 = unavailable, 0 = all, 1 = available
 }
 
 type ProductFilterResult struct {
@@ -144,7 +147,9 @@ func FindProductBySlug(slug string) (*Product, error) {
 
 	var product Product
 	var mainImg sql.NullString
+	var mainImgID sql.NullString
 	var gallery pgtype.Array[*string]
+	var galleryIDs pgtype.Array[*string]
 	var longDescription sql.NullString
 	err = conn.QueryRow(
 		ctx,
@@ -153,16 +158,18 @@ func FindProductBySlug(slug string) (*Product, error) {
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
+			main.id AS main_img_id,
 			prod.available, prod.quantity,
 			prod.qrcode_filename,
-			ARRAY_AGG(img.filename) AS gallery
+			ARRAY_AGG(img.filename) AS gallery,
+			ARRAY_AGG(img.id) AS gallery_ids
 		FROM products prod 
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
 			LEFT JOIN images img ON img_prod.image_id = img.id
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.slug = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id, prod.qrcode_filename`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, main.id, ctg.name, ctg.id, prod.qrcode_filename`,
 		slug,
 	).Scan(
 		&product.ID,
@@ -173,10 +180,12 @@ func FindProductBySlug(slug string) (*Product, error) {
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
+		&mainImgID,
 		&product.Available,
 		&product.Quantity,
 		&product.QRCodeFilename,
 		&gallery,
+		&galleryIDs,
 	)
 	if err != nil {
 		return nil, err
@@ -185,10 +194,20 @@ func FindProductBySlug(slug string) (*Product, error) {
 	if mainImg.Valid {
 		product.MainImg = mainImg.String
 	}
+	if mainImgID.Valid {
+		product.MainImgID = mainImgID.String
+	}
 	if gallery.Valid {
 		for _, img := range gallery.Elements {
 			if img != nil {
 				product.Gallery = append(product.Gallery, *img)
+			}
+		}
+	}
+	if galleryIDs.Valid {
+		for _, img := range galleryIDs.Elements {
+			if img != nil {
+				product.GalleryIDs = append(product.GalleryIDs, *img)
 			}
 		}
 	}
@@ -210,7 +229,9 @@ func FindProductByID(id string) (*Product, error) {
 
 	var product Product
 	var mainImg sql.NullString
+	var mainImgID sql.NullString
 	var gallery pgtype.Array[*string]
+	var galleryIDs pgtype.Array[*string]
 	var longDescription sql.NullString
 	err = conn.QueryRow(
 		ctx,
@@ -219,16 +240,18 @@ func FindProductByID(id string) (*Product, error) {
 			ctg.name AS category,
 			ctg.id AS category_id,
 			main.filename AS main_img,
+			main.id AS main_img_id,
 			prod.available, prod.quantity,
 			prod.qrcode_filename,
-			ARRAY_AGG(img.filename) AS gallery
+			ARRAY_AGG(img.filename) AS gallery,
+			ARRAY_AGG(img.id) AS gallery_ids
 		FROM products prod
 			LEFT JOIN images_products img_prod ON prod.id = img_prod.product_id
 			LEFT JOIN images img ON img_prod.image_id = img.id
 			LEFT JOIN images main ON main.id = prod.main_img
 			LEFT JOIN categories ctg ON ctg.id = prod.category
 		WHERE prod.id = $1
-		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, ctg.name, ctg.id, prod.qrcode_filename`,
+		GROUP BY prod.id, prod.name, prod.slug, prod.description, prod.long_description, prod.available, prod.quantity, main.filename, main.id, ctg.name, ctg.id, prod.qrcode_filename`,
 		id,
 	).Scan(
 		&product.ID,
@@ -239,10 +262,12 @@ func FindProductByID(id string) (*Product, error) {
 		&product.Category,
 		&product.CategoryID,
 		&mainImg,
+		&mainImgID,
 		&product.Available,
 		&product.Quantity,
 		&product.QRCodeFilename,
 		&gallery,
+		&galleryIDs,
 	)
 	if err != nil {
 		return nil, err
@@ -250,10 +275,20 @@ func FindProductByID(id string) (*Product, error) {
 	if mainImg.Valid {
 		product.MainImg = mainImg.String
 	}
+	if mainImgID.Valid {
+		product.MainImgID = mainImgID.String
+	}
 	if gallery.Valid {
 		for _, img := range gallery.Elements {
 			if img != nil {
 				product.Gallery = append(product.Gallery, *img)
+			}
+		}
+	}
+	if galleryIDs.Valid {
+		for _, img := range galleryIDs.Elements {
+			if img != nil {
+				product.GalleryIDs = append(product.GalleryIDs, *img)
 			}
 		}
 	}
