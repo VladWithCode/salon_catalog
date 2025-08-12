@@ -249,7 +249,7 @@ templ ProductModal(product *db.Product, availableCategories []db.Category, err s
 					id="products-modal-qrcode"
 					class="relative col-start-1 row-start-1 bg-gray-50 h-full translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
 				>
-					@ProductQRCode(product, false)
+					@ProductQRCode(product, ProductQRCodeState{})
 				</div>
 			</div>
 		}
@@ -461,11 +461,55 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 	</div>
 }
 
-templ ProductQRCode(product *db.Product, tabOnly bool) {
+type ProductQRCodeState struct {
+	HasError   bool
+	ErrorMsg   string
+	HasSuccess bool
+	SuccessMsg string
+}
+
+templ ProductQRCode(product *db.Product, state ProductQRCodeState) {
 	<div
-		class="flex-1 flex flex-col text-gray-700"
+		class="relative z-0 flex-1 flex flex-col text-gray-700"
 		id="products-modal-qrcode-tab"
 	>
+		@templ.Fragment("qrcodeTabError") {
+			if state.HasError {
+				<div
+					id="products-modal-qrcode-error"
+					class="absolute top-4 inset-x-0 z-30 flex gap-4 items-center justify-center w-full bg-red-50 border-l-4 border-red-500 rounded-lg px-4 py-2"
+				>
+					<div class="rounded-full bg-red-700 text-red-100 p-0.5">
+						@components.TimesIcon("w-8 mx-auto", nil)
+					</div>
+					<p class="text-red-700 font-medium text-center mx-auto">{ state.ErrorMsg }</p>
+					<button
+						type="button"
+						class="text-sm underline underline-offset-2 text-accent font-bold tracking-wide"
+						data-click-handler-selector="close-products-modal-qrcode-error"
+					>
+						@components.TimesIcon("w-6 mx-auto", nil)
+					</button>
+				</div>
+			}
+		}
+		@templ.Fragment("qrcodeTabSuccess") {
+			if state.HasSuccess {
+				<div class="absolute top-4 inset-x-0 z-30 flex gap-4 items-center justify-center w-full bg-green-50 border-l-4 border-green-500 rounded-lg px-4 py-2">
+					<div class="rounded-full bg-green-700 text-green-100 p-0.5">
+						@components.CheckIcon("w-8 mx-auto", nil)
+					</div>
+					<p class="text-green-700 font-medium text-center mx-auto">{ state.SuccessMsg }</p>
+					<button
+						type="button"
+						class="text-sm underline underline-offset-2 text-accent font-bold tracking-wide"
+						data-click-handler-selector="close-products-modal-qrcode-success"
+					>
+						@components.TimesIcon("w-6 mx-auto", nil)
+					</button>
+				</div>
+			}
+		}
 		<div class="flex-1 pt-4 px-4">
 			<h3 class="text-lg font-medium line-clamp-2 text-ellipsis">Codigo QR de { product.Name }</h3>
 			<p class="text-current/60">Scanea, descarga o comparte este código de acceso directo al producto: { product.Name }</p>
@@ -488,16 +532,16 @@ templ ProductQRCode(product *db.Product, tabOnly bool) {
 			<button
 				id="products-generate-qrcode-btn"
 				class="bg-gray-700 text-light px-4 py-2 rounded-sm"
-				hx-put={ fmt.Sprintf("/panel/productos/%s/qrcode", product.ID) }
-				hx-target="#products-modal"
-				hx-target-error="#products-modal"
+				hx-put={ fmt.Sprintf("/panel/qrcodes/productos/%s", product.ID) }
+				hx-target="#products-modal-qrcode-tab"
+				hx-target-error="#products-modal-qrcode-error"
 				hx-swap="outerHTML"
 				hx-indicator="#global-loading-indicator"
 			>
 				Generar QR
 			</button>
 			<a
-				href={ fmt.Sprintf("https://villachenacolo.com/static/qrcodes/%s", product.QRCodeFilename) }
+				href={ fmt.Sprintf("/static/qrcodes/%s", product.QRCodeFilename) }
 				class={
 					"text-center px-4 py-2 text-light bg-accent rounded-sm ",
 					templ.KV(

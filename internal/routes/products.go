@@ -1,14 +1,19 @@
 package routes
 
 import (
+	"archive/zip"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal"
@@ -22,17 +27,22 @@ import (
 )
 
 func RegisterProductsRoutes(router *customServeMux) {
-	// HTMX routes that respond with templ components (for AJAX requests)
+	router.HandleFunc("GET /panel/qrcodes/productos", auth.ValidateAuth(DownloadAllQrCodes))
+	router.HandleFunc("POST /panel/qrcodes/productos", auth.ValidateAuth(GenerateAllQrCodes))
+	router.HandleFunc("GET /panel/qrcodes/productos/{id}", auth.ValidateAuth(GetProductQrCode))
+	router.HandleFunc("PUT /panel/qrcodes/productos/{id}", auth.ValidateAuth(UpdateQrCode))
+
 	router.HandleFunc("GET /panel/productos/table", auth.ValidateAuth(RenderProductsTable))
 	router.HandleFunc("GET /panel/productos/modal/nuevo", auth.ValidateAuth(RenderNewProductForm))
 	router.HandleFunc("POST /panel/productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
 	router.HandleFunc("GET /panel/productos/modal/{id}", auth.ValidateAuth(RenderProduct))
 	router.HandleFunc("PUT /panel/productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
-	router.HandleFunc("PUT /panel/productos/{id}/qrcode", auth.ValidateAuth(UpdateProductQRCodeAndReturnTable))
-	router.HandleFunc("PUT /panel/productos/{id}/main_img", auth.ValidateAuth(UpdateProductMainImg))
-	router.HandleFunc("PUT /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
 	router.HandleFunc("DELETE /panel/productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
 	router.HandleFunc("DELETE /panel/productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
+
+	// Image routes
+	router.HandleFunc("PUT /panel/productos/{id}/main_img", auth.ValidateAuth(UpdateProductMainImg))
+	router.HandleFunc("PUT /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
 
 	// Legacy API routes
 	router.HandleFunc("GET /api/products", GetProducts)
@@ -199,82 +209,204 @@ func CreateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	dashboard.CreateProductForm(formState, ctgs).Render(r.Context(), w)
 }
 
-func UpdateProductQRCodeAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+func GenerateAllQrCodes(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se generaron los códigos QR", components.ToastSuccess, 3000, true, false)
+
+	// Read the QR codes directory
+	filters := db.ProductFilterParams{Available: 1}
+	products, err := db.FilterProducts(filters)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar los productos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get products: %v\n", err)
+		return
+	}
+
+	createFails := 0
+	for _, product := range products.Products {
+		qrData := &qrgen.QRCodeData{
+			Filename: product.Slug,
+			Value:    fmt.Sprintf("https://villachenacolo.com/catalogo/producto/%s", product.ID),
+		}
+		qrCodeFilename, err := qrgen.GenerateFromString(qrData)
+		if err != nil {
+			createFails++
+			continue
+		}
+		product.QRCodeFilename = qrCodeFilename
+	}
+
+	err = db.UpdateProductBatch(products.Products)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar los productos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to update products: %v\n", err)
+		return
+	}
+
+	warnToastData := components.NewToastData(
+		fmt.Sprintf("%d códigos QR no se han podido generar", createFails),
+		components.ToastWarning,
+		3000,
+		true,
+		false,
+	)
+	err = templ.Join(
+		components.ToasterToast(warnToastData),
+		components.ToasterToast(toastData),
+	).Render(r.Context(), w)
+
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render QR code success: %v\n", err)
+		return
+	}
+}
+
+func DownloadAllQrCodes(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Se descargaron los códigos QR", components.ToastSuccess, 3000, true, false)
+	qrcodesDir := "web/static/qrcodes"
+
+	// Read the QR codes directory
+	files, err := os.ReadDir(qrcodesDir)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al leer el directorio de códigos QR"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to read qrcodes directory: %v\n", err)
+		return
+	}
+
+	// Filter for QR code files only
+	var qrcodeFiles []string
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), "-qrcode.jpg") {
+			qrcodeFiles = append(qrcodeFiles, file.Name())
+		}
+	}
+
+	if len(qrcodeFiles) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		toastData.Message = "No se encontraron códigos QR"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		return
+	}
+
+	// Set headers for file download
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	filename := fmt.Sprintf("product-qrcodes_%s.zip", timestamp)
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	// Create ZIP writer that writes directly to response
+	zipWriter := zip.NewWriter(w)
+	defer zipWriter.Close()
+
+	// Add each QR code file to the ZIP
+	for _, qrcodeFile := range qrcodeFiles {
+		filePath := filepath.Join(qrcodesDir, qrcodeFile)
+
+		// Open the file
+		file, err := os.Open(filePath)
+		if err != nil {
+			log.Printf("failed to open file %s: %v\n", filePath, err)
+			continue
+		}
+
+		// Create a file in the ZIP
+		zipFile, err := zipWriter.Create(qrcodeFile)
+		if err != nil {
+			file.Close()
+			log.Printf("failed to create zip entry for %s: %v\n", qrcodeFile, err)
+			continue
+		}
+
+		// Copy file content to ZIP
+		_, err = io.Copy(zipFile, file)
+		file.Close()
+		if err != nil {
+			log.Printf("failed to copy file %s to zip: %v\n", qrcodeFile, err)
+			continue
+		}
+	}
+
+	components.ToasterToast(toastData).Render(r.Context(), w)
+	log.Printf("Successfully created QR codes ZIP with %d files for admin user %s", len(qrcodeFiles), a.ID)
+}
+
+func GetProductQrCode(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+}
+
+func UpdateQrCode(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	id := r.PathValue("id")
 	w.Header().Add("X-Includes-Toast", "true")
-	toastData := components.NewToastData("Se actualizó el producto", components.ToastSuccess, 3000, true, false)
-	product, _ := db.FindProductByID(id)
+	toastData := components.NewToastData("Se ha generado el código QR", components.ToastSuccess, 3000, true, false)
 
-	// Parse form data
-	err := r.ParseForm()
+	product, err := db.FindProductByID(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		toastData.Message = "Error al procesar el formulario"
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar el producto"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductQRCode(product, true),
+			dashboard.ProductQRCode(product, dashboard.ProductQRCodeState{HasError: true, ErrorMsg: "Error al recuperar el producto"}),
 			components.ToasterToast(toastData),
 		)
-		comp.Render(r.Context(), w)
-		log.Printf("failed to parse form: %v\n", err)
+		templ.RenderFragments(r.Context(), w, comp, "qrcodeTabError", "toaster-toast")
+		log.Printf("failed to get product: %v\n", err)
 		return
 	}
 
-	// Update product fields
-	product.QRCodeFilename = strings.TrimSpace(r.FormValue("qrcode_filename"))
-
-	// Validate required fields
-	if product.QRCodeFilename == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		toastData.Message = "Nombre, slug, descripción y categoría son requeridos"
+	qrData := &qrgen.QRCodeData{
+		Filename: product.Slug,
+		Value:    fmt.Sprintf("https://villachenacolo.com/catalogo/producto/%s", product.ID),
+	}
+	qrCodeFilename, err := qrgen.GenerateFromString(qrData)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al generar el código QR"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Campos requeridos faltantes"}),
+			dashboard.ProductQRCode(product, dashboard.ProductQRCodeState{HasError: true, ErrorMsg: "Error al generar el código QR"}),
 			components.ToasterToast(toastData),
 		)
-		comp.Render(r.Context(), w)
+		templ.RenderFragments(r.Context(), w, comp, "qrcodeTabError", "toaster-toast")
+		log.Printf("failed to generate QR code: %v\n", err)
 		return
 	}
 
-	// Update product in database
+	product.QRCodeFilename = qrCodeFilename
+	product.MainImg = product.MainImgID
+	product.Gallery = product.GalleryIDs
 	err = db.UpdateProduct(product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		toastData.Message = "Error al actualizar el producto"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al actualizar el producto"}),
+			dashboard.ProductQRCode(product, dashboard.ProductQRCodeState{HasError: true, ErrorMsg: "Error al actualizar el producto"}),
 			components.ToasterToast(toastData),
 		)
-		comp.Render(r.Context(), w)
+		templ.RenderFragments(r.Context(), w, comp, "qrcodeTabError", "toaster-toast")
 		log.Printf("failed to update product: %v\n", err)
 		return
 	}
 
-	// Get updated products list
-	filters, _ := parseProductFilterParams(r)
-	result, err := db.FilterProducts(*filters)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		toastData.Message = "Error al recuperar los productos"
-		toastData.Type = components.ToastError
-		comp := templ.Join(
-			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al recuperar los productos"}),
-			components.ToasterToast(toastData),
-		)
-		comp.Render(r.Context(), w)
-		log.Printf("failed to get products after update: %v\n", err)
-		return
-	}
-
-	comp := templ.Join(
-		dashboard.ProductsTable(result),
+	err = templ.Join(
+		dashboard.ProductQRCode(product, dashboard.ProductQRCodeState{HasSuccess: true, SuccessMsg: "Código QR actualizado exitosamente"}),
 		components.ToasterToast(toastData),
-	)
-	err = comp.Render(r.Context(), w)
+	).Render(r.Context(), w)
+
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("failed to render response: %v\n", err)
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render QR code success: %v\n", err)
 		return
 	}
 }
@@ -399,6 +531,8 @@ func parseProductFilterParams(r *http.Request) (*db.ProductFilterParams, error) 
 	params.Sort = r.URL.Query().Get("sort")
 	params.Page, _ = strconv.Atoi(r.FormValue("page"))
 	params.Limit, _ = strconv.Atoi(r.FormValue("limit"))
+	params.Available, _ = strconv.Atoi(r.FormValue("available"))
+	params.WithQRCode, _ = strconv.Atoi(r.FormValue("with_qr_code"))
 
 	return params, nil
 }

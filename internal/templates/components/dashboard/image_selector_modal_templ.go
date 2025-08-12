@@ -177,7 +177,7 @@ func ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</h2><button data-close-selector type=\"button\" class=\"text-gray-400 hover:text-gray-600 transition-colors\" aria-label=\"Cerrar selector\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Tab Navigation --><div class=\"flex border-b border-gray-200\"><button type=\"button\" data-switch-tab data-tab=\"select\" class=\"px-6 py-3 text-sm font-medium text-gray-700 border-b-2 border-accent bg-gray-50\">Seleccionar Imágenes</button></div><!-- Tab Content --><div class=\"flex-1 flex flex-col overflow-hidden\"><!-- Select Tab --><div data-content=\"select\" class=\"h-full flex flex-col\"><!-- Search and Filter Bar --><div class=\"p-4 border-b border-gray-200\"><div class=\"flex gap-4 items-center\"><div class=\"flex-1\"><input type=\"text\" data-search-input placeholder=\"Buscar imágenes...\" class=\"w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" name=\"search\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"input changed delay:500ms\" hx-include=\"[data-sort-select][name='sort'], [data-image-selector-selected-imgs], [data-images-selector-config]\"></div><select name=\"sort\" data-sort-select class=\"px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"change\" hx-include=\"[data-search-input][name='search'], [data-image-selector-selected-imgs], [data-images-selector-config]\"><option value=\"created_at_desc\">Más recientes</option> <option value=\"created_at_asc\">Más antiguos</option> <option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"size_desc\">Tamaño mayor</option> <option value=\"size_asc\">Tamaño menor</option></select></div></div><!-- Selection Summary -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</h2><button data-close-selector type=\"button\" class=\"text-gray-400 hover:text-gray-600 transition-colors\" aria-label=\"Cerrar selector\" data-click-handler-selector=\"close-images-selector-modal\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Tab Navigation --><div class=\"flex border-b border-gray-200\"><button type=\"button\" data-switch-tab data-tab=\"select\" class=\"px-6 py-3 text-sm font-medium text-gray-700 border-b-2 border-accent bg-gray-50\">Seleccionar Imágenes</button></div><!-- Tab Content --><div class=\"flex-1 flex flex-col overflow-hidden\"><!-- Select Tab --><div data-content=\"select\" class=\"h-full flex flex-col\"><!-- Search and Filter Bar --><div class=\"p-4 border-b border-gray-200\"><div class=\"flex gap-4 items-center\"><div class=\"flex-1\"><input type=\"text\" data-search-input placeholder=\"Buscar imágenes...\" class=\"w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" name=\"search\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"input changed delay:500ms\" hx-include=\"[data-sort-select][name='sort'], [data-image-selector-selected-imgs], [data-images-selector-config]\"></div><select name=\"sort\" data-sort-select class=\"px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"change\" hx-include=\"[data-search-input][name='search'], [data-image-selector-selected-imgs], [data-images-selector-config]\"><option value=\"created_at_desc\">Más recientes</option> <option value=\"created_at_asc\">Más antiguos</option> <option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"size_desc\">Tamaño mayor</option> <option value=\"size_asc\">Tamaño menor</option></select></div></div><!-- Selection Summary -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -189,7 +189,7 @@ func ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.MaxSelection))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 118, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 119, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(config.SelectedIds, ","))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 138, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 139, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -333,7 +333,7 @@ func ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div><!-- Modal Footer --><div class=\"flex items-center justify-between p-6 border-t border-gray-200\"><div class=\"flex items-center space-x-4\"><!-- Selected Images Preview --><div data-selected-preview class=\"flex space-x-2\"><!-- Selected image thumbnails will appear here --></div></div><div class=\"flex space-x-3\"><button type=\"button\" data-close-selector class=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors\">Cancelar</button> <button type=\"submit\" data-confirm-selection class=\"px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed\">Confirmar Selección</button></div></div></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div><!-- Modal Footer --><div class=\"flex items-center justify-between p-6 border-t border-gray-200\"><div class=\"flex items-center space-x-4\"><!-- Selected Images Preview --><div data-selected-preview class=\"flex space-x-2\"><!-- Selected image thumbnails will appear here --></div></div><div class=\"flex space-x-3\"><button type=\"button\" data-close-selector class=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors\" data-click-handler-selector=\"close-images-selector-modal\">Cancelar</button> <button type=\"submit\" data-confirm-selection class=\"px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed\">Confirmar Selección</button></div></div></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -449,7 +449,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(image.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 259, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 261, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -462,7 +462,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/selector?add_to_selection=%s", image.Filename))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 261, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 263, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -509,7 +509,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", image.Filename))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 282, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 284, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -522,7 +522,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 283, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 285, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -535,7 +535,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 290, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 292, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -548,7 +548,7 @@ func ImageSelectorItem(image *db.Image, isSelected bool) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(formatFileSize(image.Size))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 291, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 293, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -590,7 +590,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(result.Images)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 299, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 301, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -603,7 +603,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.Total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 299, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 301, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -621,7 +621,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.Page-1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 306, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 308, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -634,7 +634,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/selector?page=%d", result.Page-1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 307, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 309, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -664,7 +664,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var35 string
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 320, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 322, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -677,7 +677,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/selector?page=%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 321, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 323, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
@@ -703,7 +703,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 328, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 330, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
@@ -722,7 +722,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.Page+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 335, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 337, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -735,7 +735,7 @@ func ImageSelectorPagination(result *db.ImageFilterResult) templ.Component {
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/images/selector?page=%d", result.Page+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 336, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 338, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {

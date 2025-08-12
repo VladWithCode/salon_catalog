@@ -45,6 +45,7 @@ templ ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResul
 					type="button"
 					class="text-gray-400 hover:text-gray-600 transition-colors"
 					aria-label="Cerrar selector"
+					data-click-handler-selector="close-images-selector-modal"
 				>
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -206,6 +207,7 @@ templ ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResul
 						type="button"
 						data-close-selector
 						class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+						data-click-handler-selector="close-images-selector-modal"
 					>
 						Cancelar
 					</button>

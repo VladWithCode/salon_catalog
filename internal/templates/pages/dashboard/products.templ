@@ -7,7 +7,7 @@ templ Products() {
 	<script src="/static/js/popup.js" defer></script>
 	@productsScript()
 	@templates.AdminLayout("Productos | Panel Villa Chenacolo", "Administración de Productos") {
-		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5" hx-ext="response-targets">
+		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5">
 			<div class="px-2">
 				<div class="flex justify-between gap-4 pb-2">
 					<div class="space-y-0.5">
@@ -21,6 +21,67 @@ templ Products() {
 					>
 						@components.BarsIcon("w-8", nil)
 					</button>
+				</div>
+				<div id="products-actions-all-modal" class="fixed inset-4 z-50 flex items-center justify-center pointer-events-none">
+					<div id="products-actions-all" class="min-h-[50vh] w-full max-w-2xl lg:max-w-4xl xl:max-w-7xl flex flex-col gap-4 bg-gray-50 m-auto px-4 py-6 rounded-lg shadow-xl translate-y-6 opacity-0 pointer-events-none">
+						<div class="flex items-start justify-between gap-4 text-dark">
+							<h3 class="text-lg font-bold">Todas las acciones para productos</h3>
+							<button
+								id="products-actions-all-close"
+								class="text-dark/60 p-2"
+								data-click-handler-selector="products-actions-all-close"
+							>
+								@components.TimesIcon("w-8", nil)
+							</button>
+						</div>
+						<div class="flex-1 flex flex-col gap-4 overflow-x">
+							<button
+								id="products-actions-new"
+								hx-get="/panel/productos/modal/nuevo"
+								hx-target="#products-modal"
+								hx-indicator="#global-loading-indicator"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+							>
+								@components.PlusIcon("w-5", nil)
+								Nuevo Producto
+							</button>
+							@templ.Fragment("actionsGenerateQrCodes") {
+								<button
+									id="products-actions-download-qrcodes"
+									hx-post="/panel/qrcodes/productos"
+									hx-target="body"
+									hx-swap="beforeend"
+									hx-target-error="#toaster-container"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								>
+									@components.QrCodeIcon("w-5", nil)
+									Generar códigos QR
+								</button>
+							}
+							<a
+								id="products-actions-download-qrcodes"
+								href="/panel/qrcodes/productos"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+							>
+								@components.QrCodeIcon("w-5", nil)
+								Descargar códigos QR
+							</a>
+							<button
+								id="products-multi-selection-delete"
+								data-products-multi-action="delete"
+								hx-delete="/panel/productos"
+								hx-target="#products-table"
+								hx-confirm="¿Eliminar los productos seleccionados?"
+								hx-indicator="#products-table-loading"
+								hx-include='[name="product-table-selection"]'
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+								disabled
+							>
+								@components.BinIcon("w-5", nil)
+								Eliminar Selección
+							</button>
+						</div>
+					</div>
 				</div>
 				<div id="products-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-products-actions="closed">
 					<div class="py-2 border-t border-primary/70">
@@ -55,8 +116,24 @@ templ Products() {
 										Eliminar Selección
 									</button>
 								</li>
+								<li class="w-full">
+									<button
+										id="products-actions-view-all"
+										class="w-full px-4 py-2 text-sm"
+										data-click-handler-selector="products-actions-view-all"
+									>Ver todas</button>
+								</li>
+								/* <li class="w-full">
+									<a
+										id="products-actions-download-qrcodes"
+										href="/panel/qrcodes/productos"
+										class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+									>
+										@components.QrCodeIcon("w-5", nil)
+										Descargar códigos QR
+									</a>
+								</li> */
 							</ul>
-							<!-- Filters -->
 							<form
 								hx-get="/panel/productos/table"
 								hx-trigger="input changed delay:500ms"
@@ -322,6 +399,9 @@ templ productsScript() {
                     if (shouldClose) {
                         modalTl.reverse();
                         modal.dataset.productsModal = 'closed';
+                        gsap.delayedCall(0.3, () => {
+                            document.getElementById('products-modal-content')?.remove();
+                        });
                     } else {
                         modalTl.play();
                         modal.dataset.productsModal = 'open';
@@ -409,6 +489,36 @@ templ productsScript() {
                             },
                         });
                     }
+                })
+                .registerClick('close-images-selector-modal', function (e) {
+                    gsap.to('#image-selector-modal',{
+                        opacity: 0,
+                        y: '2.5rem',
+                        pointerEvents: 'none',
+                        ease: 'power2.out',
+                        duration: 0.5,
+                        onComplete: () => {
+                            document.getElementById('image-selector-modal')?.remove();
+                        },
+                    })
+                })
+                .registerClick('products-actions-all-close', function(e) {
+                    gsap.to('#products-actions-all', {
+                        opacity: 0,
+                        y: '2.5rem',
+                        pointerEvents: 'none',
+                        ease: 'power2.out',
+                        duration: 0.5,
+                    });
+                })
+                .registerClick('products-actions-view-all', function (e) {
+                    gsap.to('#products-actions-all', {
+                        opacity: 1,
+                        y: '0rem',
+                        pointerEvents: 'auto',
+                        ease: 'power2.in',
+                        duration: 0.5,
+                    });
                 });
 
             document.addEventListener('input', function (e) {

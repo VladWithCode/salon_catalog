@@ -401,6 +401,87 @@ func UpdateProduct(product *Product) error {
 	return nil
 }
 
+func UpdateProductBatch(products []*Product) error {
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	ctx := context.Background()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	batch := pgx.Batch{}
+	for _, product := range products {
+		args := pgx.NamedArgs{
+			"name":             product.Name,
+			"slug":             product.Slug,
+			"description":      product.Description,
+			"long_description": product.LongDescription,
+			"category":         product.CategoryID,
+			"available":        product.Available,
+			"quantity":         product.Quantity,
+			"qrcode_filename":  product.QRCodeFilename,
+			"id":               product.ID,
+		}
+		batch.Queue(
+			`UPDATE products SET
+				name = @name, slug = @slug, description = @description, long_description = @long_description,
+				category = @category, available = @available, quantity = @quantity, qrcode_filename = @qrcode_filename
+			WHERE id = @id`,
+			args,
+		)
+	}
+
+	results := tx.SendBatch(ctx, &batch)
+	defer results.Close()
+
+	_, err = results.Exec()
+	if err != nil {
+		return err
+	}
+
+	results.Close()
+	return tx.Commit(ctx)
+}
+
+func UpdateProductImages(productId string, imageIds []string) error {
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	ctx := context.Background()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// Delete existing product-image relationships
+	_, err = tx.Exec(ctx, "DELETE FROM images_products WHERE product_id = $1", productId)
+	if err != nil {
+		return err
+	}
+
+	// Insert new product-image relationships
+	for _, imageId := range imageIds {
+		_, err = tx.Exec(ctx,
+			"INSERT INTO images_products (image_id, product_id) VALUES ($1, $2)",
+			imageId, productId)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
 func DeleteProduct(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -479,11 +560,11 @@ func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 	selectQuery := fmt.Sprintf(`
 		SELECT 
 			prod.id, prod.name, prod.description, prod.long_description, ctg.id as category_id, ctg.name as category,
-			img.filename as main_img, prod.available, prod.quantity, prod.qrcode_filename,
+			img.filename as main_img, prod.available, prod.quantity, prod.qrcode_filename, prod.slug,
 			COALESCE(ARRAY_AGG(imgs.filename) FILTER (WHERE imgs.filename IS NOT NULL), '{}') as images,
 			%s
 		%s GROUP BY prod.id, prod.name, prod.description, prod.long_description,
-		ctg.id, ctg.name, img.filename, prod.available, prod.quantity, prod.qrcode_filename %s
+		ctg.id, ctg.name, img.filename, prod.available, prod.quantity, prod.qrcode_filename, prod.slug %s
 		LIMIT @limit OFFSET @offset`,
 		buildSearchRankSelect(filters), baseQuery, orderBy)
 
@@ -554,6 +635,12 @@ func buildQueryConditions(filters ProductFilterParams) ([]string, pgx.NamedArgs)
 	if filters.Quantity > 0 {
 		conditions = append(conditions, "quantity = @quantity")
 		namedArgs["quantity"] = filters.Quantity
+	}
+
+	if filters.WithQRCode > 0 {
+		conditions = append(conditions, "qr_code_filename IS NOT NULL AND qr_code_filename != ''")
+	} else if filters.WithQRCode < 0 {
+		conditions = append(conditions, "qr_code_filename IS NULL OR qr_code_filename = ''")
 	}
 
 	return conditions, namedArgs
@@ -631,6 +718,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&product.Available,
 				&product.Quantity,
 				&product.QRCodeFilename,
+				&product.Slug,
 				&images,
 				&searchRank,
 			)
@@ -648,6 +736,7 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 				&product.Available,
 				&product.Quantity,
 				&product.QRCodeFilename,
+				&product.Slug,
 				&images,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)
@@ -764,37 +853,4 @@ func setProdMainImg(prod *Product, conn *pgxpool.Conn) {
 	if imgID.Valid {
 		prod.MainImg = imgID.String
 	}
-}
-
-func UpdateProductImages(productId string, imageIds []string) error {
-	conn, err := GetConn()
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	ctx := context.Background()
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	// Delete existing product-image relationships
-	_, err = tx.Exec(ctx, "DELETE FROM images_products WHERE product_id = $1", productId)
-	if err != nil {
-		return err
-	}
-
-	// Insert new product-image relationships
-	for _, imageId := range imageIds {
-		_, err = tx.Exec(ctx, 
-			"INSERT INTO images_products (image_id, product_id) VALUES ($1, $2)",
-			imageId, productId)
-		if err != nil {
-			return err
-		}
-	}
-
-	return tx.Commit(ctx)
 }
