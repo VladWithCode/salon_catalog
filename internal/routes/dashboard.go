@@ -15,7 +15,7 @@ func RegisterDashboardRoutes(router *customServeMux) {
 	router.HandleFunc("GET /panel", auth.ValidateAuth(RenderDashboard))
 	router.HandleFunc("GET /panel/productos", auth.ValidateAuth(RenderProducts))
 	router.HandleFunc("GET /panel/productos/nuevo", auth.ValidateAuth(RenderCreateProduct))
-	router.HandleFunc("GET /panel/productos/editar/{id}", auth.ValidateAuth(RenderCreateProduct))
+	// router.HandleFunc("GET /panel/productos/editar/{id}", auth.ValidateAuth(RenderCreateProduct))
 
 	router.HandleFunc("GET /panel/categorias", auth.ValidateAuth(RenderCategories))
 	router.HandleFunc("GET /panel/categorias/nueva", auth.ValidateAuth(RenderCreateProduct))
