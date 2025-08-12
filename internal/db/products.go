@@ -730,3 +730,36 @@ func setProdMainImg(prod *Product, conn *pgxpool.Conn) {
 		prod.MainImg = imgID.String
 	}
 }
+
+func UpdateProductImages(productId string, imageIds []string) error {
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	ctx := context.Background()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// Delete existing product-image relationships
+	_, err = tx.Exec(ctx, "DELETE FROM images_products WHERE product_id = $1", productId)
+	if err != nil {
+		return err
+	}
+
+	// Insert new product-image relationships
+	for _, imageId := range imageIds {
+		_, err = tx.Exec(ctx, 
+			"INSERT INTO images_products (image_id, product_id) VALUES ($1, $2)",
+			imageId, productId)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}

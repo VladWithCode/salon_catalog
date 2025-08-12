@@ -70,14 +70,14 @@ func AdminLayout(title string, headerTitle string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script src=\"/static/js/htmx.js\"></script> <script src=\"/static/js/htmx-response-targets.js\"></script> <script src=\"/static/js/htmx-json-enc.js\"></script> <script src=\"/static/js/gsap.js\"></script> <script src=\"/static/js/eventManager.js\" defer></script> <link rel=\"dns-prefetch\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script src=\"/static/js/htmx.js\"></script> <script src=\"/static/js/htmx-response-targets.js\"></script> <script src=\"/static/js/htmx-json-enc.js\"></script> <script src=\"/static/js/gsap.js\"></script> <script src=\"/static/js/eventManager.js\" defer></script>  <link rel=\"dns-prefetch\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(`//fonts.googleapis.com`)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin_layout.templ`, Line: 28, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin_layout.templ`, Line: 29, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -90,7 +90,7 @@ func AdminLayout(title string, headerTitle string) templ.Component {
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(`//fonts.gstatic.com`)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin_layout.templ`, Line: 29, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin_layout.templ`, Line: 30, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -106,7 +106,7 @@ func AdminLayout(title string, headerTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</head><body><div class=\"flex h-screen w-screen overflow-hidden xl:flex gap-1 z-0 p-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</head><body hx-ext=\"response-targets\"><div class=\"flex h-screen w-screen overflow-hidden xl:flex gap-1 z-0 p-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

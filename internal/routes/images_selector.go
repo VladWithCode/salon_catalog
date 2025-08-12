@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
@@ -19,51 +20,57 @@ func RegisterImageSelectorRoutes(router *customServeMux) {
 
 func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	// Parse query parameters for selector configuration
+	filters := parseImageFilters(r)
 	mode := r.URL.Query().Get("mode")
 	if mode == "" {
 		mode = "single"
 	}
 
-	targetField := r.URL.Query().Get("target_field")
+	updateEndpoint := r.URL.Query().Get("update_endpoint")
 	title := r.URL.Query().Get("title")
 	if title == "" {
 		title = "Seleccionar Imagen"
 	}
 
-	maxSelection := 15
+	maxSelection := db.DefaultImageSelectorLimit
 	if maxStr := r.URL.Query().Get("max_selection"); maxStr != "" {
-		if max, err := strconv.Atoi(maxStr); err == nil && max > 0 {
-			maxSelection = max
+		if maxSelect, err := strconv.Atoi(maxStr); err == nil && maxSelect > 0 {
+			maxSelection = maxSelect
 		}
 	}
 
 	selectedIds := []string{}
 	if selectedStr := r.URL.Query().Get("selected_ids"); selectedStr != "" {
 		selectedIds = strings.Split(selectedStr, ",")
+		filters.Pinned = selectedIds
 	}
 
-	// Parse filter parameters for initial load
-	filters := parseImageFilters(r)
 	if filters.Limit == 0 {
-		filters.Limit = 12 // Default grid size for selector
+		filters.Limit = db.DefaultImageSelectorLimit
+	}
+	successTarget := r.URL.Query().Get("success_target")
+
+	config := dashboard.ImageSelectorConfig{
+		Mode:           mode,
+		UpdateEndpoint: updateEndpoint,
+		Title:          title,
+		MaxSelection:   maxSelection,
+		SelectedIds:    selectedIds,
+		AllowUpload:    true,
+		SuccessTarget:  successTarget,
 	}
 
 	// Get images
 	result, err := db.FilterImages(filters)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to get images"))
-		log.Printf("failed to filter images for selector: %v\n", err)
+		result := &db.ImageFilterResult{
+			HasError: true,
+			Error:    "Algo salió mal",
+		}
+		dashboard.ImageSelectorModal(config, result).Render(r.Context(), w)
+		log.Printf("failed to filter images: %v\n", err)
 		return
-	}
-
-	config := dashboard.ImageSelectorConfig{
-		Mode:         mode,
-		TargetField:  targetField,
-		Title:        title,
-		MaxSelection: maxSelection,
-		SelectedIds:  selectedIds,
-		AllowUpload:  true,
 	}
 
 	component := dashboard.ImageSelectorModal(config, result)
@@ -74,19 +81,82 @@ func GetImagesForSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 	// Parse filter parameters
 	filters := parseImageFilters(r)
 	if filters.Limit == 0 {
-		filters.Limit = 12 // Default grid size for selector
+		filters.Limit = db.DefaultImageSelectorLimit
+	}
+
+	var err error
+	config := dashboard.ImageSelectorConfig{}
+	rawConfig := r.URL.Query().Get("selectorConfig")
+	if rawConfig == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		result := &db.ImageFilterResult{
+			HasError: true,
+			Error:    "Algo salió mal",
+		}
+		templ.RenderFragments(
+			r.Context(),
+			w,
+			dashboard.ImageSelectorModal(config, result),
+			"imagesGrid",
+		)
+		log.Println("selector config is empty")
+		return
+	} else {
+		err = json.Unmarshal([]byte(rawConfig), &config)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			result := &db.ImageFilterResult{
+				HasError: true,
+				Error:    "Algo salió mal",
+			}
+			templ.RenderFragments(
+				r.Context(),
+				w,
+				dashboard.ImageSelectorModal(config, result),
+				"imagesGrid",
+			)
+			log.Printf("failed to parse selector config: %v\n", err)
+			return
+		}
+	}
+
+	if addToSelection := r.URL.Query()["add_to_selection"]; len(addToSelection) > 0 {
+		if config.Mode == "multiple" {
+			filters.Pinned = append(filters.Pinned, addToSelection...)
+		} else {
+			filters.Pinned = []string{addToSelection[0]}
+		}
 	}
 
 	// Get images
 	result, err := db.FilterImages(filters)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to get images"))
+		result := &db.ImageFilterResult{
+			HasError: true,
+			Error:    "Algo salió mal",
+		}
+		templ.RenderFragments(
+			r.Context(),
+			w,
+			dashboard.ImageSelectorModal(config, result),
+			"imagesGrid",
+		)
 		log.Printf("failed to filter images for selector API: %v\n", err)
 		return
 	}
 
+	config.SelectedIds = filters.Pinned
 	// Return JSON response
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	err = templ.RenderFragments(
+		r.Context(),
+		w,
+		dashboard.ImageSelectorModal(config, result),
+		"imagesGrid",
+	)
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images grid: %v\n", err)
+		return
+	}
 }

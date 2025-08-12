@@ -537,3 +537,34 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 
 	return categories, nil
 }
+
+func UpdateCategoryImages(categoryId string, imageIds []string) error {
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	ctx := context.Background()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// For categories, we might update a main image field instead of a relationship table
+	// Let's assume categories have a main_image field for now
+	var mainImageId string
+	if len(imageIds) > 0 {
+		mainImageId = imageIds[0] // Use first image as main image
+	}
+
+	_, err = tx.Exec(ctx, 
+		"UPDATE categories SET main_image = $1 WHERE id = $2",
+		mainImageId, categoryId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

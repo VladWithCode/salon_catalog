@@ -25,6 +25,7 @@ func RegisterCategoriesRoutes(router *customServeMux) {
 	router.HandleFunc("POST /categorias/nueva", auth.ValidateAuth(CreateCategoryAndReturnTable))
 	router.HandleFunc("GET /categorias/{id}", auth.ValidateAuth(RenderCategory))
 	router.HandleFunc("PUT /categorias/{id}", auth.ValidateAuth(UpdateCategoryAndReturnTable))
+	router.HandleFunc("PUT /categorias/{id}/images", auth.ValidateAuth(UpdateCategoryImages))
 	router.HandleFunc("DELETE /categorias", auth.ValidateAuth(DeleteCategoriesAndReturnTable))
 	router.HandleFunc("DELETE /categorias/{id}", auth.ValidateAuth(DeleteCategoryAndReturnTable))
 
@@ -565,4 +566,39 @@ func parseCategorySort(s string) string {
 	default:
 		return "name_asc"
 	}
+}
+
+func UpdateCategoryImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	categoryId := r.PathValue("id")
+	if categoryId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Category ID is required"})
+		return
+	}
+
+	var requestData struct {
+		ImageIds []string `json:"image_ids"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
+		return
+	}
+
+	// Update category images in database
+	err := db.UpdateCategoryImages(categoryId, requestData.ImageIds)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to update category images"})
+		log.Printf("failed to update category images: %v\n", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Category images updated successfully",
+		"image_ids": requestData.ImageIds,
+	})
 }

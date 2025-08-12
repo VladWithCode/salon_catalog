@@ -367,25 +367,47 @@ templ productsScript() {
                     const modal = document.getElementById('products-modal');
                     const form = document.getElementById('products-modal-form');
                     const qrcode = document.getElementById('products-modal-qrcode');
+                    const images = document.getElementById('products-modal-images');
                     const tl = gsap.timeline({defaults: {duration: 0.3, ease: 'power2.out'}});
 
+                    let inactiveTabs = [];
+                    let activeTab = form;
                     switch (tab) {
-                    case 'products-modal-form':
-                        tl.set(form, {zIndex: 10})
-                            .set(qrcode, {zIndex: 0})
-                        tl.to('[data-products-modal-tab="products-modal-form"]', {backgroundColor: `rgb(${activeBgValues})`, color: `rgb(240 240 240)`})
-                            .to('[data-products-modal-tab="products-modal-qrcode"]', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`}, "<")
-                            .to(form, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
-                            .to(qrcode, {opacity: 0, x: '15rem', pointEvents: 'none'}, '-=0.1');
-                        break;
                     case 'products-modal-qrcode':
-                        tl.set(qrcode, {zIndex: 10})
-                            .set(form, {zIndex: 0})
-                        tl.to('[data-products-modal-tab="products-modal-form"]', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`})
-                            .to('[data-products-modal-tab="products-modal-qrcode"]', {backgroundColor: `rgb(${activeBgValues})`, color: "rgb(225 225 225)"}, "<")
-                            .to(qrcode, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
-                            .to(form, {opacity: 0, x: '15rem', pointEvents: 'none'}, '-=0.1');
+                        inactiveTabs.push(form, images);
+                        activeTab = qrcode;
                         break;
+                    case 'products-modal-images':
+                        inactiveTabs.push(form, qrcode);
+                        activeTab = images;
+                        break;
+                    case 'products-modal-form':
+                    default:
+                        inactiveTabs.push(qrcode, images);
+                        activeTab = form;
+                        break;
+                    }
+                    tl.set(activeTab, {zIndex: 10})
+                        .set(inactiveTabs, {zIndex: 0})
+
+                    tl.to(target, {backgroundColor: `rgb(${activeBgValues})`, color: `rgb(240 240 240)`})
+                        .to('[data-products-modal-tab]:not([data-products-modal-tab="'+tab+'"])', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`}, "<")
+                        .to(activeTab, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
+                        .to(inactiveTabs, {opacity: 0, x: '15rem', pointerEvents: 'none'}, '-=0.1');
+                })
+                .register('afterSwap', '#product-modal-images-main', function (e) {
+                    const selectorModal = document.getElementById('image-selector-modal');
+                    if (selectorModal) {
+                        gsap.to(selectorModal, {
+                            opacity: 0,
+                            y: '10rem',
+                            pointerEvents: 'none',
+                            ease: 'power2.out',
+                            duration: 0.5,
+                            onComplete: () => {
+                                selectorModal.remove();
+                            },
+                        });
                     }
                 });
 

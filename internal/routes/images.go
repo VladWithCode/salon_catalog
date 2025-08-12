@@ -577,9 +577,13 @@ func parseImagesSort(s string) (sortOrder, sortBy string) {
 // parseImageFilters extracts and parses filter parameters from the request
 func parseImageFilters(r *http.Request) db.ImageFilterParams {
 	query := r.URL.Query()
+	filters := db.ImageFilterParams{}
 
-	filters := db.ImageFilterParams{
-		Name: strings.TrimSpace(query.Get("name")),
+	// Name takes precedence over search
+	if trimmedName := strings.TrimSpace(query.Get("name")); trimmedName != "" {
+		filters.Name = trimmedName
+	} else if trimmedSearch := strings.TrimSpace(query.Get("search")); trimmedSearch != "" {
+		filters.Name = trimmedSearch
 	}
 
 	// Parse sorting
@@ -616,6 +620,10 @@ func parseImageFilters(r *http.Request) db.ImageFilterParams {
 		if beforeDate, err := time.Parse("2006-01-02", beforeDateStr); err == nil {
 			filters.DateBefore = beforeDate
 		}
+	}
+
+	if selectedStr := query.Get("selected"); selectedStr != "" {
+		filters.Pinned = strings.Split(selectedStr, ",")
 	}
 
 	return filters

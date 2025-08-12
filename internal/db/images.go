@@ -11,6 +11,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+const (
+	DefaultImageSelectorLimit = 20
+)
+
 var (
 	ErrImageInsert                = errors.New("failed to insert image")
 	ErrDeleteImageProductRelation = errors.New("failed to delete image product relation")
@@ -23,6 +27,9 @@ type Image struct {
 	NoOptimize bool      `db:"no_optimize" json:"noOptimize"`
 	Size       int       `db:"size" json:"size"`
 	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
+
+	// Not from schema
+	Pinned bool `db:"pinned" json:"pinned"`
 }
 
 type ImageFilterParams struct {
@@ -34,6 +41,8 @@ type ImageFilterParams struct {
 	SortOrder  string    `json:"sort_order"`
 	Page       int       `json:"page"`
 	Limit      int       `json:"limit"`
+
+	Pinned []string `json:"pinned"`
 }
 
 type ImageFilterResult struct {
@@ -211,6 +220,35 @@ func FindImageByID(id string) (*Image, error) {
 	return &image, nil
 }
 
+func FindImageByFilename(filename string) (*Image, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	var image Image
+	err = conn.QueryRow(
+		ctx,
+		`SELECT id, filename, name, no_optimize, size, created_at FROM images WHERE filename = $1`,
+		filename,
+	).Scan(
+		&image.ID,
+		&image.Filename,
+		&image.Name,
+		&image.NoOptimize,
+		&image.Size,
+		&image.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &image, nil
+}
+
 func FindAllImages(ids []string) ([]*Image, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -357,6 +395,9 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 	if filters.SortOrder == "" {
 		filters.SortOrder = "DESC"
 	}
+	if filters.Pinned == nil {
+		filters.Pinned = []string{}
+	}
 
 	// Build query conditions and named arguments
 	conditions, namedArgs := buildImageQueryConditions(filters)
@@ -388,10 +429,12 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 	selectQuery := fmt.Sprintf(`
 		SELECT 
 			id, filename, name, no_optimize, size, created_at,
-			%s
+			%s %s
 		%s %s 
 		LIMIT @limit OFFSET @offset`,
-		buildImageSearchRankSelect(filters), baseQuery, orderBy)
+		buildPinnedSelectClause(filters),
+		buildImageSearchRankSelect(filters),
+		baseQuery, orderBy)
 
 	// Execute query
 	rows, err := conn.Query(ctx, selectQuery, namedArgs)
@@ -416,6 +459,7 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 				&image.NoOptimize,
 				&image.Size,
 				&image.CreatedAt,
+				&image.Pinned,
 				&searchRank,
 			)
 		} else {
@@ -426,6 +470,7 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 				&image.NoOptimize,
 				&image.Size,
 				&image.CreatedAt,
+				&image.Pinned,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)
 		}
@@ -485,7 +530,25 @@ func buildImageQueryConditions(filters ImageFilterParams) ([]string, pgx.NamedAr
 		}
 	}
 
+	if len(filters.Pinned) > 0 {
+		namedArgs["pinned"] = filters.Pinned
+	}
+
 	return conditions, namedArgs
+}
+
+func buildPinnedSelectClause(filters ImageFilterParams) string {
+	if len(filters.Pinned) == 0 {
+		return "False as pinned,"
+	}
+
+	return `
+		CASE
+			WHEN filename = ANY(@pinned::varchar[]) 
+			THEN True
+			ELSE False
+		END as pinned,
+	`
 }
 
 // buildImageSearchRankSelect adds search ranking column when using full-text search
@@ -498,14 +561,26 @@ func buildImageSearchRankSelect(filters ImageFilterParams) string {
 
 // buildImageOrderByClause constructs the ORDER BY clause
 func buildImageOrderByClause(filters ImageFilterParams) string {
+	orderClause := "ORDER BY"
+	if filters.Pinned != nil {
+		orderClause += `
+			CASE
+				WHEN filename = ANY(@pinned::varchar[]) 
+				THEN array_position(@pinned::varchar[], filename)
+				ELSE @limit + 2
+			END,
+		`
+	}
 	// If using full-text search, prioritize search ranking
 	if filters.Name != "" {
-		return fmt.Sprintf("ORDER BY search_rank DESC, %s %s",
+		orderClause += fmt.Sprintf(" search_rank DESC, %s %s",
 			sanitizeSortBy(filters.SortBy), sanitizeSortOrder(filters.SortOrder))
+		return orderClause
 	}
 
-	return fmt.Sprintf("ORDER BY %s %s",
+	orderClause += fmt.Sprintf(" %s %s",
 		sanitizeSortBy(filters.SortBy), sanitizeSortOrder(filters.SortOrder))
+	return orderClause
 }
 
 // sanitizeSortBy ensures only valid column names are used for sorting

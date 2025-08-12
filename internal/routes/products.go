@@ -29,6 +29,8 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("GET /panel/productos/modal/{id}", auth.ValidateAuth(RenderProduct))
 	router.HandleFunc("PUT /panel/productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
 	router.HandleFunc("PUT /panel/productos/{id}/qrcode", auth.ValidateAuth(UpdateProductQRCodeAndReturnTable))
+	router.HandleFunc("PUT /panel/productos/{id}/main_img", auth.ValidateAuth(UpdateProductMainImg))
+	router.HandleFunc("PUT /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
 	router.HandleFunc("DELETE /panel/productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
 	router.HandleFunc("DELETE /panel/productos/{id}", auth.ValidateAuth(DeleteProductAndReturnTable))
 
@@ -40,7 +42,7 @@ func RegisterProductsRoutes(router *customServeMux) {
 
 	router.HandleFunc("POST /api/products", auth.ValidateAuth(CreateProduct))
 	router.HandleFunc("PUT /api/products/{id}", auth.ValidateAuth(UpdateProduct))
-	router.HandleFunc("PUT /api/products/{id}/images", auth.ValidateAuth(UpdateProductImages))
+	// router.HandleFunc("PUT /api/products/{id}/images", auth.ValidateAuth(UpdateProductImages))
 	router.HandleFunc("DELETE /api/products/{id}", auth.ValidateAuth(DeleteProduct))
 	router.HandleFunc("DELETE /api/products/{id}/images", auth.ValidateAuth(DeleteProductImages))
 
@@ -320,36 +322,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to update product"))
 		log.Printf("failed to update product: %v\n", err)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func UpdateProductImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
-	id := r.PathValue("id")
-	var imgIDs []string
-	err := json.NewDecoder(r.Body).Decode(&imgIDs)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse request body"))
-		log.Printf("failed to parse request body: %v\n", err)
-		return
-	}
-
-	prod, err := db.FindProductByID(id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to find product"))
-		log.Printf("failed to find product: %v\n", err)
-		return
-	}
-
-	err = db.LinkImagesToProduct(imgIDs, prod.ID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to link images to product"))
-		log.Printf("failed to link images to product: %v\n", err)
 		return
 	}
 
@@ -814,4 +786,109 @@ func DeleteProductsAndReturnTable(w http.ResponseWriter, r *http.Request, a *aut
 		log.Printf("failed to render response: %v\n", err)
 		return
 	}
+}
+
+func UpdateProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	productId := r.PathValue("id")
+	toastData := components.NewToastData("Se actualizó la imagen principal", components.ToastSuccess, 3000, true, false)
+
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				dashboard.ImageSelectorConfig{},
+				&db.ImageFilterResult{HasError: true, Error: "Error al procesar el formulario"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGrid", "toaster-toast")
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	var config dashboard.ImageSelectorConfig
+	rawConf := r.FormValue("selectorConfig")
+	if rawConf != "" {
+		err = json.Unmarshal([]byte(rawConf), &config)
+	}
+	if err != nil {
+		config = dashboard.ImageSelectorConfig{
+			Mode:           "single",
+			UpdateEndpoint: "/panel/productos/" + productId + "/main_img",
+			MaxSelection:   1,
+		}
+	}
+
+	product, err := db.FindProductByID(productId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar el producto"
+		toastData.Type = components.ToastError
+		combined := templ.Join(
+			dashboard.ImageSelectorModal(
+				config,
+				&db.ImageFilterResult{HasError: true, Error: "Error al recuperar el producto"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "imagesGrid", "toaster-toast")
+		log.Printf("failed to get product: %v\n", err)
+		return
+	}
+
+	selectedImg := r.FormValue("selected")
+	img, err := db.FindImageByFilename(selectedImg)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la imagen"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				dashboard.ImageSelectorConfig{},
+				&db.ImageFilterResult{HasError: true, Error: "Error al recuperar la imagen"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGrid", "toaster-toast")
+		log.Printf("failed to get image: %v\n", err)
+		return
+	}
+
+	product.MainImg = img.ID
+	err = db.UpdateProduct(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ProductsTable(&db.ProductFilterResult{HasError: true, Error: "Error al actualizar el producto"}),
+			components.ToasterToast(toastData),
+		)
+		comp.Render(r.Context(), w)
+		log.Printf("failed to update product: %v\n", err)
+		return
+	}
+
+	updateData := &dashboard.ProductImagesTabUpdateData{
+		MainImgFilename: img.Filename,
+	}
+	combined := templ.Join(
+		dashboard.ProductImagesTab(product, updateData),
+		components.ToasterToast(toastData),
+	)
+	templ.RenderFragments(r.Context(), w, combined, "mainImgSection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
+}
+
+func UpdateProductGallery(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	productId := r.PathValue("id")
+	fmt.Printf("productId: %v\n", productId)
 }
