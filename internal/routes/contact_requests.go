@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	dashboardComponents "github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
 	dashboardPages "github.com/vladwithcode/salon_catalog/internal/templates/pages/dashboard"
+	"github.com/vladwithcode/salon_catalog/internal/whatsapp"
 )
 
 func RegisterContactRequestsRoutes(router *customServeMux) {
@@ -462,6 +464,20 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
 		log.Printf("failed to render success form: %v\n", err)
 	}
+
+	// Send notification to customer
+	go func() {
+		quote.CustomerPhone, err = internal.FormatPhone(quote.CustomerPhone)
+		if err != nil {
+			log.Printf("failed to format phone number: %v\n", err)
+			return
+		}
+
+		err := whatsapp.SendQuoteRequestConfirmation(quote)
+		if err != nil {
+			log.Printf("failed to send quote request confirmation: %v\n", err)
+		}
+	}()
 }
 
 func HandleContactFormSubmission(w http.ResponseWriter, r *http.Request) {

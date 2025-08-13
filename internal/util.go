@@ -114,3 +114,19 @@ func FormatFileSize(bytes int) string {
 	}
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
+
+func FormatPhone(p string) (string, error) {
+	stripCountryCodeExp := regexp.MustCompile(`^\+52`)
+	replaceExp := regexp.MustCompile(`[ -]`)
+	numExp := regexp.MustCompile(`[0-9]{10}`)
+
+	phone := stripCountryCodeExp.ReplaceAll([]byte(p), []byte(""))
+	phone = replaceExp.ReplaceAll(phone, []byte(""))
+
+	if !numExp.Match(phone) {
+		return "", fmt.Errorf("the string is not a valid phone number: %v", p)
+	}
+
+	phoneStr := fmt.Sprintf("52%s", phone)
+	return phoneStr, nil
+}
