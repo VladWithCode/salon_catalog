@@ -114,7 +114,6 @@
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --drop-shadow-lg: 0 4px 4px rgb(0 0 0 / 0.15);
     --ease-in: cubic-bezier(0.4, 0, 1, 1);
-    --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-spin: spin 1s linear infinite;
     --blur-sm: 8px;
@@ -743,9 +742,6 @@
   .min-h-1\/4 {
     min-height: calc(1/4 * 100%);
   }
-  .min-h-\[50vh\] {
-    min-height: 50vh;
-  }
   .min-h-full {
     min-height: 100%;
   }
@@ -862,6 +858,9 @@
   }
   .max-w-sm {
     max-width: var(--container-sm);
+  }
+  .max-w-xl {
+    max-width: var(--container-xl);
   }
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
@@ -4473,6 +4472,26 @@ body {
   background-color: var(--color-gray-200);
   font-family: var(--font-sans);
   color: var(--color-dark);
+}
+@layer base {
+  input[readonly] {
+    pointer-events: none;
+    border-style: var(--tw-border-style);
+    border-width: 0px;
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 2px;
+    border-color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, currentcolor 60%, transparent);
+    }
+    background-color: transparent;
+    padding-inline: calc(var(--spacing) * 1);
+    padding-bottom: calc(var(--spacing) * 1);
+    color: currentcolor;
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, currentcolor 60%, transparent);
+    }
+  }
 }
 @property --tw-translate-x {
   syntax: "*";

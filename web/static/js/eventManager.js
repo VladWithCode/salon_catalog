@@ -9,6 +9,15 @@ class EventManager {
             configRequest: new Map(),
             responseError: new Map(),
         };
+        this.initialized = false;
+        this.initializedHandlers = {
+            afterSwap: false,
+            beforeSwap: false,
+            beforeRequest: false,
+            afterRequest: false,
+            configRequest: false,
+            responseError: false,
+        };
 
         this.initializeListeners();
     }
@@ -17,6 +26,9 @@ class EventManager {
     register(eventType, targetSelector, handler, opts = {}) {
         if (!this.handlers[eventType]) {
             this.handlers[eventType] = new Map();
+            if (!this.initializedHandlers[eventType]) {
+                this.setupListener(eventType);
+            }
         }
 
         const handlerConfig = {
@@ -52,17 +64,22 @@ class EventManager {
             "htmx:responseError",
         ];
 
-        htmxEvents.forEach((eventName) => {
-            const eventType = eventName.replace("htmx:", "");
-            document.body.addEventListener(eventName, (e) => {
-                this.routeEvent(eventType, e);
-            });
-        });
+        htmxEvents.forEach(this.setupListener.bind(this));
 
         // Regular DOM events
         document.addEventListener("click", (e) => {
             this.handleClicks(e);
         });
+
+        this.initialized = true;
+    }
+
+    setupListener(eventName) {
+        const eventType = eventName.replace("htmx:", "");
+        document.body.addEventListener(eventName, (e) => {
+            this.routeEvent(eventType, e);
+        });
+        this.initializedHandlers[eventType] = true;
     }
 
     routeEvent(eventType, event) {

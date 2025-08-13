@@ -16,31 +16,31 @@ templ Products() {
 					</div>
 					<button
 						id="products-actions-toggle"
-						class="shrink flex items-center justify-center text-current/80 xl:hidden"
+						class="shrink flex items-center justify-center text-current/80 xl:hidden cursor-pointer"
 						data-click-handler-selector="products-actions-toggle"
 					>
 						@components.BarsIcon("w-8", nil)
 					</button>
 				</div>
 				<div id="products-actions-all-modal" class="fixed inset-4 z-50 flex items-center justify-center pointer-events-none">
-					<div id="products-actions-all" class="min-h-[50vh] w-full max-w-2xl lg:max-w-4xl xl:max-w-7xl flex flex-col gap-4 bg-gray-50 m-auto px-4 py-6 rounded-lg shadow-xl translate-y-6 opacity-0 pointer-events-none">
+					<div id="products-actions-all" class="w-full max-w-xl flex flex-col gap-4 bg-gray-50 m-auto px-4 py-2 rounded-lg shadow-xl translate-y-6 opacity-0 pointer-events-none">
 						<div class="flex items-start justify-between gap-4 text-dark">
 							<h3 class="text-lg font-bold">Todas las acciones para productos</h3>
 							<button
 								id="products-actions-all-close"
-								class="text-dark/60 p-2"
+								class="text-dark/60 p-2 cursor-pointer"
 								data-click-handler-selector="products-actions-all-close"
 							>
 								@components.TimesIcon("w-8", nil)
 							</button>
 						</div>
-						<div class="flex-1 flex flex-col gap-4 overflow-x">
+						<div class="flex-1 basis-full flex flex-col justify-center gap-4 overflow-x">
 							<button
 								id="products-actions-new"
 								hx-get="/panel/productos/modal/nuevo"
 								hx-target="#products-modal"
 								hx-indicator="#global-loading-indicator"
-								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent cursor-pointer"
 							>
 								@components.PlusIcon("w-5", nil)
 								Nuevo Producto
@@ -52,7 +52,7 @@ templ Products() {
 									hx-target="body"
 									hx-swap="beforeend"
 									hx-target-error="#toaster-container"
-									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent cursor-pointer"
 								>
 									@components.QrCodeIcon("w-5", nil)
 									Generar códigos QR
@@ -61,7 +61,7 @@ templ Products() {
 							<a
 								id="products-actions-download-qrcodes"
 								href="/panel/qrcodes/productos"
-								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent cursor-pointer"
 							>
 								@components.QrCodeIcon("w-5", nil)
 								Descargar códigos QR
@@ -74,7 +74,7 @@ templ Products() {
 								hx-confirm="¿Eliminar los productos seleccionados?"
 								hx-indicator="#products-table-loading"
 								hx-include='[name="product-table-selection"]'
-								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 cursor-pointer disabled:cursor-not-allowed disabled:brightness-80"
 								disabled
 							>
 								@components.BinIcon("w-5", nil)
@@ -531,8 +531,9 @@ templ productsScript() {
             function updateProductsTableSelection() {
                 const totalProds = document.querySelectorAll('[name="product-table-selection"]').length;
                 const selectedProds = document.querySelectorAll('[name="product-table-selection"]:checked');
+                const multiSelectionCtls = document.querySelectorAll('[data-products-multi-action]');
                 if (selectedProds.length === 0) {
-                    document.getElementById('products-multi-selection-delete').disabled = true;
+                    multiSelectionCtls.forEach(ctl => ctl.setAttribute('disabled', true));
                     document.getElementById('products-table-multi-selection-ctl').dataset.multiSelectionMode = 'all';
                     return;
                 }
@@ -543,7 +544,7 @@ templ productsScript() {
                     document.getElementById('products-table-multi-selection-ctl').dataset.multiSelectionMode = 'some';
                 }
 
-                document.getElementById('products-multi-selection-delete').disabled = false;
+                multiSelectionCtls.forEach(ctl => ctl.removeAttribute('disabled'));
             }
 
             function clearProductsTableFilters() {

@@ -164,3 +164,10 @@ html {
 body {
     @apply bg-gray-200 text-dark font-sans;
 }
+
+@layer base {
+
+    input[readonly] {
+        @apply bg-transparent text-current/60 border-0 border-b-2 border-current/60 pb-1 px-1 pointer-events-none;
+    }
+}

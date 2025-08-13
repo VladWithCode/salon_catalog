@@ -179,7 +179,7 @@ templ ProductsPagination(result *db.ProductFilterResult) {
 }
 
 templ ProductModal(product *db.Product, availableCategories []db.Category, err string) {
-	<div id="products-modal-content" class="h-full flex flex-col bg-stone-50 rounded-sm shadow p-2">
+	<div id="products-modal-content" class="h-full xl:max-w-7xl flex flex-col bg-stone-50 rounded-sm shadow p-2 mx-auto">
 		<div class="flex-1 flex justify-between items-center px-2 border-b border-gray-200">
 			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
 				if err != "" {
@@ -235,19 +235,19 @@ templ ProductModal(product *db.Product, availableCategories []db.Category, err s
 			<div class="flex-1 basis-full grid grid-cols-1 grid-rows-1 overflow-hidden">
 				<div
 					id="products-modal-form"
-					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-auto flex flex-col z-10"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden flex flex-col z-10"
 				>
 					@ProductEditForm(product, availableCategories)
 				</div>
 				<div
 					id="products-modal-images"
-					class="relative col-start-1 row-start-1 bg-gray-50 h-full translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
 				>
 					@ProductImagesTab(product, &ProductImagesTabUpdateData{})
 				</div>
 				<div
 					id="products-modal-qrcode"
-					class="relative col-start-1 row-start-1 bg-gray-50 h-full translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none"
 				>
 					@ProductQRCode(product, ProductQRCodeState{})
 				</div>
@@ -299,17 +299,20 @@ templ ProductEditForm(product *db.Product, availableCategories []db.Category) {
 				value={ product.Name }
 				required
 				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				data-products-modal-input="name"
 			/>
 		</div>
 		<div class="space-y-2">
-			<label for="product-slug" class="block text-sm font-medium text-gray-700">Slug</label>
+			<label for="product-slug" class="block text-sm font-medium text-gray-700">Nombre de Catálogo</label>
 			<input
 				id="product-slug"
 				name="slug"
 				type="text"
+				readonly
 				value={ product.Slug }
 				required
-				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				class="block w-full"
+				data-products-modal-input="slug"
 			/>
 		</div>
 		<div class="space-y-2">
