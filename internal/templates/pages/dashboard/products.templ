@@ -305,6 +305,28 @@ templ Products() {
 				data-products-modal="closed"
 			></div>
 		</div>
+		<template id="max-prio-popup">
+			<div class="fixed inset-0 z-60 flex items-center justify-center bg-dark/50 p-4" data-max-prio-popup>
+				<button
+					class="absolute top-0 right-0 z-30 aspect-square rounded-full bg-neutral text-light cursor-pointer rotate-0 scale-100 brightness-100 hover:rotate-90 hover:brightness-105 active:rotate-90 active:scale-95 active:brightness-90 transition-[scale,_rotate,_filter] duration-300"
+					data-click-handler-selector="max-prio-popup-close"
+				>
+					@components.TimesIcon("w-16", nil)
+				</button>
+				<div
+					id="max-prio-popup-content"
+					class="w-full bg-light flex flex-col rounded-lg p-4"
+				></div>
+			</div>
+		</template>
+		<template id="product-modal-image">
+			<img
+				class="w-full my-auto object-contain rounded-lg"
+				src="placeholder.jpg"
+				alt=""
+				data-product-modal-image=""
+			/>
+		</template>
 	}
 }
 
@@ -312,6 +334,8 @@ templ productsScript() {
 	<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 	<script>
         document.addEventListener('DOMContentLoaded', function () {
+            const TMaxPrioPopup = document.getElementById('max-prio-popup');
+
             // Register gsap plugins
             gsap.registerPlugin(window.ScrollTrigger);
 
@@ -542,6 +566,42 @@ templ productsScript() {
                 .register('input', '[name="product-table-selection"]', function (e) {
                     updateProductsTableSelection();
                 })
+                .registerClick('product-modal-images-btn', function (e) {
+                    const target = e.target.matches('[data-click-handler-selector]')
+                        ? e.target
+                        : e.target.closest('[data-click-handler-selector]');
+                    const imgPopup = document.getElementById('max-prio-popup').content.cloneNode(true);
+                    const imgElem = document.getElementById('product-modal-image').content.cloneNode(true);
+                    imgElem.children[0].src = target.querySelector('img').src;
+                    const popupContent = imgPopup.querySelector('#max-prio-popup-content');
+
+                    popupContent.appendChild(imgElem.children[0]);
+                    document.body.appendChild(imgPopup);
+
+                    gsap.set(popupContent, {
+                        opacity: 0,
+                        y: '12rem',
+                        pointerEvents: 'none',
+                    });
+                    gsap.to(popupContent, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: 'power2.in',
+                    });
+                })
+                .registerClick('max-prio-popup-close', function (e) {
+                    gsap.to('[data-max-prio-popup]', {
+                        opacity: 0,
+                        y: '12rem',
+                        pointerEvents: 'none',
+                        ease: 'power2.out',
+                        duration: 0.5,
+                        onComplete: () => {
+                            document.querySelector('[data-max-prio-popup]').remove();
+                        },
+                    });
+                });
 
             function updateProductsTableSelection() {
                 const totalProds = document.querySelectorAll('[name="product-table-selection"]').length;

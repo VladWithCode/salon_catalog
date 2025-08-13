@@ -411,44 +411,49 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 				}}
 				<div class="flex-1 basis-full space-y-4">
 					<h4 class="text-lg tracking-tight text-dark/80">Imágen principal</h4>
-					<div class="flex-1 basis-auto xl:shrink-0 xl:grow-0 xl:h-full w-full aspect-square overflow-hidden rounded-lg scale-100 transition- hover:scale-105">
-						<img src={ fmt.Sprintf("/static/uploads/%s", selectedImgVal) } alt={ product.Name } class="w-full h-full object-cover"/>
-					</div>
-					<div class="max-w-md space-y-2">
-						<button
-							id="products-modal-images-select-main"
-							class="w-full py-2 px-4 rounded-lg bg-accent/90 text-light scale-100 hover:bg-accent active:bg-accent active:scale-95 transition-[transform,_background] cursor-pointer"
-							hx-get={ fmt.Sprintf(
+					<div class="md:flex md:gap-4 space-y-4 md:space-y-0">
+						<div class="max-w-md md:basis-1/2 md:max-w-[initial] space-y-2">
+							<button
+								id="products-modal-images-select-main"
+								class="w-full py-2 px-4 rounded-lg bg-accent/90 text-light scale-100 hover:bg-accent active:bg-accent active:scale-95 transition-[transform,_background] cursor-pointer"
+								hx-get={ fmt.Sprintf(
                                 "/imagenes/selector?update_endpoint=%s&mode=single&title=Seleccionar%%20la%%20imagen%%20principal%%20para%%20%s&max_selection=1&selected_ids=%s&success_target=%s",
                                 url.QueryEscape("/panel/productos/"+product.ID+"/main_img"),
                                 product.Name,
                                 selectedImgVal,
                                 url.QueryEscape("#product-modal-images-main"),
                             ) }
-							hx-target="body"
-							hx-swap="beforeend"
-							hx-indicator="#global-loading-indicator"
-						>
-							Seleccionar otra imágen
-						</button>
-						<button
-							id="products-modal-images-unset-main"
-							class="w-full py-2 px-4 rounded-lg text-red-50 text-light scale-100 bg-red-500 hover:bg-red-600 active:bg-red-600 active:scale-95 transition-[transform,_background] cursor-pointer"
-						>Quitar la imagen principal</button>
+								hx-target="body"
+								hx-swap="beforeend"
+								hx-indicator="#global-loading-indicator"
+							>
+								Seleccionar otra imágen
+							</button>
+							<button
+								id="products-modal-images-unset-main"
+								class="w-full py-2 px-4 rounded-lg text-red-50 text-light scale-100 bg-red-500 hover:bg-red-600 active:bg-red-600 active:scale-95 transition-[transform,_background] cursor-pointer"
+							>Quitar la imagen principal</button>
+						</div>
+						<div class="flex-1 basis-1/2 w-full aspect-square overflow-hidden rounded-lg scale-100 transition-[scale] hover:scale-105">
+							<button
+								type="button"
+								class="h-full w-full"
+								data-click-handler-selector="product-modal-images-btn"
+							>
+								<img
+									src={ fmt.Sprintf("/static/uploads/%s", selectedImgVal) }
+									alt={ product.Name }
+									class="w-full h-full object-cover"
+								/>
+							</button>
+						</div>
 					</div>
 				</div>
 			}
 		</div>
-		<div id="products-modal-images-gallery" class="flex-1 flex flex-col gap-4 overflow-auto">
+		/* <div id="products-modal-images-gallery" class="flex-1 flex flex-col gap-4 overflow-auto">
 			@templ.Fragment("gallerySection") {
 				<h4 class="text-lg tracking-tight text-dark/80">Galería</h4>
-				<div id="products-modal-images-grid" class="h-full grid grid-cols-2 gap-4">
-					for _, image := range product.Gallery {
-						<div class="relative col-span-1 aspect-square rounded-md overflow-hidden border border-gray-200">
-							<img src={ fmt.Sprintf("/static/uploads/%s", image) } alt={ product.Name } class="w-full h-full object-cover"/>
-						</div>
-					}
-				</div>
 				<div class="max-w-md space-y-2">
 					<button
 						id="products-modal-images-select-gallery"
@@ -459,8 +464,25 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 						class="w-full py-2 px-4 rounded-lg text-red-50 text-light scale-100 bg-red-500 hover:bg-red-600 active:bg-red-600 active:scale-95 transition-[transform,_background] cursor-pointer"
 					>Limpiar la galería</button>
 				</div>
+				<div id="products-modal-images-grid" class="h-full grid grid-cols-2 gap-4">
+					for _, image := range product.Gallery {
+						<div class="relative col-span-1 aspect-square rounded-md overflow-hidden border border-gray-200">
+							<button
+								type="button"
+								class="w-full h-full"
+								data-click-handler-selector="product-modal-images-btn"
+							>
+								<img
+									src={ fmt.Sprintf("/static/uploads/%s", image) }
+									alt={ product.Name }
+									class="w-full h-full object-cover"
+								/>
+							</button>
+						</div>
+					}
+				</div>
 			}
-		</div>
+		</div> */
 	</div>
 }
 

@@ -373,6 +373,11 @@ func UpdateProduct(product *Product) error {
 		String: product.MainImg,
 		Valid:  product.MainImg != "",
 	}
+	if _, err := uuid.Parse(product.MainImg); err != nil {
+		mainImg.String = product.MainImgID
+		mainImg.Valid = product.MainImgID != ""
+	}
+
 	args := pgx.NamedArgs{
 		"id":               product.ID,
 		"name":             product.Name,
