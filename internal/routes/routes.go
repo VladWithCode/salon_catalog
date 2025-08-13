@@ -23,6 +23,9 @@ func NewRouter() http.Handler {
 	router.HandleFunc("GET /servicios", publicMiddleware(RenderServices))
 	router.HandleFunc("GET /reservaciones", publicMiddleware(RenderReservations))
 	router.HandleFunc("GET /experiencia", publicMiddleware(RenderSalon))
+	router.HandleFunc("GET /politica-privacidad", publicMiddleware(RenderPrivacyPolicy))
+	router.HandleFunc("GET /terminos-servicio", publicMiddleware(RenderTermsOfService))
+	router.HandleFunc("GET /politica-cookies", publicMiddleware(RenderCookiePolicy))
 	router.HandleFunc("GET /iniciar-sesion", publicMiddleware(auth.PopulateAuth(RenderSignIn)))
 	router.HandleFunc("GET /cerrar-sesion", publicMiddleware(auth.PopulateAuth(SignOut)))
 
@@ -115,6 +118,33 @@ func RenderReservations(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		w.Write([]byte("Something went wrong"))
 		log.Printf("failed to render Gallery err: %v\n", err)
+	}
+}
+
+func RenderPrivacyPolicy(w http.ResponseWriter, r *http.Request) {
+	err := pages.PrivacyPolicy().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render PrivacyPolicy err: %v\n", err)
+	}
+}
+
+func RenderTermsOfService(w http.ResponseWriter, r *http.Request) {
+	err := pages.TermsOfService().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render TermsOfService err: %v\n", err)
+	}
+}
+
+func RenderCookiePolicy(w http.ResponseWriter, r *http.Request) {
+	err := pages.CookiePolicy().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render CookiePolicy err: %v\n", err)
 	}
 }
 

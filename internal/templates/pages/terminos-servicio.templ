@@ -1,0 +1,239 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ TermsOfService() {
+	@termsOfServiceScript()
+	@templates.BaseLayout("Términos de Servicio | Villa Chenacolo", nil, false) {
+		<main class="grid grid-cols-subgrid">
+			<section id="seccion-titulo" class="relative z-0">
+				<div class="absolute inset-0 z-0">
+					<img
+						src="/static/assets/chenacolo_22.jpeg"
+						alt="Villa Chenacolo - Salón de eventos"
+						class="w-full h-full object-cover object-center brightness-75"
+					/>
+				</div>
+				<div class="relative z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/70">
+					<div class="max-w-2xl lg:max-w-5xl xl:max-w-7xl mx-auto text-light">
+						<h1 class="text-3xl sm:text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0" data-view-animate="fadeIn">Términos de Servicio</h1>
+						<p class="text-sm sm:text-base tracking-wide text-current/80 translate-y-6 opacity-0" data-view-animate="fadeIn">
+							Conoce las condiciones que rigen el uso de nuestros servicios en Villa Chenacolo. Transparencia y claridad en cada evento que celebramos contigo.
+						</p>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-aceptacion" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold uppercase mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
+								Aceptación de Términos
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Al contratar nuestros servicios o utilizar nuestras instalaciones, aceptas automáticamente estos términos y condiciones. Si no estás de acuerdo con alguna parte, te recomendamos no proceder con la contratación.
+								</p>
+								<p class="tracking-wide">
+									Estos términos se aplican a todos los servicios ofrecidos por Villa Chenacolo, incluyendo:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Renta de salón principal y espacios exteriores</li>
+									<li>Uso de capilla para ceremonias religiosas</li>
+									<li>Servicios de coordinación y asistencia durante eventos</li>
+									<li>Acceso a instalaciones complementarias (cocina, estacionamiento, etc.)</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-reservaciones" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Reservaciones y Pagos
+							</h2>
+							<div class="space-y-4 text-light/80">
+								<p class="tracking-wide">
+									Para garantizar la disponibilidad de nuestras instalaciones, se requiere:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li><strong>Apartado:</strong> 50% del costo total para reservar la fecha</li>
+									<li><strong>Liquidación:</strong> El saldo restante debe pagarse 15 días antes del evento</li>
+									<li><strong>Formas de pago:</strong> Efectivo, transferencia bancaria o cheque certificado</li>
+									<li><strong>Cotización válida:</strong> Los precios tienen vigencia de 30 días naturales</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									<strong>Importante:</strong> Las reservaciones se confirman únicamente mediante el pago del apartado correspondiente y la firma del contrato de servicios.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-cancelaciones" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Política de Cancelaciones
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Entendemos que pueden surgir circunstancias imprevistas. Nuestra política de cancelaciones es:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li><strong>Más de 60 días:</strong> Reembolso del 80% del apartado</li>
+									<li><strong>Entre 30-60 días:</strong> Reembolso del 50% del apartado</li>
+									<li><strong>Entre 15-30 días:</strong> Reembolso del 25% del apartado</li>
+									<li><strong>Menos de 15 días:</strong> No hay reembolso del apartado</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									En caso de fuerza mayor (desastres naturales, pandemias, etc.), evaluaremos cada caso individualmente para encontrar la mejor solución para ambas partes.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-responsabilidades" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Responsabilidades del Cliente
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Como cliente, te comprometes a:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Utilizar las instalaciones de manera responsable y respetuosa</li>
+									<li>Cumplir con el horario acordado para el evento</li>
+									<li>Informar sobre el número exacto de invitados con 7 días de anticipación</li>
+									<li>Contratar proveedores autorizados y con experiencia comprobable</li>
+									<li>Respetar las normas de seguridad y convivencia del lugar</li>
+									<li>Hacerte responsable por cualquier daño causado por tus invitados</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									Villa Chenacolo se reserva el derecho de suspender cualquier evento que no cumpla con estas condiciones.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-instalaciones" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Uso de Instalaciones
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Nuestras instalaciones incluyen:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Salón principal climatizado con capacidad variable</li>
+									<li>Capilla para ceremonias religiosas</li>
+									<li>Jardines y espacios exteriores</li>
+									<li>Cocina completamente equipada</li>
+									<li>Estacionamiento amplio</li>
+									<li>Baños con áreas privadas</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									<strong>Restricciones:</strong> No se permite el uso de pirotecnia, música a volumen excesivo después de las 12:00 AM, o decoraciones que dañen las instalaciones.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-limitaciones" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Limitaciones de Responsabilidad
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Villa Chenacolo no se hace responsable por:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Objetos personales olvidados o extraviados durante el evento</li>
+									<li>Daños causados por proveedores externos contratados por el cliente</li>
+									<li>Interrupciones por fenómenos meteorológicos extremos</li>
+									<li>Fallas en servicios públicos (luz, agua) fuera de nuestro control</li>
+									<li>Accidentes causados por el consumo irresponsable de alcohol</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									Recomendamos ampliamente contratar un seguro de evento para mayor tranquilidad.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-modificaciones" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Modificaciones y Contacto
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Villa Chenacolo se reserva el derecho de modificar estos términos cuando sea necesario. Los cambios serán comunicados con anticipación razonable.
+								</p>
+								<p class="tracking-wide mt-6">
+									Para consultas sobre estos términos o cualquier aspecto de nuestros servicios:
+								</p>
+								<div class="space-y-2 ml-4">
+									<p><strong>Teléfono:</strong> +52 (618) 155-6407</p>
+									<p><strong>Ubicación:</strong> Villa Chenacolo, Durango</p>
+								</div>
+								<p class="text-sm text-gray-500 mt-8">
+									Última actualización: Agosto 2025
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			@components.CTASection()
+		</main>
+	}
+}
+
+templ termsOfServiceScript() {
+	<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.batch("[data-view-animate]", {
+            start: "top 60%",
+            batchMax: 6,
+            once: true,
+            onEnter: batch => {
+                gsap.to(batch, {
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: "power2.inOut",
+                });
+            },
+        });
+    });
+    </script>
+}

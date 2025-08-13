@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Overload()
+	err := godotenv.Load()
 	if err != nil {
 		log.Printf("failed to set enviroment from file\n%v\n", err)
 	}

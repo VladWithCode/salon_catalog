@@ -99,7 +99,22 @@ func DesktopNavigation(isMainPage bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Contacto</a> <a href=\"/experiencia\" class=\"text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\">Experiencia</a></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"contacto\">Contacto</a> <a href=\"/experiencia\" class=\"text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\">Experiencia</a> <a")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if isMainPage {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " href=\"#seccion-ubicacion\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " href=\"/#seccion-ubicacion\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " class=\"text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link\" data-section=\"ubicacion\">Ubicación</a></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

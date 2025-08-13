@@ -605,6 +605,9 @@
   .ml-3 {
     margin-left: calc(var(--spacing) * 3);
   }
+  .ml-4 {
+    margin-left: calc(var(--spacing) * 4);
+  }
   .ml-8 {
     margin-left: calc(var(--spacing) * 8);
   }
@@ -1766,6 +1769,12 @@
       background-color: color-mix(in oklab, var(--color-primary) 60%, transparent);
     }
   }
+  .bg-primary\/70 {
+    background-color: color-mix(in srgb, #3A2E23 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-primary) 70%, transparent);
+    }
+  }
   .bg-primary\/80 {
     background-color: color-mix(in srgb, #3A2E23 80%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -2719,6 +2728,10 @@
   }
   .brightness-60 {
     --tw-brightness: brightness(60%);
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .brightness-75 {
+    --tw-brightness: brightness(75%);
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
   .brightness-80 {

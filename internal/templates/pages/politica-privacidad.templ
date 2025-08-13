@@ -1,0 +1,204 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ PrivacyPolicy() {
+	@privacyPolicyScript()
+	@templates.BaseLayout("Política de Privacidad | Villa Chenacolo", nil, false) {
+		<main class="grid grid-cols-subgrid">
+			<section id="seccion-titulo" class="relative z-0">
+				<div class="absolute inset-0 z-0">
+					<img
+						src="/static/assets/chenacolo_16.jpeg"
+						alt="Villa Chenacolo - Salón de eventos"
+						class="w-full h-full object-cover object-center brightness-75"
+					/>
+				</div>
+				<div class="relative z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/70">
+					<div class="max-w-2xl lg:max-w-5xl xl:max-w-7xl mx-auto text-light">
+						<h1 class="text-3xl sm:text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0" data-view-animate="fadeIn">Política de Privacidad</h1>
+						<p class="text-sm sm:text-base tracking-wide text-current/80 translate-y-6 opacity-0" data-view-animate="fadeIn">
+							En Villa Chenacolo valoramos y respetamos tu privacidad. Conoce cómo protegemos y utilizamos tu información personal para brindarte la mejor experiencia en nuestros servicios.
+						</p>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-recoleccion" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold uppercase mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
+								Información que Recolectamos
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Recolectamos información que nos proporcionas directamente cuando utilizas nuestros servicios, incluyendo:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Nombre completo y datos de contacto (teléfono, email)</li>
+									<li>Información sobre eventos y fechas de celebración</li>
+									<li>Preferencias de servicios y requerimientos especiales</li>
+									<li>Historial de comunicaciones y consultas</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-uso" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Cómo Utilizamos tu Información
+							</h2>
+							<div class="space-y-4 text-light/80">
+								<p class="tracking-wide">
+									Utilizamos la información recolectada exclusivamente para:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Coordinar y confirmar reservaciones de eventos</li>
+									<li>Personalizar nuestros servicios según tus necesidades</li>
+									<li>Comunicarnos contigo sobre tu evento o consultas</li>
+									<li>Mejorar continuamente nuestros servicios</li>
+									<li>Enviar información relevante sobre promociones (solo con tu consentimiento)</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-proteccion" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Protección de tu Información
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Implementamos medidas de seguridad técnicas y administrativas apropiadas para proteger tu información personal:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Almacenamiento seguro de datos con acceso limitado</li>
+									<li>Cifrado de información sensible durante la transmisión</li>
+									<li>Capacitación regular de nuestro personal sobre privacidad</li>
+									<li>Revisión periódica de nuestros procedimientos de seguridad</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									<strong>Importante:</strong> No vendemos, alquilamos ni compartimos tu información personal con terceros para fines comerciales sin tu consentimiento expreso.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-derechos" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Tus Derechos
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Tienes derecho a:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Acceder a la información personal que tenemos sobre ti</li>
+									<li>Solicitar correcciones o actualizaciones de tus datos</li>
+									<li>Solicitar la eliminación de tu información personal</li>
+									<li>Retirar tu consentimiento para el procesamiento de datos</li>
+									<li>Recibir una copia de tu información en formato portable</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									Para ejercer cualquiera de estos derechos, contáctanos directamente a través de nuestros canales oficiales.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-cookies" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Cookies y Tecnologías Similares
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Nuestro sitio web utiliza cookies esenciales para:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Mantener tus preferencias de navegación</li>
+									<li>Recordar items en tu carrito de cotización</li>
+									<li>Mejorar la funcionalidad del sitio web</li>
+									<li>Proporcionar una experiencia personalizada</li>
+								</ul>
+								<p class="tracking-wide mt-6">
+									Puedes controlar las cookies a través de la configuración de tu navegador, aunque esto podría afectar la funcionalidad del sitio.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-contacto" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Contacto y Actualizaciones
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Si tienes preguntas sobre esta Política de Privacidad o sobre cómo manejamos tu información personal, no dudes en contactarnos:
+								</p>
+								<div class="space-y-2 ml-4">
+									<p><strong>Teléfono:</strong> 618-259-3026</p>
+									<p><strong>Ubicación:</strong> Villa Chenacolo, Durango</p>
+								</div>
+								<p class="tracking-wide mt-6">
+									Esta política puede ser actualizada periódicamente. Te notificaremos sobre cambios importantes a través de nuestros canales oficiales.
+								</p>
+								<p class="text-sm text-current/60 mt-8">
+									Última actualización: Agosto 2025
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			@components.CTASection()
+		</main>
+	}
+}
+
+templ privacyPolicyScript() {
+	<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.batch("[data-view-animate]", {
+            start: "top 60%",
+            batchMax: 6,
+            once: true,
+            onEnter: batch => {
+                gsap.to(batch, {
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: "power2.inOut",
+                });
+            },
+        });
+    });
+    </script>
+}
