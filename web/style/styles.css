@@ -166,8 +166,11 @@ body {
 }
 
 @layer base {
-
     input[readonly] {
         @apply bg-transparent text-current/60 border-0 border-b-2 border-current/60 pb-1 px-1 pointer-events-none;
+    }
+
+    *[disabled] {
+        @apply opacity-80 brightness-80;
     }
 }

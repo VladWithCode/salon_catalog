@@ -45,6 +45,7 @@ templ Products() {
 								@components.PlusIcon("w-5", nil)
 								Nuevo Producto
 							</button>
+							@components.MenuSectionSep("Códigos QR")
 							@templ.Fragment("actionsGenerateQrCodes") {
 								<button
 									id="products-actions-download-qrcodes"
@@ -66,6 +67,17 @@ templ Products() {
 								@components.QrCodeIcon("w-5", nil)
 								Descargar códigos QR
 							</a>
+							/* <a
+								id="products-actions-download-qrcodes"
+								href="/panel/qrcodes/productos"
+								hx-include="[name='product-table-selection']"
+								class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent cursor-pointer"
+								data-products-multi-action="download-qrcodes"
+							>
+								@components.QrCodeIcon("w-5", nil)
+								Descargar códigos QR (selección)
+							</a> */
+							@components.MenuSectionSep("Multiselección")
 							<button
 								id="products-multi-selection-delete"
 								data-products-multi-action="delete"
@@ -317,6 +329,13 @@ templ productsScript() {
                 y: '0rem',
             }, "-=0.1");
 
+            // Disable multiselection actions on load
+            document.querySelectorAll('[data-products-multi-action]').forEach(ctl => {
+                ctl.setAttribute('disabled', true)
+                ctl.style.pointerEvents = 'none';
+                ctl.style.cursor = 'not-allowed';
+            });
+
             eventManager
                 .register('beforeRequest', '#products-table', function (e) {
                     gsap.set('[data-products-table-container]', { pointerEvents: 'none' });
@@ -519,21 +538,28 @@ templ productsScript() {
                         ease: 'power2.in',
                         duration: 0.5,
                     });
-                });
-
-            document.addEventListener('input', function (e) {
-                if (!e.target.matches('[name="product-table-selection"]')) {
-                    return;
-                }
-                updateProductsTableSelection();
-            });
+                })
+                .register('input', '[name="product-table-selection"]', function (e) {
+                    updateProductsTableSelection();
+                })
 
             function updateProductsTableSelection() {
                 const totalProds = document.querySelectorAll('[name="product-table-selection"]').length;
                 const selectedProds = document.querySelectorAll('[name="product-table-selection"]:checked');
                 const multiSelectionCtls = document.querySelectorAll('[data-products-multi-action]');
+                const selectionAsStr = Array.from(selectedProds).map(input => input.value).join(',');
+
                 if (selectedProds.length === 0) {
-                    multiSelectionCtls.forEach(ctl => ctl.setAttribute('disabled', true));
+                    multiSelectionCtls.forEach(ctl => {
+                        ctl.setAttribute('disabled', true)
+                        ctl.style.pointerEvents = 'none';
+                        ctl.style.cursor = 'not-allowed';
+
+                        if (ctl.dataset.productsMultiAction === 'download-qrcodes' && ctl.nodeName === 'A') {
+                            let newUrl = new URL(ctl.href);
+                            newUrl.searchParams.delete('ids');
+                        }
+                    });
                     document.getElementById('products-table-multi-selection-ctl').dataset.multiSelectionMode = 'all';
                     return;
                 }
@@ -544,7 +570,17 @@ templ productsScript() {
                     document.getElementById('products-table-multi-selection-ctl').dataset.multiSelectionMode = 'some';
                 }
 
-                multiSelectionCtls.forEach(ctl => ctl.removeAttribute('disabled'));
+                multiSelectionCtls.forEach(ctl => {
+                    ctl.removeAttribute('disabled')
+                    ctl.style.pointerEvents = 'auto';
+                    ctl.style.cursor = 'pointer';
+
+                    if (ctl.dataset.productsMultiAction === 'download-qrcodes' && ctl.nodeName === 'A') {
+                        let newUrl = new URL(ctl.href);
+                        newUrl.searchParams.set('ids', selectionAsStr);
+                        ctl.href = newUrl.toString();
+                    }
+                });
             }
 
             function clearProductsTableFilters() {
