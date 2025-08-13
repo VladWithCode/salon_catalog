@@ -286,7 +286,7 @@ templ EmptyCart() {
 				data-click-handler-selector="browse-trigger,cart-close"
 				data-browse-catalog
 			>
-				Ver Catálogo
+				Regresar al catálogo
 			</button>
 		</div>
 	</div>
@@ -326,10 +326,6 @@ templ CartScript() {
                     
                     if (event.detail.xhr.status !== 200) {
                         return;
-                    }
-                    // Check if this was triggered by add to cart
-                    if (event.detail.xhr.getResponseHeader('HX-Cart-Updated')) {
-                        this.showCartNotification();
                     }
                 }
 
@@ -410,40 +406,6 @@ templ CartScript() {
                             ease: "power2.out" 
                         }
                     );
-                }
-
-                showCartNotification() {
-                    // Create temporary notification
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-60 opacity-0';
-                    notification.textContent = 'Elementos añadidos al carrito';
-                    document.body.appendChild(notification);
-
-                    // Animate in and out
-                    gsap.timeline()
-                        .to(notification, { opacity: 1, y: 0, duration: 0.3 })
-                        .to(notification, { opacity: 0, y: -20, duration: 0.3, delay: 2 })
-                        .call(() => notification.remove());
-                }
-
-                // Public method to add items programmatically
-                addToCart(productId, source = 'catalog') {
-                    fetch('/cart/add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            product_id: productId,
-                            source: source
-                        })
-                    })
-                    .then(response => response.text())
-                    .then(html => {
-                        document.getElementById('cart-sidebar').innerHTML = html;
-                        this.updateCartCount();
-                        this.showCartNotification();
-                    });
                 }
             }
             window.cartManager = new CartManager();

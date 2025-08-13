@@ -69,7 +69,7 @@ templ Footer() {
 					class="col-span-full border-t border-slate-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"
 				>
 					<p class="text-slate-600 text-sm">
-						© 2023 Salon Eventos. Todos los derechos reservados.
+						© 2025 Villa Chenacolo. Todos los derechos reservados.
 					</p>
 					<div class="flex space-x-6 text-sm">
 						<a href="#" class="text-dark hover:text-accent transition-colors">
@@ -131,7 +131,7 @@ var footerNavLinks = [][2]string{
 templ footerNav() {
 	{{ isMainPage := util.ExtractURLPath(ctx) == "/" }}
 	<div class="space-y-4">
-		<h4 class="font-medium text-current/80">Navegación</h4>
+		<h4 class="font-medium text-current/80">Explora el sitio</h4>
 		<ul class="space-y-2 text-sm">
 			for _, link := range footerNavLinks {
 				<li>

@@ -274,6 +274,10 @@ func FindCatalogProducts(categoryID string, search string, page int, limit int) 
 			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
 		}
 
+		if product.Quantity <= 0 {
+			product.Available = false
+		}
+
 		products = append(products, &product)
 	}
 
