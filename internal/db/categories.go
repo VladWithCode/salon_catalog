@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/vladwithcode/salon_catalog/internal"
 )
 
 type Category struct {
@@ -65,6 +66,10 @@ func CreateCategory(category *Category) error {
 	displayImg := sql.NullString{
 		String: category.DisplayImg,
 		Valid:  category.DisplayImg != "",
+	}
+
+	if category.Slug == "" {
+		category.Slug = internal.Slugify(category.Name)
 	}
 
 	args := pgx.NamedArgs{
@@ -264,6 +269,9 @@ func UpdateCategory(category *Category) error {
 	displayImg := sql.NullString{
 		String: category.DisplayImg,
 		Valid:  category.DisplayImg != "",
+	}
+	if category.Slug == "" {
+		category.Slug = internal.Slugify(category.Name)
 	}
 	args := pgx.NamedArgs{
 		"id":              category.ID,
@@ -559,7 +567,7 @@ func UpdateCategoryImages(categoryId string, imageIds []string) error {
 		mainImageId = imageIds[0] // Use first image as main image
 	}
 
-	_, err = tx.Exec(ctx, 
+	_, err = tx.Exec(ctx,
 		"UPDATE categories SET main_image = $1 WHERE id = $2",
 		mainImageId, categoryId)
 	if err != nil {
