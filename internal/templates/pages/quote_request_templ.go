@@ -86,7 +86,7 @@ func QuoteRequest(formState *QuoteRequestFormState) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"quote-request-form\" hx-post=\"/solicitar-cotizacion\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 max-w-full w-min rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 md:px-6 md:py-8 space-y-6 md:space-y-8\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"quote-request-form\" hx-post=\"/solicitar-cotizacion\" hx-target-5xx=\"#quote-request-form\" hx-target-4xx=\"#quote-request-form\" hx-swap=\"outerHTML\" hx-indicator=\".form-loading\" class=\"bg-stone-50 max-w-full rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 md:px-6 md:py-8 space-y-6 md:space-y-8\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
