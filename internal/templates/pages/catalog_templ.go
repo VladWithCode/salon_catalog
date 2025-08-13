@@ -83,7 +83,7 @@ func Catalog(state *CatalogState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div class=\"fixed bottom-20 right-4 z-40\"><button id=\"scroll-top-btn\" class=\"bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none\"><svg class=\"w-8 h-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"5\" d=\"M5 15l7-7 7 7\"></path></svg></button></div><div id=\"scroll-top-btn-threshold\" class=\"absolute top-[20vh] inset-x-0 h-0 w-full\"></div><!-- Hero Section --> <section class=\"relative overflow-hidden\"><div class=\"absolute inset-0\"><img src=\"/static/assets/chenacolo-st-1.jpg\" alt=\"Catálogo de equipos\" class=\"w-full h-full object-cover brightness-80\"></div><div class=\"bg-primary/60 relative text-light pt-32 pb-20 space-y-4 z-10\"><h1 class=\"text-4xl lg:text-6xl leading-tight font-bold max-w-2xl md:max-w-4xl xl:max-w-7xl px-4 mx-auto uppercase opacity-0\" data-view-animate=\"fadeIn\">Catálogo  <span class=\"whitespace-nowrap\">Villa Chenacolo</span></h1><p class=\"text-current/80 max-w-2xl md:max-w-4xl xl:max-w-7xl px-4 mx-auto opacity-0\" data-view-animate=\"fadeIn\">Explora nuestro catálogo de productos. Cada uno de ellos ha sido elegido buscando el balance perfecto para ser funcional y tener gran estilo.</p></div></section><!-- Wizard vs Browse Choice -->  <div id=\"catalog-browse\" class=\"relative\"><!-- Search Bar --><section class=\"py-4 px-4 bg-white\" id=\"catalog-search\" data-active-search=\"\"><div class=\"max-w-6xl mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div class=\"fixed bottom-20 right-4 z-40\"><button id=\"scroll-top-btn\" class=\"bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none\"><svg class=\"w-8 h-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"5\" d=\"M5 15l7-7 7 7\"></path></svg></button></div><div id=\"scroll-top-btn-threshold\" class=\"absolute top-[20vh] inset-x-0 h-0 w-full\"></div><!-- Hero Section --> <section class=\"relative overflow-hidden\"><div class=\"absolute inset-0\"><img src=\"/static/assets/chenacolo-st-1.jpg\" alt=\"Catálogo de equipos\" class=\"w-full h-full object-cover brightness-80\"></div><div class=\"relative z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/60\"><div class=\"max-w-2xl lg:max-w-5xl xl:max-w-7xl mx-auto text-light\"><h1 class=\"text-3xl sm:text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0\" data-view-animate=\"fadeIn\">Catálogo  <span class=\"whitespace-nowrap\">Villa Chenacolo</span></h1><p class=\"text-sm sm:text-base tracking-wide text-current/80 translate-y-6 opacity-0\" data-view-animate=\"fadeIn\">Explora nuestro catálogo de productos. Cada uno de ellos ha sido elegido buscando el balance perfecto para ser funcional y tener gran estilo.</p></div></div></section><!-- Wizard vs Browse Choice -->  <div id=\"catalog-browse\" class=\"relative\"><!-- Search Bar --><section class=\"py-4 px-4 bg-white\" id=\"catalog-search\" data-active-search=\"\"><div class=\"max-w-6xl mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -103,7 +103,7 @@ func Catalog(state *CatalogState) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(state.Serialize())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 134, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 136, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -142,7 +142,7 @@ func Catalog(state *CatalogState) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(state.Serialize())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 165, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/catalog.templ`, Line: 167, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
