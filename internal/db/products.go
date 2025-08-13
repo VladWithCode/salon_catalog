@@ -48,6 +48,7 @@ const (
 )
 
 type ProductFilterParams struct {
+	IDs        []string   `json:"ids"`
 	Search     string     `json:"search"`
 	SearchMode SearchMode `json:"search_mode"`
 	Category   string     `json:"category"`
@@ -599,6 +600,11 @@ func FilterProducts(filters ProductFilterParams) (*ProductFilterResult, error) {
 func buildQueryConditions(filters ProductFilterParams) ([]string, pgx.NamedArgs) {
 	var conditions []string
 	namedArgs := make(pgx.NamedArgs)
+
+	if len(filters.IDs) > 0 {
+		conditions = append(conditions, "id = ANY(@ids)")
+		namedArgs["ids"] = filters.IDs
+	}
 
 	// Add search condition
 	if filters.Search != "" {
