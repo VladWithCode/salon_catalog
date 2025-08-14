@@ -17,8 +17,15 @@ templ ContactRequests() {
 						<p class="text-xs text-current/50">Administra las solicitudes de cotización recibidas por el sitio web.</p>
 					</div>
 				</div>
-				<div class="py-2 border-t border-primary/70">
-					<div class="flex flex-col gap-2">
+				<div class="py-2">
+					<div class="flex flex-col xl:flex-row xl:grid xl:grid-cols-5 xl:auto-rows-min gap-2">
+						<div class="xl:self-center xl:col-span-full">
+							@components.MenuSectionSep(components.MenuSectionSepParams{
+								Title:          "Multiselección",
+								PillClass:      "text-xs text-neutral/70 bg-gray-200",
+								SeparatorClass: "h-px bg-neutral",
+							})
+						</div>
 						<button
 							id="contact-requests-multi-selection-process"
 							data-contact-requests-multi-action="process"
@@ -27,7 +34,7 @@ templ ContactRequests() {
 							hx-confirm="¿Marcar las solicitudes seleccionadas como procesadas?"
 							hx-indicator="#contact-requests-table-loading"
 							hx-include='[name="contact-request-table-selection"]'
-							class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-green-600 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-green-600/80 disabled:cursor-not-allowed disabled:brightness-80"
+							class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow xl:basis-1/2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-gray-700/80 disabled:cursor-not-allowed disabled:brightness-80"
 							disabled
 						>
 							@components.CheckIcon("w-4", nil)
@@ -41,13 +48,13 @@ templ ContactRequests() {
 							hx-confirm="¿Eliminar las solicitudes seleccionadas? Esta acción no se puede deshacer."
 							hx-indicator="#contact-requests-table-loading"
 							hx-include='[name="contact-request-table-selection"]'
-							class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+							class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow-1 xl:basis-1/2 px-4 py-2 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
 							disabled
 						>
 							@components.BinIcon("w-4", nil)
 							Eliminar Selección
 						</button>
-						<div class="relative z-0 -my-1">
+						<div class="relative z-0 -my-1 xl:col-span-full">
 							<div class="absolute z-0 top-1/2 inset-x-0 -translate-y-1/2 h-px w-full bg-current/70"></div>
 							<p class="relative left-4 w-fit text-xs text-current/70 px-4 py-2 bg-gray-200 z-10">Filtros</p>
 						</div>
@@ -175,7 +182,7 @@ templ ContactRequests() {
 			></div>
 			<div
 				id="contact-requests-modal"
-				class="relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+				class="relative w-full max-w-xl xl:max-w-5xl p-2 overflow-hidden z-20 translate-y-12 opacity-0"
 				data-contact-requests-modal="closed"
 			></div>
 		</div>

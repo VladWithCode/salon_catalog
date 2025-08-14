@@ -142,44 +142,12 @@ func FindQuoteByID(id string) (*Quote, error) {
 	err = conn.QueryRow(
 		ctx,
 		`SELECT
-			q.id,
-			q.customer_name,
-			q.customer_phone,
-			q.time_start,
-			q.time_end,
-			q.cart_id,
-			q.request_type,
-			q.status,
-			q.comments,
-			q.event_kind_id,
-			ek.name AS event_kind_name,
-			q.created_at,
-			q.updated_at,
-			COALESCE(
-				json_agg(
-					json_build_object(
-						'product_id', ci.product_id,
-						'product_name', p.name,
-						'product_slug', p.slug,
-						'product_description', p.description,
-						'product_long_description', p.long_description,
-						'quantity', ci.quantity,
-						'source', ci.source,
-						'available', p.available
-					)
-				) FILTER (WHERE ci.product_id IS NOT NULL),
-				'[]'::json
-			) AS cart_items
-		FROM quotes q
-		LEFT JOIN cart_items ci ON q.cart_id = ci.cart_id
-		LEFT JOIN products p ON ci.product_id = p.id
-		LEFT JOIN event_kinds ek ON q.event_kind_id = ek.id
-		WHERE q.id = $1
-		GROUP BY
-    q.id, q.customer_name, q.customer_phone, q.time_start,
-    q.time_end, q.cart_id, q.request_type, q.status,
-    q.comments, q.event_kind_id, q.created_at, q.updated_at,
-	ek.name;`,
+			id, customer_name, customer_phone, time_start, time_end, cart_id, 
+			request_type, status, comments, event_kind_id, event_kind_name, 
+			created_at, updated_at, cart_items
+		FROM quote_details
+		WHERE id = $1
+		`,
 		id,
 	).Scan(
 		&quote.ID,
