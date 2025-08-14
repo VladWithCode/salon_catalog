@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -136,16 +137,49 @@ func FindQuoteByID(id string) (*Quote, error) {
 
 	var quote Quote
 	var timeStart, timeEnd sql.NullTime
+	var jsonItems []byte
 
 	err = conn.QueryRow(
 		ctx,
-		`SELECT 
-			q.id, q.customer_name, q.customer_phone, q.time_start, q.time_end, q.status, 
-			q.comments, q.cart_id, q.request_type, q.event_kind_id, 
-			ek.name AS event_kind_name, q.created_at, q.updated_at
+		`SELECT
+			q.id,
+			q.customer_name,
+			q.customer_phone,
+			q.time_start,
+			q.time_end,
+			q.cart_id,
+			q.request_type,
+			q.status,
+			q.comments,
+			q.event_kind_id,
+			ek.name AS event_kind_name,
+			q.created_at,
+			q.updated_at,
+			COALESCE(
+				json_agg(
+					json_build_object(
+						'product_id', ci.product_id,
+						'product_name', p.name,
+						'product_slug', p.slug,
+						'product_description', p.description,
+						'product_long_description', p.long_description,
+						'quantity', ci.quantity,
+						'source', ci.source,
+						'available', p.available
+					)
+				) FILTER (WHERE ci.product_id IS NOT NULL),
+				'[]'::json
+			) AS cart_items
 		FROM quotes q
-			LEFT JOIN event_kinds ek ON q.event_kind_id = ek.id
-		WHERE q.id = $1`,
+		LEFT JOIN cart_items ci ON q.cart_id = ci.cart_id
+		LEFT JOIN products p ON ci.product_id = p.id
+		LEFT JOIN event_kinds ek ON q.event_kind_id = ek.id
+		WHERE q.id = $1
+		GROUP BY
+    q.id, q.customer_name, q.customer_phone, q.time_start,
+    q.time_end, q.cart_id, q.request_type, q.status,
+    q.comments, q.event_kind_id, q.created_at, q.updated_at,
+	ek.name;`,
 		id,
 	).Scan(
 		&quote.ID,
@@ -153,14 +187,15 @@ func FindQuoteByID(id string) (*Quote, error) {
 		&quote.CustomerPhone,
 		&timeStart,
 		&timeEnd,
-		&quote.Status,
-		&quote.Comments,
 		&quote.CartID,
 		&quote.RequestType,
+		&quote.Status,
+		&quote.Comments,
 		&quote.EventKindID,
 		&quote.EventKindName,
 		&quote.CreatedAt,
 		&quote.UpdatedAt,
+		&jsonItems,
 	)
 	if err != nil {
 		return nil, err
@@ -172,6 +207,14 @@ func FindQuoteByID(id string) (*Quote, error) {
 	}
 	if timeEnd.Valid {
 		quote.TimeEnd = &timeEnd.Time
+	}
+
+	if len(jsonItems) > 0 {
+		quote.Cart = &Cart{}
+		err = json.Unmarshal(jsonItems, &quote.Cart.Items)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal cart items: %w", err)
+		}
 	}
 
 	return &quote, nil
