@@ -78,6 +78,12 @@
     .bg-paper {
         background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
         background-blend-mode: luminosity, color;
+
+        @variant md {
+            background: 
+                url("/static/assets/bg_texture_lg.jpeg") 0/100% repeat, 
+                linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
+        }
     }
     .bg-paper-dark {
         background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-primary), var(--color-primary));

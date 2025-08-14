@@ -39,23 +39,112 @@ func QuickActions() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"h-px border-t border-gray-200 pb-2\"></div><div id=\"quick-actions-list\" class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden\" data-quick-actions-open=\"true\"><a href=\"/panel/productos/nuevo\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button><div class=\"h-px border-t border-gray-200 pb-2\"></div><div id=\"quick-actions-list\" class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden\" data-quick-actions-open=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.PlusIcon("w-5 h-5 text-blue-600", nil).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = QuickActionCard(&QuickAction{
+			Name:  "Nuevo producto",
+			Label: "Crear nuevo producto",
+			Icon:  components.PlusIcon("w-5 h-5 text-blue-600", nil),
+			Href:  "/panel/productos/nuevo",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><p class=\"font-medium text-gray-900\">Nuevo producto</p><p class=\"text-sm text-gray-600\">Crear nuevo producto</p></div></a> <a href=\"/panel/asistente/nuevo\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4\"><svg class=\"w-5 h-5\"><use href=\"/static/assets/wizard.svg#wizard\"></use></svg></div><div><p class=\"font-medium text-gray-900\">Nuevo asistente</p><p class=\"text-sm text-gray-600\">Crear nuevo asistente de planeación</p></div></a> <a href=\"/panel/solicitudes\" class=\"flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4\">")
+		templ_7745c5c3_Err = QuickActionCard(&QuickAction{
+			Name:  "Ver mensajes",
+			Label: "Solicitudes de contacto",
+			Icon:  components.EmailIcon("w-5 h-5 text-green-600", nil),
+			Href:  "/panel/solicitudes",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.EmailIcon("w-5 h-5 text-green-600", nil).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><p class=\"font-medium text-gray-900\">Ver mensajes</p><p class=\"text-sm text-gray-600\">Solicitudes de contacto</p></div></a></div></div>")
+		return nil
+	})
+}
+
+type QuickAction struct {
+	Name  string
+	Label string
+	Icon  templ.Component
+	Href  string
+}
+
+func QuickActionCard(action *QuickAction) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 templ.SafeURL
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(action.Href)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/quick_actions.templ`, Line: 88, Col: 20}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"flex items-center bg-gray-100 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors\"><div class=\"w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = action.Icon.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div><p class=\"font-medium text-gray-900\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(action.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/quick_actions.templ`, Line: 95, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p><p class=\"text-sm text-gray-600\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(action.Label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/quick_actions.templ`, Line: 96, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p></div></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

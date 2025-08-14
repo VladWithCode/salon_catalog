@@ -24,7 +24,7 @@ templ SignIn(formState *FormState) {
 					hx-target-4xx="#signin-form"
 					hx-swap="outerHTML"
 					hx-indicator=""
-					class="bg-stone-50 w-4/5 rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6"
+					class="bg-stone-50 w-4/5 max-w-lg rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6"
 					if formState.UserError != "" || formState.PasswordError != "" {
 						data-invalid="true"
 					}

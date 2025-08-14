@@ -83,7 +83,7 @@ templ QuoteRequest(formState *QuoteRequestFormState) {
 								<div class="space-y-4 md:grid md:grid-rows-subgrid md:row-span-2 md:space-y-0">
 									@components.Input(components.InputProps{
 										Name:     "event_date",
-										Type:     "datetime-local",
+										Type:     "date",
 										Value:    formState.EventDateValue,
 										Label:    "Fecha y hora del evento",
 										Required: false,
@@ -217,11 +217,16 @@ templ QuoteRequest(formState *QuoteRequestFormState) {
 								<button
 									type="submit"
 									class="flex-1 bg-accent text-base md:text-lg text-light font-bold py-3 px-6 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500 relative"
+									id="quote-request-submit-btn"
 								>
 									<span class="form-loading htmx-indicator absolute inset-0 flex items-center justify-center">
 										@components.LoadingIcon("w-6 md:w-8 text-light", nil)
 									</span>
-									<span class="form-submit-text">Solicitar Cotización</span>
+									if len(formState.Cart) > 0 {
+										<span class="form-submit-text">Solicitar Cotización</span>
+									} else {
+										<span class="form-submit-text">Consultar Disponibilidad</span>
+									}
 								</button>
 							</div>
 						</form>

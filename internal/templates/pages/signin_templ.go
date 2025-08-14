@@ -52,7 +52,7 @@ func SignIn(formState *FormState) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-0 z-0\"><form id=\"signin-form\" hx-post=\"/api/sign-in\" hx-select=\"#signin-form\" hx-target-5xx=\"#signin-form\" hx-target-4xx=\"#signin-form\" hx-swap=\"outerHTML\" hx-indicator=\"\" class=\"bg-stone-50 w-4/5 rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"relative min-h-screen z-0 bg-brand-1-lg overflow-hidden\" hx-ext=\"response-targets\"><div class=\"absolute inset-0 z-0 bg-paper\" style=\"clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);\"></div><div class=\"absolute flex items-center justify-center inset-0 z-0\"><form id=\"signin-form\" hx-post=\"/api/sign-in\" hx-select=\"#signin-form\" hx-target-5xx=\"#signin-form\" hx-target-4xx=\"#signin-form\" hx-swap=\"outerHTML\" hx-indicator=\"\" class=\"bg-stone-50 w-4/5 max-w-lg rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

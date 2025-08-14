@@ -9,7 +9,7 @@ import (
 
 templ ProductsTable(result *db.ProductFilterResult) {
 	<span id="products-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Products)) }/ { fmt.Sprintf("%d", result.Total) })</span>
-	<div class="max-w-screen-xl flex flex-col p-1 mx-auto">
+	<div class="flex flex-col p-1 mx-auto">
 		if result.HasError {
 			<div class="flex-1 flex items-center justify-center gap-4 p-4">
 				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
