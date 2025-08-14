@@ -5,10 +5,20 @@ import (
 	"net/url"
 )
 
-templ MenuSectionSep(title string) {
-	<div class="relative z-0 px-4">
-		<div class="absolute z-0 inset-x-0 top-1/2 h-px bg-neutral"></div>
-		<p class="relative z-10 w-fit text-xs px-4 text-current/50 bg-gray-50">{ title }</p>
+type MenuSectionSepParams struct {
+	Title          string `json:"title"`
+	PillClass      string `json:"pillClass"`
+	SeparatorClass string `json:"separatorClass"`
+}
+
+templ MenuSectionSep(params MenuSectionSepParams) {
+	<div class="relative flex items-center z-0 px-4">
+		<div
+			class={ "absolute z-0 inset-x-0 top-1/2", params.SeparatorClass }
+		></div>
+		<p
+			class={ "relative z-10 w-fit px-4 text-current/50", params.PillClass }
+		>{ params.Title }</p>
 	</div>
 }
 

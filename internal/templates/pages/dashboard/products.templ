@@ -45,7 +45,11 @@ templ Products() {
 								@components.PlusIcon("w-5", nil)
 								Nuevo Producto
 							</button>
-							@components.MenuSectionSep("Códigos QR")
+							@components.MenuSectionSep(components.MenuSectionSepParams{
+								Title:          "Códigos QR",
+								PillClass:      "text-xs text-neutral/70 bg-gray-50",
+								SeparatorClass: "h-px bg-neutral",
+							})
 							@templ.Fragment("actionsGenerateQrCodes") {
 								<button
 									id="products-actions-download-qrcodes"
@@ -77,7 +81,11 @@ templ Products() {
 								@components.QrCodeIcon("w-5", nil)
 								Descargar códigos QR (selección)
 							</a> */
-							@components.MenuSectionSep("Multiselección")
+							@components.MenuSectionSep(components.MenuSectionSepParams{
+								Title:          "Multiselección",
+								PillClass:      "text-xs text-neutral/70 bg-gray-50",
+								SeparatorClass: "h-px bg-neutral",
+							})
 							<button
 								id="products-multi-selection-delete"
 								data-products-multi-action="delete"

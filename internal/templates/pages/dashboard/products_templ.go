@@ -80,7 +80,11 @@ func Products() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.MenuSectionSep("Códigos QR").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.MenuSectionSep(components.MenuSectionSepParams{
+				Title:          "Códigos QR",
+				PillClass:      "text-xs text-neutral/70 bg-gray-50",
+				SeparatorClass: "h-px bg-neutral",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -126,7 +130,11 @@ func Products() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.MenuSectionSep("Multiselección").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.MenuSectionSep(components.MenuSectionSepParams{
+				Title:          "Multiselección",
+				PillClass:      "text-xs text-neutral/70 bg-gray-50",
+				SeparatorClass: "h-px bg-neutral",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
