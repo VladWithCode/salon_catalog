@@ -300,44 +300,16 @@ templ quoteCartItem(item *db.CartItem) {
 
 templ quoteRequestScript() {
 	<script>
-		// Form data change tracking
-		let formChanged = false;
-		
-		// Navigation confirmation
-		function confirmNavigation() {
-			if (formChanged) {
-				return confirm('¿Estás seguro de que quieres salir? Se perderán los datos del formulario.');
-			}
-			return true;
-		}
-		
-		// Make confirmNavigation globally available
-		window.confirmNavigation = confirmNavigation;
-		
 		document.addEventListener('DOMContentLoaded', function() {
-			const form = document.getElementById('quote-request-form');
-			// Track form changes
-			if (form) {
-				form.addEventListener('input', function() {
-					formChanged = true;
-				});
-				
-				form.addEventListener('change', function() {
-					formChanged = true;
-				});
-			}
-		
-			// Handle form submission animations
             eventManager
                 .register('beforeRequest', '#quote-request-form', function(e) {
                 }, { preventExternal: true })
                 .register('afterRequest', '#quote-request-form', function(e) {
 					if (e.detail.xhr.status === 200) {
-						formChanged = false;
 						// Redirect will be handled by server response
 						setTimeout(() => {
 							window.location.href = '/';
-						}, 2000);
+						}, 2600);
 					}
                 }, { preventExternal: true })
 		});
