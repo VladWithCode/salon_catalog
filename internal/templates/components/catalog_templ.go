@@ -846,7 +846,7 @@ func ProductModal(state *ProductModalState) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<p class=\"text-primary text-center\">Añadiendo...</p></div><span>Añadir al carrito</span></button></div><!-- Content --> <div class=\"relative z-10 min-h-full w-full xl:flex-1 flex flex-col gap-4 px-4 pb-18 text-center overflow-hidden xl:overflow-y-auto bg-linear-to-b from-light/0 to-light to-[50vh] xl:from-light pt-[50vh] xl:pt-4\"><div class=\"text-primary p-4 py-2 translate-y-6 opacity-0\" data-modal-animate-enter><span class=\"font-light text-current/80 sm:text-lg\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<p class=\"text-primary text-center\">Añadiendo...</p></div><span>Añadir al carrito</span></button></div><!-- Content --> <div class=\"relative z-10 min-h-full w-full xl:flex-1 flex flex-col gap-4 px-4 pb-18 text-center overflow-hidden xl:overflow-y-auto bg-linear-to-b from-light/0 to-light to-[64vh] xl:from-light pt-[64vh] xl:pt-4\"><div class=\"text-primary p-4 py-2 translate-y-6 opacity-0\" data-modal-animate-enter><span class=\"font-light text-current/80 sm:text-lg\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

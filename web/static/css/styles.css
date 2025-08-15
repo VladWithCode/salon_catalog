@@ -2025,6 +2025,12 @@
   .to-\[50vh\] {
     --tw-gradient-to-position: 50vh;
   }
+  .to-\[60vh\] {
+    --tw-gradient-to-position: 60vh;
+  }
+  .to-\[64vh\] {
+    --tw-gradient-to-position: 64vh;
+  }
   .bg-contain {
     background-size: contain;
   }
@@ -2192,6 +2198,12 @@
   }
   .pt-\[50vh\] {
     padding-top: 50vh;
+  }
+  .pt-\[60vh\] {
+    padding-top: 60vh;
+  }
+  .pt-\[64vh\] {
+    padding-top: 64vh;
   }
   .pr-2 {
     padding-right: calc(var(--spacing) * 2);
