@@ -5070,6 +5070,11 @@
       width: 100%;
     }
   }
+  .xl\:max-w-2xl {
+    @media (width >= 80rem) {
+      max-width: var(--container-2xl);
+    }
+  }
   .xl\:max-w-5xl {
     @media (width >= 80rem) {
       max-width: var(--container-5xl);

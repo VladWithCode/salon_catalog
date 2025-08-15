@@ -138,7 +138,7 @@ func AdminLayout(title string, headerTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div id=\"global-loading-indicator\" class=\"global-loading-indicator fixed inset-0 z-50 flex items-center justify-center overflow-hidden opacity-0 pointer-events-none\" data-global-loading-indicator=\"idle\"><div id=\"global-loading-backdrop\" class=\"gli-backdrop absolute h-full w-full z-0 bg-dark/30\"></div><div id=\"global-loading-indicator-content\" class=\"gli-content relative z-10 w-full max-w-9/10 aspect-4/3 bg-secondary rounded-sm flex flex-col items-center justify-center gap-4 p-4 translate-y-12 opacity-0 text-primary\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div id=\"global-loading-indicator\" class=\"global-loading-indicator fixed inset-0 z-50 flex items-center justify-center overflow-hidden opacity-0 pointer-events-none\" data-global-loading-indicator=\"idle\"><div id=\"global-loading-backdrop\" class=\"gli-backdrop absolute h-full w-full z-0 bg-dark/30\"></div><div id=\"global-loading-indicator-content\" class=\"gli-content relative z-10 w-full max-w-xl xl:max-w-2xl aspect-4/3 bg-light rounded-lg flex flex-col items-center justify-center gap-4 p-4 translate-y-12 opacity-0 text-primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -146,7 +146,7 @@ func AdminLayout(title string, headerTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p class=\"mt-2 text-2xl font-semibold text-current/90\">Cargando...</p></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p class=\"mt-2 text-2xl md:text-3xl lg:text-4xl font-semibold text-current/90\">Cargando...</p></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
