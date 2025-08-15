@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
-	"net/url"
 )
 
 templ ProductsTable(result *db.ProductFilterResult) {
@@ -394,35 +393,32 @@ type ProductImagesTabUpdateData struct {
 
 templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateData) {
 	<div
-		class="flex-1 xl:flex xl:flex-col xl:gap-4 space-y-4 xl:space-y-0 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden"
+		class="flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden"
 		id="products-modal-images-tab"
 	>
 		<div class="shrink-0 grow-0 basis-auto">
 			<h3 class="text-lg font-medium line-clamp-1 text-ellipsis">Codigo QR de { product.Name }</h3>
 			<p class="text-current/60">Selecciona las imágenes que deseas incluir en el producto: { product.Name }</p>
 		</div>
-		<div id="product-modal-images-main" class="flex-1 basis-full space-y-4 overflow-hidden">
-			@templ.Fragment("mainImgSection") {
-				{{
-	selectedImgVal := product.MainImg
-	if updateData.MainImgFilename != "" {
-		selectedImgVal = updateData.MainImgFilename
-	}
-				}}
+		@templ.Fragment("mainImgSection") {
+			<div id="product-modal-images-main" class="flex-1 basis-full space-y-4 overflow-hidden">
+				{{ imgFileName := ExtractProductImageFilename(product, updateData) }}
 				<div class="flex-1 basis-full space-y-4">
 					<h4 class="shrink-0 grow-0 text-lg lg:text-2xl tracking-tight text-dark/80">Imágen principal</h4>
 					<div class="lg:grid lg:grid-cols-[20rem_1fr] lg:grid-rows-[20rem] lg:gap-4 space-y-4 lg:space-y-0">
 						<div class="lg:col-start-2 lg:row-start-1 lg:justify-self-start max-w-md md:basis-1/2 md:max-w-[initial] space-y-2">
 							<button
 								id="products-modal-images-select-main"
-								class="flex items-center justify-center gap-4 w-full py-2 px-6 rounded-lg bg-gray-700 text-light scale-100 hover:bg-gray-700/90 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
-								hx-get={ fmt.Sprintf(
-                                "/imagenes/selector?update_endpoint=%s&mode=single&title=Seleccionar%%20la%%20imagen%%20principal%%20para%%20%s&max_selection=1&selected_ids=%s&success_target=%s",
-                                url.QueryEscape("/panel/productos/"+product.ID+"/main_img"),
-                                product.Name,
-                                selectedImgVal,
-                                url.QueryEscape("#product-modal-images-main"),
-                            ) }
+								class="flex items-center justify-center gap-4 w-full py-2 px-6 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
+								hx-get="/imagenes/selector"
+								hx-vals={ (&ImageSelectorConfig{
+                                    Mode:           "single",
+                                    UpdateEndpoint: fmt.Sprintf("/panel/productos/%s/main_img", product.ID),
+                                    Title:          "Seleccionar la imagen principal para " + product.Name,
+                                    MaxSelection:   1,
+                                    SelectedIds:    []string{product.MainImgID},
+                                    SuccessTarget:  "#product-modal-images-main",
+                                }).ToJSONString() }
 								hx-target="body"
 								hx-swap="beforeend"
 								hx-indicator="#global-loading-indicator"
@@ -433,40 +429,56 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 							<button
 								id="products-modal-images-unset-main"
 								class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer"
+								hx-delete={ fmt.Sprintf("/panel/productos/%s/main_img", product.ID) }
+								hx-target="#product-modal-images-main"
+								hx-indicator="#global-loading-indicator"
 							>
 								@components.BinIcon("w-5", nil)
 								<span class="block">Quitar imágen principal</span>
 							</button>
 						</div>
-						<div class="flex-1 lg:flex-initial basis-1/2 lg:basis-auto lg:h-full lg:w-full lg:col-start-1 lg:row-start-1 lg:place-self-center lg:flex lg:justify-center overflow-hidden">
-							<button
-								type="button"
-								class="h-full w-full mx-auto"
-								data-click-handler-selector="product-modal-images-btn"
-							>
-								<img
-									src={ fmt.Sprintf("/static/uploads/%s", selectedImgVal) }
-									alt={ product.Name }
-									class="w-full h-full object-cover rounded-lg drop-shadow-md"
-								/>
-							</button>
+						<div class="w-full lg:h-full lg:col-start-1 lg:row-start-1 lg:place-self-center lg:flex lg:justify-center overflow-hidden">
+							if imgFileName != "" {
+								<button
+									type="button"
+									class="lg:h-full w-full mx-auto"
+									data-click-handler-selector="product-modal-images-btn"
+								>
+									<img
+										src={ fmt.Sprintf("/static/uploads/%s", imgFileName) }
+										alt={ product.Name }
+										class="w-full h-full object-cover rounded-lg drop-shadow-md"
+									/>
+								</button>
+							} else {
+								<div class="flex flex-col items-center justify-center gap-4 w-full lg:h-full py-16 mx-auto">
+									@components.ImageIcon("w-12 h-12", nil)
+									<p class="text-center text-gray-400">No se ha seleccionado una imagen</p>
+								</div>
+							}
 						</div>
 					</div>
 				</div>
-			}
-		</div>
-		/* <div id="products-modal-images-gallery" class="flex-1 flex flex-col gap-4 overflow-auto">
+			</div>
+		}
+		<div id="products-modal-images-gallery" class="flex-1 grid gap-4 overflow-auto">
 			@templ.Fragment("gallerySection") {
 				<h4 class="text-lg tracking-tight text-dark/80">Galería</h4>
 				<div class="max-w-md space-y-2">
 					<button
 						id="products-modal-images-select-gallery"
-						class="w-full py-2 px-4 rounded-lg bg-accent/90 text-light scale-100 hover:bg-accent active:bg-accent active:scale-95 transition-[transform,_background] cursor-pointer"
-					>Seleccionar imágenes</button>
+						class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
+					>
+						@components.ImageIcon("w-5", nil)
+						<span class="block">Seleccionar imágenes</span>
+					</button>
 					<button
 						id="products-modal-images-unset-main"
-						class="w-full py-2 px-4 rounded-lg text-red-50 text-light scale-100 bg-red-500 hover:bg-red-600 active:bg-red-600 active:scale-95 transition-[transform,_background] cursor-pointer"
-					>Limpiar la galería</button>
+						class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer"
+					>
+						@components.BinIcon("w-5", nil)
+						<span class="block">Quitar imágenes</span>
+					</button>
 				</div>
 				<div id="products-modal-images-grid" class="h-full grid grid-cols-2 gap-4">
 					for _, image := range product.Gallery {
@@ -486,8 +498,16 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 					}
 				</div>
 			}
-		</div> */
+		</div>
 	</div>
+}
+
+func ExtractProductImageFilename(product *db.Product, updateData *ProductImagesTabUpdateData) string {
+	if updateData.MainImgFilename != "" {
+		return updateData.MainImgFilename
+	} else {
+		return product.MainImg
+	}
 }
 
 type ProductQRCodeState struct {

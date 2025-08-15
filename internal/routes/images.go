@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -19,6 +20,7 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal/forms"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
+	"github.com/vladwithcode/salon_catalog/internal/templates/util"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
 
@@ -30,6 +32,8 @@ func RegisterImagesRoutes(router *customServeMux) {
 	router.HandleFunc("GET /imagenes/table", auth.ValidateAuth(RenderImagesTable))
 	router.HandleFunc("DELETE /imagenes", auth.ValidateAuth(DeleteImagesAndReturnTable))
 	router.HandleFunc("DELETE /imagenes/{id}", auth.ValidateAuth(DeleteImageAndReturnTable))
+
+	router.HandleFunc("POST /panel/imagenes/selector/subir", auth.ValidateAuth(UploadImagesSelector))
 
 	router.HandleFunc("POST /api/images", auth.ValidateAuth(UploadImages))
 	// This routes respond with JSON
@@ -93,7 +97,6 @@ func UploadImagesForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	// Create states and indicate we're including toasts
 	w.Header().Add("X-Includes-Toast", "true")
 	fs, err := forms.NewImagesFormStateFromReq(r)
-	fs.SetSuccessMessage("Imágenes subidas exitosamente")
 	td := components.NewToastData(
 		"Se subieron las imágenes exitosamente",
 		components.ToastSuccess,
@@ -117,6 +120,7 @@ func UploadImagesForm(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		log.Printf("image upload failed: %v\n", err)
 		return
 	}
+	fs.SetSuccessMessage("Imágenes subidas exitosamente")
 
 	err = fs.Validate()
 	if err != nil {
@@ -393,6 +397,91 @@ func DeleteImagesAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		log.Printf("failed to delete images: %v\n", err)
 		return
 	}
+}
+
+func UploadImagesSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	td := components.NewToastData("Se subieron las imágenes exitosamente", components.ToastSuccess, 3000, true, false)
+
+	err := r.ParseMultipartForm(64 << 20)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		td.Message = "Hay errores en el formulario"
+		td.Type = components.ToastError
+		components.ToasterToast(td).Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	imgs, wrtFiles, err := parseImageUploads(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		td.Message = "Hay errores en el formulario"
+		td.Type = components.ToastError
+		components.ToasterToast(td).Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	writtenFiles, err := uploads.UploadMultiple(wrtFiles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		td.Message = "Algo salió mal al subir las imágenes"
+		td.Type = components.ToastError
+		components.ToasterToast(td).Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	selectImgs := []string{}
+	for i, img := range imgs {
+		img.Filename = writtenFiles[i].Filename
+		img.Size = int(writtenFiles[i].Size)
+		selectImgs = append(selectImgs, img.ID)
+	}
+
+	err = db.CreateImages(imgs)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		td.Message = "Ocurrió un error al crear las imágenes"
+		td.Type = components.ToastError
+		components.ToasterToast(td).Render(r.Context(), w)
+		log.Printf("image upload failed: %v\n", err)
+		return
+	}
+
+	filters := parseImageFilters(r)
+	if filters.Limit == 0 {
+		filters.Limit = db.DefaultImageSelectorLimit
+	}
+	filters.Pinned = selectImgs
+
+	imagesResult, err := db.FilterImages(filters)
+	if err != nil {
+		imagesResult.HasError = true
+		imagesResult.Error = "Algo salió mal. Intente cambiar los filtros"
+	}
+
+	rawSelectConf := r.FormValue("selectorConfig")
+	selectConf := dashboard.ImageSelectorConfig{}
+	selectConf.FromJSONString(rawSelectConf)
+	selectConf.SelectedIds = selectImgs
+
+	uploadFormState := dashboard.ImagesSelectorUploadFormState{
+		HasSuccess: true,
+		SuccessMsg: "Imágenes subidas exitosamente",
+	}
+
+	combined := templ.Join(
+		dashboard.ImagesSelectorTab(selectConf, imagesResult),
+		dashboard.ImagesSelectorUploadForm(&selectConf, &uploadFormState),
+		components.ToasterToast(td),
+	)
+	renderConf := util.WithMixedFragmentsConf{}
+	renderConf.SetFromTemplate(combined)
+
+	ctx := context.WithValue(r.Context(), "swapOOBSelectorTab", true)
+	util.RenderMixedWithFragments(ctx, w, renderConf)
 }
 
 func GetImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {

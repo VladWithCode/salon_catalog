@@ -314,16 +314,16 @@ templ Products() {
 			></div>
 		</div>
 		<template id="max-prio-popup">
-			<div class="fixed inset-0 z-60 flex items-center justify-center bg-dark/50 p-4" data-max-prio-popup>
+			<div class="fixed inset-0 z-60 flex items-center justify-center bg-dark/50 p-2" data-max-prio-popup>
 				<button
 					class="absolute top-0 right-0 z-30 aspect-square rounded-full bg-neutral text-light cursor-pointer rotate-0 scale-100 brightness-100 hover:rotate-90 hover:brightness-105 active:rotate-90 active:scale-95 active:brightness-90 transition-[scale,_rotate,_filter] duration-300"
 					data-click-handler-selector="max-prio-popup-close"
 				>
-					@components.TimesIcon("w-16", nil)
+					@components.TimesIcon("w-10", nil)
 				</button>
 				<div
 					id="max-prio-popup-content"
-					class="w-full bg-light flex flex-col rounded-lg p-4"
+					class="w-full bg-light flex flex-col rounded-lg p-1"
 				></div>
 			</div>
 		</template>
@@ -339,7 +339,6 @@ templ Products() {
 }
 
 templ productsScript() {
-	<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 	<script>
         document.addEventListener('DOMContentLoaded', function () {
             const TMaxPrioPopup = document.getElementById('max-prio-popup');
@@ -552,6 +551,37 @@ templ productsScript() {
                             document.getElementById('image-selector-modal')?.remove();
                         },
                     })
+                })
+                .register('input', '#images-selector-modal-upload-files', function (e) {
+                    const preview = document.getElementById('images-selector-modal-upload-preview');
+                    const template = document.getElementById('images-selector-modal-upload-preview-item');
+                    const inp = e.target;
+                    
+                    // Clear existing previews
+                    preview.querySelectorAll('[data-image-item]').forEach(item => item.remove());
+                    
+                    if (inp.files.length > 0) {
+                        // Show preview container
+                        preview.style.opacity = '1';
+                        preview.style.pointerEvents = 'auto';
+                        
+                        // Create preview items for each file
+                        for (let f of inp.files) {
+                            const url = URL.createObjectURL(f);
+                            const clone = template.content.cloneNode(true);
+                            const elem = clone.querySelector('[data-image-item]');
+                            const img = elem.querySelector('[data-image-item-img]');
+                            
+                            img.src = url;
+                            img.alt = f.name;
+                            
+                            preview.appendChild(elem);
+                        }
+                    } else {
+                        // Hide preview container when no files
+                        preview.style.opacity = '0';
+                        preview.style.pointerEvents = 'none';
+                    }
                 })
                 .registerClick('products-actions-all-close', function(e) {
                     gsap.to('#products-actions-all', {

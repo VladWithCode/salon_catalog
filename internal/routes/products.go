@@ -23,6 +23,7 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal/qrgen"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
+	"github.com/vladwithcode/salon_catalog/internal/templates/util"
 	"github.com/vladwithcode/salon_catalog/internal/uploads"
 )
 
@@ -33,8 +34,8 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("PUT /panel/qrcodes/productos/{id}", auth.ValidateAuth(UpdateQrCode))
 
 	router.HandleFunc("GET /panel/productos/table", auth.ValidateAuth(RenderProductsTable))
-	router.HandleFunc("GET /panel/productos/modal/nuevo", auth.ValidateAuth(RenderNewProductForm))
 	router.HandleFunc("POST /panel/productos/nuevo", auth.ValidateAuth(CreateProductAndReturnTable))
+	router.HandleFunc("GET /panel/productos/modal/nuevo", auth.ValidateAuth(RenderNewProductForm))
 	router.HandleFunc("GET /panel/productos/modal/{id}", auth.ValidateAuth(RenderProduct))
 	router.HandleFunc("PUT /panel/productos/{id}", auth.ValidateAuth(UpdateProductAndReturnTable))
 	router.HandleFunc("DELETE /panel/productos", auth.ValidateAuth(DeleteProductsAndReturnTable))
@@ -43,6 +44,8 @@ func RegisterProductsRoutes(router *customServeMux) {
 	// Image routes
 	router.HandleFunc("PUT /panel/productos/{id}/main_img", auth.ValidateAuth(UpdateProductMainImg))
 	router.HandleFunc("PUT /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
+	router.HandleFunc("DELETE /panel/productos/{id}/main_img", auth.ValidateAuth(DeleteProductMainImg))
+	router.HandleFunc("DELETE /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
 
 	// Legacy API routes
 	router.HandleFunc("GET /api/products", GetProducts)
@@ -1014,12 +1017,58 @@ func UpdateProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 		dashboard.ProductImagesTab(product, updateData),
 		components.ToasterToast(toastData),
 	)
-	templ.RenderFragments(r.Context(), w, combined, "mainImgSection", "toaster-toast")
+	err = templ.RenderFragments(r.Context(), w, combined, "mainImgSection", "toaster-toast")
 	if err != nil {
 		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
 		log.Printf("failed to render images tab: %v\n", err)
 		return
 	}
+}
+
+func DeleteProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	productId := r.PathValue("id")
+	toastData := components.NewToastData("Se eliminó la imagen principal", components.ToastSuccess, 3000, true, false)
+	updateData := &dashboard.ProductImagesTabUpdateData{
+		MainImgFilename: "",
+		MainImgID:       "",
+	}
+	mixedFragmentsConf := util.WithMixedFragmentsConf{}
+
+	product, err := db.FindProductByID(productId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		toastData.Message = "Error al recuperar el producto"
+		toastData.Type = components.ToastError
+		mixedFragmentsConf.
+			AppendJoinTemplates(components.ToasterToast(toastData)).
+			SetFragments("toaster-toast")
+		util.RenderMixedWithFragments(r.Context(), w, mixedFragmentsConf)
+		log.Printf("failed to find product: %v\n", err)
+		return
+	}
+
+	product.MainImg = ""
+	product.MainImgID = ""
+	err = db.UpdateProduct(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		toastData.Message = "Error al eliminar la imagen principal"
+		toastData.Type = components.ToastError
+		mixedFragmentsConf.
+			AppendJoinTemplates(components.ToasterToast(toastData)).
+			SetFragments("toaster-toast")
+		util.RenderMixedWithFragments(r.Context(), w, mixedFragmentsConf)
+		log.Printf("failed to unlink images from product: %v\n", err)
+		return
+	}
+
+	mixedFragmentsConf.
+		AppendJoinTemplates(components.ToasterToast(toastData), dashboard.ProductImagesTab(product, updateData)).
+		SetFragments("toaster-toast", "mainImgSection")
+	util.RenderMixedWithFragments(r.Context(), w, mixedFragmentsConf)
 }
 
 func UpdateProductGallery(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
