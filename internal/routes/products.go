@@ -46,7 +46,7 @@ func RegisterProductsRoutes(router *customServeMux) {
 	router.HandleFunc("PUT /panel/productos/{id}/main_img", auth.ValidateAuth(UpdateProductMainImg))
 	router.HandleFunc("PUT /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
 	router.HandleFunc("DELETE /panel/productos/{id}/main_img", auth.ValidateAuth(DeleteProductMainImg))
-	router.HandleFunc("DELETE /panel/productos/{id}/gallery", auth.ValidateAuth(UpdateProductGallery))
+	router.HandleFunc("DELETE /panel/productos/{id}/gallery", auth.ValidateAuth(DeleteProductGallery))
 
 	// Legacy API routes
 	router.HandleFunc("GET /api/products", GetProducts)
@@ -1194,6 +1194,53 @@ func UpdateProductGallery(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 			components.ToasterToast(toastData),
 		)
 		templ.RenderFragments(r.Context(), w, comp, "imagesGridError", "toaster-toast")
+		log.Printf("failed to update product: %v\n", err)
+		return
+	}
+
+	combined := templ.Join(
+		dashboard.ProductImagesTab(product, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "gallerySection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
+}
+
+func DeleteProductGallery(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	productId := r.PathValue("id")
+	toastData := components.NewToastData("Se eliminaron las imágenes de la galería", components.ToastSuccess, 3000, true, false)
+
+	product, err := db.FindProductByID(productId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar el producto"
+		toastData.Type = components.ToastError
+		combined := templ.Join(
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "imagesGridError", "toaster-toast")
+		log.Printf("failed to get product: %v\n", err)
+		return
+	}
+
+	product.Gallery = []string{}
+	product.GalleryIDs = []string{}
+
+	updateData := &dashboard.ProductImagesTabUpdateData{
+		GalleryIDs: product.GalleryIDs,
+		Gallery:    product.Gallery,
+	}
+	err = db.UpdateProductImages(product.ID, product.GalleryIDs)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar el producto"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		log.Printf("failed to update product: %v\n", err)
 		return
 	}

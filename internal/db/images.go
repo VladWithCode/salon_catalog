@@ -568,7 +568,7 @@ func buildImageSearchRankSelect(filters ImageFilterParams) string {
 // buildImageOrderByClause constructs the ORDER BY clause
 func buildImageOrderByClause(filters ImageFilterParams) string {
 	orderClause := "ORDER BY"
-	if filters.Pinned != nil {
+	if len(filters.Pinned) > 0 {
 		orderClause += `
 			CASE
 				WHEN id = ANY(@pinned::uuid[]) 
@@ -598,7 +598,7 @@ func sanitizeSortBy(sortBy string) string {
 		return "filename"
 	case "size":
 		return "size"
-	case "created_at", "date":
+	case "created_at", "createdAt", "date":
 		return "created_at"
 	default:
 		return "created_at"
@@ -608,9 +608,9 @@ func sanitizeSortBy(sortBy string) string {
 // sanitizeSortOrder ensures only valid sort orders are used
 func sanitizeSortOrder(sortOrder string) string {
 	switch strings.ToUpper(sortOrder) {
-	case "ASC":
+	case "ASC", "asc":
 		return "ASC"
-	case "DESC":
+	case "DESC", "desc":
 		return "DESC"
 	default:
 		return "DESC"

@@ -540,6 +540,21 @@ templ productsScript() {
                         });
                     }
                 })
+                .register('afterSwap', '#products-modal-images-gallery', function (e) {
+                    const selectorModal = document.getElementById('image-selector-modal');
+                    if (selectorModal) {
+                        gsap.to(selectorModal, {
+                            opacity: 0,
+                            y: '10rem',
+                            pointerEvents: 'none',
+                            ease: 'power2.out',
+                            duration: 0.5,
+                            onComplete: () => {
+                                selectorModal.remove();
+                            },
+                        });
+                    }
+                })
                 .registerClick('close-images-selector-modal', function (e) {
                     gsap.to('#image-selector-modal',{
                         opacity: 0,

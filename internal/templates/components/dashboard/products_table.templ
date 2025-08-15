@@ -397,7 +397,7 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 		id="products-modal-images-tab"
 	>
 		<div class="shrink-0 grow-0 basis-auto">
-			<h3 class="text-lg font-medium line-clamp-1 text-ellipsis">Codigo QR de { product.Name }</h3>
+			<h3 class="text-lg font-medium line-clamp-1 text-ellipsis">Imágenes de { product.Name }</h3>
 			<p class="text-current/60">Selecciona las imágenes que deseas incluir en el producto: { product.Name }</p>
 		</div>
 		@templ.Fragment("mainImgSection") {
@@ -432,6 +432,7 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 								hx-delete={ fmt.Sprintf("/panel/productos/%s/main_img", product.ID) }
 								hx-target="#product-modal-images-main"
 								hx-indicator="#global-loading-indicator"
+								hx-confirm="¿Seguro que deseas eliminar la imagen principal?"
 							>
 								@components.BinIcon("w-5", nil)
 								<span class="block">Quitar imágen principal</span>
@@ -487,25 +488,36 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 					<button
 						id="products-modal-images-unset-main"
 						class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer"
+						hx-delete={ fmt.Sprintf("/panel/productos/%s/gallery", product.ID) }
+						hx-target="#products-modal-images-gallery"
+						hx-indicator="#global-loading-indicator"
+						hx-confirm="¿Seguro que deseas eliminar las imágenes de la galería?"
 					>
 						@components.BinIcon("w-5", nil)
 						<span class="block">Quitar imágenes</span>
 					</button>
 				</div>
 				<div id="products-modal-images-grid" class="h-full grid grid-cols-2 gap-4">
-					for _, image := range product.Gallery {
-						<div class="relative col-span-1 aspect-square rounded-md overflow-hidden border border-gray-200">
-							<button
-								type="button"
-								class="w-full h-full"
-								data-click-handler-selector="product-modal-images-btn"
-							>
-								<img
-									src={ fmt.Sprintf("/static/uploads/%s", image) }
-									alt={ product.Name }
-									class="w-full h-full object-cover"
-								/>
-							</button>
+					if len(product.Gallery) > 0 {
+						for _, image := range product.Gallery {
+							<div class="relative col-span-1 aspect-square rounded-md overflow-hidden border border-gray-200">
+								<button
+									type="button"
+									class="w-full h-full"
+									data-click-handler-selector="product-modal-images-btn"
+								>
+									<img
+										src={ fmt.Sprintf("/static/uploads/%s", image) }
+										alt={ product.Name }
+										class="w-full h-full object-cover"
+									/>
+								</button>
+							</div>
+						}
+					} else {
+						<div class="col-span-full flex flex-col items-center justify-center gap-4 w-full h-full py-16 mx-auto">
+							@components.ImageIcon("w-12 h-12", nil)
+							<p class="text-center text-gray-400">No se han seleccionado imágenes</p>
 						</div>
 					}
 				</div>
