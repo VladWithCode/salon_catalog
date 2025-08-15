@@ -252,11 +252,11 @@ func ContactRequestTableRow(quote *db.Quote) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if quote.TimeStart != nil {
+		if quote.TimeStart != nil && !quote.TimeStart.IsZero() {
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(quote.TimeStart.Format("02/01/2006 15:04"))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(quote.TimeStart.Format("02/01/2006 03:04pm"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 112, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 112, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -266,15 +266,15 @@ func ContactRequestTableRow(quote *db.Quote) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if quote.TimeEnd != nil {
+			if quote.TimeEnd != nil && !quote.TimeEnd.IsZero() {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"text-xs text-gray-700/80\">hasta ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(quote.TimeEnd.Format("15:04"))
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(quote.TimeEnd.Format("03:04pm"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 114, Col: 81}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 114, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -317,9 +317,9 @@ func ContactRequestTableRow(quote *db.Quote) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(quote.CreatedAt.Format("15:04"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(quote.CreatedAt.Format("03:04pm"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 126, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/contact_requests_table.templ`, Line: 126, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
