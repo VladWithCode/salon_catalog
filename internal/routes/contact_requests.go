@@ -397,7 +397,7 @@ func HandleQuoteRequestSubmission(w http.ResponseWriter, r *http.Request) {
 
 	var eventTime time.Time
 	if eventDate != "" {
-		eventTime, err = time.Parse("2006-01-02T15:04", eventDate)
+		eventTime, err = time.Parse("2006-01-02", eventDate)
 		if err != nil {
 			formState.EventDateError = "La fecha del evento no es válida"
 			hasErrors = true
