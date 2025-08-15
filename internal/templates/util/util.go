@@ -45,6 +45,23 @@ type WithMixedFragmentsConf struct {
 	Fragments []any
 }
 
+func (c *WithMixedFragmentsConf) SetFromTemplate(t templ.Component) *WithMixedFragmentsConf {
+	c.FromTemplate = &t
+	return c
+}
+
+func (c *WithMixedFragmentsConf) AppendJoinTemplates(t ...templ.Component) *WithMixedFragmentsConf {
+	for _, t := range t {
+		c.JoinTemplates = append(c.JoinTemplates, &t)
+	}
+	return c
+}
+
+func (c *WithMixedFragmentsConf) SetFragments(f ...any) *WithMixedFragmentsConf {
+	c.Fragments = f
+	return c
+}
+
 func RenderMixedWithFragments(ctx context.Context, w http.ResponseWriter, conf WithMixedFragmentsConf) {
 	buf := bytes.NewBuffer(nil)
 	var err error
