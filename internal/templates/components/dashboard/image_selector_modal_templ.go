@@ -17,13 +17,13 @@ import (
 )
 
 type ImageSelectorConfig struct {
-	Mode           string   `json:"mode"`            // "single" or "multiple"
-	UpdateEndpoint string   `json:"update_endpoint"` // API endpoint for updates
-	Title          string   `json:"title"`           // Modal title
-	MaxSelection   int      `json:"max_selection"`   // Max images for multi-select
-	SelectedIds    []string `json:"selected_ids"`    // Currently selected image IDs
-	AllowUpload    bool     `json:"allow_upload"`    // Show upload tab
-	SuccessTarget  string   `json:"success_target"`  // Target for swap on update success
+	Mode           string   `json:"mode"`                   // "single" or "multiple"
+	UpdateEndpoint string   `json:"update_endpoint"`        // API endpoint for updates
+	Title          string   `json:"title"`                  // Modal title
+	MaxSelection   int      `json:"max_selection"`          // Max images for multi-select
+	SelectedIds    []string `json:"selected_ids,omitempty"` // Currently selected image IDs
+	AllowUpload    bool     `json:"allow_upload"`           // Show upload tab
+	SuccessTarget  string   `json:"success_target"`         // Target for swap on update success
 }
 
 func (is *ImageSelectorConfig) ToJSONString() (string, error) {
@@ -506,30 +506,11 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "><div class=\"shrink-0 grow-0 p-4\"><div class=\"flex gap-2 items-stretch\"><div class=\"flex-1\"><input type=\"text\" data-search-input placeholder=\"Buscar imágenes...\" class=\"w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" name=\"search\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"input changed delay:500ms\" hx-include=\"[data-sort-select][name='sort'], [data-image-selector-selected-imgs], [data-images-selector-config]\"></div><select name=\"sort\" data-sort-select class=\"px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"change\" hx-include=\"[data-search-input][name='search'], [data-image-selector-selected-imgs], [data-images-selector-config]\"><option value=\"created_at_desc\">Más recientes</option> <option value=\"created_at_asc\">Más antiguos</option> <option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"size_desc\">Tamaño mayor</option> <option value=\"size_asc\">Tamaño menor</option></select></div></div><!-- Selection Summary -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "><div class=\"shrink-0 grow-0 p-4\"><div class=\"flex gap-2 items-stretch\"><div class=\"flex-1\"><input type=\"text\" data-search-input placeholder=\"Buscar imágenes...\" class=\"w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" name=\"search\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"input changed delay:500ms\" hx-include=\"[data-sort-select][name='sort'], [data-image-selector-selected-imgs], [data-images-selector-config]\"></div><select name=\"sort\" data-sort-select class=\"px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent\" hx-get=\"/api/images/selector\" hx-target=\"#images-selector-grid\" hx-trigger=\"change\" hx-include=\"[data-search-input][name='search'], [data-image-selector-selected-imgs], [data-images-selector-config]\"><option value=\"created_at_desc\">Más recientes</option> <option value=\"created_at_asc\">Más antiguos</option> <option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"size_desc\">Tamaño mayor</option> <option value=\"size_asc\">Tamaño menor</option></select></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if config.Mode == "multiple" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"px-4 py-2 bg-gray-50 border-b border-gray-200\"><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-600\"><span data-selected-count>0</span> de ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.MaxSelection))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 249, Col: 84}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " imágenes seleccionadas</span> <button data-clear-selection class=\"text-sm text-accent hover:text-accent/80\">Limpiar selección</button></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Var27 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var26 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -541,24 +522,24 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div id=\"images-selector-grid\" class=\"flex-1 basis-full overflow-y-auto overflow-x-hidden\"><input type=\"hidden\" name=\"selected\" data-image-selector-selected-imgs value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div id=\"images-selector-grid\" class=\"flex-1 basis-full overflow-y-auto overflow-x-hidden\"><input type=\"hidden\" name=\"selected\" data-image-selector-selected-imgs value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(config.SelectedIds, ","))
+			var templ_7745c5c3_Var27 string
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(config.SelectedIds, ","))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 269, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 253, Col: 50}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\"><!-- Images Grid --><div class=\"relative z-0 overflow-visible p-4\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"><!-- Images Grid --><div class=\"relative z-0 overflow-visible p-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var28 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 				if !templ_7745c5c3_IsBuffer {
@@ -570,22 +551,22 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div id=\"images-selector-modal-error\" class=\"absolute top-0 inset-x-0 z-30 w-full px-4 pointer-events-none\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div id=\"images-selector-modal-error\" class=\"absolute top-0 inset-x-0 z-30 w-full px-4 pointer-events-none\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if result.HasError {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, " hx-swap-oob=\"innerHTML\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " hx-swap-oob=\"innerHTML\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if result.HasError {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div class=\"flex items-center justify-center bg-red-50 border-l-4 rounded-lg border-red-700 gap-4 py-2 pointer-events-auto\"><div class=\"bg-red-700 text-red-100 p-0.5 rounded-full\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div class=\"flex items-center justify-center bg-red-50 border-l-4 rounded-lg border-red-700 gap-4 py-2 pointer-events-auto\"><div class=\"bg-red-700 text-red-100 p-0.5 rounded-full\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -593,7 +574,7 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</div><p class=\"text-red-700\">Algo salió mal</p><button type=\"button\" class=\"text-sm underline underline-offset-2 text-accent font-bold tracking-wide\" data-images-selector-modal-close data-click-handler-selector=\"close-images-selector-error\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</div><p class=\"text-red-700\">Algo salió mal</p><button type=\"button\" class=\"text-sm underline underline-offset-2 text-accent font-bold tracking-wide\" data-images-selector-modal-close data-click-handler-selector=\"close-images-selector-error\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -601,22 +582,22 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</button></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</button></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = templ.Fragment("imagesGridError").Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Fragment("imagesGridError").Render(templ.WithChildren(ctx, templ_7745c5c3_Var28), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<div class=\"grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<div class=\"grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -624,12 +605,12 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</div><!-- Loading Indicator --><div data-loading class=\"hidden flex justify-center items-center py-8\"><div class=\"animate-spin rounded-full h-8 w-8 border-b-2 border-accent\"></div></div></div><!-- Pagination -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div><!-- Loading Indicator --><div data-loading class=\"hidden flex justify-center items-center py-8\"><div class=\"animate-spin rounded-full h-8 w-8 border-b-2 border-accent\"></div></div></div><!-- Pagination -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if result.TotalPages > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"p-4 border-t border-gray-200\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<div class=\"p-4 border-t border-gray-200\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -637,22 +618,22 @@ func ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = templ.Fragment("imagesGrid").Render(templ.WithChildren(ctx, templ_7745c5c3_Var27), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Fragment("imagesGrid").Render(templ.WithChildren(ctx, templ_7745c5c3_Var26), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -676,9 +657,9 @@ func ImageSelectorGrid(config *ImageSelectorConfig, result *db.ImageFilterResult
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var30 == nil {
-			templ_7745c5c3_Var30 = templ.NopComponent
+		templ_7745c5c3_Var29 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var29 == nil {
+			templ_7745c5c3_Var29 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		for _, image := range result.Images {
@@ -707,57 +688,75 @@ func ImageSelectorItem(config *ImageSelectorConfig, image *db.Image, isSelected 
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var31 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var31 == nil {
-			templ_7745c5c3_Var31 = templ.NopComponent
+		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var30 == nil {
+			templ_7745c5c3_Var30 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var32 = []any{"relative group cursor-pointer rounded-lg overflow-hidden outline-4 outline-current transition-all duration-200",
+		var templ_7745c5c3_Var31 = []any{"relative group cursor-pointer rounded-lg overflow-hidden outline-4 outline-current transition-all duration-200",
 			templ.KV("text-accent bg-accent/10", isSelected),
 			templ.KV("text-gray-200 hover:text-gray-300", !isSelected)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var32...)
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var31...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<button type=\"button\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<button type=\"button\" class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var32 string
+		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var31).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\" data-image-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var33 string
-		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var32).String())
+		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(image.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 314, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "\" data-image-id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(image.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 330, Col: 26}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\" data-image-item hx-get=\"/api/images/selector\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "\" data-image-item hx-get=\"/api/images/selector\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if isSelected {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, " hx-vals=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var34 string
+			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"remove_from_selection": "%s"}`, image.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 318, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, " hx-vals=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var35 string
-			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"remove_from_selection": "%s"}`, image.ID))
+			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"add_to_selection": "%s"}`, image.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 334, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 320, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -767,112 +766,94 @@ func ImageSelectorItem(config *ImageSelectorConfig, image *db.Image, isSelected 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, " hx-vals=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var36 string
-			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"add_to_selection": "%s"}`, image.ID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 336, Col: 64}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " hx-target=\"#images-selector-grid\" hx-trigger=\"click\" hx-include=\"[data-image-selector-selected-imgs], [data-sort-select], [data-search-input], [data-images-selector-config]\"><!-- Selection Indicator -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, " hx-target=\"#images-selector-grid\" hx-trigger=\"click\" hx-include=\"[data-image-selector-selected-imgs], [data-sort-select], [data-search-input], [data-images-selector-config]\"><!-- Selection Indicator -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var37 = []any{"absolute top-2 right-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+		var templ_7745c5c3_Var36 = []any{"absolute top-2 right-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
 			templ.KV("bg-accent border-accent", isSelected),
 			templ.KV("bg-white border-gray-300 group-hover:border-gray-400", !isSelected)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var37...)
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var36...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "<div data-selection-indicator class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<div data-selection-indicator class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var37 string
+		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var36).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if isSelected {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "<svg class=\"w-4 h-4 text-white\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\" clip-rule=\"evenodd\"></path></svg>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "</div><!-- Image --><div class=\"aspect-square\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var37).String())
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", image.Filename))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 342, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if isSelected {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<svg class=\"w-4 h-4 text-white\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\" clip-rule=\"evenodd\"></path></svg>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "</div><!-- Image --><div class=\"aspect-square\"><img src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "\" alt=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var39 string
-		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", image.Filename))
+		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 358, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 343, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" alt=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-200\" loading=\"lazy\"></div><!-- Image Info --><div class=\"absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3\"><p class=\"text-white text-sm font-medium truncate\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 359, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 350, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-200\" loading=\"lazy\"></div><!-- Image Info --><div class=\"absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3\"><p class=\"text-white text-sm font-medium truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</p><p class=\"text-white/80 text-xs\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var41 string
-		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
+		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(formatFileSize(image.Size))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 366, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 351, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</p><p class=\"text-white/80 text-xs\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var42 string
-		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(formatFileSize(image.Size))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 367, Col: 64}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "</p></div></button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "</p></div></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -903,16 +884,16 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var43 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var43 == nil {
-			templ_7745c5c3_Var43 = templ.NopComponent
+		templ_7745c5c3_Var42 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var42 == nil {
+			templ_7745c5c3_Var42 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<form id=\"images-selector-modal-upload\" class=\"relative h-full flex flex-col gap-4 px-4 py-2\" hx-post=\"/panel/imagenes/selector/subir\" hx-target=\"#images-selector-modal-upload-container\" hx-target-error=\"#images-selector-modal-upload\" hx-swap=\"innerHTML\" hx-encoding=\"multipart/form-data\" hx-include=\"[data-images-selector-config]\"><div id=\"images-selector-modal-upload-feedback\" class=\"absolute\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<form id=\"images-selector-modal-upload\" class=\"relative h-full flex flex-col gap-4 px-4 py-2\" hx-post=\"/panel/imagenes/selector/subir\" hx-target=\"#images-selector-modal-upload-container\" hx-target-error=\"#images-selector-modal-upload\" hx-swap=\"innerHTML\" hx-encoding=\"multipart/form-data\" hx-include=\"[data-images-selector-config]\"><div id=\"images-selector-modal-upload-feedback\" class=\"absolute\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var44 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var43 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -925,7 +906,7 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 			}
 			ctx = templ.InitializeContext(ctx)
 			if state.HasError {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<div id=\"images-selector-modal-upload-feedback\" class=\"absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-red-50 border-l-4 rounded-lg px-4 py-2 text-red-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0\" hx-swap-oob=\"outerHTML\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "<div id=\"images-selector-modal-upload-feedback\" class=\"absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-red-50 border-l-4 rounded-lg px-4 py-2 text-red-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0\" hx-swap-oob=\"outerHTML\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -933,31 +914,31 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "<span class=\"block\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<span class=\"block\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var45 string
-				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(state.ErrorMsg)
+				var templ_7745c5c3_Var44 string
+				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(state.ErrorMsg)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 399, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 383, Col: 41}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "</span></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "</span></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = templ.Fragment("imagesUploadFormError").Render(templ.WithChildren(ctx, templ_7745c5c3_Var44), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Fragment("imagesUploadFormError").Render(templ.WithChildren(ctx, templ_7745c5c3_Var43), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var46 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var45 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -970,7 +951,7 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 			}
 			ctx = templ.InitializeContext(ctx)
 			if state.HasSuccess {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<div id=\"images-selector-modal-upload-feedback\" class=\"absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-green-50 border-l-4 rounded-lg px-4 py-2 text-green-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0\" hx-swap-oob=\"outerHTML\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "<div id=\"images-selector-modal-upload-feedback\" class=\"absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-green-50 border-l-4 rounded-lg px-4 py-2 text-green-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0\" hx-swap-oob=\"outerHTML\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -978,54 +959,54 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<span class=\"block\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<span class=\"block\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var47 string
-				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(state.SuccessMsg)
+				var templ_7745c5c3_Var46 string
+				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(state.SuccessMsg)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 411, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 395, Col: 43}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</span></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "</span></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = templ.Fragment("imagesUploadFormSuccess").Render(templ.WithChildren(ctx, templ_7745c5c3_Var46), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Fragment("imagesUploadFormSuccess").Render(templ.WithChildren(ctx, templ_7745c5c3_Var45), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<div id=\"images-selector-modal-upload-dropzone\" class=\"relative flex-1 basis-full grid grid-cols-1 grid-rows-1 border-2 border-gray-200 border-dashed rounded-lg overflow-hidden\"><input type=\"file\" id=\"images-selector-modal-upload-files\" name=\"upload_file_0\" class=\"col-start-1 row-start-1 z-30 w-full h-full opacity-0\" hx-preserve=\"true\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<div id=\"images-selector-modal-upload-dropzone\" class=\"relative flex-1 basis-full grid grid-cols-1 grid-rows-1 border-2 border-gray-200 border-dashed rounded-lg overflow-hidden\"><input type=\"file\" id=\"images-selector-modal-upload-files\" name=\"upload_file_0\" class=\"col-start-1 row-start-1 z-30 w-full h-full opacity-0\" hx-preserve=\"true\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if conf.MaxSelection > 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, " multiple")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, " multiple")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, " data-max-selection=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, " data-max-selection=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var48 string
-		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", conf.MaxSelection))
+		var templ_7745c5c3_Var47 string
+		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", conf.MaxSelection))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 426, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/image_selector_modal.templ`, Line: 410, Col: 61}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "\"> <label for=\"upload_name_0\" class=\"col-start-1 row-start-1 z-0 place-self-center space-y-4 text-center text-gray-700/80 px-4\" id=\"images-selector-modal-upload-dropzone-label\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "\"> <label for=\"upload_name_0\" class=\"col-start-1 row-start-1 z-0 place-self-center space-y-4 text-center text-gray-700/80 px-4\" id=\"images-selector-modal-upload-dropzone-label\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1033,7 +1014,7 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<span class=\"block\">Da click o arrastra las imágenes que deseas subir.</span></label><div id=\"images-selector-modal-upload-preview\" class=\"col-start-1 row-start-1 grid grid-cols-3 auto-cols-auto gap-1 w-full h-full bg-gray-100 z-10 opacity-0 m-auto pointer-events-none overflow-auto\"><template id=\"images-selector-modal-upload-preview-item\"><div class=\"col-span-1 row-span-1 w-full aspect-square rounded-lg overflow-hidden\" data-image-item><img src=\"\" class=\"w-full h-full object-cover\" data-image-item-img></div></template></div></div><div class=\"shrink-0 grow-0 basis-auto space-y-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<span class=\"block\">Da click o arrastra las imágenes que deseas subir.</span></label><div id=\"images-selector-modal-upload-preview\" class=\"col-start-1 row-start-1 grid grid-cols-3 auto-cols-auto gap-1 w-full h-full bg-gray-100 z-10 opacity-0 m-auto pointer-events-none overflow-auto\"><template id=\"images-selector-modal-upload-preview-item\"><div class=\"col-span-1 row-span-1 w-full aspect-square rounded-lg overflow-hidden\" data-image-item><img src=\"\" class=\"w-full h-full object-cover\" data-image-item-img></div></template></div></div><div class=\"shrink-0 grow-0 basis-auto space-y-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1048,7 +1029,7 @@ func ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "</div><div class=\"shrink-0 grow-0 basis-auto\"><button class=\"block w-full text-gray-50 bg-gray-700/90 hover:bg-gray-700 active:bg-gray-700 scale-100 hover:scale-104 active:scale-96 py-2 rounded-lg transition-[background,_scale]\">Subir</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "</div><div class=\"shrink-0 grow-0 basis-auto\"><button class=\"block w-full text-gray-50 bg-gray-700/90 hover:bg-gray-700 active:bg-gray-700 scale-100 hover:scale-104 active:scale-96 py-2 rounded-lg transition-[background,_scale]\">Subir</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

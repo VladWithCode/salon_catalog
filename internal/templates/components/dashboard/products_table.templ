@@ -468,6 +468,18 @@ templ ProductImagesTab(product *db.Product, updateData *ProductImagesTabUpdateDa
 					<button
 						id="products-modal-images-select-gallery"
 						class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
+						hx-get="/imagenes/selector"
+						hx-vals={ (&ImageSelectorConfig{
+                            Mode:           "multiple",
+                            UpdateEndpoint: fmt.Sprintf("/panel/productos/%s/gallery", product.ID),
+                            Title:          "Seleccionar imágenes para la galería de " + product.Name,
+                            MaxSelection:   10,
+                            SelectedIds:    product.GalleryIDs,
+                            SuccessTarget:  "#products-modal-images-gallery",
+                        }).ToJSONString() }
+						hx-target="body"
+						hx-swap="beforeend"
+						hx-indicator="#global-loading-indicator"
 					>
 						@components.ImageIcon("w-5", nil)
 						<span class="block">Seleccionar imágenes</span>

@@ -9,13 +9,13 @@ import (
 )
 
 type ImageSelectorConfig struct {
-	Mode           string   `json:"mode"`            // "single" or "multiple"
-	UpdateEndpoint string   `json:"update_endpoint"` // API endpoint for updates
-	Title          string   `json:"title"`           // Modal title
-	MaxSelection   int      `json:"max_selection"`   // Max images for multi-select
-	SelectedIds    []string `json:"selected_ids"`    // Currently selected image IDs
-	AllowUpload    bool     `json:"allow_upload"`    // Show upload tab
-	SuccessTarget  string   `json:"success_target"`  // Target for swap on update success
+	Mode           string   `json:"mode"`                   // "single" or "multiple"
+	UpdateEndpoint string   `json:"update_endpoint"`        // API endpoint for updates
+	Title          string   `json:"title"`                  // Modal title
+	MaxSelection   int      `json:"max_selection"`          // Max images for multi-select
+	SelectedIds    []string `json:"selected_ids,omitempty"` // Currently selected image IDs
+	AllowUpload    bool     `json:"allow_upload"`           // Show upload tab
+	SuccessTarget  string   `json:"success_target"`         // Target for swap on update success
 }
 
 func (is *ImageSelectorConfig) ToJSONString() (string, error) {
@@ -241,22 +241,6 @@ templ ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult
 				</select>
 			</div>
 		</div>
-		<!-- Selection Summary -->
-		if config.Mode == "multiple" {
-			<div class="px-4 py-2 bg-gray-50 border-b border-gray-200">
-				<div class="flex items-center justify-between">
-					<span class="text-sm text-gray-600">
-						<span data-selected-count>0</span> de { fmt.Sprintf("%d", config.MaxSelection) } imágenes seleccionadas
-					</span>
-					<button
-						data-clear-selection
-						class="text-sm text-accent hover:text-accent/80"
-					>
-						Limpiar selección
-					</button>
-				</div>
-			</div>
-		}
 		@templ.Fragment("imagesGrid") {
 			<div
 				id="images-selector-grid"

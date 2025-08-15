@@ -39,8 +39,11 @@ func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	}
 
 	selectedIds := []string{}
-	if selectedStr := r.URL.Query().Get("selected_ids"); selectedStr != "" {
-		selectedIds = strings.Split(selectedStr, ",")
+	if selectedStr := r.URL.Query()["selected_ids"]; len(selectedStr) > 0 {
+		for _, selected := range selectedStr {
+			ids := strings.Split(selected, ",")
+			selectedIds = append(selectedIds, ids...)
+		}
 	}
 
 	if filters.Limit == 0 {

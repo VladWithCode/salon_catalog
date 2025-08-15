@@ -951,13 +951,13 @@ func UpdateProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 	var config dashboard.ImageSelectorConfig
 	rawConf := r.FormValue("selectorConfig")
 	if rawConf != "" {
-		err = json.Unmarshal([]byte(rawConf), &config)
-	}
-	if err != nil {
-		config = dashboard.ImageSelectorConfig{
-			Mode:           "single",
-			UpdateEndpoint: "/panel/productos/" + productId + "/main_img",
-			MaxSelection:   1,
+		err = config.FromJSONString(rawConf)
+		if err != nil {
+			config = dashboard.ImageSelectorConfig{
+				Mode:           "single",
+				UpdateEndpoint: "/panel/productos/" + productId + "/main_img",
+				MaxSelection:   1,
+			}
 		}
 	}
 
@@ -1078,6 +1078,134 @@ func DeleteProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 }
 
 func UpdateProductGallery(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
 	productId := r.PathValue("id")
-	fmt.Printf("productId: %v\n", productId)
+	toastData := components.NewToastData("Se actualizó la galería de imágenes", components.ToastSuccess, 3000, true, false)
+	selectorConfig := dashboard.ImageSelectorConfig{
+		Mode:           "multiple",
+		UpdateEndpoint: "/panel/productos/" + productId + "/gallery",
+		MaxSelection:   10,
+		SuccessTarget:  "#products-modal-images-gallery",
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				selectorConfig,
+				&db.ImageFilterResult{HasError: true, Error: "Error al procesar el formulario"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGridError", "toaster-toast")
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	var config dashboard.ImageSelectorConfig
+	rawConf := r.FormValue("selectorConfig")
+	if rawConf != "" {
+		err = config.FromJSONString(rawConf)
+		if err != nil {
+			config = dashboard.ImageSelectorConfig{
+				Mode:           "multiple",
+				UpdateEndpoint: "/panel/productos/" + productId + "/gallery",
+				MaxSelection:   10,
+			}
+		}
+	}
+
+	product, err := db.FindProductByID(productId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar el producto"
+		toastData.Type = components.ToastError
+		combined := templ.Join(
+			dashboard.ImageSelectorModal(
+				config,
+				&db.ImageFilterResult{HasError: true, Error: "Error al recuperar el producto"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, combined, "imagesGridError", "toaster-toast")
+		log.Printf("failed to get product: %v\n", err)
+		return
+	}
+
+	selectedImgs := r.FormValue("selected")
+	if len(selectedImgs) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "No se encontraron imágenes"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				config,
+				&db.ImageFilterResult{HasError: true, Error: "No se encontraron imágenes"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGridError", "toaster-toast")
+		log.Printf("failed to get selected images: %v\n", err)
+		return
+	}
+
+	imgIds := strings.Split(selectedImgs, ",")
+	imgs, err := db.FindAllImages(imgIds)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la imagen"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				dashboard.ImageSelectorConfig{},
+				&db.ImageFilterResult{HasError: true, Error: "Error al recuperar la imagen"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGridError", "toaster-toast")
+		log.Printf("failed to get image: %v\n", err)
+		return
+	}
+
+	product.Gallery = []string{}
+	product.GalleryIDs = []string{}
+	for _, img := range imgs {
+		product.Gallery = append(product.Gallery, img.Filename)
+		product.GalleryIDs = append(product.GalleryIDs, img.ID)
+	}
+
+	updateData := &dashboard.ProductImagesTabUpdateData{
+		GalleryIDs: product.GalleryIDs,
+		Gallery:    product.Gallery,
+	}
+	err = db.UpdateProductImages(product.ID, product.GalleryIDs)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar el producto"
+		toastData.Type = components.ToastError
+		comp := templ.Join(
+			dashboard.ImageSelectorModal(
+				dashboard.ImageSelectorConfig{},
+				&db.ImageFilterResult{HasError: true, Error: "Error al recuperar la imagen"},
+			),
+			components.ToasterToast(toastData),
+		)
+		templ.RenderFragments(r.Context(), w, comp, "imagesGridError", "toaster-toast")
+		log.Printf("failed to update product: %v\n", err)
+		return
+	}
+
+	combined := templ.Join(
+		dashboard.ProductImagesTab(product, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "gallerySection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
 }

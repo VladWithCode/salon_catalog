@@ -260,14 +260,16 @@ func FindAllImages(ids []string) ([]*Image, error) {
 
 	baseQuery := `SELECT id, filename, name, no_optimize, size, created_at FROM images`
 	if len(ids) > 0 {
-		baseQuery += ` WHERE id IN @ids::uuid[]`
+		baseQuery += ` WHERE id = ANY(@ids::uuid[])`
 	}
 
 	rows, err := conn.Query(
 		ctx,
 		baseQuery,
+		pgx.NamedArgs{"ids": ids},
 	)
 	if err != nil {
+		fmt.Printf("err: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -287,6 +289,10 @@ func FindAllImages(ids []string) ([]*Image, error) {
 			return nil, err
 		}
 		images = append(images, &image)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return images, nil
