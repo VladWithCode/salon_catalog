@@ -544,7 +544,7 @@ func buildPinnedSelectClause(filters ImageFilterParams) string {
 
 	return `
 		CASE
-			WHEN filename = ANY(@pinned::varchar[]) 
+			WHEN id = ANY(@pinned::uuid[]) 
 			THEN True
 			ELSE False
 		END as pinned,
@@ -565,8 +565,8 @@ func buildImageOrderByClause(filters ImageFilterParams) string {
 	if filters.Pinned != nil {
 		orderClause += `
 			CASE
-				WHEN filename = ANY(@pinned::varchar[]) 
-				THEN array_position(@pinned::varchar[], filename)
+				WHEN id = ANY(@pinned::uuid[]) 
+				THEN array_position(@pinned::uuid[], id)
 				ELSE @limit + 2
 			END,
 		`

@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -42,7 +41,6 @@ func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	selectedIds := []string{}
 	if selectedStr := r.URL.Query().Get("selected_ids"); selectedStr != "" {
 		selectedIds = strings.Split(selectedStr, ",")
-		filters.Pinned = selectedIds
 	}
 
 	if filters.Limit == 0 {
@@ -60,6 +58,7 @@ func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 		SuccessTarget:  successTarget,
 	}
 
+	filters.Pinned = config.SelectedIds
 	// Get images
 	result, err := db.FilterImages(filters)
 	if err != nil {
@@ -102,7 +101,7 @@ func GetImagesForSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 		log.Println("selector config is empty")
 		return
 	} else {
-		err = json.Unmarshal([]byte(rawConfig), &config)
+		err = config.FromJSONString(rawConfig)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			result := &db.ImageFilterResult{
@@ -126,6 +125,32 @@ func GetImagesForSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 		} else {
 			filters.Pinned = []string{addToSelection[0]}
 		}
+	}
+
+	if removeFromSelection := r.URL.Query()["remove_from_selection"]; len(removeFromSelection) > 0 {
+		newSelection := []string{}
+		for _, id := range filters.Pinned {
+			if id != removeFromSelection[0] {
+				newSelection = append(newSelection, id)
+			}
+		}
+		filters.Pinned = newSelection
+		config.SelectedIds = newSelection
+	}
+
+	if len(filters.Pinned) > 10 {
+		w.WriteHeader(http.StatusBadRequest)
+		result := &db.ImageFilterResult{
+			HasError: true,
+			Error:    "El máximo de imágenes permitidas es de 10",
+		}
+		templ.RenderFragments(
+			r.Context(),
+			w,
+			dashboard.ImageSelectorModal(config, result),
+			"imagesGrid",
+		)
+		log.Printf("failed to filter images for selector API: %v\n", err)
 	}
 
 	// Get images

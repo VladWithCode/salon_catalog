@@ -40,6 +40,7 @@ class EventManager {
             includeChildren: opts.includeChildren !== false, // Include child elements (default true)
             excludeSelectors: opts.excludeSelectors || [], // Exclude certain child selectors
             triggerSource: opts.triggerSource || null, // Only trigger from specific sources
+            useMatchingName: opts.useMatchingName || false, // Use matching name instead of selector
         };
 
         const currentHandlers =
@@ -97,7 +98,7 @@ class EventManager {
             const matchResult = this.findMatchingTarget(
                 eventTargets,
                 selector,
-                event,
+                handlerConfigs,
             );
 
             if (matchResult.matches) {

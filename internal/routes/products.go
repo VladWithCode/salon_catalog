@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/google/uuid"
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
@@ -978,7 +979,12 @@ func UpdateProductMainImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 	}
 
 	selectedImg := r.FormValue("selected")
-	img, err := db.FindImageByFilename(selectedImg)
+	findFn := db.FindImageByID
+	if _, err = uuid.Parse(selectedImg); err != nil {
+		findFn = db.FindImageByFilename
+	}
+
+	img, err := findFn(selectedImg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		toastData.Message = "Error al recuperar la imagen"

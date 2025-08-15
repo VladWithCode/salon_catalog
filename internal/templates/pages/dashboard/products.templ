@@ -556,25 +556,25 @@ templ productsScript() {
                     const preview = document.getElementById('images-selector-modal-upload-preview');
                     const template = document.getElementById('images-selector-modal-upload-preview-item');
                     const inp = e.target;
-                    
+
                     // Clear existing previews
                     preview.querySelectorAll('[data-image-item]').forEach(item => item.remove());
-                    
+
                     if (inp.files.length > 0) {
                         // Show preview container
                         preview.style.opacity = '1';
                         preview.style.pointerEvents = 'auto';
-                        
+
                         // Create preview items for each file
                         for (let f of inp.files) {
                             const url = URL.createObjectURL(f);
                             const clone = template.content.cloneNode(true);
                             const elem = clone.querySelector('[data-image-item]');
                             const img = elem.querySelector('[data-image-item-img]');
-                            
+
                             img.src = url;
                             img.alt = f.name;
-                            
+
                             preview.appendChild(elem);
                         }
                     } else {
@@ -627,6 +627,58 @@ templ productsScript() {
                         duration: 0.5,
                         ease: 'power2.in',
                     });
+                })
+                .registerClick('images-selector-modal-switch-tab', function (e) {
+                        const activeBgValues = "55 65 81";
+                        const activeTextColor = "249 250 251";
+                        const selectedTab = e.target.getAttribute('data-tab');
+                        const inactiveTabBtn = document.querySelector('[data-tab]:not([data-tab="'+selectedTab+'"])');
+                        const selectTab = document.getElementById('images-selector-modal-select-container');
+                        const uploadTab = document.getElementById('images-selector-modal-upload-container');
+
+                        let inactiveTabs = [];
+                        let activeTab = selectTab;
+                        switch (selectedTab) {
+                            case 'select':
+                                inactiveTabs.push(uploadTab);
+                                activeTab = selectTab;
+                                break;
+                            case 'upload':
+                                inactiveTabs.push(selectTab);
+                                activeTab = uploadTab;
+                                break;
+                            case 'select':
+                            default:
+                                inactiveTabs.push(uploadTab);
+                                activeTab = selectTab;
+                                break;
+                        }
+                        gsap.to(e.target, {
+                            backgroundColor: `rgb(${activeBgValues})`,
+                            color: `rgb(${activeTextColor})`,
+                            ease: 'power2.in',
+                            duration: 0.2,
+                        });
+                        gsap.to(inactiveTabBtn, {
+                            backgroundColor: `rgb(${activeBgValues} / 0%)`,
+                            color: `rgb(${activeBgValues})`,
+                            ease: 'power2.out',
+                            duration: 0.2,
+                        }, "<")
+                        gsap.to(inactiveTabs, {
+                            autoAlpha: 0,
+                            x: '2.5rem',
+                            pointerEvents: 'none',
+                            ease: 'power2.out',
+                            duration: 0.2,
+                        }, "<")
+                        gsap.to(activeTab, {
+                            autoAlpha: 1,
+                            x: '0rem',
+                            pointerEvents: 'auto',
+                            ease: 'power2.in',
+                            duration: 0.5,
+                        }, "<");
                 })
                 .registerClick('max-prio-popup-close', function (e) {
                     gsap.to('[data-max-prio-popup]', {
