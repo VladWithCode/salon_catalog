@@ -140,7 +140,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"relative bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group\" data-images-table-img=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"relative flex flex-col bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group\" data-images-table-img=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -218,14 +218,14 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" loading=\"lazy\" class=\"w-full h-full object-cover group-hover:scale-105 group-active:scale-105 transition-transform ease-in-out duration-200\"></div><div class=\"flex flex-col gap-1 p-2 pt-4\"><div class=\"flex gap-1 justify-between\"><h5 class=\"tracking-wide font-medium overflow-hidden whitespace-nowrap text-clip\" title=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" loading=\"lazy\" class=\"w-full h-full object-cover group-hover:scale-105 group-active:scale-105 transition-transform ease-in-out duration-200\"></div><div class=\"flex-1 flex flex-col gap-1 p-2 pt-4\"><div class=\"flex gap-1 justify-between\"><h5 class=\"tracking-wide font-medium line-clamp-2\" title=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(image.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 86, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/images_table.templ`, Line: 86, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -257,7 +257,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><div class=\"ml-auto text-current/60 text-sm font-extralight\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><div class=\"ml-auto text-current/60 text-sm font-extralight mt-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -283,7 +283,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-4 bg-gray-700/20 rounded-xs p-2 text-gray-700\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-2 bg-gray-700/20 rounded-xs p-2 text-gray-700\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -291,7 +291,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"\">Ver imágen</div></button> <button hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"\">Ver</div></button> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -304,7 +304,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-confirm=\"¿Seguro que deseas eliminar la imágen?\" hx-indicator=\"#global-loading-indicator\" hx-target=\"#images-table\" hx-include='[name=\"sort\"], [name=\"name\"], [name=\"date\"], [name=\"date_after\"], [name=\"date_before\"]' class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-4 bg-red-700/20 rounded-xs p-2 text-red-700\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-confirm=\"¿Seguro que deseas eliminar la imágen?\" hx-indicator=\"#global-loading-indicator\" hx-target=\"#images-table\" hx-include='[name=\"sort\"], [name=\"name\"], [name=\"date\"], [name=\"date_after\"], [name=\"date_before\"]' class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-2 bg-red-700/20 rounded-xs p-2 text-red-700\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -312,7 +312,7 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"\">Eliminar imágen</div></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"\">Eliminar</div></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
