@@ -62,7 +62,7 @@ func Images() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button></div><div id=\"images-actions-container\" class=\"overflow-hidden h-0 opacity-0 xl:h-auto xl:opacity-100\" data-images-actions=\"closed\"><div class=\"py-2 border-t border-primary/70\"><h4 class=\"text-lg font-medium text-gray-700 mb-2\">Acciones</h4><div class=\"lg:flex items-center gap-4\"><ul class=\"lg:basis-1/3 flex flex-col items-center gap-2\"><li class=\"w-full\"><button id=\"images-actions-new\" hx-get=\"/imagenes/subir\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button></div><div id=\"images-actions-container\" class=\"overflow-hidden h-0 opacity-0 xl:h-auto xl:opacity-100\" data-images-actions=\"closed\"><div class=\"py-2\"><div class=\"lg:flex items-center gap-4\"><ul class=\"lg:basis-1/3 flex flex-col items-center gap-2\"><li class=\"w-full\"><button id=\"images-actions-new\" hx-get=\"/imagenes/subir\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
