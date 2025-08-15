@@ -283,15 +283,15 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-target=\"#images-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-4 bg-gray-700/20 rounded-xs p-2 text-gray-700\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.ViewIcon("w-5 mx-auto", nil).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.ViewIcon("w-5", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"sr-only\">Ver imágen</div></button> <button hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"\">Ver imágen</div></button> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -304,15 +304,15 @@ func ImageTableRow(image *db.Image) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-confirm=\"¿Seguro que deseas eliminar la imágen?\" hx-indicator=\"#global-loading-indicator\" hx-target=\"#images-table\" hx-include='[name=\"sort\"], [name=\"name\"], [name=\"date\"], [name=\"date_after\"], [name=\"date_before\"]' class=\"flex-1 basis-full bg-red-700/20 rounded-xs p-2 text-red-700\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-confirm=\"¿Seguro que deseas eliminar la imágen?\" hx-indicator=\"#global-loading-indicator\" hx-target=\"#images-table\" hx-include='[name=\"sort\"], [name=\"name\"], [name=\"date\"], [name=\"date_after\"], [name=\"date_before\"]' class=\"flex-1 basis-full flex flex-col lg:flex-row items-center justify-center gap-x-4 bg-red-700/20 rounded-xs p-2 text-red-700\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.BinIcon("w-5 mx-auto", nil).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.BinIcon("w-5", nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"sr-only\">Eliminar imágen</div></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"\">Eliminar imágen</div></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -506,7 +506,7 @@ func ImageModal(image *db.Image, err string) templ.Component {
 			templ_7745c5c3_Var26 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div id=\"images-modal-content\" class=\"h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2\"><div class=\"flex-1 flex justify-between items-center\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div id=\"images-modal-content\" class=\"h-full w-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2 mx-auto\"><div class=\"flex-1 flex justify-between items-center\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -591,7 +591,7 @@ func ImageModal(image *db.Image, err string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" loading=\"lazy\" class=\"w-full h-full object-cover rounded-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" loading=\"lazy\" class=\"w-full object-contain rounded-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

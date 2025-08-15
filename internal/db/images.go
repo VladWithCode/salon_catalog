@@ -393,7 +393,7 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 		filters.Page = 1
 	}
 	if filters.Limit < 1 || filters.Limit > 100 {
-		filters.Limit = 10
+		filters.Limit = 20
 	}
 	if filters.SortBy == "" {
 		filters.SortBy = "created_at"

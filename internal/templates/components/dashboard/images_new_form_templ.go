@@ -33,7 +33,7 @@ func ImagesNewForm(formState forms.FormState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"new-image-form-container\" class=\"w-full my-auto bg-light rounded-sm p-4 pb-2 shadow-sm flex flex-col gap-2 overflow-hidden\"><div class=\"flex-1 flex items-center pb-2border-b border-primary/40\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">Subir Imágen</h3><button class=\"\" id=\"new-image-form-close\" data-images-modal-toggle data-click-handler-selector=\"[data-images-modal-toggle]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"new-image-form-container\" class=\"w-full max-w-lg flex flex-col gap-2 bg-gray-100 rounded-sm p-4 pb-2 shadow-sm overflow-hidden m-auto\"><div class=\"flex-1 flex items-center pb-2border-b border-primary/40\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">Subir Imágen</h3><button class=\"\" id=\"new-image-form-close\" data-images-modal-toggle data-click-handler-selector=\"[data-images-modal-toggle]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

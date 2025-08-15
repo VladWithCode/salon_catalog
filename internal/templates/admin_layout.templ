@@ -40,7 +40,9 @@ templ AdminLayout(title string, headerTitle string) {
 			<div class="flex h-screen w-screen overflow-hidden xl:flex gap-1 z-0 p-0.5">
 				@dashboard.DashboardSidebar()
 				<div class="flex-1 flex flex-col gap-2 overflow-hidden">
-					@dashboard.DashboardHeader(headerTitle)
+					<div class="p-0.5">
+						@dashboard.DashboardHeader(headerTitle)
+					</div>
 					{ children... }
 				</div>
 			</div>
