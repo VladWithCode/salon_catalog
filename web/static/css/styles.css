@@ -2055,6 +2055,9 @@
   .object-cover {
     object-fit: cover;
   }
+  .object-\[center_-2rem\] {
+    object-position: center -2rem;
+  }
   .object-bottom {
     object-position: bottom;
   }

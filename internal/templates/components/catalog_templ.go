@@ -815,7 +815,7 @@ func ProductModal(state *ProductModalState) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" class=\"h-full object-cover object-center translate-y-6 opacity-0 xl:rounded-xl\" data-modal-animate-enter> <button class=\"absolute inset-0 h-full z-10 bg-light/60 opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in cursor-pointer\"><p class=\"text-4xl text-dark rounded-xl\">Ver Galería</p></button></div><div id=\"product-modal-gallery-popup\" class=\"hidden xl:block xl:invisible fixed inset-0 z-30 p-4\"></div><!-- Add to Cart --> <div class=\"fixed inset-x-0 xl:left-1/2 bottom-0 xl:w-1/2 z-30 px-4 py-2\"><button hx-put=\"/carrito\" hx-vals=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" class=\"h-full object-cover object-[center_-2rem] translate-y-6 opacity-0 xl:rounded-xl\" data-modal-animate-enter> <button class=\"absolute inset-0 h-full z-10 bg-light/60 opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in cursor-pointer\"><p class=\"text-4xl text-dark rounded-xl\">Ver Galería</p></button></div><div id=\"product-modal-gallery-popup\" class=\"hidden xl:block xl:invisible fixed inset-0 z-30 p-4\"></div><!-- Add to Cart --> <div class=\"fixed inset-x-0 xl:left-1/2 bottom-0 xl:w-1/2 z-30 px-4 py-2\"><button hx-put=\"/carrito\" hx-vals=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
