@@ -20,7 +20,9 @@ type Category struct {
 	Description     string `db:"description" json:"description"`
 	LongDescription string `db:"long_description" json:"longDescription"`
 	HeaderImg       string `db:"header_img" json:"headerImg"`
+	HeaderImgID     string `db:"header_img_id" json:"headerImgId"`
 	DisplayImg      string `db:"display_img" json:"displayImg"`
+	DisplayImgID    string `db:"display_img_id" json:"displayImgId"`
 	ProductCount    int    `db:"product_count" json:"productCount"`
 	QRCodeFilename  string `db:"qrcode_filename" json:"qrcodeFilename"`
 }
@@ -113,11 +115,13 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
 			header.filename AS header_img,
+			header.id AS header_img_id,
 			display.filename AS display_img,
+			display.id AS display_img_id,
 			ctg.qrcode_filename
 		FROM categories ctg
-			JOIN images header ON header.id = ctg.header_img
-			JOIN images display ON display.id = ctg.display_img
+			LEFT JOIN images header ON header.id = ctg.header_img
+			LEFT JOIN images display ON display.id = ctg.display_img
 		WHERE slug = $1`,
 		slug,
 	).Scan(
@@ -126,7 +130,9 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		&category.Slug,
 		&category.Description,
 		&headerImg,
+		&category.HeaderImgID,
 		&displayImg,
+		&category.DisplayImgID,
 		&category.QRCodeFilename,
 	)
 	if err != nil {
@@ -163,7 +169,9 @@ func FindCategoryByID(id string) (*Category, error) {
 		`SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description,
 			header.filename AS header_img,
+			header.id AS header_img_id,
 			display.filename AS display_img,
+			display.id AS display_img_id,
 			qrcode_filename
 		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
@@ -176,7 +184,9 @@ func FindCategoryByID(id string) (*Category, error) {
 		&category.Slug,
 		&category.Description,
 		&headerImg,
+		&category.HeaderImgID,
 		&displayImg,
+		&category.DisplayImgID,
 		&category.QRCodeFilename,
 	)
 	if err != nil {
@@ -207,7 +217,9 @@ func FindAllCategories() ([]*Category, error) {
 		`SELECT
 			ctg.id, ctg.name, ctg.slug, ctg.description, 
 			header.filename AS header_img,
+			header.id AS header_img_id,
 			display.filename AS display_img,
+			display.id AS display_img_id,
 			ctg.qrcode_filename
 		FROM categories ctg
 			LEFT JOIN images header ON header.id = ctg.header_img
@@ -233,7 +245,9 @@ func FindAllCategories() ([]*Category, error) {
 			&category.Slug,
 			&category.Description,
 			&headerImg,
+			&category.HeaderImgID,
 			&displayImg,
+			&category.DisplayImgID,
 			&category.QRCodeFilename,
 		)
 		if err != nil {
@@ -266,10 +280,20 @@ func UpdateCategory(category *Category) error {
 		String: category.HeaderImg,
 		Valid:  category.HeaderImg != "",
 	}
+	if _, err := uuid.Parse(category.HeaderImg); err != nil {
+		headerImg.String = category.HeaderImgID
+		headerImg.Valid = category.HeaderImgID != ""
+	}
+
 	displayImg := sql.NullString{
 		String: category.DisplayImg,
 		Valid:  category.DisplayImg != "",
 	}
+	if _, err := uuid.Parse(category.DisplayImg); err != nil {
+		displayImg.String = category.DisplayImgID
+		displayImg.Valid = category.DisplayImgID != ""
+	}
+
 	if category.Slug == "" {
 		category.Slug = internal.Slugify(category.Name)
 	}
@@ -374,12 +398,14 @@ func FilterCategories(filters CategoryFilterParams) (*CategoryFilterResult, erro
 		SELECT 
 			ctg.id, ctg.name, ctg.slug, ctg.description, ctg.long_description,
 			header.filename as header_img,
+			header.id as header_img_id,
 			display.filename as display_img,
+			display.id as display_img_id,
 			COUNT(p.id) as product_count,
 			ctg.qrcode_filename,
 			%s
 		%s GROUP BY ctg.id, ctg.name, ctg.slug, ctg.description, ctg.long_description,
-		header.filename, display.filename, ctg.qrcode_filename %s
+		header.filename, header.id, display.filename, display.id, ctg.qrcode_filename %s
 		LIMIT @limit OFFSET @offset`,
 		buildCategorySearchRankSelect(filters), baseQuery, orderBy)
 
@@ -500,7 +526,9 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&category.Description,
 				&longDescription,
 				&headerImg,
+				&category.HeaderImgID,
 				&displayImg,
+				&category.DisplayImgID,
 				&category.ProductCount,
 				&category.QRCodeFilename,
 				&searchRank,
@@ -516,7 +544,9 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&category.Description,
 				&longDescription,
 				&headerImg,
+				&category.HeaderImgID,
 				&displayImg,
+				&category.DisplayImgID,
 				&category.ProductCount,
 				&category.QRCodeFilename,
 				&searchRank, // Still need to scan the rank column (will be 0)
@@ -546,33 +576,98 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 	return categories, nil
 }
 
-func UpdateCategoryImages(categoryId string, imageIds []string) error {
+func UpdateCategoryHeaderImg(categoryId, imageId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	conn, err := GetConn()
 	if err != nil {
 		return err
 	}
 	defer conn.Release()
 
-	ctx := context.Background()
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	// For categories, we might update a main image field instead of a relationship table
-	// Let's assume categories have a main_image field for now
-	var mainImageId string
-	if len(imageIds) > 0 {
-		mainImageId = imageIds[0] // Use first image as main image
+	headerImg := sql.NullString{
+		String: imageId,
+		Valid:  imageId != "",
 	}
 
-	_, err = tx.Exec(ctx,
-		"UPDATE categories SET main_image = $1 WHERE id = $2",
-		mainImageId, categoryId)
+	_, err = conn.Exec(
+		ctx,
+		`UPDATE categories SET header_img = $1 WHERE id = $2`,
+		headerImg,
+		categoryId,
+	)
 	if err != nil {
 		return err
 	}
 
-	return tx.Commit(ctx)
+	return nil
+}
+
+func UpdateCategoryDisplayImg(categoryId, imageId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	displayImg := sql.NullString{
+		String: imageId,
+		Valid:  imageId != "",
+	}
+
+	_, err = conn.Exec(
+		ctx,
+		`UPDATE categories SET display_img = $1 WHERE id = $2`,
+		displayImg,
+		categoryId,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteCategoryHeaderImg(categoryId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(
+		ctx,
+		`UPDATE categories SET header_img = NULL WHERE id = $1`,
+		categoryId,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteCategoryDisplayImg(categoryId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(
+		ctx,
+		`UPDATE categories SET display_img = NULL WHERE id = $1`,
+		categoryId,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

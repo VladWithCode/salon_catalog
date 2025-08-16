@@ -36,7 +36,7 @@ func NewRouter() http.Handler {
 	RegisterProductsRoutes(router)
 	RegisterEventKindsRoutes(router)
 	RegisterContactRequestsRoutes(router)
-	RegisterWizardRoutes(router)
+	// RegisterWizardRoutes(router)
 	RegisterCatalogRoutes(router)
 	RegisterCartRoutes(router)
 	RegisterUserRoutes(router)

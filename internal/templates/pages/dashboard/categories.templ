@@ -205,6 +205,24 @@ templ Categories() {
 				data-categories-modal="closed"
 			></div>
 		</div>
+		<template id="max-prio-popup">
+			<div
+				data-max-prio-popup
+				class="fixed inset-0 w-screen h-screen z-50 flex flex-col justify-center items-center overflow-hidden bg-dark/60"
+				data-click-handler-selector="max-prio-popup-close"
+			>
+				<button
+					class="absolute top-4 right-4 z-10 text-gray-50 hover:text-gray-200 transition-colors"
+					data-click-handler-selector="max-prio-popup-close"
+				>
+					@components.TimesIcon("w-8 h-8", nil)
+				</button>
+				<div id="max-prio-popup-content" class="w-full bg-light flex flex-col rounded-lg p-1"></div>
+			</div>
+		</template>
+		<template id="category-modal-image">
+			<img class="w-full my-auto object-contain rounded-lg" src="placeholder.jpg" alt="" data-category-modal-image="">
+		</template>
 	}
 }
 
@@ -317,6 +335,92 @@ templ categoriesScript() {
                 })
                 .registerClick('[data-categories-filter-clear]', function (e) {
                     clearCategoriesTableFilters();
+                })
+                .registerClick('[data-categories-modal-tab]', function (e) {
+                    const activeBgValues = "54 65 83";
+                    const target = e.target.matches('[data-categories-modal-tab]')
+                        ? e.target
+                        : e.target.closest('[data-categories-modal-tab]');
+                    const tab = target.dataset.categoriesModalTab;
+                    const modal = document.getElementById('categories-modal');
+                    const form = document.getElementById('categories-modal-form');
+                    const images = document.getElementById('categories-modal-images');
+                    const tl = gsap.timeline({defaults: {duration: 0.3, ease: 'power2.out'}});
+
+                    let inactiveTabs = [];
+                    let activeTab = form;
+                    switch (tab) {
+                    case 'categories-modal-images':
+                        inactiveTabs.push(form);
+                        activeTab = images;
+                        break;
+                    case 'categories-modal-form':
+                    default:
+                        inactiveTabs.push(images);
+                        activeTab = form;
+                        break;
+                    }
+                    tl.set(activeTab, {zIndex: 10})
+                        .set(inactiveTabs, {zIndex: 0})
+
+                    tl.to(target, {backgroundColor: `rgb(${activeBgValues})`, color: `rgb(240 240 240)`})
+                        .to('[data-categories-modal-tab]:not([data-categories-modal-tab="'+tab+'"])', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`}, "<")
+                        .to(activeTab, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
+                        .to(inactiveTabs, {opacity: 0, x: '15rem', pointerEvents: 'none'}, '-=0.1');
+                })
+                .register('afterSwap', '#headerImgSection', function (e) {
+                    const selectorModal = document.getElementById('image-selector-modal');
+                    if (selectorModal) {
+                        gsap.to(selectorModal, {
+                            opacity: 0,
+                            y: '10rem',
+                            pointerEvents: 'none',
+                            ease: 'power2.out',
+                            duration: 0.5,
+                            onComplete: () => {
+                                selectorModal.remove();
+                            },
+                        });
+                    }
+                })
+                .register('afterSwap', '#displayImgSection', function (e) {
+                    const selectorModal = document.getElementById('image-selector-modal');
+                    if (selectorModal) {
+                        gsap.to(selectorModal, {
+                            opacity: 0,
+                            y: '10rem',
+                            pointerEvents: 'none',
+                            ease: 'power2.out',
+                            duration: 0.5,
+                            onComplete: () => {
+                                selectorModal.remove();
+                            },
+                        });
+                    }
+                })
+                .registerClick('category-modal-images-btn', function (e) {
+                    const target = e.target.matches('[data-click-handler-selector]')
+                        ? e.target
+                        : e.target.closest('[data-click-handler-selector]');
+                    const imgPopup = document.getElementById('max-prio-popup').content.cloneNode(true);
+                    const imgElem = document.getElementById('category-modal-image').content.cloneNode(true);
+                    imgElem.children[0].src = target.querySelector('img').src;
+                    const popupContent = imgPopup.querySelector('#max-prio-popup-content');
+
+                    popupContent.appendChild(imgElem.children[0]);
+                    document.body.appendChild(imgPopup);
+
+                    gsap.set(popupContent, {
+                        opacity: 0,
+                        y: '12rem',
+                        pointerEvents: 'none',
+                    });
+                    gsap.to(popupContent, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: 'power2.in',
+                    });
                 })
                 .registerClick('#categories-table-multi-selection-ctl', function (e) {
                     const target = e.target.matches('[data-multi-selection-mode]')

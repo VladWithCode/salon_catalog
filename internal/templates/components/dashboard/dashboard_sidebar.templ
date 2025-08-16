@@ -19,7 +19,7 @@ templ DashboardSidebar() {
 		class="fixed inset-y-0 left-0 w-72 -translate-x-full z-50 p-0.5 lg:block lg:static lg:translate-x-0 lg:z-10 transition-[height] duration-100"
 		data-sidebar-open="false"
 	>
-		<div class="w-full h-full bg-secondary text-primary/90 rounded-xs">
+		<div class="w-full h-full bg-secondary text-primary/90 rounded-xs shadow-sm">
 			<div class="relative flex flex-col h-full">
 				<!-- Sidebar Header -->
 				<div class="flex items-center justify-between h-16 px-6 bg-sidebar border-b border-sidebar-accent">
@@ -62,12 +62,10 @@ templ DashboardSidebar() {
 					<!-- Products Section -->
 					@SidebarSection("Productos", components.BoxIcon("h-5 mr-3", nil)) {
 						@SidebarSectionNavItem("Productos", "/panel/productos", nil)
-						// @SidebarSectionNavItem("Crear Producto", "/panel/productos/nuevo", nil)
 						<div class="border-b border-accent/70">
 							<p class="sr-only">sidebar separator</p>
 						</div>
 						@SidebarSectionNavItem("Categorías", "/panel/categorias", nil)
-						// @SidebarSectionNavItem("Crear categoría", "/panel/categorias/nueva", templ.Attributes{})
 					}
 					<!-- Event Types Section -->
 					<a
@@ -85,7 +83,6 @@ templ DashboardSidebar() {
 						components.ImageIcon("h-5 mr-3", nil),
 					) {
 						@SidebarSectionNavItem("Imagenes", "/panel/imagenes", templ.Attributes{})
-						<!-- @SidebarSectionNavItem("Nueva Imagen", "/panel/imagenes/nueva", templ.Attributes{}) -->
 					}
 					<!-- Wizard Section -->
 					/* @SidebarSection("Asistente de Eventos", components.WizardIcon("h-5 mr-3", nil)) {
@@ -107,15 +104,6 @@ templ DashboardSidebar() {
 						}
 					</a>
 					<!-- Quotes Section -->
-					/* @SidebarSection(
-                "Quotes",
-                components.EmailIcon("h-5 mr-3"),
-                ) {
-                @SidebarSectionNavItem("Ver Quotes", "/panel/quotes", templ.Attributes{})
-                @SidebarSectionNavItem("Crear Quote", "/panel/quotes/nuevo", templ.Attributes{})
-                @SidebarSectionNavItem("Pending", "/panel/quotes/pending", templ.Attributes{})
-                @SidebarSectionNavItem("Approved", "/panel/quotes/approved", templ.Attributes{})
-                } */
 					<!-- Analytics -->
 					/* @SidebarSection("Analytics", components.GraphIcon("h-5 mr-3", templ.Attributes{})) {
                 @SidebarSectionNavItem("Ver Reportes", "/panel/analytics", templ.Attributes{})
@@ -157,7 +145,10 @@ templ DashboardSidebar() {
 					<div id="sidebar-user-navigation" class="flex flex-col border-primary h-0" data-sidebar-user-nav="closed">
 						<ul class="pt-4 text-primary/60 text-sm font-medium space-y-2">
 							<li>
-								<a href="/panel/usuario" class="block cursor-pointer underline underline-offset-2 hover:text-accent">Mi perfil</a>
+								<a href="/panel/usuario" class="block flex items-center gap-3 cursor-pointer hover:text-accent">
+									@components.UserIcon("w-5", nil)
+									<span class="block">Mi perfil</span>
+								</a>
 							</li>
 						</ul>
 					</div>

@@ -539,55 +539,52 @@ func CategoryModal(category *db.Category, err string) templ.Component {
 			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div id=\"categories-modal-content\" class=\"h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2\"><div class=\"flex-1 flex justify-between items-center\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div id=\"categories-modal-content\" class=\"relative bg-light h-full md:h-[90vh] w-full md:w-[95vw] lg:w-[90vw] max-w-screen-2xl mx-auto md:rounded-lg md:shadow-lg overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-[2fr_3fr] lg:grid-rows-1 gap-1 md:gap-2\" data-categories-modal=\"closed\"><!-- Header --><div class=\"lg:col-span-2 flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200\"><h2 class=\"text-xl font-semibold text-gray-900\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if err != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "Ocurrió un error al cargar la categoría")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "Error")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
+		} else if category != nil {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 200, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 205, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "Nueva Categoría")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</h3><button id=\"categories-modal-close\" class=\"p-2 rounded-sm text-gray-700 bg-stone-50\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.TimesIcon("w-8 mx-auto", nil).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</h2><button type=\"button\" class=\"text-gray-400 hover:text-gray-600 transition-colors\" data-click-handler-selector=\"[data-categories-modal-toggle]\" data-categories-modal-toggle=\"close\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if err != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<div class=\"flex-1 basis-full w-full overflow-hidden\"><div class=\"flex flex-col items-center justify-center h-full\"><p class=\"text-red-700/70 mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<div class=\"lg:col-span-2 flex flex-col items-center justify-center h-full p-8\"><div class=\"text-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.TimesIcon("w-10 mx-auto", nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.TimesIcon("w-16 h-16 text-red-500 mx-auto mb-4", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</p><p class=\"text-red-700 font-medium text-center mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<h3 class=\"text-lg font-medium text-red-700 mb-2\">Error</h3><p class=\"text-red-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 218, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 226, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -598,51 +595,51 @@ func CategoryModal(category *db.Category, err string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = CategoryEditForm(category).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<!-- Tabs --> <div id=\"categories-modal-tab-selector\" class=\"lg:col-span-2 flex gap-2 p-2 bg-gray-200 rounded-sm overflow-x-auto overflow-y-hidden\"><button data-categories-modal-tab=\"categories-modal-form\" data-click-handler-selector=\"[data-categories-modal-tab]\" class=\"flex-1 basis-1/2 p-2 bg-gray-700 rounded-sm text-light cursor-pointer hover:bg-gray-700/80 hover:text-light\">Datos</button><div class=\"w-px h-4/5 bg-gray-700/60 my-auto\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
+			}
+			if category != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<button data-categories-modal-tab=\"categories-modal-images\" data-click-handler-selector=\"[data-categories-modal-tab]\" class=\"flex-1 basis-1/2 p-2 bg-gray-700/0 rounded-sm text-gray-700 cursor-pointer hover:bg-gray-700/80 hover:text-light\">Imágenes</button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</div><!-- Form Tab --> <div id=\"categories-modal-form\" class=\"relative col-start-1 row-start-1 lg:col-start-1 lg:row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-0 opacity-100 flex flex-col z-10 pointer-events-auto\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if category != nil {
+				templ_7745c5c3_Err = CategoryEditForm(category).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = CategoryCreateForm().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</div><!-- Images Tab --> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if category != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "<div id=\"categories-modal-images\" class=\"relative col-start-1 row-start-1 lg:col-start-1 lg:row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = CategoryImagesTab(category, nil).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<div class=\"flex-1 flex gap-2 justify-end items-center\"><button id=\"categories-modal-back\" class=\"flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.ChevronIcon("w-5 rotate-90 stroke-4", nil).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "Volver</button> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if err == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<button id=\"categories-modal-delete\" class=\"flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm\" hx-delete=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var30 string
-			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/categorias/%s", category.ID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 238, Col: 59}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" hx-target=\"#categories-table\" hx-include='[name=\"sort\"], [name=\"search\"]' hx-indicator=\"#global-loading-indicator\" hx-confirm=\"¿Seguro que deseas eliminar la categoría? ADVERTENCIA: Esto también eliminará todos los productos de esta categoría.\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = components.BinIcon("w-5 mx-auto", nil).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "Eliminar</button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -666,149 +663,90 @@ func CategoryEditForm(category *db.Category) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var31 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var31 == nil {
-			templ_7745c5c3_Var31 = templ.NopComponent
+		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var30 == nil {
+			templ_7745c5c3_Var30 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "<form hx-put=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<div class=\"flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden\" id=\"categories-modal-form-tab\"><div class=\"shrink-0 grow-0 basis-auto\"><h3 class=\"text-lg font-medium line-clamp-1 text-ellipsis\">Editar ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var31 string
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 271, Col: 84}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "</h3></div><form class=\"flex-1 basis-full space-y-4 overflow-hidden\" hx-put=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/categorias/%s", category.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 256, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 275, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\" hx-target=\"#categories-table\" hx-indicator=\"#global-loading-indicator\" class=\"flex-1 basis-full w-full overflow-auto space-y-4 p-4\"><div class=\"space-y-2\"><label for=\"category-name\" class=\"block text-sm font-medium text-gray-700\">Nombre</label> <input id=\"category-name\" name=\"name\" type=\"text\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\" hx-target=\"#categories-table\" hx-indicator=\"#global-loading-indicator\"><div class=\"flex-1 basis-full space-y-4\"><div class=\"grid gap-4\"><div><label for=\"category-edit-name\" class=\"block text-sm font-medium text-gray-700 mb-1\">Nombre *</label> <input type=\"text\" id=\"category-edit-name\" name=\"name\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 267, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 289, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" required class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></div><div class=\"space-y-2\"><label for=\"category-slug\" class=\"block text-sm font-medium text-gray-700\">Slug</label> <input id=\"category-slug\" name=\"slug\" type=\"text\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "\" required class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"></div><div><label for=\"category-edit-slug\" class=\"block text-sm font-medium text-gray-700 mb-1\">Slug *</label> <input type=\"text\" id=\"category-edit-slug\" name=\"slug\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(category.Slug)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 278, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 302, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\" required class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></div><div class=\"space-y-2\"><label for=\"category-description\" class=\"block text-sm font-medium text-gray-700\">Descripción</label> <textarea id=\"category-description\" name=\"description\" rows=\"3\" required class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "\" required class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"></div><div><label for=\"category-edit-description\" class=\"block text-sm font-medium text-gray-700 mb-1\">Descripción *</label> <textarea id=\"category-edit-description\" name=\"description\" rows=\"3\" required class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(category.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 291, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 317, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "</textarea></div><div class=\"space-y-2\"><label for=\"category-long-description\" class=\"block text-sm font-medium text-gray-700\">Descripción Larga</label> <textarea id=\"category-long-description\" name=\"long_description\" rows=\"4\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "</textarea></div><div><label for=\"category-edit-long-description\" class=\"block text-sm font-medium text-gray-700 mb-1\">Descripción larga</label> <textarea id=\"category-edit-long-description\" name=\"long_description\" rows=\"5\" class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(category.LongDescription)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 300, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 328, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "</textarea></div><!-- Images Section --><div class=\"space-y-4 border-t border-gray-200 pt-4\"><h3 class=\"text-md font-medium text-gray-700\">Imágenes</h3><!-- Hidden inputs for image fields --><input type=\"hidden\" name=\"header_img\" value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var37 string
-		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(category.HeaderImg)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 308, Col: 68}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "\"> <input type=\"hidden\" name=\"display_img\" value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(category.DisplayImg)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 309, Col: 70}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\"><!-- Header Image Selector --><div class=\"space-y-2\"><label class=\"block text-sm font-medium text-gray-700\">Imagen de Encabezado</label><div class=\"flex items-center space-x-4\"><button type=\"button\" onclick=\"openImageSelector('single', 'header_img', 'Seleccionar Imagen de Encabezado', 1)\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\">Seleccionar</button><div id=\"header_img-preview\" class=\"flex space-x-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if category.HeaderImg != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<div class=\"relative w-16 h-16 rounded-md overflow-hidden border border-gray-200\"><img src=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var39 string
-			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", category.HeaderImg))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 325, Col: 72}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "\" alt=\"Header\" class=\"w-full h-full object-cover\"></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "</div></div></div><!-- Display Image Selector --><div class=\"space-y-2\"><label class=\"block text-sm font-medium text-gray-700\">Imagen de Visualización</label><div class=\"flex items-center space-x-4\"><button type=\"button\" onclick=\"openImageSelector('single', 'display_img', 'Seleccionar Imagen de Visualización', 1)\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\">Seleccionar</button><div id=\"display_img-preview\" class=\"flex space-x-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if category.DisplayImg != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "<div class=\"relative w-16 h-16 rounded-md overflow-hidden border border-gray-200\"><img src=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var40 string
-			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", category.DisplayImg))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 346, Col: 73}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "\" alt=\"Display\" class=\"w-full h-full object-cover\"></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</div></div></div></div><div class=\"flex gap-2 pt-4\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2\">Guardar Cambios</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "</textarea></div></div></div><div class=\"flex gap-2 pt-4 border-t border-gray-200\"><button type=\"submit\" class=\"flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors\">Actualizar Categoría</button> <button type=\"button\" class=\"px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors\" data-click-handler-selector=\"[data-categories-modal-toggle]\" data-categories-modal-toggle=\"close\">Cancelar</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -832,27 +770,27 @@ func CategoryCreateModal(err string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var41 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var41 == nil {
-			templ_7745c5c3_Var41 = templ.NopComponent
+		templ_7745c5c3_Var37 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var37 == nil {
+			templ_7745c5c3_Var37 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "<div id=\"categories-modal-content\" class=\"h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2\"><div class=\"flex-1 flex justify-between items-center\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<div id=\"categories-modal-content\" class=\"h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2\"><div class=\"flex-1 flex justify-between items-center\"><h3 class=\"text-xl font-medium text-gray-700 tracking-tight flex-1 truncate\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if err != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "Ocurrió un error al crear la categoría")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "Ocurrió un error al crear la categoría")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "Nueva Categoría")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "Nueva Categoría")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "</h3><button id=\"categories-modal-close\" class=\"p-2 rounded-sm text-gray-700 bg-stone-50\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</h3><button id=\"categories-modal-close\" class=\"p-2 rounded-sm text-gray-700 bg-stone-50\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -860,12 +798,12 @@ func CategoryCreateModal(err string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if err != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<div class=\"flex-1 basis-full w-full overflow-hidden\"><div class=\"flex flex-col items-center justify-center h-full\"><p class=\"text-red-700/70 mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<div class=\"flex-1 basis-full w-full overflow-hidden\"><div class=\"flex flex-col items-center justify-center h-full\"><p class=\"text-red-700/70 mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -873,20 +811,20 @@ func CategoryCreateModal(err string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "</p><p class=\"text-red-700 font-medium text-center mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "</p><p class=\"text-red-700 font-medium text-center mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var42 string
-			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(err)
+			var templ_7745c5c3_Var38 string
+			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 389, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/categories_table.templ`, Line: 377, Col: 66}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</p></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</p></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -896,7 +834,7 @@ func CategoryCreateModal(err string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<div class=\"flex-1 flex gap-2 justify-end items-center\"><button id=\"categories-modal-back\" class=\"flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<div class=\"flex-1 flex gap-2 justify-end items-center\"><button id=\"categories-modal-back\" class=\"flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm\" data-categories-modal-toggle=\"close\" data-click-handler-selector=\"[data-categories-modal-toggle]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -904,7 +842,7 @@ func CategoryCreateModal(err string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "Cancelar</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "Cancelar</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -928,12 +866,12 @@ func CategoryCreateForm() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var43 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var43 == nil {
-			templ_7745c5c3_Var43 = templ.NopComponent
+		templ_7745c5c3_Var39 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var39 == nil {
+			templ_7745c5c3_Var39 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<form hx-post=\"/categorias/nueva\" hx-target=\"#categories-table\" hx-indicator=\"#global-loading-indicator\" hx-include='[name=\"search\"], [name=\"sort\"]' class=\"flex-1 basis-full w-full overflow-auto space-y-4 p-4\"><div class=\"space-y-2\"><label for=\"category-create-name\" class=\"block text-sm font-medium text-gray-700\">Nombre</label> <input id=\"category-create-name\" name=\"name\" type=\"text\" required placeholder=\"Nombre de la categoría\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></div><div class=\"space-y-2\"><label for=\"category-create-description\" class=\"block text-sm font-medium text-gray-700\">Descripción</label> <textarea id=\"category-create-description\" name=\"description\" rows=\"3\" required placeholder=\"Descripción breve de la categoría\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><div class=\"space-y-2\"><label for=\"category-create-long-description\" class=\"block text-sm font-medium text-gray-700\">Descripción Larga</label> <textarea id=\"category-create-long-description\" name=\"long_description\" rows=\"4\" placeholder=\"Descripción detallada (opcional)\" class=\"block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent\"></textarea></div><!-- Images Section --><div class=\"space-y-4 border-t border-gray-200 pt-4\"><h3 class=\"text-md font-medium text-gray-700\">Imágenes</h3><!-- Hidden inputs for image fields --><input type=\"hidden\" name=\"header_img\" value=\"\"> <input type=\"hidden\" name=\"display_img\" value=\"\"><!-- Header Image Selector --><div class=\"space-y-2\"><label class=\"block text-sm font-medium text-gray-700\">Imagen de Encabezado</label><div class=\"flex items-center space-x-4\"><button type=\"button\" onclick=\"openImageSelector('single', 'header_img', 'Seleccionar Imagen de Encabezado', 1)\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\">Seleccionar</button><div id=\"header_img-preview\" class=\"flex space-x-2\"><!-- Selected image preview will appear here --></div></div></div><!-- Display Image Selector --><div class=\"space-y-2\"><label class=\"block text-sm font-medium text-gray-700\">Imagen de Visualización</label><div class=\"flex items-center space-x-4\"><button type=\"button\" onclick=\"openImageSelector('single', 'display_img', 'Seleccionar Imagen de Visualización', 1)\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\">Seleccionar</button><div id=\"display_img-preview\" class=\"flex space-x-2\"><!-- Selected image preview will appear here --></div></div></div></div><div class=\"flex gap-2 pt-4\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2\">Crear Categoría</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<div class=\"flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden\" id=\"categories-modal-form-tab\"><div class=\"shrink-0 grow-0 basis-auto\"><h3 class=\"text-lg font-medium\">Crear Nueva Categoría</h3></div><form class=\"flex-1 basis-full space-y-4 overflow-hidden\" hx-post=\"/categorias/nueva\" hx-target=\"#categories-table\" hx-indicator=\"#global-loading-indicator\"><div class=\"flex-1 basis-full space-y-4\"><div class=\"grid gap-4\"><div><label for=\"category-create-name\" class=\"block text-sm font-medium text-gray-700 mb-1\">Nombre *</label> <input type=\"text\" id=\"category-create-name\" name=\"name\" required class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"></div><div><label for=\"category-create-description\" class=\"block text-sm font-medium text-gray-700 mb-1\">Descripción *</label> <textarea id=\"category-create-description\" name=\"description\" rows=\"3\" required class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"></textarea></div><div><label for=\"category-create-long-description\" class=\"block text-sm font-medium text-gray-700 mb-1\">Descripción larga</label> <textarea id=\"category-create-long-description\" name=\"long_description\" rows=\"5\" class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"></textarea></div></div></div><div class=\"flex gap-2 pt-4 border-t border-gray-200\"><button type=\"submit\" class=\"flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors\">Crear Categoría</button> <button type=\"button\" class=\"px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors\" data-click-handler-selector=\"[data-categories-modal-toggle]\" data-categories-modal-toggle=\"close\">Cancelar</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

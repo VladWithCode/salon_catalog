@@ -1,0 +1,139 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
+
+type CategoryImagesTabUpdateData struct {
+	HeaderImgFilename  string
+	HeaderImgID        string
+	DisplayImgFilename string
+	DisplayImgID       string
+}
+
+templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpdateData) {
+	<div class="flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden" id="categories-modal-images-tab">
+		<div class="shrink-0 grow-0 basis-auto">
+			<h3 class="text-lg font-medium line-clamp-1 text-ellipsis">Imágenes de { category.Name }</h3>
+		</div>
+		<div id="category-modal-images-main" class="flex-1 basis-full space-y-4 overflow-hidden">
+			<div class="flex-1 basis-full space-y-4">
+				<!-- Header Image Section -->
+				<h4 class="shrink-0 grow-0 text-lg lg:text-2xl tracking-tight text-dark/80">Imagen de cabecera</h4>
+				<div id="headerImgSection" class="lg:grid lg:grid-cols-[20rem_1fr] lg:grid-rows-[20rem] lg:gap-4 space-y-4 lg:space-y-0">
+					<div class="lg:col-start-2 lg:row-start-1 lg:justify-self-start max-w-md md:basis-1/2 md:max-w-[initial] space-y-2">
+						<button
+							id="categories-modal-images-select-header"
+							class="flex items-center justify-center gap-4 w-full py-2 px-6 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
+							hx-get="/imagenes/selector"
+							hx-vals={
+								fmt.Sprintf(`{
+									"mode": "single",
+									"updateEndpoint": "/panel/categorias/%s/header_img",
+									"maxSelection": "1",
+									"successTarget": "#headerImgSection"
+								}`, category.ID)
+							}
+							hx-target="body"
+							hx-swap="beforeend"
+							hx-indicator="#global-loading-indicator"
+						>
+							<span class="block">Seleccionar imagen de cabecera</span>
+						</button>
+						<button
+							id="categories-modal-images-unset-header"
+							class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer"
+							hx-delete={ fmt.Sprintf("/panel/categorias/%s/header_img", category.ID) }
+							hx-target="#headerImgSection"
+							hx-indicator="#global-loading-indicator"
+							hx-confirm="¿Seguro que deseas eliminar la imagen de cabecera?"
+						>
+							<span class="block">Quitar imagen</span>
+						</button>
+					</div>
+					if (updateData != nil && updateData.HeaderImgFilename != "") || category.HeaderImg != "" {
+						<button type="button" class="lg:h-full w-full mx-auto" data-click-handler-selector="category-modal-images-btn">
+							<img
+								src={
+									fmt.Sprintf("/static/uploads/%s", 
+										func() string {
+											if updateData != nil && updateData.HeaderImgFilename != "" {
+												return updateData.HeaderImgFilename
+											}
+											return category.HeaderImg
+										}())
+								}
+								alt={ category.Name }
+								class="w-full h-full object-cover rounded-lg"
+							/>
+						</button>
+					} else {
+						<div class="lg:h-full w-full mx-auto flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+							<span class="text-gray-500">Sin imagen de cabecera</span>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<div id="categories-modal-images-display" class="flex-1 grid gap-4 overflow-auto">
+			<div>
+				<!-- Display Image Section -->
+				<h4 class="text-lg tracking-tight text-dark/80">Imagen de visualización</h4>
+				<div id="displayImgSection" class="lg:grid lg:grid-cols-[20rem_1fr] lg:grid-rows-[20rem] lg:gap-4 space-y-4 lg:space-y-0">
+					<div class="lg:col-start-2 lg:row-start-1 lg:justify-self-start max-w-md space-y-2">
+						<button
+							id="categories-modal-images-select-display"
+							class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer"
+							hx-get="/imagenes/selector"
+							hx-vals={
+								fmt.Sprintf(`{
+									"mode": "single",
+									"updateEndpoint": "/panel/categorias/%s/display_img",
+									"maxSelection": "1",
+									"successTarget": "#displayImgSection"
+								}`, category.ID)
+							}
+							hx-target="body"
+							hx-swap="beforeend"
+							hx-indicator="#global-loading-indicator"
+						>
+							<span class="block">Seleccionar imagen de visualización</span>
+						</button>
+						<button
+							id="categories-modal-images-unset-display"
+							class="flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer"
+							hx-delete={ fmt.Sprintf("/panel/categorias/%s/display_img", category.ID) }
+							hx-target="#displayImgSection"
+							hx-indicator="#global-loading-indicator"
+							hx-confirm="¿Seguro que deseas eliminar la imagen de visualización?"
+						>
+							<span class="block">Quitar imagen</span>
+						</button>
+					</div>
+					if (updateData != nil && updateData.DisplayImgFilename != "") || category.DisplayImg != "" {
+						<button type="button" class="lg:h-full w-full mx-auto" data-click-handler-selector="category-modal-images-btn">
+							<img
+								src={
+									fmt.Sprintf("/static/uploads/%s", 
+										func() string {
+											if updateData != nil && updateData.DisplayImgFilename != "" {
+												return updateData.DisplayImgFilename
+											}
+											return category.DisplayImg
+										}())
+								}
+								alt={ category.Name }
+								class="w-full h-full object-cover rounded-lg"
+							/>
+						</button>
+					} else {
+						<div class="lg:h-full w-full mx-auto flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+							<span class="text-gray-500">Sin imagen de visualización</span>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}

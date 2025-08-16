@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/google/uuid"
 	"github.com/vladwithcode/salon_catalog/internal"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
@@ -25,9 +26,14 @@ func RegisterCategoriesRoutes(router *customServeMux) {
 	router.HandleFunc("POST /categorias/nueva", auth.ValidateAuth(CreateCategoryAndReturnTable))
 	router.HandleFunc("GET /categorias/{id}", auth.ValidateAuth(RenderCategory))
 	router.HandleFunc("PUT /categorias/{id}", auth.ValidateAuth(UpdateCategoryAndReturnTable))
-	router.HandleFunc("PUT /categorias/{id}/images", auth.ValidateAuth(UpdateCategoryImages))
 	router.HandleFunc("DELETE /categorias", auth.ValidateAuth(DeleteCategoriesAndReturnTable))
 	router.HandleFunc("DELETE /categorias/{id}", auth.ValidateAuth(DeleteCategoryAndReturnTable))
+
+	// Image routes
+	router.HandleFunc("PUT /panel/categorias/{id}/header_img", auth.ValidateAuth(UpdateCategoryHeaderImg))
+	router.HandleFunc("PUT /panel/categorias/{id}/display_img", auth.ValidateAuth(UpdateCategoryDisplayImg))
+	router.HandleFunc("DELETE /panel/categorias/{id}/header_img", auth.ValidateAuth(DeleteCategoryHeaderImg))
+	router.HandleFunc("DELETE /panel/categorias/{id}/display_img", auth.ValidateAuth(DeleteCategoryDisplayImg))
 
 	// Dashboard specific routes
 	router.HandleFunc("GET /panel/categorias/select", RenderCategorySelect)
@@ -568,37 +574,226 @@ func parseCategorySort(s string) string {
 	}
 }
 
-func UpdateCategoryImages(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+func UpdateCategoryHeaderImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
 	categoryId := r.PathValue("id")
-	if categoryId == "" {
+	toastData := components.NewToastData("Se actualizó la imagen de cabecera", components.ToastSuccess, 3000, true, false)
+
+	err := r.ParseForm()
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Category ID is required"})
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
 		return
 	}
 
-	var requestData struct {
-		ImageIds []string `json:"image_ids"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
-		return
-	}
-
-	// Update category images in database
-	err := db.UpdateCategoryImages(categoryId, requestData.ImageIds)
+	category, err := db.FindCategoryByID(categoryId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to update category images"})
-		log.Printf("failed to update category images: %v\n", err)
+		toastData.Message = "Error al recuperar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get category: %v\n", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Category images updated successfully",
-		"image_ids": requestData.ImageIds,
-	})
+	selectedImg := r.FormValue("selected")
+	findFn := db.FindImageByID
+	if _, err = uuid.Parse(selectedImg); err != nil {
+		findFn = db.FindImageByFilename
+	}
+
+	img, err := findFn(selectedImg)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la imagen"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get image: %v\n", err)
+		return
+	}
+
+	err = db.UpdateCategoryHeaderImg(category.ID, img.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to update category: %v\n", err)
+		return
+	}
+
+	category.HeaderImg = img.Filename
+	category.HeaderImgID = img.ID
+	updateData := &dashboard.CategoryImagesTabUpdateData{
+		HeaderImgFilename: img.Filename,
+		HeaderImgID:       img.ID,
+	}
+	combined := templ.Join(
+		dashboard.CategoryImagesTab(category, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "headerImgSection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
+}
+
+func UpdateCategoryDisplayImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	categoryId := r.PathValue("id")
+	toastData := components.NewToastData("Se actualizó la imagen de visualización", components.ToastSuccess, 3000, true, false)
+
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar el formulario"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to parse form: %v\n", err)
+		return
+	}
+
+	category, err := db.FindCategoryByID(categoryId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get category: %v\n", err)
+		return
+	}
+
+	selectedImg := r.FormValue("selected")
+	findFn := db.FindImageByID
+	if _, err = uuid.Parse(selectedImg); err != nil {
+		findFn = db.FindImageByFilename
+	}
+
+	img, err := findFn(selectedImg)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la imagen"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get image: %v\n", err)
+		return
+	}
+
+	err = db.UpdateCategoryDisplayImg(category.ID, img.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to update category: %v\n", err)
+		return
+	}
+
+	category.DisplayImg = img.Filename
+	category.DisplayImgID = img.ID
+	updateData := &dashboard.CategoryImagesTabUpdateData{
+		DisplayImgFilename: img.Filename,
+		DisplayImgID:       img.ID,
+	}
+	combined := templ.Join(
+		dashboard.CategoryImagesTab(category, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "displayImgSection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
+}
+
+func DeleteCategoryHeaderImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	categoryId := r.PathValue("id")
+	toastData := components.NewToastData("Se eliminó la imagen de cabecera", components.ToastSuccess, 3000, true, false)
+
+	category, err := db.FindCategoryByID(categoryId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to find category: %v\n", err)
+		return
+	}
+
+	err = db.DeleteCategoryHeaderImg(category.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al eliminar la imagen de cabecera"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to delete header image: %v\n", err)
+		return
+	}
+
+	category.HeaderImg = ""
+	category.HeaderImgID = ""
+	updateData := &dashboard.CategoryImagesTabUpdateData{
+		HeaderImgFilename: "",
+		HeaderImgID:       "",
+	}
+	combined := templ.Join(
+		dashboard.CategoryImagesTab(category, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "headerImgSection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
+}
+
+func DeleteCategoryDisplayImg(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	categoryId := r.PathValue("id")
+	toastData := components.NewToastData("Se eliminó la imagen de visualización", components.ToastSuccess, 3000, true, false)
+
+	category, err := db.FindCategoryByID(categoryId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recuperar la categoría"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to find category: %v\n", err)
+		return
+	}
+
+	err = db.DeleteCategoryDisplayImg(category.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al eliminar la imagen de visualización"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to delete display image: %v\n", err)
+		return
+	}
+
+	category.DisplayImg = ""
+	category.DisplayImgID = ""
+	updateData := &dashboard.CategoryImagesTabUpdateData{
+		DisplayImgFilename: "",
+		DisplayImgID:       "",
+	}
+	combined := templ.Join(
+		dashboard.CategoryImagesTab(category, updateData),
+		components.ToasterToast(toastData),
+	)
+	err = templ.RenderFragments(r.Context(), w, combined, "displayImgSection", "toaster-toast")
+	if err != nil {
+		http.Error(w, "Ocurrió un error inesperado", http.StatusInternalServerError)
+		log.Printf("failed to render images tab: %v\n", err)
+		return
+	}
 }
