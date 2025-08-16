@@ -2,6 +2,10 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,25 +15,31 @@ import (
 type Wizard struct {
 	ID          string        `json:"id"`
 	Name        string        `json:"name"`
+	Description string        `json:"description"`
 	EventKindID string        `json:"event_kind_id"`
 	EventKind   string        `json:"event_kind"`
 	Steps       []*WizardStep `json:"steps"`
+	Enabled     bool          `json:"enabled"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type WizardStep struct {
-	ID          string `json:"id"`
-	WizardID    string `json:"wizard_id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Required    bool   `json:"required"`
-	MultiSelect bool   `json:"multi_select"`
-	MinSelected int    `json:"min_selected"`
-	MaxSelected int    `json:"max_selected"`
-	CategoryIDs string `json:"category_ids"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Required    bool      `json:"required"`
+	MultiSelect bool      `json:"multi_select"`
+	MinSelected int       `json:"min_selected"`
+	MaxSelected int       `json:"max_selected"`
+	CategoryIDs []string  `json:"category_ids"`
+	StepOrder   int       `json:"step_order"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-func CreateWizard(wizard *Wizard, steps []*WizardStep) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func CreateWizard(ctx context.Context, wizard *Wizard) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	conn, err := GetConn()
 	if err != nil {
@@ -42,59 +52,56 @@ func CreateWizard(wizard *Wizard, steps []*WizardStep) error {
 	}
 	defer tx.Rollback(ctx)
 
-	id, err := uuid.NewV7()
-	if err != nil {
-		return ErrUUIDFail
+	if wizard.ID == "" {
+		id := uuid.Must(uuid.NewV7()).String()
+		wizard.ID = id
 	}
 	args := pgx.NamedArgs{
-		"id":            id.String(),
+		"id":            wizard.ID,
 		"name":          wizard.Name,
+		"description":   wizard.Description,
 		"event_kind_id": wizard.EventKindID,
 	}
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO wizards (
-			id, name, event_kind_id
-		) VALUES (@id, @name, @event_kind_id)`,
+		`INSERT INTO wizards (id, name, description, event_kind_id)
+		VALUES (@id, @name, @description, @event_kind_id)`,
 		args,
 	)
-	if err != nil {
-		return err
-	}
 
-	for _, step := range steps {
-		_, err = tx.Exec(
-			ctx,
-			`INSERT INTO wizard_steps (
-				id, wizard_id, name, description, required, multi_select, min_selected, max_selected, category_ids
-			) VALUES (@id, @wizard_id, @name, @description, @required, @multi_select, @min_selected, @max_selected, @category_ids)`,
-			pgx.NamedArgs{
-				"id":           step.ID,
-				"wizard_id":    step.WizardID,
-				"name":         step.Name,
-				"description":  step.Description,
-				"required":     step.Required,
-				"multi_select": step.MultiSelect,
-				"min_selected": step.MinSelected,
-				"max_selected": step.MaxSelected,
-				"category_ids": step.CategoryIDs,
-			},
+	batch := pgx.Batch{}
+	for _, step := range wizard.Steps {
+		args := pgx.NamedArgs{
+			"wizard_id":      wizard.ID,
+			"wizard_step_id": step.ID,
+			"required":       step.Required,
+			"step_order":     step.StepOrder,
+			"multi_select":   step.MultiSelect,
+			"min_selected":   step.MinSelected,
+			"max_selected":   step.MaxSelected,
+		}
+		batch.Queue(
+			`INSERT INTO wizard_steps_wizards 
+				(wizard_id, wizard_step_id, required, step_order, multi_select, min_selected, max_selected)
+			VALUES (@wizard_id, @wizard_step_id, @required, @step_order, @multi_select, @min_selected, @max_selected)`,
+			args,
 		)
+	}
+	batchResults := tx.SendBatch(ctx, &batch)
+	defer batchResults.Close()
+
+	for i, l := 0, batch.Len(); i < l; i++ {
+		_, err := batchResults.Exec()
 		if err != nil {
 			return err
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(ctx)
 }
 
-func FindWizardByID(id string) (*Wizard, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func FindWizard(ctx context.Context, id string) (*Wizard, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	conn, err := GetConn()
 	if err != nil {
@@ -102,119 +109,315 @@ func FindWizardByID(id string) (*Wizard, error) {
 	}
 	defer conn.Release()
 
-	var wizard Wizard
-	var eventKindDetails EventKindDetails
-	err = conn.QueryRow(
-		ctx,
-		`SELECT 
-			w.id, w.name, w.event_kind_id, 
-			ek.name AS event_kind,
-		FROM wizards w
-			LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
-		WHERE w.id = $1`,
-		id,
-	).Scan(
+	wizard := Wizard{}
+	err = conn.QueryRow(ctx, `SELECT * FROM wizards WHERE id = $1`, id).Scan(
 		&wizard.ID,
 		&wizard.Name,
+		&wizard.Description,
 		&wizard.EventKindID,
-		&eventKindDetails.Name,
+		&wizard.Enabled,
+		&wizard.CreatedAt,
+		&wizard.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
-
-	wizard.EventKind = eventKindDetails.Name
 
 	return &wizard, nil
 }
 
-func FindAllWizards() ([]*Wizard, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func CreateWizardStep(ctx context.Context, wizardStep *WizardStep) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if wizardStep.ID == "" {
+		id := uuid.Must(uuid.NewV7()).String()
+		wizardStep.ID = id
+	}
+
+	_, err = tx.Exec(
+		ctx,
+		`INSERT INTO wizard_steps (
+			id, name, description, multi_select, min_selected, max_selected, step_order
+		) VALUES (@id, @name, @description, @multi_select, @min_selected, @max_selected, @step_order)`,
+		pgx.NamedArgs{
+			"id":           wizardStep.ID,
+			"name":         wizardStep.Name,
+			"description":  wizardStep.Description,
+			"multi_select": wizardStep.MultiSelect,
+			"min_selected": wizardStep.MinSelected,
+			"max_selected": wizardStep.MaxSelected,
+			"step_order":   wizardStep.StepOrder,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	batch := pgx.Batch{}
+	for _, stepCtg := range wizardStep.CategoryIDs {
+		batch.Queue(
+			`INSERT INTO wizard_step_categories (wizard_step_id, category_id) VALUES ($1, $2)`,
+			wizardStep.ID,
+			stepCtg,
+		)
+	}
+	batchResults := tx.SendBatch(ctx, &batch)
+	defer batchResults.Close()
+
+	for i, l := 0, batch.Len(); i < l; i++ {
+		_, err := batchResults.Exec()
+		if err != nil {
+			return err
+		}
+	}
+	batchResults.Close()
+
+	return tx.Commit(ctx)
+}
+
+type WizardFilterParams struct {
+	Search     string     `json:"search"`
+	SearchMode SearchMode `json:"search_mode"`
+	EventKind  string     `json:"event_kind"`
+	Sort       string     `json:"sort"`
+	Page       int        `json:"page"`
+	Limit      int        `json:"limit"`
+}
+
+type WizardFilterResult struct {
+	Wizards     []*Wizard `json:"wizards"`
+	Total       int       `json:"total"`
+	Page        int       `json:"page"`
+	Limit       int       `json:"limit"`
+	TotalPages  int       `json:"total_pages"`
+	HasNext     bool      `json:"has_next"`
+	HasPrevious bool      `json:"has_previous"`
+	HasError    bool      `json:"has_error"`
+	Error       string    `json:"error"`
+}
+
+func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	conn, err := GetConn()
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Release()
 
-	rows, err := conn.Query(
-		ctx,
-		`SELECT 
-			w.id, w.name, w.event_kind_id, 
-			ek.name AS event_kind
+	// Set defaults
+	if filters.Page < 1 {
+		filters.Page = 1
+	}
+	if filters.Limit < 1 || filters.Limit > 100 {
+		filters.Limit = 20
+	}
+	if filters.SearchMode == "" {
+		filters.SearchMode = SearchModeFullText
+	}
+
+	// Build query conditions and named arguments
+	conditions, namedArgs := buildWizardQueryConditions(filters)
+
+	// Base query with explicit column selection
+	baseQuery := `
 		FROM wizards w
-			LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id`,
-	)
+		LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
+		`
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Get total count
+	countQuery := "SELECT COUNT(*) " + baseQuery
+	var total int
+	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	// Calculate pagination
+	offset := (filters.Page - 1) * filters.Limit
+	totalPages := int(math.Ceil(float64(total) / float64(filters.Limit)))
+
+	// Add pagination to named args
+	namedArgs["limit"] = filters.Limit
+	namedArgs["offset"] = offset
+
+	// Build final query with sorting and pagination
+	orderBy := buildWizardOrderByClause(filters)
+	selectQuery := fmt.Sprintf(`
+		SELECT 
+			w.id, w.name, w.event_kind_id,
+			ek.name as event_kind,
+			%s
+		%s %s
+		LIMIT @limit OFFSET @offset`,
+		buildWizardSearchRankSelect(filters), baseQuery, orderBy)
+
+	// Execute query
+	rows, err := conn.Query(ctx, selectQuery, namedArgs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
+	// Scan results
+	wizards, err := scanWizards(rows, filters.SearchMode == SearchModeFullText)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build result
+	result := &WizardFilterResult{
+		Wizards:     wizards,
+		Total:       total,
+		Page:        filters.Page,
+		Limit:       filters.Limit,
+		TotalPages:  totalPages,
+		HasNext:     filters.Page < totalPages,
+		HasPrevious: filters.Page > 1,
+	}
+
+	return result, nil
+}
+
+// buildWizardQueryConditions creates WHERE conditions and named arguments
+func buildWizardQueryConditions(filters WizardFilterParams) ([]string, pgx.NamedArgs) {
+	var conditions []string
+	namedArgs := make(pgx.NamedArgs)
+
+	// Add search condition
+	if filters.Search != "" {
+		switch filters.SearchMode {
+		case SearchModeFullText:
+			// Full-text search with ranking (assuming search_vector exists)
+			conditions = append(conditions, "w.search_vector @@ plainto_tsquery('spanish', @search_query)")
+			namedArgs["search_query"] = filters.Search
+
+		case SearchModeExact:
+			// Exact match search
+			conditions = append(conditions, "(w.name ILIKE @exact_search)")
+			namedArgs["exact_search"] = filters.Search
+
+		case SearchModeFuzzy:
+			// Fuzzy search (LIKE with wildcards)
+			conditions = append(conditions, "(w.name ILIKE @fuzzy_search OR ek.name ILIKE @fuzzy_search)")
+			namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
+		}
+	}
+
+	// Add event kind filter
+	if filters.EventKind != "" {
+		conditions = append(conditions, "w.event_kind_id = @event_kind_id")
+		namedArgs["event_kind_id"] = filters.EventKind
+	}
+
+	return conditions, namedArgs
+}
+
+// buildWizardSearchRankSelect adds search ranking column when using full-text search
+func buildWizardSearchRankSelect(filters WizardFilterParams) string {
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		return "ts_rank(w.search_vector, plainto_tsquery('spanish', @search_query)) as search_rank"
+	}
+	return "0 as search_rank"
+}
+
+// buildWizardOrderByClause constructs the ORDER BY clause
+func buildWizardOrderByClause(filters WizardFilterParams) string {
+	// If using full-text search with a query, prioritize search ranking
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		switch strings.ToLower(filters.Sort) {
+		case "relevance", "":
+			return "ORDER BY search_rank DESC, w.name ASC"
+		case "name_asc", "name":
+			return "ORDER BY w.name ASC"
+		case "name_desc":
+			return "ORDER BY w.name DESC"
+		case "eventkind_asc":
+			return "ORDER BY ek.name ASC, search_rank DESC"
+		case "eventkind_desc":
+			return "ORDER BY ek.name DESC, search_rank DESC"
+		default:
+			return "ORDER BY search_rank DESC, w.name ASC"
+		}
+	}
+
+	// Regular sorting without search ranking
+	switch strings.ToLower(filters.Sort) {
+	case "name_asc", "name", "":
+		return "ORDER BY w.name ASC"
+	case "name_desc":
+		return "ORDER BY w.name DESC"
+	case "eventkind_asc":
+		return "ORDER BY ek.name ASC"
+	case "eventkind_desc":
+		return "ORDER BY ek.name DESC"
+	case "newest":
+		return "ORDER BY w.id DESC"
+	case "oldest":
+		return "ORDER BY w.id ASC"
+	default:
+		return "ORDER BY w.name ASC"
+	}
+}
+
+// scanWizards scans the query results into Wizard structs
+func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 	var wizards []*Wizard
+
 	for rows.Next() {
 		var wizard Wizard
-		var eventKindDetails EventKindDetails
-		err = rows.Scan(
-			&wizard.ID,
-			&wizard.Name,
-			&wizard.EventKindID,
-			&eventKindDetails.Name,
-		)
-		if err != nil {
-			return nil, err
+		var searchRank float32
+		var eventKind sql.NullString
+
+		if includeRank {
+			err := rows.Scan(
+				&wizard.ID,
+				&wizard.Name,
+				&wizard.EventKindID,
+				&eventKind,
+				&searchRank,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan wizard with rank: %w", err)
+			}
+		} else {
+			err := rows.Scan(
+				&wizard.ID,
+				&wizard.Name,
+				&wizard.EventKindID,
+				&eventKind,
+				&searchRank, // Still need to scan the rank column (will be 0)
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan wizard: %w", err)
+			}
 		}
 
-		wizard.EventKind = eventKindDetails.Name
+		if eventKind.Valid {
+			wizard.EventKind = eventKind.String
+		}
+
 		wizards = append(wizards, &wizard)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
 	return wizards, nil
-}
-
-func UpdateWizard(wizard *Wizard) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	conn, err := GetConn()
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	args := pgx.NamedArgs{
-		"id":            wizard.ID,
-		"name":          wizard.Name,
-		"event_kind_id": wizard.EventKindID,
-	}
-	_, err = conn.Exec(
-		ctx,
-		`UPDATE wizards SET
-			name = @name, event_kind_id = @event_kind_id
-		WHERE id = @id`,
-		args,
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteWizard(id string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	conn, err := GetConn()
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	_, err = conn.Exec(
-		ctx,
-		`DELETE FROM wizards WHERE id = $1`,
-		id,
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
