@@ -55,22 +55,22 @@ templ QuickActions() {
 			data-quick-actions-open="true"
 		>
 			@QuickActionCard(&QuickAction{
-				Name:  "Nuevo producto",
-				Label: "Crear nuevo producto",
-				Icon:  components.PlusIcon("w-5 h-5 text-blue-600", nil),
-				Href:  "/panel/productos/nuevo",
+				Name:  "Ver productos",
+				Label: "Listado de productos",
+				Icon:  components.BoxIcon("w-5 text-blue-600", nil),
+				Href:  "/panel/productos",
 			})
-			/* @QuickActionCard(&QuickAction{
-				Name:  "Nuevo asistente",
-				Label: "Crear nuevo asistente de planeación",
-				Icon:  components.WizardIcon("w-5 h-5"),
-				Href:  "/panel/asistente/nuevo",
-			}) */
 			@QuickActionCard(&QuickAction{
 				Name:  "Ver mensajes",
 				Label: "Solicitudes de contacto",
-				Icon:  components.EmailIcon("w-5 h-5 text-green-600", nil),
+				Icon:  components.EmailIcon("w-5 text-green-600", nil),
 				Href:  "/panel/solicitudes",
+			})
+			@QuickActionCard(&QuickAction{
+				Name:  "Ver Perfil",
+				Label: "Perfil de usuario",
+				Icon:  components.UserIcon("w-5 text-blue-600", nil),
+				Href:  "/panel/usuario",
 			})
 		</div>
 	</div>

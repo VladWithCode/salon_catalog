@@ -44,10 +44,10 @@ func QuickActions() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = QuickActionCard(&QuickAction{
-			Name:  "Nuevo producto",
-			Label: "Crear nuevo producto",
-			Icon:  components.PlusIcon("w-5 h-5 text-blue-600", nil),
-			Href:  "/panel/productos/nuevo",
+			Name:  "Ver productos",
+			Label: "Listado de productos",
+			Icon:  components.BoxIcon("w-5 text-blue-600", nil),
+			Href:  "/panel/productos",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -55,8 +55,17 @@ func QuickActions() templ.Component {
 		templ_7745c5c3_Err = QuickActionCard(&QuickAction{
 			Name:  "Ver mensajes",
 			Label: "Solicitudes de contacto",
-			Icon:  components.EmailIcon("w-5 h-5 text-green-600", nil),
+			Icon:  components.EmailIcon("w-5 text-green-600", nil),
 			Href:  "/panel/solicitudes",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = QuickActionCard(&QuickAction{
+			Name:  "Ver Perfil",
+			Label: "Perfil de usuario",
+			Icon:  components.UserIcon("w-5 text-blue-600", nil),
+			Href:  "/panel/usuario",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -51,7 +51,7 @@ func Profile(user *db.User, formState *forms.UserFormState) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-col gap-2 px-0.5 pb-0.5\" hx-ext=\"response-targets\"><div class=\"flex-1 gap-4 px-2\"><h2 class=\"text-3xl tracking-tight\">Perfil</h2><p class=\"text-sm text-current/50\">Revisa y edita tu perfil.</p></div><div class=\"flex-1 basis-full flex flex-col bg-gray-50 border border-gray-200 rounded-sm shadow-sm max-h-full max-w-2xl lg:basis-fit overflow-hidden px-2\"><div class=\"flex-1 py-8 space-y-4\"><div class=\"flex items-center justify-center w-48 text-7xl aspect-square rounded-full bg-blue-500 text-light mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-col gap-2 px-0.5 pb-0.5\" hx-ext=\"response-targets\"><div class=\"flex-1 gap-4 px-2\"><h2 class=\"text-3xl tracking-tight\">Perfil</h2><p class=\"text-sm text-current/50\">Revisa y edita tu perfil.</p></div><div class=\"flex-1 basis-full flex flex-col bg-gray-100 border border-gray-200 rounded-sm shadow-sm max-h-full max-w-2xl lg:basis-fit overflow-hidden px-2\"><div class=\"flex-1 py-8 space-y-4\"><div class=\"flex items-center justify-center w-48 text-7xl aspect-square rounded-full bg-blue-500 text-light mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

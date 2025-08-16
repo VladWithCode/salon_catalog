@@ -156,7 +156,7 @@ func (fs *UserFormState) GetFieldClass(field string) string {
 	case "warning":
 		return baseClass + " border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500 bg-yellow-50"
 	default:
-		return baseClass + " border-gray-200 focus:ring-accent focus:border-transparent bg-light"
+		return baseClass + " border-gray-200 focus:ring-accent focus:border-transparent bg-gray-50"
 	}
 }
 
