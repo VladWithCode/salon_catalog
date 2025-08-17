@@ -296,7 +296,7 @@ templ ProductModal(state *ProductModalState) {
 							id="product-modal-main-img"
 							src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
 							alt={ fmt.Sprintf("Imagen de producto %s", product.Name) }
-							class="h-full object-cover object-[center_-2rem] translate-y-6 opacity-0 xl:rounded-xl"
+							class="h-full object-cover object-center translate-y-6 opacity-0 xl:rounded-xl"
 							data-modal-animate-enter
 						/>
 						<button class="absolute inset-0 h-full z-10 bg-light/60 opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in cursor-pointer">
@@ -354,7 +354,13 @@ templ ProductModal(state *ProductModalState) {
 							<p
 								id="product-modal-description"
 								class="text-neutral/80 leading-relaxed line-clamp-3"
-							>{ product.LongDescription }</p>
+							>
+								if len(product.LongDescription) > 0 {
+									{ product.LongDescription }
+								} else {
+									{ product.Description }
+								}
+							</p>
 							<button
 								class="text-neutral font-medium"
 								data-product-modal-read-more="collapsed"
