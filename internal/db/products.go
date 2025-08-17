@@ -214,6 +214,8 @@ func FindProductBySlug(slug string) (*Product, error) {
 	}
 	if longDescription.Valid {
 		product.LongDescription = longDescription.String
+	} else {
+		product.LongDescription = product.Description
 	}
 
 	return &product, nil
@@ -295,6 +297,8 @@ func FindProductByID(id string) (*Product, error) {
 	}
 	if longDescription.Valid {
 		product.LongDescription = longDescription.String
+	} else {
+		product.LongDescription = product.Description
 	}
 
 	return &product, nil
@@ -353,6 +357,8 @@ func FindAllProducts() ([]*Product, error) {
 		}
 		if longDescription.Valid {
 			product.LongDescription = longDescription.String
+		} else {
+			product.LongDescription = product.Description
 		}
 		products = append(products, &product)
 	}
@@ -764,6 +770,8 @@ func scanProducts(rows pgx.Rows, includeRank bool) ([]*Product, error) {
 		}
 		if longDescription.Valid {
 			product.LongDescription = longDescription.String
+		} else {
+			product.LongDescription = product.Description
 		}
 
 		products = append(products, &product)
