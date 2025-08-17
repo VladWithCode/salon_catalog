@@ -328,6 +328,8 @@ templ categoriesScript() {
                     if (shouldClose) {
                         modalTl.reverse();
                         modal.dataset.categoriesModal = 'closed';
+
+                        gsap.delayedCall(0.5, () => modal.querySelector('#categories-modal-content')?.remove());
                     } else {
                         modalTl.play();
                         modal.dataset.categoriesModal = 'open';

@@ -51,9 +51,8 @@ templ CategoriesTable(result *db.CategoryFilterResult) {
 			if result.TotalPages > 1 {
 				@CategoriesPagination(result)
 			}
-	</div>
-	
-	<script>
+		</div>
+		<script>
 		function openImageSelector(mode, targetField, title, maxSelection) {
 			const selectedIds = document.querySelector(`[name="${targetField}"]`).value;
 			const params = new URLSearchParams({
@@ -74,7 +73,8 @@ templ CategoriesTable(result *db.CategoryFilterResult) {
 				});
 		}
 	</script>
-}}
+	}
+}
 
 templ CategoryTableRow(category *db.Category) {
 	<div
@@ -155,7 +155,7 @@ templ CategoriesPagination(result *db.CategoryFilterResult) {
 			}
 			hx-get={ fmt.Sprintf("/categorias?page=%d", result.Page-1) }
 			hx-include="[name='search'], [name='sort']"
-            hx-indicator="#categories-table-loading"
+			hx-indicator="#categories-table-loading"
 			hx-target="#categories-table"
 		>
 			@components.ChevronIcon("w-6 rotate-90", nil)
@@ -168,7 +168,7 @@ templ CategoriesPagination(result *db.CategoryFilterResult) {
 					hx-get={ fmt.Sprintf("/categorias?page=%d", i) }
 					hx-target="#categories-table"
 					hx-include="[name='search'], [name='sort']"
-                    hx-indicator="#categories-table-loading"
+					hx-indicator="#categories-table-loading"
 					disabled?={ i==result.Page }
 				>
 					{ fmt.Sprintf("%d", i) }
@@ -183,7 +183,7 @@ templ CategoriesPagination(result *db.CategoryFilterResult) {
 			hx-get={ fmt.Sprintf("/categorias?page=%d", result.Page+1) }
 			hx-include="[name='search'], [name='sort']"
 			hx-target="#categories-table"
-            hx-indicator="#categories-table-loading"
+			hx-indicator="#categories-table-loading"
 		>
 			@components.ChevronIcon("w-6 -rotate-90", nil)
 		</button>
@@ -212,7 +212,6 @@ templ CategoryModal(category *db.Category, err string) {
 				@components.TimesIcon("w-8 mx-auto", nil)
 			</button>
 		</div>
-		
 		if err != "" {
 			<div class="flex-1 basis-full w-full overflow-hidden">
 				<div class="flex flex-col items-center justify-center h-full">
@@ -242,7 +241,6 @@ templ CategoryModal(category *db.Category, err string) {
 					</button>
 				</div>
 			}
-			
 			<!-- Content Area -->
 			<div class="relative flex-1 basis-full w-full overflow-hidden">
 				<!-- Form Tab -->
@@ -253,7 +251,6 @@ templ CategoryModal(category *db.Category, err string) {
 						@CategoryCreateForm()
 					}
 				</div>
-				
 				<!-- Images Tab -->
 				if category != nil {
 					<div id="categories-modal-images" class="absolute inset-0 translate-x-full opacity-0 z-0 pointer-events-none overflow-y-auto">
@@ -262,7 +259,6 @@ templ CategoryModal(category *db.Category, err string) {
 				}
 			</div>
 		}
-		
 		<!-- Footer (only for edit mode with error handling) -->
 		if err == "" && category != nil {
 			<div class="flex gap-2 justify-end items-center">
@@ -448,5 +444,3 @@ templ CategoryCreateForm() {
 		</div>
 	</form>
 }
-
-
