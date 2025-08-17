@@ -65,9 +65,17 @@ func CreateCategory(category *Category) error {
 		String: category.HeaderImg,
 		Valid:  category.HeaderImg != "",
 	}
+	if category.HeaderImgID != "" {
+		headerImg.String = category.HeaderImgID
+		headerImg.Valid = true
+	}
 	displayImg := sql.NullString{
 		String: category.DisplayImg,
 		Valid:  category.DisplayImg != "",
+	}
+	if category.DisplayImgID != "" {
+		displayImg.String = category.DisplayImgID
+		displayImg.Valid = true
 	}
 
 	if category.Slug == "" {
@@ -105,9 +113,11 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 	defer conn.Release()
 
 	var (
-		category   Category
-		headerImg  sql.NullString
-		displayImg sql.NullString
+		category     Category
+		headerImg    sql.NullString
+		headerImgID  sql.NullString
+		displayImg   sql.NullString
+		displayImgID sql.NullString
 	)
 
 	err = conn.QueryRow(
@@ -130,9 +140,9 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 		&category.Slug,
 		&category.Description,
 		&headerImg,
-		&category.HeaderImgID,
+		&headerImgID,
 		&displayImg,
-		&category.DisplayImgID,
+		&displayImgID,
 		&category.QRCodeFilename,
 	)
 	if err != nil {
@@ -144,6 +154,12 @@ func FindCategoryBySlug(slug string) (*Category, error) {
 	}
 	if displayImg.Valid {
 		category.DisplayImg = displayImg.String
+	}
+	if headerImgID.Valid {
+		category.HeaderImgID = headerImgID.String
+	}
+	if displayImgID.Valid {
+		category.DisplayImgID = displayImgID.String
 	}
 
 	return &category, nil
@@ -159,9 +175,11 @@ func FindCategoryByID(id string) (*Category, error) {
 	defer conn.Release()
 
 	var (
-		category   Category
-		headerImg  sql.NullString
-		displayImg sql.NullString
+		category     Category
+		headerImg    sql.NullString
+		headerImgID  sql.NullString
+		displayImg   sql.NullString
+		displayImgID sql.NullString
 	)
 
 	err = conn.QueryRow(
@@ -184,9 +202,9 @@ func FindCategoryByID(id string) (*Category, error) {
 		&category.Slug,
 		&category.Description,
 		&headerImg,
-		&category.HeaderImgID,
+		&headerImgID,
 		&displayImg,
-		&category.DisplayImgID,
+		&displayImgID,
 		&category.QRCodeFilename,
 	)
 	if err != nil {
@@ -196,8 +214,14 @@ func FindCategoryByID(id string) (*Category, error) {
 	if headerImg.Valid {
 		category.HeaderImg = headerImg.String
 	}
+	if headerImgID.Valid {
+		category.HeaderImgID = headerImgID.String
+	}
 	if displayImg.Valid {
 		category.DisplayImg = displayImg.String
+	}
+	if displayImgID.Valid {
+		category.DisplayImgID = displayImgID.String
 	}
 
 	return &category, nil
@@ -234,9 +258,11 @@ func FindAllCategories() ([]*Category, error) {
 	var categories []*Category
 	for rows.Next() {
 		var (
-			category   Category
-			headerImg  sql.NullString
-			displayImg sql.NullString
+			category     Category
+			headerImg    sql.NullString
+			headerImgID  sql.NullString
+			displayImg   sql.NullString
+			displayImgID sql.NullString
 		)
 
 		err = rows.Scan(
@@ -245,9 +271,9 @@ func FindAllCategories() ([]*Category, error) {
 			&category.Slug,
 			&category.Description,
 			&headerImg,
-			&category.HeaderImgID,
+			&headerImgID,
 			&displayImg,
-			&category.DisplayImgID,
+			&displayImgID,
 			&category.QRCodeFilename,
 		)
 		if err != nil {
@@ -257,8 +283,14 @@ func FindAllCategories() ([]*Category, error) {
 		if headerImg.Valid {
 			category.HeaderImg = headerImg.String
 		}
+		if headerImgID.Valid {
+			category.HeaderImgID = headerImgID.String
+		}
 		if displayImg.Valid {
 			category.DisplayImg = displayImg.String
+		}
+		if displayImgID.Valid {
+			category.DisplayImgID = displayImgID.String
 		}
 
 		categories = append(categories, &category)
@@ -515,7 +547,9 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 		var category Category
 		var searchRank float32
 		var headerImg sql.NullString
+		var headerImgID sql.NullString
 		var displayImg sql.NullString
+		var displayImgID sql.NullString
 		var longDescription sql.NullString
 
 		if includeRank {
@@ -526,9 +560,9 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&category.Description,
 				&longDescription,
 				&headerImg,
-				&category.HeaderImgID,
+				&headerImgID,
 				&displayImg,
-				&category.DisplayImgID,
+				&displayImgID,
 				&category.ProductCount,
 				&category.QRCodeFilename,
 				&searchRank,
@@ -544,9 +578,9 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 				&category.Description,
 				&longDescription,
 				&headerImg,
-				&category.HeaderImgID,
+				&headerImgID,
 				&displayImg,
-				&category.DisplayImgID,
+				&displayImgID,
 				&category.ProductCount,
 				&category.QRCodeFilename,
 				&searchRank, // Still need to scan the rank column (will be 0)
@@ -559,8 +593,14 @@ func scanCategories(rows pgx.Rows, includeRank bool) ([]*Category, error) {
 		if headerImg.Valid {
 			category.HeaderImg = headerImg.String
 		}
+		if headerImgID.Valid {
+			category.HeaderImgID = headerImgID.String
+		}
 		if displayImg.Valid {
 			category.DisplayImg = displayImg.String
+		}
+		if displayImgID.Valid {
+			category.DisplayImgID = displayImgID.String
 		}
 		if longDescription.Valid {
 			category.LongDescription = longDescription.String
