@@ -41,61 +41,50 @@ func CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpdat
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden\" id=\"categories-modal-images-tab\"><div class=\"shrink-0 grow-0 basis-auto\"><h3 class=\"text-lg font-medium line-clamp-1 text-ellipsis\">Imágenes de ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-full w-full overflow-auto space-y-4 p-4\"><!-- Header Image Section --><div class=\"space-y-2\"><h4 class=\"text-sm font-medium text-gray-700\">Imagen de Cabecera</h4><div id=\"headerImgSection\" class=\"space-y-2\"><div class=\"flex gap-2\"><button id=\"categories-modal-images-select-header\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\" hx-get=\"/imagenes/selector\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs((&ImageSelectorConfig{
+			Mode:           "single",
+			UpdateEndpoint: fmt.Sprintf("/panel/categorias/%s/header_img", category.ID),
+			Title:          "Seleccionar la imagen de cabecera para " + category.Name,
+			MaxSelection:   1,
+			SelectedIds:    []string{category.HeaderImgID},
+			SuccessTarget:  "#headerImgSection",
+		}).ToJSONString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 18, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 33, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h3></div><div id=\"category-modal-images-main\" class=\"flex-1 basis-full space-y-4 overflow-hidden\"><div class=\"flex-1 basis-full space-y-4\"><!-- Header Image Section --><h4 class=\"shrink-0 grow-0 text-lg lg:text-2xl tracking-tight text-dark/80\">Imagen de cabecera</h4><div id=\"headerImgSection\" class=\"lg:grid lg:grid-cols-[20rem_1fr] lg:grid-rows-[20rem] lg:gap-4 space-y-4 lg:space-y-0\"><div class=\"lg:col-start-2 lg:row-start-1 lg:justify-self-start max-w-md md:basis-1/2 md:max-w-[initial] space-y-2\"><button id=\"categories-modal-images-select-header\" class=\"flex items-center justify-center gap-4 w-full py-2 px-6 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer\" hx-get=\"/imagenes/selector\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-target=\"body\" hx-swap=\"beforeend\" hx-indicator=\"#global-loading-indicator\">Seleccionar</button> <button id=\"categories-modal-images-unset-header\" class=\"px-3 py-1 text-sm border border-red-300 text-red-700 rounded-sm hover:bg-red-50 transition-colors\" hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{
-									"mode": "single",
-									"updateEndpoint": "/panel/categorias/%s/header_img",
-									"maxSelection": "1",
-									"successTarget": "#headerImgSection"
-								}`, category.ID))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/categorias/%s/header_img", category.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 36, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 43, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-target=\"body\" hx-swap=\"beforeend\" hx-indicator=\"#global-loading-indicator\"><span class=\"block\">Seleccionar imagen de cabecera</span></button> <button id=\"categories-modal-images-unset-header\" class=\"flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer\" hx-delete=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/categorias/%s/header_img", category.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 47, Col: 78}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-target=\"#headerImgSection\" hx-indicator=\"#global-loading-indicator\" hx-confirm=\"¿Seguro que deseas eliminar la imagen de cabecera?\"><span class=\"block\">Quitar imagen</span></button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-target=\"#headerImgSection\" hx-indicator=\"#global-loading-indicator\" hx-confirm=\"¿Seguro que deseas eliminar la imagen de cabecera?\">Quitar</button></div><div class=\"flex space-x-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if (updateData != nil && updateData.HeaderImgFilename != "") || category.HeaderImg != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<button type=\"button\" class=\"lg:h-full w-full mx-auto\" data-click-handler-selector=\"category-modal-images-btn\"><img src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"relative w-16 h-16 rounded-md overflow-hidden border border-gray-200\"><button type=\"button\" class=\"w-full h-full\" data-click-handler-selector=\"category-modal-images-btn\"><img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s",
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s",
 				func() string {
 					if updateData != nil && updateData.HeaderImgFilename != "" {
 						return updateData.HeaderImgFilename
@@ -103,77 +92,59 @@ func CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpdat
 					return category.HeaderImg
 				}()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 65, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 62, Col: 15}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" alt=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 67, Col: 27}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"w-full h-full object-cover rounded-lg\"></button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"lg:h-full w-full mx-auto flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-gray-300\"><span class=\"text-gray-500\">Sin imagen de cabecera</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" alt=\"Header\" class=\"w-full h-full object-cover\"></button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div><div id=\"categories-modal-images-display\" class=\"flex-1 grid gap-4 overflow-auto\"><div><!-- Display Image Section --><h4 class=\"text-lg tracking-tight text-dark/80\">Imagen de visualización</h4><div id=\"displayImgSection\" class=\"lg:grid lg:grid-cols-[20rem_1fr] lg:grid-rows-[20rem] lg:gap-4 space-y-4 lg:space-y-0\"><div class=\"lg:col-start-2 lg:row-start-1 lg:justify-self-start max-w-md space-y-2\"><button id=\"categories-modal-images-select-display\" class=\"flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg bg-gray-700/90 text-light scale-100 hover:bg-gray-700 active:bg-gray-700 active:scale-95 transition-[transform,_background] cursor-pointer\" hx-get=\"/imagenes/selector\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div></div><!-- Display Image Section --><div class=\"space-y-2\"><h4 class=\"text-sm font-medium text-gray-700\">Imagen de Visualización</h4><div id=\"displayImgSection\" class=\"space-y-2\"><div class=\"flex gap-2\"><button id=\"categories-modal-images-select-display\" class=\"px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors\" hx-get=\"/imagenes/selector\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{
-									"mode": "single",
-									"updateEndpoint": "/panel/categorias/%s/display_img",
-									"maxSelection": "1",
-									"successTarget": "#displayImgSection"
-								}`, category.ID))
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{
+								"mode": "single",
+								"updateEndpoint": "/panel/categorias/%s/display_img",
+								"maxSelection": "1",
+								"successTarget": "#displayImgSection"
+							}`, category.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 95, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 86, Col: 23}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"body\" hx-swap=\"beforeend\" hx-indicator=\"#global-loading-indicator\"><span class=\"block\">Seleccionar imagen de visualización</span></button> <button id=\"categories-modal-images-unset-display\" class=\"flex items-center justify-center gap-4 w-full py-2 px-4 rounded-lg text-red-700 text-light scale-100 bg-red-100 hover:bg-red-200 active:bg-red-200 active:scale-95 transition-[transform,_background] cursor-pointer\" hx-delete=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/categorias/%s/display_img", category.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 106, Col: 79}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-target=\"body\" hx-swap=\"beforeend\" hx-indicator=\"#global-loading-indicator\">Seleccionar</button> <button id=\"categories-modal-images-unset-display\" class=\"px-3 py-1 text-sm border border-red-300 text-red-700 rounded-sm hover:bg-red-50 transition-colors\" hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-target=\"#displayImgSection\" hx-indicator=\"#global-loading-indicator\" hx-confirm=\"¿Seguro que deseas eliminar la imagen de visualización?\"><span class=\"block\">Quitar imagen</span></button></div>")
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/panel/categorias/%s/display_img", category.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 96, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"#displayImgSection\" hx-indicator=\"#global-loading-indicator\" hx-confirm=\"¿Seguro que deseas eliminar la imagen de visualización?\">Quitar</button></div><div class=\"flex space-x-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if (updateData != nil && updateData.DisplayImgFilename != "") || category.DisplayImg != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<button type=\"button\" class=\"lg:h-full w-full mx-auto\" data-click-handler-selector=\"category-modal-images-btn\"><img src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"relative w-16 h-16 rounded-md overflow-hidden border border-gray-200\"><button type=\"button\" class=\"w-full h-full\" data-click-handler-selector=\"category-modal-images-btn\"><img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s",
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s",
 				func() string {
 					if updateData != nil && updateData.DisplayImgFilename != "" {
 						return updateData.DisplayImgFilename
@@ -181,36 +152,18 @@ func CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpdat
 					return category.DisplayImg
 				}()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 124, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 115, Col: 15}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" alt=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(category.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/dashboard/category_images_tab.templ`, Line: 126, Col: 27}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"w-full h-full object-cover rounded-lg\"></button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"lg:h-full w-full mx-auto flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-gray-300\"><span class=\"text-gray-500\">Sin imagen de visualización</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" alt=\"Display\" class=\"w-full h-full object-cover\"></button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

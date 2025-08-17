@@ -201,7 +201,7 @@ templ Categories() {
 			></div>
 			<div
 				id="categories-modal"
-				class="relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+				class="basis-9/10 relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl p-2 overflow-hidden z-20 translate-y-12 opacity-0"
 				data-categories-modal="closed"
 			></div>
 		</div>
@@ -221,7 +221,7 @@ templ Categories() {
 			</div>
 		</template>
 		<template id="category-modal-image">
-			<img class="w-full my-auto object-contain rounded-lg" src="placeholder.jpg" alt="" data-category-modal-image="">
+			<img class="w-full my-auto object-contain rounded-lg" src="placeholder.jpg" alt="" data-category-modal-image=""/>
 		</template>
 	}
 }
@@ -342,7 +342,6 @@ templ categoriesScript() {
                         ? e.target
                         : e.target.closest('[data-categories-modal-tab]');
                     const tab = target.dataset.categoriesModalTab;
-                    const modal = document.getElementById('categories-modal');
                     const form = document.getElementById('categories-modal-form');
                     const images = document.getElementById('categories-modal-images');
                     const tl = gsap.timeline({defaults: {duration: 0.3, ease: 'power2.out'}});
@@ -360,13 +359,11 @@ templ categoriesScript() {
                         activeTab = form;
                         break;
                     }
-                    tl.set(activeTab, {zIndex: 10})
-                        .set(inactiveTabs, {zIndex: 0})
 
                     tl.to(target, {backgroundColor: `rgb(${activeBgValues})`, color: `rgb(240 240 240)`})
                         .to('[data-categories-modal-tab]:not([data-categories-modal-tab="'+tab+'"])', {backgroundColor: `rgb(${activeBgValues} / 0%)`, color: `rgb(${activeBgValues})`}, "<")
-                        .to(activeTab, {opacity: 1, x: '0rem', pointerEvents: 'auto'}, "<")
-                        .to(inactiveTabs, {opacity: 0, x: '15rem', pointerEvents: 'none'}, '-=0.1');
+                        .to(activeTab, {opacity: 1, x: '0', pointerEvents: 'auto'}, "<")
+                        .to(inactiveTabs, {opacity: 0, x: '100%', pointerEvents: 'none'}, '<');
                 })
                 .register('afterSwap', '#headerImgSection', function (e) {
                     const selectorModal = document.getElementById('image-selector-modal');
@@ -398,6 +395,18 @@ templ categoriesScript() {
                         });
                     }
                 })
+                .registerClick('close-images-selector-modal', function (e) {
+                    gsap.to('#image-selector-modal',{
+                        opacity: 0,
+                        y: '2.5rem',
+                        pointerEvents: 'none',
+                        ease: 'power2.out',
+                        duration: 0.5,
+                        onComplete: () => {
+                            document.getElementById('image-selector-modal')?.remove();
+                        },
+                    })
+                })
                 .registerClick('category-modal-images-btn', function (e) {
                     const target = e.target.matches('[data-click-handler-selector]')
                         ? e.target
@@ -420,6 +429,18 @@ templ categoriesScript() {
                         y: 0,
                         duration: 0.5,
                         ease: 'power2.in',
+                    });
+                })
+                .registerClick('max-prio-popup-close', function (e) {
+                    gsap.to('[data-max-prio-popup]', {
+                        opacity: 0,
+                        y: '12rem',
+                        pointerEvents: 'none',
+                        ease: 'power2.out',
+                        duration: 0.5,
+                        onComplete: () => {
+                            document.querySelector('[data-max-prio-popup]').remove();
+                        },
                     });
                 })
                 .registerClick('#categories-table-multi-selection-ctl', function (e) {

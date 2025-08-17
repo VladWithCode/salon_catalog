@@ -191,162 +191,166 @@ templ CategoriesPagination(result *db.CategoryFilterResult) {
 }
 
 templ CategoryModal(category *db.Category, err string) {
-	<div
-		id="categories-modal-content"
-		class="relative bg-light h-full md:h-[90vh] w-full md:w-[95vw] lg:w-[90vw] max-w-screen-2xl mx-auto md:rounded-lg md:shadow-lg overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-[2fr_3fr] lg:grid-rows-1 gap-1 md:gap-2"
-		data-categories-modal="closed"
-	>
+	<div id="categories-modal-content" class="h-full w-full max-w-2xl mx-auto flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
 		<!-- Header -->
-		<div class="lg:col-span-2 flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
-			<h2 class="text-xl font-semibold text-gray-900">
+		<div class="flex-1 flex justify-between items-center">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
 				if err != "" {
-					Error
+					Ocurrió un error al cargar la categoría
 				} else if category != nil {
 					{ category.Name }
 				} else {
 					Nueva Categoría
 				}
-			</h2>
+			</h3>
 			<button
-				type="button"
-				class="text-gray-400 hover:text-gray-600 transition-colors"
-				data-click-handler-selector="[data-categories-modal-toggle]"
+				id="categories-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
 				data-categories-modal-toggle="close"
+				data-click-handler-selector="[data-categories-modal-toggle]"
 			>
-				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-				</svg>
+				@components.TimesIcon("w-8 mx-auto", nil)
 			</button>
 		</div>
+		
 		if err != "" {
-			<div class="lg:col-span-2 flex flex-col items-center justify-center h-full p-8">
-				<div class="text-center">
-					@components.TimesIcon("w-16 h-16 text-red-500 mx-auto mb-4", nil)
-					<h3 class="text-lg font-medium text-red-700 mb-2">Error</h3>
-					<p class="text-red-600">{ err }</p>
+			<div class="flex-1 basis-full w-full overflow-hidden">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
 				</div>
 			</div>
 		} else {
-			<!-- Tabs -->
-			<div id="categories-modal-tab-selector" class="lg:col-span-2 flex gap-2 p-2 bg-gray-200 rounded-sm overflow-x-auto overflow-y-hidden">
-				<button
-					data-categories-modal-tab="categories-modal-form"
-					data-click-handler-selector="[data-categories-modal-tab]"
-					class="flex-1 basis-1/2 p-2 bg-gray-700 rounded-sm text-light cursor-pointer hover:bg-gray-700/80 hover:text-light"
-				>
-					Datos
-				</button>
-				<div class="w-px h-4/5 bg-gray-700/60 my-auto"></div>
-				if category != nil {
+			<!-- Tabs (only show for edit mode) -->
+			if category != nil {
+				<div id="categories-modal-tab-selector" class="flex gap-0.5 p-1 bg-gray-300 rounded-sm">
+					<button
+						data-categories-modal-tab="categories-modal-form"
+						data-click-handler-selector="[data-categories-modal-tab]"
+						class="flex-1 p-2 bg-gray-700 rounded-sm text-light cursor-pointer hover:bg-gray-700/80 hover:text-light text-sm font-medium"
+					>
+						Datos
+					</button>
 					<button
 						data-categories-modal-tab="categories-modal-images"
 						data-click-handler-selector="[data-categories-modal-tab]"
-						class="flex-1 basis-1/2 p-2 bg-gray-700/0 rounded-sm text-gray-700 cursor-pointer hover:bg-gray-700/80 hover:text-light"
+						class="flex-1 p-2 bg-gray-700/0 rounded-sm text-gray-700 cursor-pointer hover:bg-gray-700/80 hover:text-light text-sm font-medium"
 					>
 						Imágenes
 					</button>
-				}
-			</div>
-			<!-- Form Tab -->
-			<div id="categories-modal-form" class="relative col-start-1 row-start-1 lg:col-start-1 lg:row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-0 opacity-100 flex flex-col z-10 pointer-events-auto">
-				if category != nil {
-					@CategoryEditForm(category)
-				} else {
-					@CategoryCreateForm()
-				}
-			</div>
-			<!-- Images Tab -->
-			if category != nil {
-				<div id="categories-modal-images" class="relative col-start-1 row-start-1 lg:col-start-1 lg:row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden translate-x-60 opacity-0 flex flex-col z-0 pointer-events-none">
-					@CategoryImagesTab(category, nil)
 				</div>
 			}
+			
+			<!-- Content Area -->
+			<div class="relative flex-1 basis-full w-full overflow-hidden">
+				<!-- Form Tab -->
+				<div id="categories-modal-form" class="absolute inset-0 translate-x-0 opacity-100 z-10 pointer-events-auto">
+					if category != nil {
+						@CategoryEditForm(category)
+					} else {
+						@CategoryCreateForm()
+					}
+				</div>
+				
+				<!-- Images Tab -->
+				if category != nil {
+					<div id="categories-modal-images" class="absolute inset-0 translate-x-full opacity-0 z-0 pointer-events-none overflow-y-auto">
+						@CategoryImagesTab(category, nil)
+					</div>
+				}
+			</div>
+		}
+		
+		<!-- Footer (only for edit mode with error handling) -->
+		if err == "" && category != nil {
+			<div class="flex gap-2 justify-end items-center">
+				<button
+					id="categories-modal-back"
+					class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+					data-categories-modal-toggle="close"
+					data-click-handler-selector="[data-categories-modal-toggle]"
+				>
+					@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+					Volver
+				</button>
+				<button
+					id="categories-modal-delete"
+					class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
+					hx-delete={ fmt.Sprintf("/categorias/%s", category.ID) }
+					hx-target="#categories-table"
+					hx-include='[name="sort"], [name="search"]'
+					hx-indicator="#global-loading-indicator"
+					hx-confirm="¿Seguro que deseas eliminar la categoría? ADVERTENCIA: Esto también eliminará todos los productos de esta categoría."
+					data-categories-modal-toggle="close"
+					data-click-handler-selector="[data-categories-modal-toggle]"
+				>
+					@components.BinIcon("w-5 mx-auto", nil)
+					Eliminar
+				</button>
+			</div>
 		}
 	</div>
 }
 
 templ CategoryEditForm(category *db.Category) {
-	<div class="flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden" id="categories-modal-form-tab">
-		<div class="shrink-0 grow-0 basis-auto">
-			<h3 class="text-lg font-medium line-clamp-1 text-ellipsis">Editar { category.Name }</h3>
+	<form
+		hx-put={ fmt.Sprintf("/categorias/%s", category.ID) }
+		hx-target="#categories-table"
+		hx-indicator="#global-loading-indicator"
+		class="h-full w-full overflow-auto space-y-4 p-4"
+	>
+		<div class="space-y-2">
+			<label for="category-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+			<input
+				id="category-name"
+				name="name"
+				type="text"
+				value={ category.Name }
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
 		</div>
-		<form
-			class="flex-1 basis-full space-y-4 overflow-hidden"
-			hx-put={ fmt.Sprintf("/categorias/%s", category.ID) }
-			hx-target="#categories-table"
-			hx-indicator="#global-loading-indicator"
-		>
-			<div class="flex-1 basis-full space-y-4">
-				<div class="grid gap-4">
-					<div>
-						<label for="category-edit-name" class="block text-sm font-medium text-gray-700 mb-1">
-							Nombre *
-						</label>
-						<input
-							type="text"
-							id="category-edit-name"
-							name="name"
-							value={ category.Name }
-							required
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						/>
-					</div>
-					<div>
-						<label for="category-edit-slug" class="block text-sm font-medium text-gray-700 mb-1">
-							Slug *
-						</label>
-						<input
-							type="text"
-							id="category-edit-slug"
-							name="slug"
-							value={ category.Slug }
-							required
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						/>
-					</div>
-					<div>
-						<label for="category-edit-description" class="block text-sm font-medium text-gray-700 mb-1">
-							Descripción *
-						</label>
-						<textarea
-							id="category-edit-description"
-							name="description"
-							rows="3"
-							required
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						>{ category.Description }</textarea>
-					</div>
-					<div>
-						<label for="category-edit-long-description" class="block text-sm font-medium text-gray-700 mb-1">
-							Descripción larga
-						</label>
-						<textarea
-							id="category-edit-long-description"
-							name="long_description"
-							rows="5"
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						>{ category.LongDescription }</textarea>
-					</div>
-				</div>
-			</div>
-			<div class="flex gap-2 pt-4 border-t border-gray-200">
-				<button
-					type="submit"
-					class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-				>
-					Actualizar Categoría
-				</button>
-				<button
-					type="button"
-					class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-					data-click-handler-selector="[data-categories-modal-toggle]"
-					data-categories-modal-toggle="close"
-				>
-					Cancelar
-				</button>
-			</div>
-		</form>
-	</div>
+		<div class="space-y-2">
+			<label for="category-slug" class="block text-sm font-medium text-gray-700">Slug</label>
+			<input
+				id="category-slug"
+				name="slug"
+				type="text"
+				value={ category.Slug }
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
+		</div>
+		<div class="space-y-2">
+			<label for="category-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+			<textarea
+				id="category-description"
+				name="description"
+				rows="3"
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			>{ category.Description }</textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="category-long-description" class="block text-sm font-medium text-gray-700">Descripción Larga</label>
+			<textarea
+				id="category-long-description"
+				name="long_description"
+				rows="4"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			>{ category.LongDescription }</textarea>
+		</div>
+		<div class="flex gap-2 pt-4">
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+			>
+				Guardar Cambios
+			</button>
+		</div>
+	</form>
 }
 
 templ CategoryCreateModal(err string) {
@@ -395,73 +399,54 @@ templ CategoryCreateModal(err string) {
 }
 
 templ CategoryCreateForm() {
-	<div class="flex-1 space-y-4 py-6 px-2 md:px-4 text-gray-700 overflow-y-auto overflow-x-hidden" id="categories-modal-form-tab">
-		<div class="shrink-0 grow-0 basis-auto">
-			<h3 class="text-lg font-medium">Crear Nueva Categoría</h3>
+	<form
+		hx-post="/categorias/nueva"
+		hx-target="#categories-table"
+		hx-indicator="#global-loading-indicator"
+		hx-include='[name="search"], [name="sort"]'
+		class="h-full w-full overflow-auto space-y-4 p-4"
+	>
+		<div class="space-y-2">
+			<label for="category-create-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+			<input
+				id="category-create-name"
+				name="name"
+				type="text"
+				required
+				placeholder="Nombre de la categoría"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			/>
 		</div>
-		<form
-			class="flex-1 basis-full space-y-4 overflow-hidden"
-			hx-post="/categorias/nueva"
-			hx-target="#categories-table"
-			hx-indicator="#global-loading-indicator"
-		>
-			<div class="flex-1 basis-full space-y-4">
-				<div class="grid gap-4">
-					<div>
-						<label for="category-create-name" class="block text-sm font-medium text-gray-700 mb-1">
-							Nombre *
-						</label>
-						<input
-							type="text"
-							id="category-create-name"
-							name="name"
-							required
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						/>
-					</div>
-					<div>
-						<label for="category-create-description" class="block text-sm font-medium text-gray-700 mb-1">
-							Descripción *
-						</label>
-						<textarea
-							id="category-create-description"
-							name="description"
-							rows="3"
-							required
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						></textarea>
-					</div>
-					<div>
-						<label for="category-create-long-description" class="block text-sm font-medium text-gray-700 mb-1">
-							Descripción larga
-						</label>
-						<textarea
-							id="category-create-long-description"
-							name="long_description"
-							rows="5"
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						></textarea>
-					</div>
-				</div>
-			</div>
-			<div class="flex gap-2 pt-4 border-t border-gray-200">
-				<button
-					type="submit"
-					class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-				>
-					Crear Categoría
-				</button>
-				<button
-					type="button"
-					class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-					data-click-handler-selector="[data-categories-modal-toggle]"
-					data-categories-modal-toggle="close"
-				>
-					Cancelar
-				</button>
-			</div>
-		</form>
-	</div>
+		<div class="space-y-2">
+			<label for="category-create-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+			<textarea
+				id="category-create-description"
+				name="description"
+				rows="3"
+				required
+				placeholder="Descripción breve de la categoría"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			></textarea>
+		</div>
+		<div class="space-y-2">
+			<label for="category-create-long-description" class="block text-sm font-medium text-gray-700">Descripción Larga</label>
+			<textarea
+				id="category-create-long-description"
+				name="long_description"
+				rows="4"
+				placeholder="Descripción detallada (opcional)"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+			></textarea>
+		</div>
+		<div class="flex gap-2 pt-4">
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+			>
+				Crear Categoría
+			</button>
+		</div>
+	</form>
 }
 
 
