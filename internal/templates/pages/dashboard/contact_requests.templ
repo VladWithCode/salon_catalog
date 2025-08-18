@@ -13,61 +13,70 @@ templ ContactRequests() {
 			<div class="px-2">
 				<div class="flex gap-4 pb-2">
 					<div class="space-y-0.5">
-						<h1 class="text-3xl tracking-tight">Solicitudes de Contacto</h1>
+						<h1 class="text-2xl md:text-3xl tracking-tight">Solicitudes de Contacto</h1>
 						<p class="text-xs text-current/50">Administra las solicitudes de cotización recibidas por el sitio web.</p>
 					</div>
+					<button
+						id="quotes-actions-toggle"
+						class="shrink flex items-center justify-center text-current/80 xl:hidden cursor-pointer"
+						data-click-handler-selector="quotes-actions-toggle"
+					>
+						@components.BarsIcon("w-8", nil)
+					</button>
 				</div>
-				<div class="py-2">
-					<div class="flex flex-col xl:flex-row xl:grid xl:grid-cols-5 xl:auto-rows-min gap-2">
-						<div class="xl:self-center xl:col-span-full">
-							@components.MenuSectionSep(components.MenuSectionSepParams{
-								Title:          "Multiselección",
-								PillClass:      "text-xs text-neutral/70 bg-gray-200",
-								SeparatorClass: "h-px bg-neutral",
-							})
+				<div id="quotes-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-quotes-actions="closed">
+					<div class="py-2">
+						<div class="flex flex-col xl:flex-row xl:grid xl:grid-cols-5 xl:auto-rows-min gap-2">
+							<div class="xl:self-center xl:col-span-full">
+								@components.MenuSectionSep(components.MenuSectionSepParams{
+									Title:          "Multiselección",
+									PillClass:      "text-xs text-neutral/70 bg-gray-200",
+									SeparatorClass: "h-px bg-neutral",
+								})
+							</div>
+							<button
+								id="contact-requests-multi-selection-process"
+								data-contact-requests-multi-action="process"
+								hx-patch="/solicitudes/status"
+								hx-target="#contact-requests-table"
+								hx-confirm="¿Marcar las solicitudes seleccionadas como procesadas?"
+								hx-indicator="#contact-requests-table-loading"
+								hx-include='[name="contact-request-table-selection"]'
+								class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow xl:basis-1/2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-gray-700/80 disabled:cursor-not-allowed disabled:brightness-80"
+								disabled
+							>
+								@components.CheckIcon("w-4", nil)
+								Marcar como Procesadas
+							</button>
+							<button
+								id="contact-requests-multi-selection-delete"
+								data-contact-requests-multi-action="delete"
+								hx-delete="/solicitudes"
+								hx-target="#contact-requests-table"
+								hx-confirm="¿Eliminar las solicitudes seleccionadas? Esta acción no se puede deshacer."
+								hx-indicator="#contact-requests-table-loading"
+								hx-include='[name="contact-request-table-selection"]'
+								class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow-1 xl:basis-1/2 px-4 py-2 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+								disabled
+							>
+								@components.BinIcon("w-4", nil)
+								Eliminar Selección
+							</button>
+							<div class="relative z-0 -my-1 xl:col-span-full">
+								<div class="absolute z-0 top-1/2 inset-x-0 -translate-y-1/2 h-px w-full bg-current/70"></div>
+								<p class="relative left-4 w-fit text-xs text-current/70 px-4 py-2 bg-gray-200 z-10">Filtros</p>
+							</div>
+							<button
+								id="contact-requests-filters-button"
+								hx-get="/solicitudes/filters"
+								hx-target="#contact-requests-filters-modal"
+								hx-indicator="#global-loading-indicator"
+								class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+							>
+								@components.FilterIcon("w-5", nil)
+								Filtros
+							</button>
 						</div>
-						<button
-							id="contact-requests-multi-selection-process"
-							data-contact-requests-multi-action="process"
-							hx-patch="/solicitudes/status"
-							hx-target="#contact-requests-table"
-							hx-confirm="¿Marcar las solicitudes seleccionadas como procesadas?"
-							hx-indicator="#contact-requests-table-loading"
-							hx-include='[name="contact-request-table-selection"]'
-							class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow xl:basis-1/2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-gray-700/80 disabled:cursor-not-allowed disabled:brightness-80"
-							disabled
-						>
-							@components.CheckIcon("w-4", nil)
-							Marcar como Procesadas
-						</button>
-						<button
-							id="contact-requests-multi-selection-delete"
-							data-contact-requests-multi-action="delete"
-							hx-delete="/solicitudes"
-							hx-target="#contact-requests-table"
-							hx-confirm="¿Eliminar las solicitudes seleccionadas? Esta acción no se puede deshacer."
-							hx-indicator="#contact-requests-table-loading"
-							hx-include='[name="contact-request-table-selection"]'
-							class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow-1 xl:basis-1/2 px-4 py-2 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
-							disabled
-						>
-							@components.BinIcon("w-4", nil)
-							Eliminar Selección
-						</button>
-						<div class="relative z-0 -my-1 xl:col-span-full">
-							<div class="absolute z-0 top-1/2 inset-x-0 -translate-y-1/2 h-px w-full bg-current/70"></div>
-							<p class="relative left-4 w-fit text-xs text-current/70 px-4 py-2 bg-gray-200 z-10">Filtros</p>
-						</div>
-						<button
-							id="contact-requests-filters-button"
-							hx-get="/solicitudes/filters"
-							hx-target="#contact-requests-filters-modal"
-							hx-indicator="#global-loading-indicator"
-							class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
-						>
-							@components.FilterIcon("w-5", nil)
-							Filtros
-						</button>
 					</div>
 				</div>
 			</div>
@@ -229,135 +238,149 @@ templ contactRequestsScript() {
             opacity: 1,
             y: '0rem',
         }, "-=0.1");
-            eventManager
-                .register('beforeRequest', '#contact-requests-table', function (e) {
-                    gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'none' });
-                    gsap.to(
-                        '[data-contact-requests-table-container]', 
-                        { height: '0rem', opacity: 0, },
-                    )
-                    gsap.to(
-                        '[data-contact-requests-table-row]', 
-                        { y: '0rem', opacity: 1, stagger: 0.05, },
-                        { y: '10rem', opacity: 0, stagger: 0.05, },
-                    );
-                })
-                .register('configRequest', '[data-contact-requests-multi-action]', function (e) {
-                    const ids = e.detail.parameters.getAll('contact-request-table-selection');
-                    for (const id of ids) {
-                        e.detail.parameters.append('ids', id);
-                    }
+        const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
+        toggleActionsTl.to('#quotes-actions-container', {opacity: 1, height: 'auto'});
 
-                    e.detail.parameters.delete('contact-request-table-selection');
+        eventManager
+            .register('beforeRequest', '#contact-requests-table', function (e) {
+                gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'none' });
+                gsap.to(
+                    '[data-contact-requests-table-container]', 
+                    { height: '0rem', opacity: 0, },
+                )
+                gsap.to(
+                    '[data-contact-requests-table-row]', 
+                    { y: '0rem', opacity: 1, stagger: 0.05, },
+                    { y: '10rem', opacity: 0, stagger: 0.05, },
+                );
+            })
+            .register('configRequest', '[data-contact-requests-multi-action]', function (e) {
+                const ids = e.detail.parameters.getAll('contact-request-table-selection');
+                for (const id of ids) {
+                    e.detail.parameters.append('ids', id);
+                }
+
+                e.detail.parameters.delete('contact-request-table-selection');
+                
+                // Add status for process action
+                if (e.detail.elt.dataset.contactRequestsMultiAction === 'process') {
+                    e.detail.parameters.append('status', 'procesada');
+                }
+            })
+            .register('afterSwap', '#contact-requests-table', function (e) {
+                gsap.to(
+                    '[data-contact-requests-table-container]', 
+                    { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' },
+                )
+                gsap.fromTo(
+                    '[data-contact-requests-table-row]', 
+                    { y: '1rem', opacity: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' },
+                    { y: '0rem', opacity: 1 },
+                    "<",
+                );
+                gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'auto' });
+
+                // Scroll to top of table
+                const tableScroll = e.detail.target.closest('[data-contact-requests-table-scroll]');
+                if (tableScroll) {
+                    tableScroll.scrollTo(0, 0);
+                }
+
+                // Close modal if open
+                const modal = document.getElementById('contact-requests-modal');
+                if (modal.dataset.contactRequestsModal === 'open') {
+                    modalTl.reverse();
+                    modal.dataset.contactRequestsModal = 'closed';
+                }
+
+                updateContactRequestsTableSelection();
+            })
+            .register('afterSwap', '#contact-requests-modal', function (e) {
+                if (e.detail.elt.dataset.contactRequestsModal === 'closed') {
+                    modalTl.play();
+                    e.detail.elt.dataset.contactRequestsModal = 'open';
+                }
+            })
+            .register('afterSwap', '#contact-requests-filters-modal', function (e) {
+                if (e.detail.elt.dataset.contactRequestsFiltersModal === 'closed') {
+                    filtersModalTl.play();
+                    e.detail.elt.dataset.contactRequestsFiltersModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-modal-toggle]', function (e) {
+                const target = e.target.matches('[data-contact-requests-modal-toggle]')
+                    ? e.target
+                    : e.target.closest('[data-contact-requests-modal-toggle]');
+                const modal = document.getElementById('contact-requests-modal');
+
+                const force = target.dataset.contactRequestsModalToggle
+                const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsModal === 'open');
+                if (shouldClose) {
+                    modalTl.reverse();
+                    modal.dataset.contactRequestsModal = 'closed';
+                } else {
+                    modalTl.play();
+                    modal.dataset.contactRequestsModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-filters-modal-toggle]', function (e) {
+                const target = e.target.matches('[data-contact-requests-filters-modal-toggle]')
+                    ? e.target
+                    : e.target.closest('[data-contact-requests-filters-modal-toggle]');
+                const modal = document.getElementById('contact-requests-filters-modal');
+
+                const force = target.dataset.contactRequestsFiltersModalToggle
+                const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsFiltersModal === 'open');
+                if (shouldClose) {
+                    filtersModalTl.reverse();
+                    modal.dataset.contactRequestsFiltersModal = 'closed';
+                } else {
+                    filtersModalTl.play();
+                    modal.dataset.contactRequestsFiltersModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-filter-clear]', function (e) {
+                clearContactRequestsTableFilters();
+            })
+            .registerClick('#contact-requests-table-multi-selection-ctl', function (e) {
+                const target = e.target.matches('[data-multi-selection-mode]')
+                    ? e.target
+                    : e.target.closest('[data-multi-selection-mode]');
                     
-                    // Add status for process action
-                    if (e.detail.elt.dataset.contactRequestsMultiAction === 'process') {
-                        e.detail.parameters.append('status', 'procesada');
-                    }
-                })
-                .register('afterSwap', '#contact-requests-table', function (e) {
-                    gsap.to(
-                        '[data-contact-requests-table-container]', 
-                        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' },
-                    )
-                    gsap.fromTo(
-                        '[data-contact-requests-table-row]', 
-                        { y: '1rem', opacity: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' },
-                        { y: '0rem', opacity: 1 },
-                        "<",
-                    );
-                    gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'auto' });
-
-                    // Scroll to top of table
-                    const tableScroll = e.detail.target.closest('[data-contact-requests-table-scroll]');
-                    if (tableScroll) {
-                        tableScroll.scrollTo(0, 0);
-                    }
-
-                    // Close modal if open
-                    const modal = document.getElementById('contact-requests-modal');
-                    if (modal.dataset.contactRequestsModal === 'open') {
-                        modalTl.reverse();
-                        modal.dataset.contactRequestsModal = 'closed';
-                    }
-
-                    updateContactRequestsTableSelection();
-                })
-                .register('afterSwap', '#contact-requests-modal', function (e) {
-                    if (e.detail.elt.dataset.contactRequestsModal === 'closed') {
-                        modalTl.play();
-                        e.detail.elt.dataset.contactRequestsModal = 'open';
-                    }
-                })
-                .register('afterSwap', '#contact-requests-filters-modal', function (e) {
-                    if (e.detail.elt.dataset.contactRequestsFiltersModal === 'closed') {
-                        filtersModalTl.play();
-                        e.detail.elt.dataset.contactRequestsFiltersModal = 'open';
-                    }
-                })
-                .registerClick('[data-contact-requests-modal-toggle]', function (e) {
-                    const target = e.target.matches('[data-contact-requests-modal-toggle]')
-                        ? e.target
-                        : e.target.closest('[data-contact-requests-modal-toggle]');
-                    const modal = document.getElementById('contact-requests-modal');
-
-                    const force = target.dataset.contactRequestsModalToggle
-                    const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsModal === 'open');
-                    if (shouldClose) {
-                        modalTl.reverse();
-                        modal.dataset.contactRequestsModal = 'closed';
-                    } else {
-                        modalTl.play();
-                        modal.dataset.contactRequestsModal = 'open';
-                    }
-                })
-                .registerClick('[data-contact-requests-filters-modal-toggle]', function (e) {
-                    const target = e.target.matches('[data-contact-requests-filters-modal-toggle]')
-                        ? e.target
-                        : e.target.closest('[data-contact-requests-filters-modal-toggle]');
-                    const modal = document.getElementById('contact-requests-filters-modal');
-
-                    const force = target.dataset.contactRequestsFiltersModalToggle
-                    const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsFiltersModal === 'open');
-                    if (shouldClose) {
-                        filtersModalTl.reverse();
-                        modal.dataset.contactRequestsFiltersModal = 'closed';
-                    } else {
-                        filtersModalTl.play();
-                        modal.dataset.contactRequestsFiltersModal = 'open';
-                    }
-                })
-                .registerClick('[data-contact-requests-filter-clear]', function (e) {
-                    clearContactRequestsTableFilters();
-                })
-                .registerClick('#contact-requests-table-multi-selection-ctl', function (e) {
-                    const target = e.target.matches('[data-multi-selection-mode]')
-                        ? e.target
-                        : e.target.closest('[data-multi-selection-mode]');
-                        
-                    const mode = target.dataset.multiSelectionMode;
-                    switch (mode) {
-                        case 'none':
-                            document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
-                                req.checked = false;
-                            });
-                            updateContactRequestsTableSelection();
-                            break;
-                        case 'some':
-                            document.querySelectorAll('[name="contact-request-table-selection"]:checked').forEach(function (req) {
-                                req.checked = false;
-                            });
-                            updateContactRequestsTableSelection();
-                            break;
-                        case 'all':
-                        default:
-                            document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
-                                req.checked = true;
-                            });
-                            updateContactRequestsTableSelection();
-                            break;
-                    }
-                });
+                const mode = target.dataset.multiSelectionMode;
+                switch (mode) {
+                    case 'none':
+                        document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
+                            req.checked = false;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                    case 'some':
+                        document.querySelectorAll('[name="contact-request-table-selection"]:checked').forEach(function (req) {
+                            req.checked = false;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                    case 'all':
+                    default:
+                        document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
+                            req.checked = true;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                }
+            })
+            .registerClick('quotes-actions-toggle', function (e) {
+                const actionsContainer = document.getElementById('quotes-actions-container')
+                if (actionsContainer.dataset.quotesActions === 'open') {
+                    toggleActionsTl.reverse();
+                    actionsContainer.dataset.quotesActions = 'closed';
+                    gsap.delayedCall(0.4, () => toggleActionsTl.revert())
+                } else {
+                    toggleActionsTl.play();
+                    actionsContainer.dataset.quotesActions = 'open';
+                }
+            });
 
             document.addEventListener('input', function (e) {
                 if (!e.target.matches('[name="contact-request-table-selection"]')) {
