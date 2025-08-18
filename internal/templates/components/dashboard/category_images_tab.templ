@@ -17,11 +17,24 @@ templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpda
 		<!-- Header Image Section -->
 		<div class="space-y-2">
 			<h4 class="text-sm font-medium text-gray-700">Imagen de Cabecera</h4>
-			<div id="headerImgSection" class="space-y-2">
-				<div class="flex gap-2">
+			<div id="headerImgSection" class="flex gap-2">
+				<div class="basis-1/2">
+					if (updateData != nil && updateData.HeaderImgFilename != "") || category.HeaderImg != "" {
+						<div class="relative w-full aspect-square rounded-md overflow-hidden border border-gray-200">
+							<button type="button" class="w-full h-full" data-click-handler-selector="category-modal-images-btn">
+								<img
+									src={ fmt.Sprintf("/static/uploads/%s", category.HeaderImg) }
+									alt="Header"
+									class="w-full h-full object-cover"
+								/>
+							</button>
+						</div>
+					}
+				</div>
+				<div class="basis-1/2 space-y-2">
 					<button
 						id="categories-modal-images-select-header"
-						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+						class="px-4 py-2 text-gray-50 bg-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
 						hx-get="/imagenes/selector"
 						hx-vals={ (&ImageSelectorConfig{
                             Mode:           "single",
@@ -32,6 +45,7 @@ templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpda
                             SuccessTarget:  "#headerImgSection",
                         }).ToJSONString() }
 						hx-target="body"
+						hx-target-error="body"
 						hx-swap="beforeend"
 						hx-indicator="#global-loading-indicator"
 					>
@@ -39,7 +53,7 @@ templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpda
 					</button>
 					<button
 						id="categories-modal-images-unset-header"
-						class="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-sm hover:bg-red-50 transition-colors"
+						class="px-4 py-2 text-red-700 bg-red-100 rounded-sm hover:bg-red-50 transition-colors"
 						hx-delete={ fmt.Sprintf("/panel/categorias/%s/header_img", category.ID) }
 						hx-target="#headerImgSection"
 						hx-indicator="#global-loading-indicator"
@@ -48,62 +62,15 @@ templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpda
 						Quitar
 					</button>
 				</div>
-				<div class="flex space-x-2">
-					if (updateData != nil && updateData.HeaderImgFilename != "") || category.HeaderImg != "" {
-						<div class="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
-							<button type="button" class="w-full h-full" data-click-handler-selector="category-modal-images-btn">
-								<img
-									src={ fmt.Sprintf("/static/uploads/%s", 
-											func() string {
-												if updateData != nil && updateData.HeaderImgFilename != "" {
-													return updateData.HeaderImgFilename
-												}
-												return category.HeaderImg
-											}()) }
-									alt="Header"
-									class="w-full h-full object-cover"
-								/>
-							</button>
-						</div>
-					}
-				</div>
 			</div>
 		</div>
 		<!-- Display Image Section -->
 		<div class="space-y-2">
 			<h4 class="text-sm font-medium text-gray-700">Imagen de Visualización</h4>
-			<div id="displayImgSection" class="space-y-2">
-				<div class="flex gap-2">
-					<button
-						id="categories-modal-images-select-display"
-						class="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
-						hx-get="/imagenes/selector"
-						hx-vals={ fmt.Sprintf(`{
-								"mode": "single",
-								"updateEndpoint": "/panel/categorias/%s/display_img",
-								"maxSelection": "1",
-								"successTarget": "#displayImgSection"
-							}`, category.ID) }
-						hx-target="body"
-						hx-swap="beforeend"
-						hx-indicator="#global-loading-indicator"
-					>
-						Seleccionar
-					</button>
-					<button
-						id="categories-modal-images-unset-display"
-						class="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-sm hover:bg-red-50 transition-colors"
-						hx-delete={ fmt.Sprintf("/panel/categorias/%s/display_img", category.ID) }
-						hx-target="#displayImgSection"
-						hx-indicator="#global-loading-indicator"
-						hx-confirm="¿Seguro que deseas eliminar la imagen de visualización?"
-					>
-						Quitar
-					</button>
-				</div>
-				<div class="flex space-x-2">
+			<div id="displayImgSection" class="flex gap-2">
+				<div class="basis-1/2">
 					if (updateData != nil && updateData.DisplayImgFilename != "") || category.DisplayImg != "" {
-						<div class="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+						<div class="relative w-full aspect-square rounded-md overflow-hidden border border-gray-200">
 							<button type="button" class="w-full h-full" data-click-handler-selector="category-modal-images-btn">
 								<img
 									src={ fmt.Sprintf("/static/uploads/%s", 
@@ -119,6 +86,36 @@ templ CategoryImagesTab(category *db.Category, updateData *CategoryImagesTabUpda
 							</button>
 						</div>
 					}
+				</div>
+				<div class="basis-1/2 space-y-2">
+					<button
+						id="categories-modal-images-select-display"
+						class="px-4 py-2 text-gray-50 bg-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
+						hx-get="/imagenes/selector"
+						hx-vals={ (&ImageSelectorConfig{
+                            Mode:           "single",
+                            UpdateEndpoint: fmt.Sprintf("/panel/categorias/%s/display_img", category.ID),
+                            Title:          "Seleccionar la imagen de visualización para " + category.Name,
+                            MaxSelection:   1,
+                            SelectedIds:    []string{category.DisplayImgID},
+                            SuccessTarget:  "#displayImgSection",
+                        }).ToJSONString() }
+						hx-target="body"
+						hx-swap="beforeend"
+						hx-indicator="#global-loading-indicator"
+					>
+						Seleccionar
+					</button>
+					<button
+						id="categories-modal-images-unset-display"
+						class="px-4 py-2 text-red-700 bg-red-100 rounded-sm hover:bg-red-50 transition-colors"
+						hx-delete={ fmt.Sprintf("/panel/categorias/%s/display_img", category.ID) }
+						hx-target="#displayImgSection"
+						hx-indicator="#global-loading-indicator"
+						hx-confirm="¿Seguro que deseas eliminar la imagen de visualización?"
+					>
+						Quitar
+					</button>
 				</div>
 			</div>
 		</div>
