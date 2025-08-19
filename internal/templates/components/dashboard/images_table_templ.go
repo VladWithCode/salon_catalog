@@ -646,18 +646,4 @@ func formatDate(t time.Time) string {
 	return t.Format("02/01/2006 15:04")
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 var _ = templruntime.GeneratedTemplate

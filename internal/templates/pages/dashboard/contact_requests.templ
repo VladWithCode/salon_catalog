@@ -80,7 +80,7 @@ templ ContactRequests() {
 					</div>
 				</div>
 			</div>
-			<main class="flex-1 basis-full overflow-hidden">
+			<main class="relative z-0 flex-1 basis-full overflow-hidden">
 				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-contact-requests-table-scroll>
 					<div
 						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
@@ -176,7 +176,7 @@ templ ContactRequests() {
 						</div>
 					</div>
 					<div
-						class="fixed inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
+						class="absolute inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
 						id="contact-requests-table-pagination"
 					></div>
 				</div>

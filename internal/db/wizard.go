@@ -33,9 +33,31 @@ type WizardStep struct {
 	MinSelected int       `json:"min_selected"`
 	MaxSelected int       `json:"max_selected"`
 	CategoryIDs []string  `json:"category_ids"`
+	Categories  []string  `json:"categories"`
 	StepOrder   int       `json:"step_order"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type WizardStepFilterParams struct {
+	Search     string     `json:"search"`
+	SearchMode SearchMode `json:"search_mode"`
+	Categories []string   `json:"categories"`
+	Sort       string     `json:"sort"`
+	Page       int        `json:"page"`
+	Limit      int        `json:"limit"`
+}
+
+type WizardStepFilterResult struct {
+	WizardSteps []*WizardStep `json:"wizard_steps"`
+	Total       int           `json:"total"`
+	Page        int           `json:"page"`
+	Limit       int           `json:"limit"`
+	TotalPages  int           `json:"total_pages"`
+	HasNext     bool          `json:"has_next"`
+	HasPrevious bool          `json:"has_previous"`
+	HasError    bool          `json:"has_error"`
+	Error       string        `json:"error"`
 }
 
 func CreateWizard(ctx context.Context, wizard *Wizard) error {
@@ -97,6 +119,7 @@ func CreateWizard(ctx context.Context, wizard *Wizard) error {
 		}
 	}
 
+	batchResults.Close()
 	return tx.Commit(ctx)
 }
 
@@ -123,6 +146,192 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 		return nil, err
 	}
 
+	return &wizard, nil
+}
+
+func UpdateWizard(ctx context.Context, wizard *Wizard) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// Update wizard basic info
+	_, err = tx.Exec(
+		ctx,
+		`UPDATE wizards 
+		 SET name = @name, description = @description, event_kind_id = @event_kind_id, 
+		     enabled = @enabled, updated_at = CURRENT_TIMESTAMP
+		 WHERE id = @id`,
+		pgx.NamedArgs{
+			"id":            wizard.ID,
+			"name":          wizard.Name,
+			"description":   wizard.Description,
+			"event_kind_id": wizard.EventKindID,
+			"enabled":       wizard.Enabled,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	// Update wizard steps if provided
+	if len(wizard.Steps) > 0 {
+		// Delete existing wizard step associations
+		_, err = tx.Exec(ctx, "DELETE FROM wizard_steps_wizards WHERE wizard_id = $1", wizard.ID)
+		if err != nil {
+			return err
+		}
+
+		// Insert new wizard step associations
+		batch := pgx.Batch{}
+		for _, step := range wizard.Steps {
+			args := pgx.NamedArgs{
+				"wizard_id":      wizard.ID,
+				"wizard_step_id": step.ID,
+				"required":       step.Required,
+				"step_order":     step.StepOrder,
+				"multi_select":   step.MultiSelect,
+				"min_selected":   step.MinSelected,
+				"max_selected":   step.MaxSelected,
+			}
+			batch.Queue(
+				`INSERT INTO wizard_steps_wizards 
+					(wizard_id, wizard_step_id, required, step_order, multi_select, min_selected, max_selected)
+				VALUES (@wizard_id, @wizard_step_id, @required, @step_order, @multi_select, @min_selected, @max_selected)`,
+				args,
+			)
+		}
+		batchResults := tx.SendBatch(ctx, &batch)
+		defer batchResults.Close()
+
+		for i, l := 0, batch.Len(); i < l; i++ {
+			_, err := batchResults.Exec()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
+func DeleteWizard(ctx context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, "DELETE FROM wizards WHERE id = $1", id)
+	return err
+}
+
+func GetWizardWithSteps(ctx context.Context, id string) (*Wizard, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	// Get wizard basic info
+	wizard := Wizard{}
+	var eventKind sql.NullString
+	err = conn.QueryRow(ctx, `
+		SELECT w.id, w.name, w.description, w.event_kind_id, w.enabled, w.created_at, w.updated_at, ek.name as event_kind
+		FROM wizards w
+		LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
+		WHERE w.id = $1`, id).Scan(
+		&wizard.ID,
+		&wizard.Name,
+		&wizard.Description,
+		&wizard.EventKindID,
+		&wizard.Enabled,
+		&wizard.CreatedAt,
+		&wizard.UpdatedAt,
+		&eventKind,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if eventKind.Valid {
+		wizard.EventKind = eventKind.String
+	}
+
+	// Get wizard steps with custom parameters
+	query := `
+		SELECT ws.id, ws.name, ws.description, 
+		       COALESCE(wsw.step_order, ws.step_order) as step_order,
+		       COALESCE(wsw.required, ws.required) as required, 
+		       COALESCE(wsw.multi_select, ws.multi_select) as multi_select,
+		       COALESCE(wsw.min_selected, ws.min_selected) as min_selected, 
+		       COALESCE(wsw.max_selected, ws.max_selected) as max_selected,
+		       ws.created_at, ws.updated_at,
+		       array_remove(array_agg(DISTINCT c.id), NULL) as category_ids,
+		       array_remove(array_agg(DISTINCT c.name), NULL) as categories
+		FROM wizard_steps_wizards wsw
+		JOIN wizard_steps ws ON wsw.wizard_step_id = ws.id
+		LEFT JOIN wizard_step_categories wsc ON ws.id = wsc.wizard_step_id
+		LEFT JOIN categories c ON wsc.category_id = c.id
+		WHERE wsw.wizard_id = $1
+		GROUP BY ws.id, ws.name, ws.description, ws.step_order, ws.required, ws.multi_select,
+		         ws.min_selected, ws.max_selected, wsw.step_order, wsw.required, 
+		         wsw.multi_select, wsw.min_selected, wsw.max_selected, ws.created_at, ws.updated_at
+		ORDER BY COALESCE(wsw.step_order, ws.step_order) ASC
+	`
+
+	rows, err := conn.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var steps []*WizardStep
+	for rows.Next() {
+		var step WizardStep
+		var categoryIDs []string
+		var categories []string
+
+		err := rows.Scan(
+			&step.ID,
+			&step.Name,
+			&step.Description,
+			&step.StepOrder,
+			&step.Required,
+			&step.MultiSelect,
+			&step.MinSelected,
+			&step.MaxSelected,
+			&step.CreatedAt,
+			&step.UpdatedAt,
+			&categoryIDs,
+			&categories,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		step.CategoryIDs = categoryIDs
+		step.Categories = categories
+		steps = append(steps, &step)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	wizard.Steps = steps
 	return &wizard, nil
 }
 
@@ -420,4 +629,491 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 	}
 
 	return wizards, nil
+}
+
+func FilterWizardSteps(filters WizardStepFilterParams) (*WizardStepFilterResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	// Set defaults
+	if filters.Page < 1 {
+		filters.Page = 1
+	}
+	if filters.Limit < 1 || filters.Limit > 100 {
+		filters.Limit = 20
+	}
+	if filters.SearchMode == "" {
+		filters.SearchMode = SearchModeFullText
+	}
+
+	// Build query conditions and named arguments
+	conditions, namedArgs := buildWizardStepQueryConditions(filters)
+
+	// Base query with joins to get categories
+	baseQuery := `
+		FROM wizard_steps ws
+		LEFT JOIN wizard_step_categories wsc ON ws.id = wsc.wizard_step_id
+		LEFT JOIN categories c ON wsc.category_id = c.id
+		`
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Get total count (distinct wizard steps)
+	countQuery := "SELECT COUNT(DISTINCT ws.id) " + baseQuery
+	var total int
+	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	// Calculate pagination
+	offset := (filters.Page - 1) * filters.Limit
+	totalPages := int(math.Ceil(float64(total) / float64(filters.Limit)))
+
+	// Add pagination to named args
+	namedArgs["limit"] = filters.Limit
+	namedArgs["offset"] = offset
+
+	// Build final query with sorting and pagination
+	orderBy := buildWizardStepOrderByClause(filters)
+	selectQuery := fmt.Sprintf(`
+		SELECT DISTINCT
+			ws.id, ws.name, ws.description, ws.required, ws.multi_select,
+			ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at,
+			array_remove(array_agg(DISTINCT c.id), NULL) as category_ids,
+			array_remove(array_agg(DISTINCT c.name), NULL) as categories
+		%s 
+		GROUP BY ws.id, ws.name, ws.description, ws.required, ws.multi_select,
+			ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at
+		%s
+		LIMIT @limit OFFSET @offset`, baseQuery, orderBy)
+
+	// Execute query
+	rows, err := conn.Query(ctx, selectQuery, namedArgs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	// Scan results
+	wizardSteps, err := scanWizardSteps(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build result
+	result := &WizardStepFilterResult{
+		WizardSteps: wizardSteps,
+		Total:       total,
+		Page:        filters.Page,
+		Limit:       filters.Limit,
+		TotalPages:  totalPages,
+		HasNext:     filters.Page < totalPages,
+		HasPrevious: filters.Page > 1,
+	}
+
+	return result, nil
+}
+
+func buildWizardStepQueryConditions(filters WizardStepFilterParams) ([]string, pgx.NamedArgs) {
+	var conditions []string
+	namedArgs := make(pgx.NamedArgs)
+
+	// Add search condition
+	if filters.Search != "" {
+		switch filters.SearchMode {
+		case SearchModeFullText:
+			conditions = append(conditions, "(ws.name ILIKE @search_query OR ws.description ILIKE @search_query)")
+			namedArgs["search_query"] = "%" + filters.Search + "%"
+
+		case SearchModeExact:
+			conditions = append(conditions, "(ws.name ILIKE @exact_search OR ws.description ILIKE @exact_search)")
+			namedArgs["exact_search"] = filters.Search
+
+		case SearchModeFuzzy:
+			conditions = append(conditions, "(ws.name ILIKE @fuzzy_search OR ws.description ILIKE @fuzzy_search)")
+			namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
+		}
+	}
+
+	// Add category filter
+	if len(filters.Categories) > 0 {
+		conditions = append(conditions, "c.id = ANY(@category_ids)")
+		namedArgs["category_ids"] = filters.Categories
+	}
+
+	return conditions, namedArgs
+}
+
+func buildWizardStepOrderByClause(filters WizardStepFilterParams) string {
+	switch strings.ToLower(filters.Sort) {
+	case "name_asc", "name", "":
+		return "ORDER BY ws.name ASC"
+	case "name_desc":
+		return "ORDER BY ws.name DESC"
+	case "newest":
+		return "ORDER BY ws.created_at DESC"
+	case "oldest":
+		return "ORDER BY ws.created_at ASC"
+	case "step_order":
+		return "ORDER BY ws.step_order ASC, ws.name ASC"
+	default:
+		return "ORDER BY ws.name ASC"
+	}
+}
+
+func scanWizardSteps(rows pgx.Rows) ([]*WizardStep, error) {
+	var wizardSteps []*WizardStep
+
+	for rows.Next() {
+		var step WizardStep
+		var categoryIDs []string
+		var categories []string
+
+		err := rows.Scan(
+			&step.ID,
+			&step.Name,
+			&step.Description,
+			&step.Required,
+			&step.MultiSelect,
+			&step.MinSelected,
+			&step.MaxSelected,
+			&step.StepOrder,
+			&step.CreatedAt,
+			&step.UpdatedAt,
+			&categoryIDs,
+			&categories,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan wizard step: %w", err)
+		}
+
+		step.CategoryIDs = categoryIDs
+		step.Categories = categories
+
+		wizardSteps = append(wizardSteps, &step)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return wizardSteps, nil
+}
+
+func UpdateWizardStep(ctx context.Context, step *WizardStep) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// Update wizard step
+	_, err = tx.Exec(
+		ctx,
+		`UPDATE wizard_steps 
+		 SET name = @name, description = @description, required = @required,
+		     multi_select = @multi_select, min_selected = @min_selected, 
+		     max_selected = @max_selected, step_order = @step_order,
+		     updated_at = CURRENT_TIMESTAMP
+		 WHERE id = @id`,
+		pgx.NamedArgs{
+			"id":           step.ID,
+			"name":         step.Name,
+			"description":  step.Description,
+			"required":     step.Required,
+			"multi_select": step.MultiSelect,
+			"min_selected": step.MinSelected,
+			"max_selected": step.MaxSelected,
+			"step_order":   step.StepOrder,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	// Delete existing category associations
+	_, err = tx.Exec(ctx, "DELETE FROM wizard_step_categories WHERE wizard_step_id = $1", step.ID)
+	if err != nil {
+		return err
+	}
+
+	// Insert new category associations
+	if len(step.CategoryIDs) > 0 {
+		batch := pgx.Batch{}
+		batch.Queue(
+			`DELETE FROM wizard_step_categories WHERE wizard_step_id = $1`,
+			step.ID,
+		)
+
+		for _, categoryID := range step.CategoryIDs {
+			batch.Queue(
+				`INSERT INTO wizard_step_categories (wizard_step_id, category_id) VALUES ($1, $2)`,
+				step.ID,
+				categoryID,
+			)
+		}
+
+		batchResults := tx.SendBatch(ctx, &batch)
+		defer batchResults.Close()
+
+		for i, l := 0, batch.Len(); i < l; i++ {
+			_, err := batchResults.Exec()
+			if err != nil {
+				return err
+			}
+		}
+
+		batchResults.Close()
+	}
+
+	return tx.Commit(ctx)
+}
+
+func DeleteWizardStep(ctx context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, "DELETE FROM wizard_steps WHERE id = $1", id)
+	return err
+}
+
+func FindWizardStep(ctx context.Context, id string) (*WizardStep, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	query := `
+		SELECT ws.id, ws.name, ws.description, ws.required, ws.multi_select,
+		       ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at,
+		       array_remove(array_agg(DISTINCT c.id), NULL) as category_ids,
+		       array_remove(array_agg(DISTINCT c.name), NULL) as categories
+		FROM wizard_steps ws
+		LEFT JOIN wizard_step_categories wsc ON ws.id = wsc.wizard_step_id
+		LEFT JOIN categories c ON wsc.category_id = c.id
+		WHERE ws.id = $1
+		GROUP BY ws.id, ws.name, ws.description, ws.required, ws.multi_select,
+		         ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at
+	`
+
+	var step WizardStep
+	var categoryIDs []string
+	var categories []string
+
+	err = conn.QueryRow(ctx, query, id).Scan(
+		&step.ID,
+		&step.Name,
+		&step.Description,
+		&step.Required,
+		&step.MultiSelect,
+		&step.MinSelected,
+		&step.MaxSelected,
+		&step.StepOrder,
+		&step.CreatedAt,
+		&step.UpdatedAt,
+		&categoryIDs,
+		&categories,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	step.CategoryIDs = categoryIDs
+	step.Categories = categories
+
+	return &step, nil
+}
+
+func GetAllWizardSteps(ctx context.Context) ([]*WizardStep, error) {
+	filters := WizardStepFilterParams{
+		Page:  1,
+		Limit: 1000, // Get all steps
+	}
+	result, err := FilterWizardSteps(filters)
+	if err != nil {
+		return nil, err
+	}
+	return result.WizardSteps, nil
+}
+
+func AttachStepToWizard(ctx context.Context, wizardID, stepID string, stepParams *WizardStep) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	args := pgx.NamedArgs{
+		"wizard_id":      wizardID,
+		"wizard_step_id": stepID,
+		"required":       stepParams.Required,
+		"step_order":     stepParams.StepOrder,
+		"multi_select":   stepParams.MultiSelect,
+		"min_selected":   stepParams.MinSelected,
+		"max_selected":   stepParams.MaxSelected,
+	}
+
+	_, err = conn.Exec(
+		ctx,
+		`INSERT INTO wizard_steps_wizards 
+			(wizard_id, wizard_step_id, required, step_order, multi_select, min_selected, max_selected)
+		VALUES (@wizard_id, @wizard_step_id, @required, @step_order, @multi_select, @min_selected, @max_selected)
+		ON CONFLICT (wizard_id, wizard_step_id) 
+		DO UPDATE SET
+			required = EXCLUDED.required,
+			step_order = EXCLUDED.step_order,
+			multi_select = EXCLUDED.multi_select,
+			min_selected = EXCLUDED.min_selected,
+			max_selected = EXCLUDED.max_selected`,
+		args,
+	)
+
+	return err
+}
+
+func DetachStepFromWizard(ctx context.Context, wizardID, stepID string) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(
+		ctx,
+		"DELETE FROM wizard_steps_wizards WHERE wizard_id = $1 AND wizard_step_id = $2",
+		wizardID,
+		stepID,
+	)
+
+	return err
+}
+
+func UpdateWizardStepParams(ctx context.Context, wizardID, stepID string, stepParams *WizardStep) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	args := pgx.NamedArgs{
+		"wizard_id":      wizardID,
+		"wizard_step_id": stepID,
+		"required":       stepParams.Required,
+		"step_order":     stepParams.StepOrder,
+		"multi_select":   stepParams.MultiSelect,
+		"min_selected":   stepParams.MinSelected,
+		"max_selected":   stepParams.MaxSelected,
+	}
+
+	_, err = conn.Exec(
+		ctx,
+		`UPDATE wizard_steps_wizards 
+		 SET required = @required, step_order = @step_order, multi_select = @multi_select,
+		     min_selected = @min_selected, max_selected = @max_selected
+		 WHERE wizard_id = @wizard_id AND wizard_step_id = @wizard_step_id`,
+		args,
+	)
+
+	return err
+}
+
+func GetWizardSteps(ctx context.Context, wizardID string) ([]*WizardStep, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	query := `
+		SELECT ws.id, ws.name, ws.description, 
+		       COALESCE(wsw.step_order, ws.step_order) as step_order,
+		       COALESCE(wsw.required, ws.required) as required, 
+		       COALESCE(wsw.multi_select, ws.multi_select) as multi_select,
+		       COALESCE(wsw.min_selected, ws.min_selected) as min_selected, 
+		       COALESCE(wsw.max_selected, ws.max_selected) as max_selected,
+		       ws.created_at, ws.updated_at,
+		       array_remove(array_agg(DISTINCT c.id), NULL) as category_ids,
+		       array_remove(array_agg(DISTINCT c.name), NULL) as categories
+		FROM wizard_steps_wizards wsw
+		JOIN wizard_steps ws ON wsw.wizard_step_id = ws.id
+		LEFT JOIN wizard_step_categories wsc ON ws.id = wsc.wizard_step_id
+		LEFT JOIN categories c ON wsc.category_id = c.id
+		WHERE wsw.wizard_id = $1
+		GROUP BY ws.id, ws.name, ws.description, ws.step_order, ws.required, ws.multi_select,
+		         ws.min_selected, ws.max_selected, wsw.step_order, wsw.required, 
+		         wsw.multi_select, wsw.min_selected, wsw.max_selected, ws.created_at, ws.updated_at
+		ORDER BY COALESCE(wsw.step_order, ws.step_order) ASC
+	`
+
+	rows, err := conn.Query(ctx, query, wizardID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var steps []*WizardStep
+	for rows.Next() {
+		var step WizardStep
+		var categoryIDs []string
+		var categories []string
+
+		err := rows.Scan(
+			&step.ID,
+			&step.Name,
+			&step.Description,
+			&step.StepOrder,
+			&step.Required,
+			&step.MultiSelect,
+			&step.MinSelected,
+			&step.MaxSelected,
+			&step.CreatedAt,
+			&step.UpdatedAt,
+			&categoryIDs,
+			&categories,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		step.CategoryIDs = categoryIDs
+		step.Categories = categories
+		steps = append(steps, &step)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return steps, nil
 }
