@@ -49,8 +49,6 @@ CREATE TABLE wizard_step_categories (
 
 -- Create indexes for better performance
 CREATE INDEX idx_wizards_event_kind_id ON wizards(event_kind_id);
-CREATE INDEX idx_wizard_steps_wizard_id ON wizard_steps(wizard_id);
-CREATE INDEX idx_wizard_steps_order ON wizard_steps(wizard_id, step_order);
 
 -- Add search vectors for full-text search (optional, following product pattern)
 ALTER TABLE wizards ADD COLUMN search_vector tsvector;
