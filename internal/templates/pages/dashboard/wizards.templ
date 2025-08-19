@@ -1,0 +1,253 @@
+package dashboard
+
+import (
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ Wizards() {
+	@wizardScript()
+	@templates.AdminLayout("Asistentes de Planeación | Panel Villa Chenacolo", "Administración de Asistentes") {
+		<div class="flex-1 flex flex-col gap-4 overflow-hidden px-0.5 text-gray-700">
+			<div class="px-2">
+				<div class="flex items-center justify-between gap-4">
+					<div class="space-y-0.5">
+						<h1 class="text-2xl md:text-3xl tracking-tight">Asistentes de Planeación</h1>
+						<p class="text-xs text-current">Los asistentes de planeación le permiten a tus clientes crear sus eventos perfectos paso a paso.</p>
+					</div>
+					<button
+						id="wizards-actions-toggle"
+						class="shrink flex items-center justify-center text-current/80 xl:hidden cursor-pointer"
+						data-click-handler-selector="wizards-actions-toggle"
+					>
+						@components.BarsIcon("w-8", nil)
+					</button>
+				</div>
+				<div id="wizards-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-wizards-actions="closed">
+					<div class="flex flex-col xl:flex-row gap-2 mt-4">
+						<!-- Search Bar -->
+						<div class="flex-1 relative">
+							<input
+								type="text"
+								name="search"
+								placeholder="Buscar asistentes..."
+								class="w-full px-4 py-2 pl-10 border border-gray-200 rounded-xs bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+								hx-get="/panel/asistentes/table"
+								hx-trigger="input changed delay:300ms, search"
+								hx-target="#wizards-table"
+								hx-include="[name='sort'], [name='event_kind_filter']"
+								hx-indicator="#wizards-table-loading"
+							/>
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								@components.SearchIcon("w-5 text-gray-400", nil)
+							</div>
+						</div>
+						<!-- Event Kind Filter -->
+						<div class="xl:w-48">
+							<select
+								name="event_kind_filter"
+								class="w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+								hx-get="/panel/asistentes/table"
+								hx-trigger="change"
+								hx-target="#wizards-table"
+								hx-include="[name='search'], [name='sort']"
+								hx-indicator="#wizards-table-loading"
+							>
+								<option value="">Todos los eventos</option>
+								<!-- Event kinds would be populated here -->
+							</select>
+						</div>
+						<!-- Add New Wizard Button -->
+						<button
+							type="button"
+							class="px-4 py-2 bg-gray-700 text-white rounded-sm hover:bg-gray-700/90 active:scale-97 focus:outline-none focus:ring-2 focus:ring-accent"
+							hx-get="/panel/asistentes/modal/nuevo"
+							hx-target="#wizards-modal"
+							hx-indicator="#global-loading-indicator"
+						>
+							+ Nuevo Asistente
+						</button>
+					</div>
+				</div>
+			</div>
+			<main class="relative z-0 flex-1 overflow-hidden pb-0.5">
+				<div class="h-full grid grid-rows-[auto_1fr_auto] bg-gray-100 rounded-xs shadow-sm overflow-hidden">
+					<!-- Table Header -->
+					<div
+						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
+					>
+						// Button modes: all, none, some
+						<style>
+                            [data-multi-selection-mode="all"] [data-multi-selection-mode-display="all"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="none"] [data-multi-selection-mode-display="none"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="some"] [data-multi-selection-mode-display="some"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode-display] {
+                                transition: opacity 0.1s linear;
+                            }
+                        </style>
+						<button
+							id="products-table-multi-selection-ctl"
+							type="button"
+							class="shrink-0 grow-0 basis-5 aspect-square grid grid-cols-1 grid-rows-1"
+							data-click-handler-selector="#products-table-multi-selection-ctl"
+							data-multi-selection-mode="all"
+						>
+							<div
+								class="col-start-1 row-start-1 w-full h-full border border-gray-300 rounded-xs"
+								data-multi-selection-mode-display="all"
+							></div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="none"
+							>
+								@components.CheckIcon("w-full text-gray-50", nil)
+							</div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="some"
+							>
+								<div class="w-3/4 h-0.5 bg-stone-50 rounded-xs"></div>
+							</div>
+						</button>
+						<h4 class="flex-1 basis-full text-gray-900">
+							Asistentes
+							<span id="wizards-table-count" hx-swap-oob>(0/0)</span>
+						</h4>
+						<select
+							hx-get="/panel/asistentes/table"
+							hx-trigger="change"
+							hx-target="#wizards-table"
+							hx-indicator="#wizards-table-loading"
+							hx-include='[name="search"]'
+							name="sort"
+							id="sort"
+							class="block px-1 py-0.5 border border-gray-200 rounded-xs"
+						>
+							<option value="name_asc">A-Z &uarr;</option>
+							<option value="name_desc">A-Z &darr;</option>
+							<option value="eventKind_asc">Evento A-Z</option>
+							<option value="eventKind_desc">Evento Z-A</option>
+							<option value="newest">Más Recientes</option>
+							<option value="oldest">Más Antiguos</option>
+						</select>
+					</div>
+					<!-- Table Body -->
+					<div id="wizards-table-wrapper" class="h-full row-start-2 col-span-full overflow-auto">
+						<div
+							id="wizards-table"
+							hx-get="/panel/asistentes/table"
+							hx-trigger="load"
+							hx-indicator="#wizards-table-loading"
+							class="h-full"
+						>
+							<div id="wizards-table-loading" class="htmx-indicator flex items-center justify-center h-full">
+								<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+			<div id="wizards-modal-container" class="fixed inset-0 w-screen h-screen z-40 flex flex-col justify-center items-center overflow-hidden invisible">
+				<div
+					id="wizards-modal-backdrop"
+					class="absolute h-full w-full z-0 bg-dark/30"
+					data-wizards-modal-toggle="close"
+					data-click-handler-selector="wizards-modal-toggle"
+				></div>
+				<div
+					id="wizards-modal"
+					class="relative w-full lg:max-w-4xl 2xl:max-w-[90%] p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+					data-wizards-modal="closed"
+				></div>
+			</div>
+			<div id="wizard-steps-modal-container" class="fixed inset-0 fixed inset-0 w-screen h-screen z-40 flex flex-col justify-center items-center overflow-hidden invisible">
+				<div
+					id="wizard-steps-modal-backdrop"
+					class="absolute h-full w-full z-0 bg-dark/30"
+					data-click-handler-selector="wizard-steps-modal-close"
+				></div>
+				<div
+					id="wizard-steps-modal"
+					class="relative w-full lg:max-w-4xl 2xl:max-w-7xl p-2 overflow-hidden z-20 translate-y-12 opacity-0 mx-auto"
+					hx-swap-oob="outerHTML"
+					data-wizard-steps-modal="closed"
+				></div>
+			</div>
+		</div>
+	}
+}
+
+templ wizardScript() {
+	<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wizardModalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power2.out'}});
+            wizardModalTl.to('#wizards-modal-container', {
+                autoAlpha: 1,
+            }).to('#wizards-modal', {
+                opacity: 1,
+                y: '0rem',
+            }, "-=0.2");
+
+            eventManager
+                .register('afterSwap', '#wizards-modal', function(e) {
+                    if (e.detail.elt.dataset.wizardsModal === 'closed') {
+                        wizardModalTl.play();
+                        e.detail.elt.dataset.wizardsModal = 'open';
+                    }
+                })
+                .registerClick('wizards-modal-toggle', function(e) {
+                    const target = e.target.matches('[data-wizards-modal-toggle]') ? e.target : e.target.closest('[data-wizards-modal-toggle]');
+                    const force = target.dataset.wizardsModalToggle
+                    const shouldClose = (force === 'close') || (!force && modal.dataset.wizardsModal === 'open');
+                    if (shouldClose) {
+                        wizardModalTl.reverse();
+                        document.getElementById('wizards-modal').dataset.wizardsModal = 'closed';
+                        gsap.delayedCall(1, () => {
+                            document.getElementById('wizards-modal-content')?.remove();
+                            wizardModalTl.revert();
+                        });
+                    } else {
+                        wizardModalTl.play();
+                        modal.dataset.wizardsModal = 'open';
+                    }
+                })
+                .register('afterSwap', '#wizard-steps-modal', function(e, ctx) {
+                    if (e.detail.requestConfig.elt.matches('[data-wizards-edit-btn]')) {
+                        return;
+                    }
+
+                    const target = ctx.targetElement;
+                    const tl = gsap.timeline({defaults: {duration: 0.5, ease: 'power2.out'}});
+
+                    if (target.dataset.wizardStepsModal === 'closed') {
+                        tl.to(target.closest('#wizard-steps-modal-container'), { 
+                            autoAlpha: 1
+                        }).to(target, {
+                            opacity: 1,
+                            y: '0rem',
+                        }, '-=0.2');
+                    }
+                })
+                .registerClick('wizard-steps-modal-close', function (e) {
+                    const target = e.target.matches('[data-wizard-steps-modal-toggle]') ? e.target : e.target.closest('[data-wizard-steps-modal-toggle]');
+                    const force = target.dataset.wizardStepsModalToggle
+                    const shouldClose = (force === 'close') || (!force && modal.dataset.wizardStepsModal === 'open');
+                    const tl = gsap.timeline({defaults: {duration: 0.5, ease: 'power2.out'}});
+
+                    if (shouldClose) {
+                        tl.to(target, {
+                        });
+                    } else {
+                        wizardStepsModalTl.play();
+                        modal.dataset.wizardStepsModal = 'open';
+                    }
+                });
+        });
+    </script>
+}

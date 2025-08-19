@@ -1,0 +1,583 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ WizardStepsTable(result *db.WizardStepFilterResult) {
+	<span id="wizardsteps-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.WizardSteps)) }/ { fmt.Sprintf("%d", result.Total) })</span>
+	<div id="wizardsteps-table" class="flex flex-col p-1 mx-auto">
+		if result.HasError {
+			<div class="flex-1 flex items-center justify-center gap-4 p-4">
+				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/panel/asistentes/pasos/table"
+					hx-target="#wizardsteps-table"
+					hx-params="none"
+					hx-indicator="#wizardsteps-table-loading"
+					hx-swap="outerHTML swap:0.5s"
+				>Limpiar Filtros</button>
+			</div>
+		}
+		if len(result.WizardSteps) == 0 {
+			<div class="text-center p-4 space-y-2">
+				<h3 class="">No se encontraron pasos que coincidan con tu búsqueda</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/panel/asistentes/pasos/table"
+					hx-target="#wizardsteps-table"
+					hx-params="none"
+					hx-indicator="#wizardsteps-table-loading"
+					hx-swap="outerHTML swap:0.5s"
+				>Limpiar Filtros</button>
+			</div>
+		} else {
+			<!-- Wizard Steps Grid -->
+			<div class="grid grid-cols-table gap-2">
+				for _, step := range result.WizardSteps {
+					@WizardStepTableRow(step)
+				}
+			</div>
+		}
+	</div>
+	if result.TotalPages > 1 {
+		<div hx-swap-oob="innerHTML:#wizardsteps-table-pagination">
+			@WizardStepsPagination(result)
+		</div>
+	}
+}
+
+templ WizardStepTableRow(step *db.WizardStep) {
+	<div class="contents group hover:bg-gray-50 transition-colors duration-150">
+		<!-- Selection checkbox -->
+		<div class="flex items-center justify-center p-2">
+			<input
+				type="checkbox"
+				name="wizard-step-selection"
+				value={ step.ID }
+				class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+				data-wizard-step-checkbox
+			/>
+		</div>
+		<!-- Step name -->
+		<div class="p-2 font-medium text-gray-900">
+			{ step.Name }
+		</div>
+		<!-- Description -->
+		<div class="p-2 text-gray-600 text-sm">
+			if step.Description != "" {
+				{ step.Description }
+			} else {
+				<span class="text-gray-400 italic">Sin descripción</span>
+			}
+		</div>
+		<!-- Categories -->
+		<div class="p-2">
+			if len(step.Categories) > 0 {
+				<div class="flex flex-wrap gap-1">
+					for _, category := range step.Categories {
+						<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+							{ category }
+						</span>
+					}
+				</div>
+			} else {
+				<span class="text-gray-400 italic text-sm">Sin categorías</span>
+			}
+		</div>
+		<!-- Configuration -->
+		<div class="p-2">
+			<div class="flex flex-col gap-1 text-xs">
+				if step.Required {
+					<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+						Requerido
+					</span>
+				}
+				if step.MultiSelect {
+					<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+						Multi-selección
+					</span>
+				}
+				if step.MinSelected > 0 || step.MaxSelected > 1 {
+					<span class="text-gray-600">
+						{ fmt.Sprintf("Min: %d, Max: %d", step.MinSelected, step.MaxSelected) }
+					</span>
+				}
+			</div>
+		</div>
+		<!-- Actions -->
+		<div class="p-2">
+			<div class="flex items-center gap-2">
+				<button
+					hx-get={ fmt.Sprintf("/panel/asistentes/pasos/modal/%s", step.ID) }
+					hx-target="#wizardsteps-modal"
+					hx-indicator="#global-loading-indicator"
+					class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+					data-wizardsteps-modal-toggle="open"
+					data-click-handler-selector="wizardsteps-modal-toggle"
+				>
+					Editar
+				</button>
+				<button
+					hx-delete={ fmt.Sprintf("/panel/asistentes/pasos/%s", step.ID) }
+					hx-target="#wizardsteps-table-wrapper"
+					hx-confirm="¿Estás seguro de eliminar este paso?"
+					hx-indicator="#wizardsteps-table-loading"
+					class="text-red-600 hover:text-red-800 text-sm font-medium"
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+type WizardStepCreateModalState struct {
+	WizardStep *db.WizardStep `json:"wizard_step"`
+	Categories []*db.Category `json:"categories"`
+	Error      string         `json:"error"`
+}
+
+type WizardStepEditModalState struct {
+	Categories []*db.Category `json:"categories"`
+	Error      string         `json:"error"`
+}
+
+templ WizardStepCreateModal(state *WizardStepCreateModalState) {
+	<div class="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+		<div class="flex items-center justify-between mb-6">
+			<h3 class="text-lg font-semibold text-gray-900">Nuevo Paso de Asistente</h3>
+			<button
+				type="button"
+				class="text-gray-400 hover:text-gray-600"
+				data-wizardsteps-modal-toggle="close"
+				data-click-handler-selector="wizardsteps-modal-toggle"
+			>
+				@components.TimesIcon("w-6 h-6", nil)
+			</button>
+		</div>
+		if state.Error != "" {
+			<div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+				{ state.Error }
+			</div>
+		}
+		<form
+			hx-post="/panel/asistentes/pasos/nuevo"
+			hx-target="#wizardsteps-table-wrapper"
+			hx-indicator="#global-loading-indicator"
+			class="space-y-4"
+		>
+			<!-- Name -->
+			<div>
+				<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+					Nombre del paso *
+				</label>
+				<input
+					type="text"
+					id="name"
+					name="name"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					placeholder="Ej: Selección de flores"
+					if state.WizardStep != nil {
+						value={ state.WizardStep.Name }
+					}
+				/>
+			</div>
+			<!-- Description -->
+			<div>
+				<label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+					Descripción
+				</label>
+				<textarea
+					id="description"
+					name="description"
+					rows="3"
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					placeholder="Describe qué tipo de productos debe seleccionar el usuario en este paso"
+				>
+					if state.WizardStep != nil {
+						{ state.WizardStep.Description }
+					}
+				</textarea>
+			</div>
+			<!-- Configuration Options -->
+			<div class="grid grid-cols-2 gap-4">
+				<div>
+					<label class="flex items-center">
+						<input
+							type="checkbox"
+							name="required"
+							class="mr-2"
+							if state.WizardStep != nil && state.WizardStep.Required {
+								checked
+							}
+						/>
+						<span class="text-sm text-gray-700">Paso requerido</span>
+					</label>
+				</div>
+				<div>
+					<label class="flex items-center">
+						<input
+							type="checkbox"
+							name="multi_select"
+							class="mr-2"
+							if state.WizardStep != nil && state.WizardStep.MultiSelect {
+								checked
+							}
+						/>
+						<span class="text-sm text-gray-700">Permitir múltiples selecciones</span>
+					</label>
+				</div>
+			</div>
+			<!-- Min/Max Selection -->
+			<div class="grid grid-cols-3 gap-4">
+				<div>
+					<label for="min_selected" class="block text-sm font-medium text-gray-700 mb-1">
+						Mínimo a seleccionar
+					</label>
+					<input
+						type="number"
+						id="min_selected"
+						name="min_selected"
+						min="0"
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						if state.WizardStep != nil {
+							value={ fmt.Sprintf("%d", state.WizardStep.MinSelected) }
+						} else {
+							value="0"
+						}
+					/>
+				</div>
+				<div>
+					<label for="max_selected" class="block text-sm font-medium text-gray-700 mb-1">
+						Máximo a seleccionar
+					</label>
+					<input
+						type="number"
+						id="max_selected"
+						name="max_selected"
+						min="1"
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						if state.WizardStep != nil {
+							value={ fmt.Sprintf("%d", state.WizardStep.MaxSelected) }
+						} else {
+							value="1"
+						}
+					/>
+				</div>
+				<div>
+					<label for="step_order" class="block text-sm font-medium text-gray-700 mb-1">
+						Orden del paso
+					</label>
+					<input
+						type="number"
+						id="step_order"
+						name="step_order"
+						min="1"
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						if state.WizardStep != nil {
+							value={ fmt.Sprintf("%d", state.WizardStep.StepOrder) }
+						} else {
+							value="1"
+						}
+					/>
+				</div>
+			</div>
+			<!-- Categories -->
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">
+					Categorías disponibles
+				</label>
+				<div class="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
+					if len(state.Categories) > 0 {
+						for _, category := range state.Categories {
+							<label class="flex items-center">
+								<input
+									type="checkbox"
+									name="category_ids"
+									value={ category.ID }
+									class="mr-2"
+								/>
+								<span class="text-sm text-gray-700">{ category.Name }</span>
+							</label>
+						}
+					} else {
+						<p class="text-sm text-gray-500 italic">No hay categorías disponibles</p>
+					}
+				</div>
+			</div>
+			<!-- Actions -->
+			<div class="flex items-center justify-end gap-3 pt-4">
+				<button
+					type="button"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+					data-wizardsteps-modal-toggle="close"
+					data-click-handler-selector="wizardsteps-modal-toggle"
+				>
+					Cancelar
+				</button>
+				<button
+					type="submit"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+				>
+					Crear Paso
+				</button>
+			</div>
+		</form>
+	</div>
+}
+
+templ WizardStepEditModal(step *db.WizardStep, state *WizardStepEditModalState) {
+	<div class="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+		<div class="flex items-center justify-between mb-6">
+			<h3 class="text-lg font-semibold text-gray-900">Editar Paso: { step.Name }</h3>
+			<button
+				type="button"
+				class="text-gray-400 hover:text-gray-600"
+				data-wizardsteps-modal-toggle="close"
+				data-click-handler-selector="wizardsteps-modal-toggle"
+			>
+				@components.TimesIcon("w-6 h-6", nil)
+			</button>
+		</div>
+		if state.Error != "" {
+			<div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+				{ state.Error }
+			</div>
+		}
+		<form
+			hx-put={ fmt.Sprintf("/panel/asistentes/pasos/%s", step.ID) }
+			hx-target="#wizardsteps-table-wrapper"
+			hx-indicator="#global-loading-indicator"
+			class="space-y-4"
+		>
+			<!-- Name -->
+			<div>
+				<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+					Nombre del paso *
+				</label>
+				<input
+					type="text"
+					id="name"
+					name="name"
+					required
+					value={ step.Name }
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					placeholder="Ej: Selección de flores"
+				/>
+			</div>
+			<!-- Description -->
+			<div>
+				<label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+					Descripción
+				</label>
+				<textarea
+					id="description"
+					name="description"
+					rows="3"
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					placeholder="Describe qué tipo de productos debe seleccionar el usuario en este paso"
+				>{ step.Description }</textarea>
+			</div>
+			<!-- Configuration Options -->
+			<div class="grid grid-cols-2 gap-4">
+				<div>
+					<label class="flex items-center">
+						<input
+							type="checkbox"
+							name="required"
+							class="mr-2"
+							if step.Required {
+								checked
+							}
+						/>
+						<span class="text-sm text-gray-700">Paso requerido</span>
+					</label>
+				</div>
+				<div>
+					<label class="flex items-center">
+						<input
+							type="checkbox"
+							name="multi_select"
+							class="mr-2"
+							if step.MultiSelect {
+								checked
+							}
+						/>
+						<span class="text-sm text-gray-700">Permitir múltiples selecciones</span>
+					</label>
+				</div>
+			</div>
+			<!-- Min/Max Selection -->
+			<div class="grid grid-cols-3 gap-4">
+				<div>
+					<label for="min_selected" class="block text-sm font-medium text-gray-700 mb-1">
+						Mínimo a seleccionar
+					</label>
+					<input
+						type="number"
+						id="min_selected"
+						name="min_selected"
+						min="0"
+						value={ fmt.Sprintf("%d", step.MinSelected) }
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					/>
+				</div>
+				<div>
+					<label for="max_selected" class="block text-sm font-medium text-gray-700 mb-1">
+						Máximo a seleccionar
+					</label>
+					<input
+						type="number"
+						id="max_selected"
+						name="max_selected"
+						min="1"
+						value={ fmt.Sprintf("%d", step.MaxSelected) }
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					/>
+				</div>
+				<div>
+					<label for="step_order" class="block text-sm font-medium text-gray-700 mb-1">
+						Orden del paso
+					</label>
+					<input
+						type="number"
+						id="step_order"
+						name="step_order"
+						min="1"
+						value={ fmt.Sprintf("%d", step.StepOrder) }
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+					/>
+				</div>
+			</div>
+			<!-- Categories -->
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">
+					Categorías disponibles
+				</label>
+				<div class="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
+					if len(state.Categories) > 0 {
+						for _, category := range state.Categories {
+							<label class="flex items-center">
+								<input
+									type="checkbox"
+									name="category_ids"
+									value={ category.ID }
+									class="mr-2"
+								/>
+								<span class="text-sm text-gray-700">{ category.Name }</span>
+							</label>
+						}
+					} else {
+						<p class="text-sm text-gray-500 italic">No hay categorías disponibles</p>
+					}
+				</div>
+			</div>
+			<!-- Actions -->
+			<div class="flex items-center justify-end gap-3 pt-4">
+				<button
+					type="button"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+					data-wizardsteps-modal-toggle="close"
+					data-click-handler-selector="wizardsteps-modal-toggle"
+				>
+					Cancelar
+				</button>
+				<button
+					type="submit"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+				>
+					Actualizar Paso
+				</button>
+			</div>
+		</form>
+	</div>
+}
+
+templ WizardStepsPagination(result *db.WizardStepFilterResult) {
+	<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+		<div class="flex flex-1 justify-between sm:hidden">
+			if result.HasPrevious {
+				<button
+					hx-get="/panel/asistentes/pasos/table"
+					hx-include="[name='search'], [name='sort'], [name='categories']"
+					hx-vals={ fmt.Sprintf(`{"page": %d}`, result.Page-1) }
+					hx-target="#wizardsteps-table"
+					hx-indicator="#wizardsteps-table-loading"
+					hx-swap="outerHTML swap:0.5s"
+					class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+				>
+					Anterior
+				</button>
+			}
+			if result.HasNext {
+				<button
+					hx-get="/panel/asistentes/pasos/table"
+					hx-include="[name='search'], [name='sort'], [name='categories']"
+					hx-vals={ fmt.Sprintf(`{"page": %d}`, result.Page+1) }
+					hx-target="#wizardsteps-table"
+					hx-indicator="#wizardsteps-table-loading"
+					hx-swap="outerHTML swap:0.5s"
+					class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+				>
+					Siguiente
+				</button>
+			}
+		</div>
+		<div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+			<div>
+				<p class="text-sm text-gray-700">
+					Mostrando
+					<span class="font-medium">{ fmt.Sprintf("%d", (result.Page-1)*result.Limit+1) }</span>
+					a
+					<span class="font-medium">{ fmt.Sprintf("%d", min((result.Page-1)*result.Limit+result.Limit, result.Total)) }</span>
+					de
+					<span class="font-medium">{ fmt.Sprintf("%d", result.Total) }</span>
+					resultados
+				</p>
+			</div>
+			<div>
+				<nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+					if result.HasPrevious {
+						<button
+							hx-get="/panel/asistentes/pasos/table"
+							hx-include="[name='search'], [name='sort'], [name='categories']"
+							hx-vals={ fmt.Sprintf(`{"page": %d}`, result.Page-1) }
+							hx-target="#wizardsteps-table"
+							hx-indicator="#wizardsteps-table-loading"
+							hx-swap="outerHTML swap:0.5s"
+							class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+						>
+							<span class="sr-only">Anterior</span>
+							←
+						</button>
+					}
+					<!-- Page numbers would go here - simplified for now -->
+					<span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300">
+						{ fmt.Sprintf("%d", result.Page) }
+					</span>
+					if result.HasNext {
+						<button
+							hx-get="/panel/asistentes/pasos/table"
+							hx-include="[name='search'], [name='sort'], [name='categories']"
+							hx-vals={ fmt.Sprintf(`{"page": %d}`, result.Page+1) }
+							hx-target="#wizardsteps-table"
+							hx-indicator="#wizardsteps-table-loading"
+							hx-swap="outerHTML swap:0.5s"
+							class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+						>
+							<span class="sr-only">Siguiente</span>
+							→
+						</button>
+					}
+				</nav>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,748 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ WizardsTable(result *db.WizardFilterResult) {
+	<span id="wizards-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Wizards)) }/ { fmt.Sprintf("%d", result.Total) })</span>
+	<div class="flex flex-col p-1 mx-auto">
+		if result.HasError {
+			<div class="flex-1 flex items-center justify-center gap-4 p-4">
+				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/panel/asistentes/table"
+					hx-target="#wizards-table"
+					hx-params="none"
+					data-click-handler-selector="[data-wizards-filter-clear]"
+					data-wizards-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		}
+		if len(result.Wizards) == 0 {
+			<div class="text-center p-4 space-y-2">
+				<h3 class="">No se encontraron asistentes que coincidan con tu búsqueda</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/panel/asistentes/table"
+					hx-target="#wizards-table"
+					hx-params="none"
+					data-click-handler-selector="[data-wizards-filter-clear]"
+					data-wizards-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		} else {
+			<!-- Wizards Grid -->
+			<div class="grid grid-cols-table gap-2">
+				for _, wizard := range result.Wizards {
+					@WizardTableRow(wizard)
+				}
+			</div>
+		}
+	</div>
+	if result.TotalPages > 1 {
+		<div hx-swap-oob="innerHTML:#wizards-table-pagination">
+			<!-- Pagination -->
+			if result.TotalPages > 1 {
+				@WizardsPagination(result)
+			}
+		</div>
+	}
+}
+
+templ WizardTableRow(wizard *db.Wizard) {
+	<div
+		class="relative bg-white rounded-xs shadow-sm overflow-hidden transition-all ease-in-out duration-200 hover:-translate-y-1 hover:shadow-sm active:-translate-y-1 active:shadow-sm select-none group"
+		data-wizards-table-row={ wizard.ID }
+		data-wizard-id={ wizard.ID }
+	>
+		<div class="absolute top-1 left-1 z-10">
+			<input
+				type="checkbox"
+				name="wizard-table-selection"
+				id={ fmt.Sprintf("wizard-table-selection-%s", wizard.ID) }
+				value={ wizard.ID }
+				class="h-4.5 w-4.5 rounded-xs bg-stone-50 border border-gray-200"
+			/>
+		</div>
+		<!-- Wizard Icon/Visual -->
+		<div class="aspect-4/3 relative overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+			<div class="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+				<div class="text-center text-blue-600">
+					@components.WizardIcon("w-16 h-16 mx-auto mb-2", nil)
+					<p class="text-xs font-medium">Asistente</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex flex-col gap-1 p-2 pt-4">
+			<div class="flex gap-1 justify-between">
+				<h5 class="tracking-wide font-medium overflow-hidden whitespace-nowrap text-clip" title={ wizard.Name }>
+					{ wizard.Name }
+				</h5>
+				<div class="shrink-0 grow-0 basis-auto text-sm text-current/60">
+					<span class="text-blue-600">Activo</span>
+				</div>
+			</div>
+			<div class="text-current/60 text-sm font-extralight line-clamp-2" title={ wizard.EventKind }>
+				Tipo de evento: { wizard.EventKind }
+			</div>
+		</div>
+		<div class="flex gap-2 p-2 pt-0.5">
+			<button
+				hx-get={ fmt.Sprintf("/panel/asistentes/modal/%s", wizard.ID) }
+				hx-target="#wizards-modal"
+				hx-indicator="#global-loading-indicator"
+				class="flex-1 basis-full bg-gray-700/20 rounded-xs p-2 text-gray-700"
+				data-wizards-edit-btn={ wizard.ID }
+			>
+				@components.EditIcon("w-5 mx-auto", nil)
+				<div class="sr-only">Editar/Ver asistente</div>
+			</button>
+			<button
+				hx-delete={ fmt.Sprintf("/panel/asistentes/%s", wizard.ID) }
+				hx-confirm="¿Seguro que deseas eliminar el asistente?"
+				hx-indicator="#global-loading-indicator"
+				hx-target="#wizards-table"
+				hx-include='[name="sort"], [name="search"]'
+				class="flex-1 basis-full bg-red-700/20 rounded-xs p-2 text-red-700"
+				data-wizards-delete-btn={ wizard.ID }
+			>
+				@components.BinIcon("w-5 mx-auto", nil)
+				<div class="sr-only">Eliminar asistente</div>
+			</button>
+		</div>
+	</div>
+}
+
+templ WizardsPagination(result *db.WizardFilterResult) {
+	<div class="flex gap-0.5 h-10 items-center">
+		<button
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasPrevious),
+			}
+			hx-get={ fmt.Sprintf("/panel/asistentes/table?page=%d", result.Page-1) }
+			hx-include="[name='search'], [name='sort']"
+			hx-indicator="#wizards-table-loading"
+			hx-target="#wizards-table"
+		>
+			@components.ChevronIcon("w-6 rotate-90", nil)
+		</button>
+		<!-- Page numbers -->
+		<div class="flex-1 basis-full flex justify-center gap-0.5 overflow-x-auto">
+			for i, lim:= max(1, result.Page-2), min(result.TotalPages, result.Page+2); i <= lim; i++ {
+				<button
+					class="w-8 aspect-square rounded-sm disabled:font-medium disabled:text-gray-800 disabled:bg-secondary"
+					hx-get={ fmt.Sprintf("/panel/asistentes/table?page=%d", i) }
+					hx-target="#wizards-table"
+					hx-include="[name='search'], [name='sort']"
+					hx-indicator="#wizards-table-loading"
+					disabled?={ i==result.Page }
+				>
+					{ fmt.Sprintf("%d", i) }
+				</button>
+			}
+		</div>
+		<button
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasNext),
+			}
+			hx-get={ fmt.Sprintf("/panel/asistentes/table?page=%d", result.Page+1) }
+			hx-include="[name='search'], [name='sort']"
+			hx-target="#wizards-table"
+			hx-indicator="#wizards-table-loading"
+		>
+			@components.ChevronIcon("w-6 -rotate-90", nil)
+		</button>
+	</div>
+}
+
+templ WizardModal(wizard *db.Wizard, availableEventKinds []*db.EventKind, err string) {
+	<div id="wizards-modal-content" class="h-full lg:max-w-4xl xl:max-w-7xl flex flex-col bg-stone-50 rounded-sm shadow p-2 mx-auto">
+		<div class="flex-1 flex justify-between items-center px-2 border-b border-gray-200">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				if err != "" {
+					Ocurrió un error al cargar el asistente
+				} else {
+					{ wizard.Name }
+				}
+			</h3>
+			<button
+				id="wizards-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-wizards-modal-toggle="close"
+				data-click-handler-selector="wizards-modal-toggle"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if err != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden mt-2">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+				</div>
+			</div>
+		} else {
+			<div class="flex-1 basis-full grid grid-cols-1 grid-rows-1 overflow-hidden">
+				<div
+					id="wizards-modal-form"
+					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden flex flex-col z-10"
+				>
+					@WizardEditForm(wizard, availableEventKinds)
+				</div>
+			</div>
+		}
+		<div class="flex-1 flex gap-2 justify-end items-center my-2">
+			<button
+				id="wizards-modal-back"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-wizards-modal-toggle="close"
+				data-click-handler-selector="wizards-modal-toggle"
+			>
+				@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+				Volver
+			</button>
+			if err == "" {
+				<button
+					id="wizards-modal-delete"
+					class="flex gap-1 px-4 py-2 bg-red-700/20 text-red-700 font-medium rounded-sm"
+					hx-delete={ fmt.Sprintf("/panel/asistentes/%s", wizard.ID) }
+					hx-target="#wizards-table"
+					hx-include='[name="sort"], [name="search"]'
+					hx-indicator="#global-loading-indicator"
+					hx-confirm="¿Seguro que deseas eliminar el asistente?"
+					data-wizards-modal-toggle="close"
+					data-click-handler-selector="wizards-modal-toggle"
+				>
+					@components.BinIcon("w-5 mx-auto", nil)
+					Eliminar
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
+	<div class="flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-hidden">
+		<!-- Basic Info Form -->
+		<div class="bg-white rounded-sm border border-gray-200 p-4">
+			<h4 class="text-lg font-medium text-gray-700 mb-4">Información Básica</h4>
+			<form
+				hx-put={ fmt.Sprintf("/panel/asistentes/%s", wizard.ID) }
+				hx-target="#wizards-table"
+				hx-swap="delay:500ms"
+				hx-indicator="#global-loading-indicator"
+				class="space-y-4"
+			>
+				<div class="space-y-2">
+					<label for="wizard-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+					<input
+						id="wizard-name"
+						name="name"
+						type="text"
+						value={ wizard.Name }
+						required
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+					/>
+				</div>
+				<div class="space-y-2">
+					<label for="wizard-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+					<textarea
+						id="wizard-description"
+						name="description"
+						rows="3"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+						placeholder="Descripción del asistente"
+					>{ wizard.Description }</textarea>
+				</div>
+				<div class="space-y-2">
+					<label for="wizard-event-kind" class="block text-sm font-medium text-gray-700">Tipo de Evento</label>
+					<select
+						id="wizard-event-kind"
+						name="event_kind"
+						required
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					>
+						<option value="">Seleccionar tipo de evento</option>
+						@WizardEventKindOptions(wizard.EventKindID, availableEventKinds)
+						<option value="all">En general</option>
+					</select>
+				</div>
+				<div class="flex gap-2 pt-4">
+					<button
+						type="submit"
+						class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+					>
+						Guardar Cambios
+					</button>
+				</div>
+			</form>
+		</div>
+		<!-- Steps Management -->
+		<div class="bg-white rounded-sm border border-gray-200 p-4 flex flex-col">
+			<div class="flex items-center justify-between mb-4">
+				<h4 class="text-lg font-medium text-gray-700">Pasos del Asistente</h4>
+				<button
+					type="button"
+					class="px-3 py-2 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600"
+					hx-get={ fmt.Sprintf("/panel/asistentes/%s/pasos/modal/nuevo", wizard.ID) }
+					hx-target="#wizard-steps-modal"
+					hx-indicator="#global-loading-indicator"
+				>
+					+ Agregar Paso
+				</button>
+			</div>
+			<div class="flex-1 overflow-auto">
+				if len(wizard.Steps) == 0 {
+					<div class="text-center text-gray-500 py-8">
+						<p class="mb-2">No hay pasos asignados</p>
+						<p class="text-sm">Agrega pasos para crear la experiencia del asistente</p>
+					</div>
+				} else {
+					<div class="space-y-2">
+						for _, step := range wizard.Steps {
+							@WizardStepRow(wizard.ID, step)
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+	<!-- Steps Modal Container -->
+	<div
+		id="wizard-steps-modal"
+		class="relative w-full lg:max-w-4xl p-2 overflow-hidden z-20 translate-y-12 opacity-0 mx-auto"
+		data-wizard-steps-modal="closed"
+		hx-swap-oob="outerHTML"
+	></div>
+}
+
+templ WizardStepRow(wizardID string, step *db.WizardStep) {
+	<div class="bg-gray-50 rounded border p-3" data-step-id={ step.ID }>
+		<div class="flex items-start justify-between">
+			<div class="flex-1">
+				<h5 class="font-medium text-gray-800">{ step.Name }</h5>
+				if step.Description != "" {
+					<p class="text-sm text-gray-600 mt-1">{ step.Description }</p>
+				}
+				<div class="flex gap-4 text-xs text-gray-500 mt-2">
+					<span>Orden: { fmt.Sprintf("%d", step.StepOrder) }</span>
+					if step.Required {
+						<span class="text-red-600">Requerido</span>
+					}
+					if step.MultiSelect {
+						<span>Multi-selección</span>
+					}
+					<span>Min: { fmt.Sprintf("%d", step.MinSelected) }, Max: { fmt.Sprintf("%d", step.MaxSelected) }</span>
+				</div>
+			</div>
+			<div class="flex gap-1 ml-2">
+				<button
+					type="button"
+					class="p-1 text-blue-600 hover:bg-blue-100 rounded"
+					hx-get={ fmt.Sprintf("/panel/asistentes/%s/pasos/modal/%s", wizardID, step.ID) }
+					hx-target="#wizard-steps-modal"
+					hx-indicator="#global-loading-indicator"
+					title="Editar parámetros del paso"
+				>
+					@components.EditIcon("w-4", nil)
+				</button>
+				<button
+					type="button"
+					class="p-1 text-red-600 hover:bg-red-100 rounded"
+					hx-delete={ fmt.Sprintf("/panel/asistentes/%s/pasos/%s", wizardID, step.ID) }
+					hx-target={ fmt.Sprintf("[data-step-id='%s']", step.ID) }
+					hx-swap="outerHTML"
+					hx-confirm="¿Seguro que deseas quitar este paso del asistente?"
+					hx-indicator="#global-loading-indicator"
+					title="Quitar paso del asistente"
+				>
+					@components.BinIcon("w-4", nil)
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+type WizardCreateModalState struct {
+	Kinds []*db.EventKind
+	Steps []*db.WizardStep
+
+	Wizard            *db.Wizard
+	SelectedKindIdx   int
+	SelectedStepsIdxs []int
+	Error             string
+}
+
+func (s *WizardCreateModalState) SetSelectedKind(id string) {
+	for i, kind := range s.Kinds {
+		if kind.ID == id {
+			s.SelectedKindIdx = i
+			return
+		}
+	}
+}
+
+func (s *WizardCreateModalState) AddStep(step *db.WizardStep) {
+	s.Steps = append(s.Steps, step)
+}
+
+templ WizardCreateModal(state *WizardCreateModalState) {
+	<div id="wizards-modal-content" class="h-full w-full flex 2xl:grid flex-col 2xl:grid-cols-2 2xl:grid-rows-[auto_1fr_auto] gap-2 bg-stone-50 rounded-sm shadow p-2 mx-auto">
+		<div class="flex-1 flex justify-between items-center 2xl:col-span-full 2xl:rows-start-1">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate px-4">
+				if state.Wizard != nil && state.Wizard.Name != "" {
+					{ state.Wizard.Name }
+				} else {
+					Nuevo Asistente
+				}
+			</h3>
+			<button
+				id="wizards-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-wizards-modal-toggle="close"
+				data-click-handler-selector="wizards-modal-toggle"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if state.Error != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden 2xl:col-span-full 2xl:row-start-2">
+				<div class="flex flex-col items-center justify-center gap-4 h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ state.Error }</p>
+				</div>
+			</div>
+		} else {
+			@WizardCreateForm(state)
+		}
+		<div class="flex-1 flex gap-2 justify-end items-center 2xl:col-span-full 2xl:row-start-3">
+			<button
+				id="wizards-modal-back"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-wizards-modal-toggle="close"
+				data-click-handler-selector="wizards-modal-toggle"
+			>
+				@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+				Cancelar
+			</button>
+		</div>
+	</div>
+}
+
+templ WizardCreateForm(state *WizardCreateModalState) {
+	<div class="2xl:col-span-full 2xl:row-start-2 flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-hidden p-4">
+		<!-- Basic Info Form -->
+		<div class="bg-white rounded-sm border border-gray-200 p-4">
+			<h4 class="text-lg font-medium text-gray-700 mb-4">Información Básica</h4>
+			<form
+				id="wizards-modal-form"
+				hx-post="/panel/asistentes/nuevo"
+				hx-target="#wizards-table"
+				hx-target-error="#wizards-modal-form"
+				hx-indicator="#global-loading-indicator"
+				hx-include='[name="search"], [name="sort"], input[name="selected_steps"]:checked'
+				class="space-y-4"
+			>
+				<div class="space-y-2">
+					<label for="wizard-create-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+					<input
+						id="wizard-create-name"
+						name="name"
+						type="text"
+						required
+						placeholder="Nombre del asistente"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+					/>
+				</div>
+				<div class="space-y-2">
+					<label for="wizard-create-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+					<textarea
+						id="wizard-create-description"
+						name="description"
+						rows="3"
+						placeholder="Descripción del asistente"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+					></textarea>
+				</div>
+				<div class="space-y-2">
+					<label for="wizard-create-event-kind" class="block text-sm font-medium text-gray-700">Tipo de Evento</label>
+					<select
+						id="wizard-create-event-kind"
+						name="event_kind"
+						required
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					>
+						<option value="">Seleccionar tipo de evento</option>
+						@WizardEventKindOptions("", state.Kinds)
+						<option value="general">Seleccionar tipo de evento</option>
+					</select>
+				</div>
+				<div class="flex gap-2 pt-4">
+					<button
+						type="submit"
+						class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+					>
+						Crear Asistente
+					</button>
+				</div>
+			</form>
+		</div>
+		<!-- Step Selection -->
+		<div class="bg-white rounded-sm border border-gray-200 p-4 flex flex-col">
+			<h4 class="text-lg font-medium text-gray-700 mb-4">Pasos Iniciales (Opcional)</h4>
+			<div class="flex-1 overflow-auto">
+				if len(state.Steps) == 0 {
+					<div class="text-center text-gray-500 py-8">
+						<p class="mb-2">No hay pasos disponibles</p>
+						<p class="text-sm">Crea pasos primero para poder agregarlos al asistente</p>
+					</div>
+				} else {
+					<div class="space-y-2">
+						<p class="text-sm text-gray-600 mb-3">Selecciona los pasos que quieres incluir en este asistente:</p>
+						for _, step := range state.Steps {
+							<label class="flex items-start space-x-3 p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer">
+								<input
+									type="checkbox"
+									name="selected_steps"
+									value={ step.ID }
+									class="mt-1 h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
+								/>
+								<div class="flex-1 min-w-0">
+									<p class="text-sm font-medium text-gray-900">{ step.Name }</p>
+									if step.Description != "" {
+										<p class="text-xs text-gray-500 mt-1">{ step.Description }</p>
+									}
+									<div class="flex gap-2 text-xs text-gray-400 mt-1">
+										<span>Orden: { fmt.Sprintf("%d", step.StepOrder) }</span>
+										if step.Required {
+											<span class="text-red-500">Requerido</span>
+										}
+										if step.MultiSelect {
+											<span>Multi-select</span>
+										}
+									</div>
+								</div>
+							</label>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ WizardEventKindOptions(selectedID string, availableEventKinds []*db.EventKind) {
+	for _, eventKind := range availableEventKinds {
+		<option value={ eventKind.ID } selected?={ selectedID == eventKind.ID }>{ eventKind.Name }</option>
+	}
+}
+
+templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
+	<div class="bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
+		<div class="flex items-center justify-between mb-4">
+			<h3 class="text-lg font-medium text-gray-700">Agregar Paso al Asistente</h3>
+			<button
+				id="wizard-steps-modal-close-btn"
+				type="button"
+				class="text-gray-400 hover:text-gray-600"
+				data-wizard-steps-modal-toggle="close"
+				data-click-handler-selector="wizard-steps-modal-close"
+			>
+				@components.TimesIcon("w-6", nil)
+			</button>
+		</div>
+		if len(availableSteps) == 0 {
+			<div class="text-center py-8">
+				<p class="text-gray-500 mb-4">No hay pasos disponibles para agregar</p>
+				<p class="text-sm text-gray-400">Todos los pasos ya están asignados al asistente o no hay pasos creados.</p>
+			</div>
+		} else {
+			<form
+				hx-post={ fmt.Sprintf("/panel/asistentes/%s/pasos", wizardID) }
+				hx-target="#wizard-steps-modal"
+				hx-swap="outerHTML"
+				class="space-y-4"
+			>
+				<div class="space-y-2">
+					<label for="step-select" class="block text-sm font-medium text-gray-700">Seleccionar Paso</label>
+					<select
+						id="step-select"
+						name="step_id"
+						required
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					>
+						<option value="">Seleccionar paso...</option>
+						for _, step := range availableSteps {
+							<option value={ step.ID }>{ step.Name }</option>
+						}
+					</select>
+				</div>
+				<div class="grid grid-cols-2 items-end gap-4">
+					<div class="space-y-2">
+						<label for="step-order" class="block text-sm font-medium text-gray-700">Orden</label>
+						<input
+							id="step-order"
+							name="step_order"
+							type="number"
+							min="1"
+							value="1"
+							class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+						/>
+					</div>
+					<div class="space-y-2">
+						<label class="flex items-center">
+							<input type="checkbox" name="required" class="mr-2"/>
+							<span class="text-sm font-medium text-gray-700">Requerido</span>
+						</label>
+						<label class="flex items-center">
+							<input type="checkbox" name="multi_select" class="mr-2"/>
+							<span class="text-sm font-medium text-gray-700">Multi-selección</span>
+						</label>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div class="space-y-2">
+						<label for="min-selected" class="block text-sm font-medium text-gray-700">Mínimo</label>
+						<input
+							id="min-selected"
+							name="min_selected"
+							type="number"
+							min="0"
+							value="0"
+							class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+						/>
+					</div>
+					<div class="space-y-2">
+						<label for="max-selected" class="block text-sm font-medium text-gray-700">Máximo</label>
+						<input
+							id="max-selected"
+							name="max_selected"
+							type="number"
+							min="1"
+							value="1"
+							class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+						/>
+					</div>
+				</div>
+				<div class="flex gap-2 pt-4">
+					<button
+						type="button"
+						onclick="closeStepsModal()"
+						class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300"
+					>
+						Cancelar
+					</button>
+					<button
+						type="submit"
+						class="flex-1 px-4 py-2 bg-accent text-white rounded-sm hover:bg-accent/90"
+					>
+						Agregar Paso
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+}
+
+templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
+	<div class="bg-white rounded-sm shadow-lg p-4 w-full max-w-2xl">
+		<div class="flex items-center justify-between mb-4">
+			<h3 class="text-lg font-medium text-gray-700">Editar Parámetros: { step.Name }</h3>
+			<button
+				id="wizard-steps-modal-close-btn"
+				type="button"
+				class="text-gray-400 hover:text-gray-600"
+				data-click-handler-selector="wizard-steps-modal-close"
+			>
+				@components.TimesIcon("w-6", nil)
+			</button>
+		</div>
+		<form
+			hx-put={ fmt.Sprintf("/panel/asistentes/%s/pasos/%s", wizardID, step.ID) }
+			hx-target="#wizard-steps-modal"
+			hx-swap="outerHTML"
+			class="space-y-4"
+		>
+			<div class="bg-gray-50 p-3 rounded border">
+				<h4 class="font-medium text-gray-800 mb-2">{ step.Name }</h4>
+				if step.Description != "" {
+					<p class="text-sm text-gray-600">{ step.Description }</p>
+				}
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<label for="edit-step-order" class="block text-sm font-medium text-gray-700">Orden</label>
+					<input
+						id="edit-step-order"
+						name="step_order"
+						type="number"
+						min="1"
+						value={ fmt.Sprintf("%d", step.StepOrder) }
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					/>
+				</div>
+				<div class="space-y-2">
+					<label class="flex items-center">
+						<input type="checkbox" name="required" checked?={ step.Required } class="mr-2"/>
+						<span class="text-sm font-medium text-gray-700">Requerido</span>
+					</label>
+					<label class="flex items-center">
+						<input type="checkbox" name="multi_select" checked?={ step.MultiSelect } class="mr-2"/>
+						<span class="text-sm font-medium text-gray-700">Multi-selección</span>
+					</label>
+				</div>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<label for="edit-min-selected" class="block text-sm font-medium text-gray-700">Mínimo</label>
+					<input
+						id="edit-min-selected"
+						name="min_selected"
+						type="number"
+						min="0"
+						value={ fmt.Sprintf("%d", step.MinSelected) }
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					/>
+				</div>
+				<div class="space-y-2">
+					<label for="edit-max-selected" class="block text-sm font-medium text-gray-700">Máximo</label>
+					<input
+						id="edit-max-selected"
+						name="max_selected"
+						type="number"
+						min="1"
+						value={ fmt.Sprintf("%d", step.MaxSelected) }
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					/>
+				</div>
+			</div>
+			<div class="flex gap-2 pt-4">
+				<button
+					type="button"
+					onclick="closeStepsModal()"
+					class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300"
+				>
+					Cancelar
+				</button>
+				<button
+					type="submit"
+					class="flex-1 px-4 py-2 bg-accent text-white rounded-sm hover:bg-accent/90"
+				>
+					Guardar Cambios
+				</button>
+			</div>
+		</form>
+	</div>
+}
