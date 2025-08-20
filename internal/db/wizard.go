@@ -80,17 +80,23 @@ func CreateWizard(ctx context.Context, wizard *Wizard) error {
 		wizard.ID = id
 	}
 	args := pgx.NamedArgs{
-		"id":            wizard.ID,
-		"name":          wizard.Name,
-		"description":   wizard.Description,
-		"event_kind_id": wizard.EventKindID,
-		"is_general":    wizard.IsGeneral,
-		"enabled":       wizard.Enabled,
+		"id":          wizard.ID,
+		"name":        wizard.Name,
+		"description": wizard.Description,
+		"is_general":  wizard.IsGeneral,
+		"enabled":     wizard.Enabled,
 	}
+
+	if wizard.EventKindID != "" {
+		args["event_kind_id"] = wizard.EventKindID
+	} else {
+		args["event_kind_id"] = nil
+	}
+
 	_, err = tx.Exec(
 		ctx,
 		`INSERT INTO wizards (id, name, description, event_kind_id, is_general, enabled)
-		VALUES (@id, @name, @description, NULLIF(@event_kind_id, ''), @is_general, @enabled)`,
+		VALUES (@id, @name, @description, @event_kind_id, @is_general, @enabled)`,
 		args,
 	)
 
@@ -140,17 +146,18 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 	defer conn.Release()
 
 	wizard := Wizard{}
+	var eventKindID sql.NullString
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			id, name, description, COALESCE(event_kind_id, ''), is_general, enabled, created_at, updated_at
+			id, name, description, event_kind_id, is_general, enabled, created_at, updated_at
 		FROM wizards WHERE id = $1`,
 		id,
 	).Scan(
 		&wizard.ID,
 		&wizard.Name,
 		&wizard.Description,
-		&wizard.EventKindID,
+		&eventKindID,
 		&wizard.IsGeneral,
 		&wizard.Enabled,
 		&wizard.CreatedAt,
@@ -158,6 +165,10 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if eventKindID.Valid {
+		wizard.EventKindID = eventKindID.String
 	}
 
 	return &wizard, nil
@@ -263,15 +274,16 @@ func GetWizardWithSteps(ctx context.Context, id string) (*Wizard, error) {
 	// Get wizard basic info
 	wizard := Wizard{}
 	var eventKind sql.NullString
+	var eventKindID sql.NullString
 	err = conn.QueryRow(ctx, `
-		SELECT w.id, w.name, w.description, COALESCE(w.event_kind_id, ''), w.is_general, w.enabled, w.created_at, w.updated_at, ek.name as event_kind
+		SELECT w.id, w.name, w.description, w.event_kind_id, w.is_general, w.enabled, w.created_at, w.updated_at, ek.name as event_kind
 		FROM wizards w
 		LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
 		WHERE w.id = $1`, id).Scan(
 		&wizard.ID,
 		&wizard.Name,
 		&wizard.Description,
-		&wizard.EventKindID,
+		&eventKindID,
 		&wizard.IsGeneral,
 		&wizard.Enabled,
 		&wizard.CreatedAt,
@@ -284,6 +296,9 @@ func GetWizardWithSteps(ctx context.Context, id string) (*Wizard, error) {
 
 	if eventKind.Valid {
 		wizard.EventKind = eventKind.String
+	}
+	if eventKindID.Valid {
+		wizard.EventKindID = eventKindID.String
 	}
 
 	// Get wizard steps with custom parameters
@@ -485,7 +500,7 @@ func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
 	orderBy := buildWizardOrderByClause(filters)
 	selectQuery := fmt.Sprintf(`
 		SELECT 
-			w.id, w.name, COALESCE(w.event_kind_id, ''), w.is_general, w.enabled,
+			w.id, w.name, w.event_kind_id, w.is_general, w.enabled,
 			ek.name as event_kind,
 			%s
 		%s %s
@@ -608,12 +623,13 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 		var wizard Wizard
 		var searchRank float32
 		var eventKind sql.NullString
+		var eventKindID sql.NullString
 
 		if includeRank {
 			err := rows.Scan(
 				&wizard.ID,
 				&wizard.Name,
-				&wizard.EventKindID,
+				&eventKindID,
 				&wizard.IsGeneral,
 				&wizard.Enabled,
 				&eventKind,
@@ -626,7 +642,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 			err := rows.Scan(
 				&wizard.ID,
 				&wizard.Name,
-				&wizard.EventKindID,
+				&eventKindID,
 				&wizard.IsGeneral,
 				&wizard.Enabled,
 				&eventKind,
@@ -639,6 +655,9 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 
 		if eventKind.Valid {
 			wizard.EventKind = eventKind.String
+		}
+		if eventKindID.Valid {
+			wizard.EventKindID = eventKindID.String
 		}
 
 		wizards = append(wizards, &wizard)
