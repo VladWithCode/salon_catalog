@@ -510,16 +510,6 @@ class ImageSelectorManager {
         });
     }
 
-    showMessage(message, type = "info") {
-        // Use existing toast system if available
-        if (window.showToast) {
-            window.showToast(message, type);
-        } else {
-            // Fallback to alert
-            alert(message);
-        }
-    }
-
     close() {
         this.cleanup();
         if (this.modalElement) {
