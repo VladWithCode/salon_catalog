@@ -18,6 +18,7 @@ type Wizard struct {
 	Description string        `json:"description"`
 	EventKindID string        `json:"event_kind_id"`
 	EventKind   string        `json:"event_kind"`
+	IsGeneral   bool          `json:"is_general"`
 	Steps       []*WizardStep `json:"steps"`
 	Enabled     bool          `json:"enabled"`
 	CreatedAt   time.Time     `json:"created_at"`
@@ -83,12 +84,13 @@ func CreateWizard(ctx context.Context, wizard *Wizard) error {
 		"name":          wizard.Name,
 		"description":   wizard.Description,
 		"event_kind_id": wizard.EventKindID,
+		"is_general":    wizard.IsGeneral,
 		"enabled":       wizard.Enabled,
 	}
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO wizards (id, name, description, event_kind_id, enabled)
-		VALUES (@id, @name, @description, @event_kind_id, @enabled)`,
+		`INSERT INTO wizards (id, name, description, event_kind_id, is_general, enabled)
+		VALUES (@id, @name, @description, NULLIF(@event_kind_id, ''), @is_general, @enabled)`,
 		args,
 	)
 
@@ -141,7 +143,7 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			id, name, description, event_kind_id, enabled, created_at, updated_at
+			id, name, description, COALESCE(event_kind_id, ''), is_general, enabled, created_at, updated_at
 		FROM wizards WHERE id = $1`,
 		id,
 	).Scan(
@@ -149,6 +151,7 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 		&wizard.Name,
 		&wizard.Description,
 		&wizard.EventKindID,
+		&wizard.IsGeneral,
 		&wizard.Enabled,
 		&wizard.CreatedAt,
 		&wizard.UpdatedAt,
@@ -178,14 +181,15 @@ func UpdateWizard(ctx context.Context, wizard *Wizard) error {
 	_, err = tx.Exec(
 		ctx,
 		`UPDATE wizards 
-		 SET name = @name, description = @description, event_kind_id = @event_kind_id, 
-		     enabled = @enabled
+		 SET name = @name, description = @description, event_kind_id = NULLIF(@event_kind_id, ''), 
+		     is_general = @is_general, enabled = @enabled
 		 WHERE id = @id`,
 		pgx.NamedArgs{
 			"id":            wizard.ID,
 			"name":          wizard.Name,
 			"description":   wizard.Description,
 			"event_kind_id": wizard.EventKindID,
+			"is_general":    wizard.IsGeneral,
 			"enabled":       wizard.Enabled,
 		},
 	)
@@ -260,7 +264,7 @@ func GetWizardWithSteps(ctx context.Context, id string) (*Wizard, error) {
 	wizard := Wizard{}
 	var eventKind sql.NullString
 	err = conn.QueryRow(ctx, `
-		SELECT w.id, w.name, w.description, w.event_kind_id, w.enabled, w.created_at, w.updated_at, ek.name as event_kind
+		SELECT w.id, w.name, w.description, COALESCE(w.event_kind_id, ''), w.is_general, w.enabled, w.created_at, w.updated_at, ek.name as event_kind
 		FROM wizards w
 		LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
 		WHERE w.id = $1`, id).Scan(
@@ -268,6 +272,7 @@ func GetWizardWithSteps(ctx context.Context, id string) (*Wizard, error) {
 		&wizard.Name,
 		&wizard.Description,
 		&wizard.EventKindID,
+		&wizard.IsGeneral,
 		&wizard.Enabled,
 		&wizard.CreatedAt,
 		&wizard.UpdatedAt,
@@ -480,7 +485,7 @@ func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
 	orderBy := buildWizardOrderByClause(filters)
 	selectQuery := fmt.Sprintf(`
 		SELECT 
-			w.id, w.name, w.event_kind_id, w.enabled,
+			w.id, w.name, COALESCE(w.event_kind_id, ''), w.is_general, w.enabled,
 			ek.name as event_kind,
 			%s
 		%s %s
@@ -609,6 +614,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 				&wizard.ID,
 				&wizard.Name,
 				&wizard.EventKindID,
+				&wizard.IsGeneral,
 				&wizard.Enabled,
 				&eventKind,
 				&searchRank,
@@ -621,6 +627,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 				&wizard.ID,
 				&wizard.Name,
 				&wizard.EventKindID,
+				&wizard.IsGeneral,
 				&wizard.Enabled,
 				&eventKind,
 				&searchRank, // Still need to scan the rank column (will be 0)

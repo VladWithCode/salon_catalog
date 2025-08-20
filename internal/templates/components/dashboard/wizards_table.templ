@@ -268,12 +268,10 @@ templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
 					<select
 						id="wizard-event-kind"
 						name="event_kind"
-						required
 						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
 					>
-						<option value="">Seleccionar tipo de evento</option>
+						<option value="">Asistente General (sin tipo específico)</option>
 						@WizardEventKindOptions(wizard.EventKindID, availableEventKinds)
-						<option value="all">En general</option>
 					</select>
 				</div>
 				<div class="space-x-2 flex items-center">
@@ -491,12 +489,10 @@ templ WizardCreateForm(state *WizardCreateModalState) {
 					<select
 						id="wizard-create-event-kind"
 						name="event_kind"
-						required
 						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
 					>
-						<option value="">Seleccionar tipo de evento</option>
+						<option value="">Asistente General (sin tipo específico)</option>
 						@WizardEventKindOptions("", state.Kinds)
-						<option value="general">Seleccionar tipo de evento</option>
 					</select>
 				</div>
 				<div class="space-x-2 flex items-center">

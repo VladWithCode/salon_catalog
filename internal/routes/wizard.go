@@ -180,16 +180,21 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 	enabled := r.FormValue("enabled") == "on"
 	selectedStepIDs := r.Form["selected_steps"]
 
-	// Validate required fields
-	if name == "" || eventKindID == "" {
+	// Convert "general" to empty string for general wizards
+	if eventKindID == "general" {
+		eventKindID = ""
+	}
+
+	// Validate required fields (only name is required)
+	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		toastData.Message = "Nombre y tipo de evento son requeridos"
+		toastData.Message = "El nombre es requerido"
 		toastData.Type = components.ToastError
 
 		comp := templ.Join(
 			dashboard.WizardCreateModal(&dashboard.WizardCreateModalState{
 				Kinds: eventKinds,
-				Error: "Nombre y tipo de evento son requeridos",
+				Error: "El nombre es requerido",
 				Wizard: &db.Wizard{
 					Name:        name,
 					EventKindID: eventKindID,
@@ -208,6 +213,7 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		Name:        name,
 		Description: description,
 		EventKindID: eventKindID,
+		IsGeneral:   eventKindID == "",
 		Enabled:     enabled,
 	}
 	formState := &dashboard.WizardCreateModalState{
@@ -301,13 +307,18 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 	description := strings.TrimSpace(r.FormValue("description"))
 	enabled := r.FormValue("enabled") == "on"
 
-	// Validate required fields
-	if name == "" || eventKindID == "" {
+	// Convert "general" to empty string for general wizards
+	if eventKindID == "general" {
+		eventKindID = ""
+	}
+
+	// Validate required fields (only name is required)
+	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		toastData.Message = "Nombre y tipo de evento son requeridos"
+		toastData.Message = "El nombre es requerido"
 		toastData.Type = components.ToastError
 		comp := templ.Join(
-			dashboard.WizardsTable(&db.WizardFilterResult{HasError: true, Error: "Nombre y tipo de evento son requeridos"}),
+			dashboard.WizardsTable(&db.WizardFilterResult{HasError: true, Error: "El nombre es requerido"}),
 			components.ToasterToast(toastData),
 		)
 		comp.Render(r.Context(), w)
@@ -319,6 +330,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		ID:          wizardID,
 		Name:        name,
 		EventKindID: eventKindID,
+		IsGeneral:   eventKindID == "",
 		Description: description,
 		Enabled:     enabled,
 	}

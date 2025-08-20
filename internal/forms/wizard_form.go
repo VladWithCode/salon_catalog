@@ -39,10 +39,10 @@ func (f *WizardForm) Validate() bool {
 		f.Errors["description"] = "La descripción no puede exceder 512 caracteres"
 	}
 
-	// Validate event kind ID
+	// Validate event kind ID (optional for general wizards)
 	f.EventKindID = strings.TrimSpace(f.EventKindID)
-	if f.EventKindID == "" {
-		f.Errors["event_kind_id"] = "El tipo de evento es requerido"
+	if f.EventKindID == "general" {
+		f.EventKindID = "" // Convert "general" to empty string for general wizards
 	}
 
 	return len(f.Errors) == 0
@@ -53,6 +53,7 @@ func (f *WizardForm) ToWizard() *db.Wizard {
 		Name:        f.Name,
 		Description: f.Description,
 		EventKindID: f.EventKindID,
+		IsGeneral:   f.EventKindID == "",
 		Enabled:     f.Enabled,
 	}
 }
