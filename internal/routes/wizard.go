@@ -39,6 +39,7 @@ func RegisterWizardRoutes(router *customServeMux) {
 	// Wizard step management routes
 	router.HandleFunc("GET /panel/asistentes/{wizard_id}/pasos/modal/nuevo", auth.ValidateAuth(RenderAddStepToWizardForm))
 	router.HandleFunc("GET /panel/asistentes/{wizard_id}/pasos/modal/{step_id}", auth.ValidateAuth(RenderEditWizardStepParamsForm))
+	router.HandleFunc("GET /panel/asistentes/{wizard_id}/pasos/fragment", auth.ValidateAuth(RenderWizardStepsFragment))
 	router.HandleFunc("POST /panel/asistentes/{wizard_id}/pasos", auth.ValidateAuth(AttachStepToWizardAndReturn))
 	router.HandleFunc("PUT /panel/asistentes/{wizard_id}/pasos/{step_id}", auth.ValidateAuth(UpdateWizardStepParamsAndReturn))
 	router.HandleFunc("DELETE /panel/asistentes/{wizard_id}/pasos/{step_id}", auth.ValidateAuth(DetachStepFromWizardAndReturn))
@@ -176,6 +177,7 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 	name := strings.TrimSpace(r.FormValue("name"))
 	eventKindID := strings.TrimSpace(r.FormValue("event_kind"))
 	description := strings.TrimSpace(r.FormValue("description"))
+	enabled := r.FormValue("enabled") == "on"
 	selectedStepIDs := r.Form["selected_steps"]
 
 	// Validate required fields
@@ -188,6 +190,12 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 			dashboard.WizardCreateModal(&dashboard.WizardCreateModalState{
 				Kinds: eventKinds,
 				Error: "Nombre y tipo de evento son requeridos",
+				Wizard: &db.Wizard{
+					Name:        name,
+					EventKindID: eventKindID,
+					Description: description,
+					Enabled:     enabled,
+				},
 			}),
 			components.ToasterToast(toastData),
 		)
@@ -195,19 +203,17 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		return
 	}
 
-	formState := &dashboard.WizardCreateModalState{
-		Wizard: &db.Wizard{
-			Name:        name,
-			EventKindID: eventKindID,
-		},
-		SelectedKindIdx:   0,
-		SelectedStepsIdxs: []int{},
-	}
 	// Create new wizard
 	wizard := &db.Wizard{
 		Name:        name,
 		Description: description,
 		EventKindID: eventKindID,
+		Enabled:     enabled,
+	}
+	formState := &dashboard.WizardCreateModalState{
+		Wizard:            wizard,
+		SelectedKindIdx:   0,
+		SelectedStepsIdxs: []int{},
 	}
 
 	// Add selected steps if any
@@ -291,6 +297,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 	// Get form values
 	name := strings.TrimSpace(r.FormValue("name"))
 	eventKindID := strings.TrimSpace(r.FormValue("event_kind"))
+	description := strings.TrimSpace(r.FormValue("description"))
 
 	// Validate required fields
 	if name == "" || eventKindID == "" {
@@ -310,6 +317,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		ID:          wizardID,
 		Name:        name,
 		EventKindID: eventKindID,
+		Description: description,
 	}
 
 	err = db.UpdateWizard(r.Context(), wizard)

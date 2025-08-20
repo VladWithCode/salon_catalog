@@ -1,13 +1,16 @@
 package routes
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/vladwithcode/salon_catalog/internal/auth"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/forms"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components/dashboard"
 )
 
@@ -87,21 +90,33 @@ func RenderEditWizardStepParamsForm(w http.ResponseWriter, r *http.Request, a *a
 }
 
 func AttachStepToWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Paso agregado exitosamente", components.ToastSuccess, 3000, true, false)
+
 	wizardID := r.PathValue("wizard_id")
 	if wizardID == "" {
-		http.Error(w, "ID de asistente inválido", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "ID de asistente inválido"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Error al procesar formulario", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar formulario"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	stepID := r.FormValue("step_id")
 	if stepID == "" {
-		http.Error(w, "ID de paso requerido", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "ID de paso requerido"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
@@ -119,45 +134,78 @@ func AttachStepToWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth
 			stepParams.StepOrder = o
 		}
 	}
-	if min := r.FormValue("min_selected"); min != "" {
-		if m, err := strconv.Atoi(min); err == nil {
+	if minSelected := r.FormValue("min_selected"); minSelected != "" {
+		if m, err := strconv.Atoi(minSelected); err == nil {
 			stepParams.MinSelected = m
 		}
 	}
-	if max := r.FormValue("max_selected"); max != "" {
-		if m, err := strconv.Atoi(max); err == nil {
+	if maxSelected := r.FormValue("max_selected"); maxSelected != "" {
+		if m, err := strconv.Atoi(maxSelected); err == nil {
 			stepParams.MaxSelected = m
 		}
 	}
 
 	if !stepParams.Validate() {
-		http.Error(w, "Parámetros inválidos", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Parámetros inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	// Attach step to wizard
 	err = db.AttachStepToWizard(r.Context(), wizardID, stepID, stepParams.ToWizardStep())
 	if err != nil {
-		http.Error(w, "Error al agregar paso", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al agregar paso"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		log.Printf("failed to attach step to wizard: %v\n", err)
 		return
 	}
 
-	w.Write([]byte("Paso agregado exitosamente"))
+	// Get updated wizard with steps to return refreshed UI
+	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recargar pasos del asistente"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get wizard with steps: %v\n", err)
+		return
+	}
+
+	// Return updated wizard steps section with success toast
+	comp := templ.Join(
+		dashboard.WizardEditForm(wizard, []*db.EventKind{}),
+		components.ToasterToast(toastData),
+	)
+	w.Header().Set("HX-Trigger", `{"app:closeStepsModal": {}}`)
+	reCtx := context.WithValue(r.Context(), "swapOOBStepSection", true)
+	templ.RenderFragments(reCtx, w, comp, "toaster-toast", "wizardStepsSection")
 }
 
 func UpdateWizardStepParamsAndReturn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Paso actualizado exitosamente", components.ToastSuccess, 3000, true, false)
+
 	wizardID := r.PathValue("wizard_id")
 	stepID := r.PathValue("step_id")
 
 	if wizardID == "" || stepID == "" {
-		http.Error(w, "IDs inválidos", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "IDs inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Error al procesar formulario", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Error al procesar formulario"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
@@ -175,50 +223,119 @@ func UpdateWizardStepParamsAndReturn(w http.ResponseWriter, r *http.Request, a *
 			stepParams.StepOrder = o
 		}
 	}
-	if min := r.FormValue("min_selected"); min != "" {
-		if m, err := strconv.Atoi(min); err == nil {
+	if minSelected := r.FormValue("min_selected"); minSelected != "" {
+		if m, err := strconv.Atoi(minSelected); err == nil {
 			stepParams.MinSelected = m
 		}
 	}
-	if max := r.FormValue("max_selected"); max != "" {
-		if m, err := strconv.Atoi(max); err == nil {
+	if maxSelected := r.FormValue("max_selected"); maxSelected != "" {
+		if m, err := strconv.Atoi(maxSelected); err == nil {
 			stepParams.MaxSelected = m
 		}
 	}
 
 	if !stepParams.Validate() {
-		http.Error(w, "Parámetros inválidos", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "Parámetros inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	// Update wizard step parameters
 	err = db.UpdateWizardStepParams(r.Context(), wizardID, stepID, stepParams.ToWizardStep())
 	if err != nil {
-		http.Error(w, "Error al actualizar parámetros", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al actualizar parámetros"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		log.Printf("failed to update wizard step params: %v\n", err)
 		return
 	}
 
-	w.Write([]byte("Parámetros actualizados"))
+	// Get updated wizard with steps to return refreshed UI
+	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recargar pasos del asistente"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get wizard with steps: %v\n", err)
+		return
+	}
+
+	// Return updated wizard steps section with success toast
+	comp := templ.Join(
+		dashboard.WizardEditForm(wizard, []*db.EventKind{}),
+		components.ToasterToast(toastData),
+	)
+	w.Header().Set("HX-Trigger", `{"app:closeStepsModal": {}}`)
+	reCtx := context.WithValue(r.Context(), "swapOOBStepSection", true)
+	templ.RenderFragments(reCtx, w, comp, "toaster-toast", "wizardStepsSection")
 }
 
 func DetachStepFromWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	w.Header().Add("X-Includes-Toast", "true")
+	toastData := components.NewToastData("Paso eliminado exitosamente", components.ToastSuccess, 3000, true, false)
+
 	wizardID := r.PathValue("wizard_id")
 	stepID := r.PathValue("step_id")
 
 	if wizardID == "" || stepID == "" {
-		http.Error(w, "IDs inválidos", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = "IDs inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
 	}
 
 	// Detach step from wizard
 	err := db.DetachStepFromWizard(r.Context(), wizardID, stepID)
 	if err != nil {
-		http.Error(w, "Error al quitar paso", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al quitar paso"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
 		log.Printf("failed to detach step from wizard: %v\n", err)
 		return
 	}
 
-	// Return empty content to remove the step row
-	w.WriteHeader(http.StatusOK)
+	// Get updated wizard with steps to return refreshed UI
+	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al recargar pasos del asistente"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get wizard with steps: %v\n", err)
+		return
+	}
+
+	// Return updated wizard steps section with success toast
+	comp := templ.Join(
+		dashboard.WizardEditForm(wizard, []*db.EventKind{}),
+		components.ToasterToast(toastData),
+	)
+	reCtx := context.WithValue(r.Context(), "swapOOBStepSection", true)
+	templ.RenderFragments(reCtx, w, comp, "toaster-toast", "wizardStepsSection")
+}
+
+func RenderWizardStepsFragment(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	wizardID := r.PathValue("wizard_id")
+	if wizardID == "" {
+		http.Error(w, "ID de asistente inválido", http.StatusBadRequest)
+		return
+	}
+
+	// Get wizard with steps
+	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
+	if err != nil {
+		http.Error(w, "Asistente no encontrado", http.StatusNotFound)
+		log.Printf("failed to find wizard: %v\n", err)
+		return
+	}
+
+	// Render just the wizard steps management section
+	component := dashboard.WizardStepsManagementSection(wizard)
+	component.Render(r.Context(), w)
 }

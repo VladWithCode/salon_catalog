@@ -83,13 +83,18 @@ func CreateWizard(ctx context.Context, wizard *Wizard) error {
 		"name":          wizard.Name,
 		"description":   wizard.Description,
 		"event_kind_id": wizard.EventKindID,
+		"enabled":       wizard.Enabled,
 	}
 	_, err = tx.Exec(
 		ctx,
-		`INSERT INTO wizards (id, name, description, event_kind_id)
-		VALUES (@id, @name, @description, @event_kind_id)`,
+		`INSERT INTO wizards (id, name, description, event_kind_id, enabled)
+		VALUES (@id, @name, @description, @event_kind_id, @enabled)`,
 		args,
 	)
+
+	if err != nil {
+		return err
+	}
 
 	batch := pgx.Batch{}
 	for _, step := range wizard.Steps {
@@ -133,7 +138,13 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 	defer conn.Release()
 
 	wizard := Wizard{}
-	err = conn.QueryRow(ctx, `SELECT * FROM wizards WHERE id = $1`, id).Scan(
+	err = conn.QueryRow(
+		ctx,
+		`SELECT 
+			(id, name, description, event_kind_id, enabled, created_at, updated_at)
+		FROM wizards WHERE id = $1`,
+		id,
+	).Scan(
 		&wizard.ID,
 		&wizard.Name,
 		&wizard.Description,
@@ -168,7 +179,7 @@ func UpdateWizard(ctx context.Context, wizard *Wizard) error {
 		ctx,
 		`UPDATE wizards 
 		 SET name = @name, description = @description, event_kind_id = @event_kind_id, 
-		     enabled = @enabled, updated_at = CURRENT_TIMESTAMP
+		     enabled = @enabled
 		 WHERE id = @id`,
 		pgx.NamedArgs{
 			"id":            wizard.ID,
@@ -469,7 +480,7 @@ func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
 	orderBy := buildWizardOrderByClause(filters)
 	selectQuery := fmt.Sprintf(`
 		SELECT 
-			w.id, w.name, w.event_kind_id,
+			w.id, w.name, w.event_kind_id, w.enabled,
 			ek.name as event_kind,
 			%s
 		%s %s
@@ -598,6 +609,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 				&wizard.ID,
 				&wizard.Name,
 				&wizard.EventKindID,
+				&wizard.Enabled,
 				&eventKind,
 				&searchRank,
 			)
@@ -609,6 +621,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 				&wizard.ID,
 				&wizard.Name,
 				&wizard.EventKindID,
+				&wizard.Enabled,
 				&eventKind,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)

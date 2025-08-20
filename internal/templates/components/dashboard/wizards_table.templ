@@ -239,7 +239,6 @@ templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
 			<form
 				hx-put={ fmt.Sprintf("/panel/asistentes/%s", wizard.ID) }
 				hx-target="#wizards-table"
-				hx-swap="delay:500ms"
 				hx-indicator="#global-loading-indicator"
 				class="space-y-4"
 			>
@@ -277,6 +276,10 @@ templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
 						<option value="all">En general</option>
 					</select>
 				</div>
+				<div class="space-x-2 flex items-center">
+					<input type="checkbox" id="wizard-enabled" name="enabled" value="true" checked?={ wizard.Enabled }/>
+					<label for="wizard-enabled">Habilitar Asistente</label>
+				</div>
 				<div class="flex gap-2 pt-4">
 					<button
 						type="submit"
@@ -288,42 +291,49 @@ templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
 			</form>
 		</div>
 		<!-- Steps Management -->
-		<div class="bg-white rounded-sm border border-gray-200 p-4 flex flex-col">
-			<div class="flex items-center justify-between mb-4">
-				<h4 class="text-lg font-medium text-gray-700">Pasos del Asistente</h4>
-				<button
-					type="button"
-					class="px-3 py-2 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600"
-					hx-get={ fmt.Sprintf("/panel/asistentes/%s/pasos/modal/nuevo", wizard.ID) }
-					hx-target="#wizard-steps-modal"
-					hx-indicator="#global-loading-indicator"
-				>
-					+ Agregar Paso
-				</button>
-			</div>
-			<div class="flex-1 overflow-auto">
-				if len(wizard.Steps) == 0 {
-					<div class="text-center text-gray-500 py-8">
-						<p class="mb-2">No hay pasos asignados</p>
-						<p class="text-sm">Agrega pasos para crear la experiencia del asistente</p>
-					</div>
-				} else {
-					<div class="space-y-2">
-						for _, step := range wizard.Steps {
-							@WizardStepRow(wizard.ID, step)
-						}
-					</div>
+		@templ.Fragment("wizardStepsSection") {
+			{{swapOOBStepSectionVal := ctx.Value("swapOOBStepSection")
+swapOOBStepSection := false
+if swapOOBStepSectionVal != nil {
+	swapOOBStepSection = swapOOBStepSectionVal.(bool)
+}
+			}}
+			<div
+				id="wizard-steps-section"
+				class="bg-white rounded-sm border border-gray-200 p-4 flex flex-col"
+				if swapOOBStepSection {
+					hx-swap-oob="outerHTML"
 				}
+			>
+				<div class="flex items-center justify-between mb-4">
+					<h4 class="text-lg font-medium text-gray-700">Pasos del Asistente</h4>
+					<button
+						type="button"
+						class="px-3 py-2 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600"
+						hx-get={ fmt.Sprintf("/panel/asistentes/%s/pasos/modal/nuevo", wizard.ID) }
+						hx-target="#wizard-steps-modal"
+						hx-indicator="#global-loading-indicator"
+					>
+						+ Agregar Paso
+					</button>
+				</div>
+				<div class="flex-1 overflow-auto">
+					if len(wizard.Steps) == 0 {
+						<div class="text-center text-gray-500 py-8">
+							<p class="mb-2">No hay pasos asignados</p>
+							<p class="text-sm">Agrega pasos para crear la experiencia del asistente</p>
+						</div>
+					} else {
+						<div class="space-y-2">
+							for _, step := range wizard.Steps {
+								@WizardStepRow(wizard.ID, step)
+							}
+						</div>
+					}
+				</div>
 			</div>
-		</div>
+		}
 	</div>
-	<!-- Steps Modal Container -->
-	<div
-		id="wizard-steps-modal"
-		class="relative w-full lg:max-w-4xl p-2 overflow-hidden z-20 translate-y-12 opacity-0 mx-auto"
-		data-wizard-steps-modal="closed"
-		hx-swap-oob="outerHTML"
-	></div>
 }
 
 templ WizardStepRow(wizardID string, step *db.WizardStep) {
@@ -550,7 +560,14 @@ templ WizardEventKindOptions(selectedID string, availableEventKinds []*db.EventK
 }
 
 templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
-	<div class="bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
+	<div id="wizard-steps-modal-add-form" class="relative bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
+		<div
+			id="wizard-steps-loading"
+			class="absolute inset-0 flex items-center justify-center bg-light z-10 htmx-indicator"
+		>
+			@components.LoadingIcon("h-8", nil)
+			<span class="block">Cargando...</span>
+		</div>
 		<div class="flex items-center justify-between mb-4">
 			<h3 class="text-lg font-medium text-gray-700">Agregar Paso al Asistente</h3>
 			<button
@@ -571,8 +588,10 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 		} else {
 			<form
 				hx-post={ fmt.Sprintf("/panel/asistentes/%s/pasos", wizardID) }
-				hx-target="#wizard-steps-modal"
-				hx-swap="outerHTML"
+				hx-target="this"
+				hx-target-error="this"
+				hx-swap="outerHTML swap:500ms"
+				hx-indicator="wizard-steps-loading"
 				class="space-y-4"
 			>
 				<div class="space-y-2">
@@ -639,8 +658,9 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 				<div class="flex gap-2 pt-4">
 					<button
 						type="button"
-						onclick="closeStepsModal()"
 						class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300"
+						data-wizard-steps-modal-toggle="close"
+						data-click-handler-selector="wizard-steps-modal-close"
 					>
 						Cancelar
 					</button>
@@ -657,7 +677,7 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 }
 
 templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
-	<div class="bg-white rounded-sm shadow-lg p-4 w-full max-w-2xl">
+	<div id="wizard-steps-modal-edit-form" class="bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
 		<div class="flex items-center justify-between mb-4">
 			<h3 class="text-lg font-medium text-gray-700">Editar Parámetros: { step.Name }</h3>
 			<button
@@ -672,8 +692,10 @@ templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
 		<form
 			hx-put={ fmt.Sprintf("/panel/asistentes/%s/pasos/%s", wizardID, step.ID) }
 			hx-target="#wizard-steps-modal"
+			hx-target-error="this"
 			hx-swap="outerHTML"
 			class="space-y-4"
+			data-wizard-steps-form
 		>
 			<div class="bg-gray-50 p-3 rounded border">
 				<h4 class="font-medium text-gray-800 mb-2">{ step.Name }</h4>
@@ -731,8 +753,9 @@ templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
 			<div class="flex gap-2 pt-4">
 				<button
 					type="button"
-					onclick="closeStepsModal()"
 					class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300"
+					data-wizard-steps-modal-toggle="close"
+					data-click-handler-selector="wizard-steps-modal-close"
 				>
 					Cancelar
 				</button>
@@ -744,5 +767,37 @@ templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
 				</button>
 			</div>
 		</form>
+	</div>
+}
+
+templ WizardStepsManagementSection(wizard *db.Wizard) {
+	<!-- Steps Management -->
+	<div id="wizard-steps-section" class="bg-white rounded-sm border border-gray-200 p-4 flex flex-col">
+		<div class="flex items-center justify-between mb-4">
+			<h4 class="text-lg font-medium text-gray-700">Pasos del Asistente</h4>
+			<button
+				type="button"
+				class="px-4 py-2 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600"
+				hx-get={ fmt.Sprintf("/panel/asistentes/%s/pasos/modal/nuevo", wizard.ID) }
+				hx-target="#wizard-steps-modal"
+				hx-indicator="#global-loading-indicator"
+			>
+				+ Agregar Paso
+			</button>
+		</div>
+		<div class="flex-1 overflow-auto">
+			if len(wizard.Steps) == 0 {
+				<div class="text-center text-gray-500 py-8">
+					<p class="mb-2">No hay pasos asignados</p>
+					<p class="text-sm">Agrega pasos para crear la experiencia del asistente</p>
+				</div>
+			} else {
+				<div class="space-y-2">
+					for _, step := range wizard.Steps {
+						@WizardStepRow(wizard.ID, step)
+					}
+				</div>
+			}
+		</div>
 	</div>
 }

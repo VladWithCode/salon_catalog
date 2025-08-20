@@ -166,10 +166,11 @@ templ Wizards() {
 					data-wizards-modal="closed"
 				></div>
 			</div>
-			<div id="wizard-steps-modal-container" class="fixed inset-0 fixed inset-0 w-screen h-screen z-40 flex flex-col justify-center items-center overflow-hidden invisible">
+			<div id="wizard-steps-modal-container" class="fixed inset-0 w-screen h-screen z-40 flex flex-col justify-center items-center overflow-hidden invisible">
 				<div
 					id="wizard-steps-modal-backdrop"
 					class="absolute h-full w-full z-0 bg-dark/30"
+					data-wizard-steps-modal-toggle="close"
 					data-click-handler-selector="wizard-steps-modal-close"
 				></div>
 				<div
@@ -186,34 +187,21 @@ templ Wizards() {
 templ wizardScript() {
 	<script>
         document.addEventListener('DOMContentLoaded', function() {
-            const wizardModalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power2.out'}});
-            wizardModalTl.to('#wizards-modal-container', {
-                autoAlpha: 1,
-            }).to('#wizards-modal', {
-                opacity: 1,
-                y: '0rem',
-            }, "-=0.2");
-
             eventManager
                 .register('afterSwap', '#wizards-modal', function(e) {
-                    if (e.detail.elt.dataset.wizardsModal === 'closed') {
-                        wizardModalTl.play();
-                        e.detail.elt.dataset.wizardsModal = 'open';
-                    }
-                })
+                    toggleWizardModal(false);
+                }, { excludeExternal: true, includeChildren: false })
                 .registerClick('wizards-modal-toggle', function(e) {
                     const target = e.target.matches('[data-wizards-modal-toggle]') ? e.target : e.target.closest('[data-wizards-modal-toggle]');
                     const force = target.dataset.wizardsModalToggle
                     const shouldClose = (force === 'close') || (!force && modal.dataset.wizardsModal === 'open');
+                    toggleWizardModal(shouldClose);
                     if (shouldClose) {
-                        wizardModalTl.reverse();
-                        document.getElementById('wizards-modal').dataset.wizardsModal = 'closed';
                         gsap.delayedCall(1, () => {
                             document.getElementById('wizards-modal-content')?.remove();
-                            wizardModalTl.revert();
                         });
+                        document.getElementById('wizards-modal').dataset.wizardsModal = 'closed';
                     } else {
-                        wizardModalTl.play();
                         modal.dataset.wizardsModal = 'open';
                     }
                 })
@@ -232,22 +220,72 @@ templ wizardScript() {
                             opacity: 1,
                             y: '0rem',
                         }, '-=0.2');
+                        target.dataset.wizardStepsModal = 'open';
                     }
                 })
-                .registerClick('wizard-steps-modal-close', function (e) {
-                    const target = e.target.matches('[data-wizard-steps-modal-toggle]') ? e.target : e.target.closest('[data-wizard-steps-modal-toggle]');
-                    const force = target.dataset.wizardStepsModalToggle
-                    const shouldClose = (force === 'close') || (!force && modal.dataset.wizardStepsModal === 'open');
+                .registerClick('wizard-steps-modal-close', function () {
+                    closeWizardStepForm();
+                });
+                document.addEventListener('app:closeStepsModal', function() {
+                    closeWizardStepForm(true);
+                })
+
+                function toggleWizardModal(shouldClose) {
+                    const container = document.getElementById('wizards-modal-container');
+                    const modal = container?.querySelector('#wizards-modal');
+                    if (!container || !modal) {
+                        return;
+                    }
+                    const tl = gsap.timeline({defaults: {duration: 0.5, ease: 'power2.out'}});
+                    shouldClose = (shouldClose ?? (modal.dataset.wizardsModal === 'open')) || (!modal.dataset.wizardsModal && modal.dataset.wizardsModal !== 'closed');
+
+                    if (shouldClose) {
+                        tl.to('#wizards-modal-container', {
+                            autoAlpha: 0,
+                        }).to('#wizards-modal', {
+                            opacity: 0,
+                            y: '3rem',
+                        }, '-=0.2');
+                        modal.dataset.wizardsModal = 'closed';
+                    } else {
+                        tl.to('#wizards-modal-container', {
+                            autoAlpha: 1,
+                        }, '-=0.2')
+                        .to('#wizards-modal', {
+                            opacity: 1,
+                            y: '0rem',
+                        });
+                        modal.dataset.wizardsModal = 'open';
+                    }
+                }
+                function closeWizardStepForm(shouldClose) {
+                    const container = document.getElementById('wizard-steps-modal-container');
+                    const modal = container?.querySelector('#wizard-steps-modal');
+                    if (!container || !modal) {
+                        return;
+                    }
+                    const force = modal.dataset.wizardStepsModalToggle;
+                    shouldClose = (shouldClose ?? (force === 'close')) || (!force && modal.dataset.wizardStepsModal === 'open');
                     const tl = gsap.timeline({defaults: {duration: 0.5, ease: 'power2.out'}});
 
                     if (shouldClose) {
-                        tl.to(target, {
-                        });
+                        tl.to(modal, {
+                            opacity: 0,
+                            y: '3rem',
+                        }).to(container, {
+                            autoAlpha: 0,
+                        }, '-=0.2');
+                        modal.dataset.wizardStepsModal = 'closed';
                     } else {
-                        wizardStepsModalTl.play();
+                        tl.to(container, {
+                            autoAlpha: 1,
+                        }).to(modal, {
+                            opacity: 1,
+                            y: '0rem',
+                        }, '-=0.2');
                         modal.dataset.wizardStepsModal = 'open';
                     }
-                });
+                }
         });
     </script>
 }
