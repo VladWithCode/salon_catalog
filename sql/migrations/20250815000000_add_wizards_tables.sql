@@ -81,6 +81,7 @@ DROP TRIGGER IF EXISTS wizard_steps_set_updated_at ON wizard_steps;
 DROP TRIGGER IF EXISTS wizards_set_updated_at ON wizards;
 
 DROP TABLE IF EXISTS wizard_step_categories;
+DROP TABLE IF EXISTS wizard_steps_wizards;
 DROP TABLE IF EXISTS wizard_steps;
 DROP TABLE IF EXISTS wizards;
 -- +goose StatementEnd
