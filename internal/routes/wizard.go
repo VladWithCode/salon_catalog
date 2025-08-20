@@ -258,6 +258,7 @@ func CreateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		dashboard.WizardsTable(wizards),
 		components.ToasterToast(toastData),
 	)
+	w.Header().Set("HX-Trigger", `{"app:closeWizardModal": {}}`)
 	comp.Render(r.Context(), w)
 }
 
@@ -298,6 +299,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 	name := strings.TrimSpace(r.FormValue("name"))
 	eventKindID := strings.TrimSpace(r.FormValue("event_kind"))
 	description := strings.TrimSpace(r.FormValue("description"))
+	enabled := r.FormValue("enabled") == "on"
 
 	// Validate required fields
 	if name == "" || eventKindID == "" {
@@ -318,6 +320,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		Name:        name,
 		EventKindID: eventKindID,
 		Description: description,
+		Enabled:     enabled,
 	}
 
 	err = db.UpdateWizard(r.Context(), wizard)
@@ -345,6 +348,7 @@ func UpdateWizardAndReturnTable(w http.ResponseWriter, r *http.Request, a *auth.
 		dashboard.WizardsTable(wizards),
 		components.ToasterToast(toastData),
 	)
+	w.Header().Set("HX-Trigger", `{"app:closeWizardModal": {}}`)
 	comp.Render(r.Context(), w)
 }
 

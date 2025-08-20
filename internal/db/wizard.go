@@ -141,7 +141,7 @@ func FindWizard(ctx context.Context, id string) (*Wizard, error) {
 	err = conn.QueryRow(
 		ctx,
 		`SELECT 
-			(id, name, description, event_kind_id, enabled, created_at, updated_at)
+			id, name, description, event_kind_id, enabled, created_at, updated_at
 		FROM wizards WHERE id = $1`,
 		id,
 	).Scan(
@@ -1057,6 +1057,156 @@ func UpdateWizardStepParams(ctx context.Context, wizardID, stepID string, stepPa
 	)
 
 	return err
+}
+
+func ValidateStepOrderUnique(ctx context.Context, wizardID, stepID string, stepOrder int) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	query := `
+		SELECT COUNT(*)
+		FROM wizard_steps_wizards wsw
+		JOIN wizard_steps ws ON wsw.wizard_step_id = ws.id
+		WHERE wsw.wizard_id = $1 
+		AND wsw.wizard_step_id != $2
+		AND COALESCE(wsw.step_order, ws.step_order) = $3
+	`
+
+	var count int
+	err = conn.QueryRow(ctx, query, wizardID, stepID, stepOrder).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return fmt.Errorf("step order %d is already taken by another step", stepOrder)
+	}
+
+	return nil
+}
+
+func GetNextAvailableStepPosition(ctx context.Context, wizardID string) (int, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return 1, err
+	}
+	defer conn.Release()
+
+	query := `
+		SELECT COALESCE(wsw.step_order, ws.step_order) as step_order
+		FROM wizard_steps_wizards wsw
+		JOIN wizard_steps ws ON wsw.wizard_step_id = ws.id
+		WHERE wsw.wizard_id = $1
+		ORDER BY COALESCE(wsw.step_order, ws.step_order) ASC
+	`
+
+	rows, err := conn.Query(ctx, query, wizardID)
+	if err != nil {
+		return 1, err
+	}
+	defer rows.Close()
+
+	var usedPositions []int
+	for rows.Next() {
+		var position int
+		err := rows.Scan(&position)
+		if err != nil {
+			return 1, err
+		}
+		if position > 0 {
+			usedPositions = append(usedPositions, position)
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return 1, err
+	}
+
+	// If no steps exist, return 1
+	if len(usedPositions) == 0 {
+		return 1, nil
+	}
+
+	// Find the first gap in the sequence
+	for i := 1; i <= len(usedPositions)+1; i++ {
+		found := false
+		for _, pos := range usedPositions {
+			if pos == i {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return i, nil
+		}
+	}
+
+	// This should never happen, but return next position after last
+	return len(usedPositions) + 1, nil
+}
+
+func GetWizardStepWithDefaults(ctx context.Context, wizardID, stepID string) (*WizardStep, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	query := `
+		SELECT ws.id, ws.name, ws.description, 
+		       COALESCE(wsw.step_order, ws.step_order) as step_order,
+		       COALESCE(wsw.required, ws.required) as required, 
+		       COALESCE(wsw.multi_select, ws.multi_select) as multi_select,
+		       COALESCE(wsw.min_selected, ws.min_selected) as min_selected, 
+		       COALESCE(wsw.max_selected, ws.max_selected) as max_selected,
+		       ws.created_at, ws.updated_at,
+		       array_remove(array_agg(DISTINCT c.id), NULL) as category_ids,
+		       array_remove(array_agg(DISTINCT c.name), NULL) as categories
+		FROM wizard_steps ws
+		LEFT JOIN wizard_steps_wizards wsw ON (wsw.wizard_step_id = ws.id AND wsw.wizard_id = $1)
+		LEFT JOIN wizard_step_categories wsc ON ws.id = wsc.wizard_step_id
+		LEFT JOIN categories c ON wsc.category_id = c.id
+		WHERE ws.id = $2
+		GROUP BY ws.id, ws.name, ws.description, ws.step_order, ws.required, ws.multi_select,
+		         ws.min_selected, ws.max_selected, wsw.step_order, wsw.required, 
+		         wsw.multi_select, wsw.min_selected, wsw.max_selected, ws.created_at, ws.updated_at
+	`
+
+	var step WizardStep
+	var categoryIDs []string
+	var categories []string
+
+	err = conn.QueryRow(ctx, query, wizardID, stepID).Scan(
+		&step.ID,
+		&step.Name,
+		&step.Description,
+		&step.StepOrder,
+		&step.Required,
+		&step.MultiSelect,
+		&step.MinSelected,
+		&step.MaxSelected,
+		&step.CreatedAt,
+		&step.UpdatedAt,
+		&categoryIDs,
+		&categories,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	step.CategoryIDs = categoryIDs
+	step.Categories = categories
+
+	return &step, nil
 }
 
 func GetWizardSteps(ctx context.Context, wizardID string) ([]*WizardStep, error) {

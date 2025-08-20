@@ -277,7 +277,7 @@ templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
 					</select>
 				</div>
 				<div class="space-x-2 flex items-center">
-					<input type="checkbox" id="wizard-enabled" name="enabled" value="true" checked?={ wizard.Enabled }/>
+					<input type="checkbox" id="wizard-enabled" name="enabled" checked?={ wizard.Enabled }/>
 					<label for="wizard-enabled">Habilitar Asistente</label>
 				</div>
 				<div class="flex gap-2 pt-4">
@@ -499,6 +499,19 @@ templ WizardCreateForm(state *WizardCreateModalState) {
 						<option value="general">Seleccionar tipo de evento</option>
 					</select>
 				</div>
+				<div class="space-x-2 flex items-center">
+					<input
+						type="checkbox"
+						id="wizard-enabled"
+						name="enabled"
+						if state.Wizard != nil {
+							checked?={ state.Wizard.Enabled }
+						} else {
+							checked
+						}
+					/>
+					<label for="wizard-enabled">Habilitar Asistente</label>
+				</div>
 				<div class="flex gap-2 pt-4">
 					<button
 						type="submit"
@@ -559,7 +572,7 @@ templ WizardEventKindOptions(selectedID string, availableEventKinds []*db.EventK
 	}
 }
 
-templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
+templ AddStepToWizardModal(wizard *db.Wizard, availableSteps []*db.WizardStep) {
 	<div id="wizard-steps-modal-add-form" class="relative bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
 		<div
 			id="wizard-steps-loading"
@@ -587,7 +600,7 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 			</div>
 		} else {
 			<form
-				hx-post={ fmt.Sprintf("/panel/asistentes/%s/pasos", wizardID) }
+				hx-post={ fmt.Sprintf("/panel/asistentes/%s/pasos", wizard.ID) }
 				hx-target="this"
 				hx-target-error="this"
 				hx-swap="outerHTML swap:500ms"
@@ -615,8 +628,8 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 							id="step-order"
 							name="step_order"
 							type="number"
-							min="1"
-							value="1"
+							min={ NextStepAvailable(wizard) }
+							value={ NextStepAvailable(wizard) }
 							class="block w-full px-4 py-2 border border-gray-200 rounded-xs bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
 						/>
 					</div>
@@ -676,7 +689,7 @@ templ AddStepToWizardModal(wizardID string, availableSteps []*db.WizardStep) {
 	</div>
 }
 
-templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
+templ EditWizardStepParamsModal(wizard *db.Wizard, step *db.WizardStep) {
 	<div id="wizard-steps-modal-edit-form" class="bg-white rounded-sm shadow-lg p-4 w-full mx-auto">
 		<div class="flex items-center justify-between mb-4">
 			<h3 class="text-lg font-medium text-gray-700">Editar Parámetros: { step.Name }</h3>
@@ -690,7 +703,7 @@ templ EditWizardStepParamsModal(wizardID string, step *db.WizardStep) {
 			</button>
 		</div>
 		<form
-			hx-put={ fmt.Sprintf("/panel/asistentes/%s/pasos/%s", wizardID, step.ID) }
+			hx-put={ fmt.Sprintf("/panel/asistentes/%s/pasos/%s", wizard.ID, step.ID) }
 			hx-target="#wizard-steps-modal"
 			hx-target-error="this"
 			hx-swap="outerHTML"
@@ -800,4 +813,14 @@ templ WizardStepsManagementSection(wizard *db.Wizard) {
 			}
 		</div>
 	</div>
+}
+
+func NextStepAvailable(wizard *db.Wizard) int {
+	nextStep := 1
+	for _, step := range wizard.Steps {
+		if step.StepOrder > nextStep {
+			nextStep = step.StepOrder + 1
+		}
+	}
+	return nextStep
 }

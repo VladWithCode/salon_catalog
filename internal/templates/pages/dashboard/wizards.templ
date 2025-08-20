@@ -197,7 +197,7 @@ templ wizardScript() {
                     const shouldClose = (force === 'close') || (!force && modal.dataset.wizardsModal === 'open');
                     toggleWizardModal(shouldClose);
                     if (shouldClose) {
-                        gsap.delayedCall(1, () => {
+                        gsap.delayedCall(0.5, () => {
                             document.getElementById('wizards-modal-content')?.remove();
                         });
                         document.getElementById('wizards-modal').dataset.wizardsModal = 'closed';
@@ -228,6 +228,9 @@ templ wizardScript() {
                 });
                 document.addEventListener('app:closeStepsModal', function() {
                     closeWizardStepForm(true);
+                })
+                document.addEventListener('app:closeWizardModal', function() {
+                    toggleWizardModal(true);
                 })
 
                 function toggleWizardModal(shouldClose) {

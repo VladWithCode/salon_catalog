@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -50,7 +51,14 @@ func RenderAddStepToWizardForm(w http.ResponseWriter, r *http.Request, a *auth.A
 		}
 	}
 
-	component := dashboard.AddStepToWizardModal(wizardID, availableSteps)
+	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
+	if err != nil {
+		http.Error(w, "Error al recuperar asistente", http.StatusInternalServerError)
+		log.Printf("failed to find wizard: %v\n", err)
+		return
+	}
+
+	component := dashboard.AddStepToWizardModal(wizard, availableSteps)
 	component.Render(r.Context(), w)
 }
 
@@ -63,29 +71,22 @@ func RenderEditWizardStepParamsForm(w http.ResponseWriter, r *http.Request, a *a
 		return
 	}
 
-	// Get wizard with steps to find the specific step parameters
+	// Get the specific wizard step with default values properly applied
+	wizardStep, err := db.GetWizardStepWithDefaults(r.Context(), wizardID, stepID)
+	if err != nil {
+		http.Error(w, "Paso no encontrado", http.StatusNotFound)
+		log.Printf("failed to find wizard step: %v\n", err)
+		return
+	}
+
 	wizard, err := db.GetWizardWithSteps(r.Context(), wizardID)
 	if err != nil {
-		http.Error(w, "Asistente no encontrado", http.StatusNotFound)
+		http.Error(w, "Error al recuperar asistente", http.StatusInternalServerError)
 		log.Printf("failed to find wizard: %v\n", err)
 		return
 	}
 
-	// Find the specific step
-	var wizardStep *db.WizardStep
-	for _, step := range wizard.Steps {
-		if step.ID == stepID {
-			wizardStep = step
-			break
-		}
-	}
-
-	if wizardStep == nil {
-		http.Error(w, "Paso no encontrado en el asistente", http.StatusNotFound)
-		return
-	}
-
-	component := dashboard.EditWizardStepParamsModal(wizardID, wizardStep)
+	component := dashboard.EditWizardStepParamsModal(wizard, wizardStep)
 	component.Render(r.Context(), w)
 }
 
@@ -120,17 +121,28 @@ func AttachStepToWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth
 		return
 	}
 
+	// Get next available step position as default
+	nextPosition, err := db.GetNextAvailableStepPosition(r.Context(), wizardID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toastData.Message = "Error al calcular posición del paso"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		log.Printf("failed to get next available step position: %v\n", err)
+		return
+	}
+
 	// Parse step parameters
 	stepParams := &forms.WizardStepParams{
 		Required:    r.FormValue("required") == "on",
 		MultiSelect: r.FormValue("multi_select") == "on",
-		StepOrder:   1,
+		StepOrder:   nextPosition,
 		MinSelected: 0,
 		MaxSelected: 1,
 	}
 
 	if order := r.FormValue("step_order"); order != "" {
-		if o, err := strconv.Atoi(order); err == nil {
+		if o, err := strconv.Atoi(order); err == nil && o > 0 {
 			stepParams.StepOrder = o
 		}
 	}
@@ -148,6 +160,16 @@ func AttachStepToWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth
 	if !stepParams.Validate() {
 		w.WriteHeader(http.StatusBadRequest)
 		toastData.Message = "Parámetros inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		return
+	}
+
+	// Validate step order uniqueness
+	err = db.ValidateStepOrderUnique(r.Context(), wizardID, stepID, stepParams.StepOrder)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = fmt.Sprintf("La posición %d ya está ocupada por otro paso", stepParams.StepOrder)
 		toastData.Type = components.ToastError
 		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
@@ -219,7 +241,7 @@ func UpdateWizardStepParamsAndReturn(w http.ResponseWriter, r *http.Request, a *
 	}
 
 	if order := r.FormValue("step_order"); order != "" {
-		if o, err := strconv.Atoi(order); err == nil {
+		if o, err := strconv.Atoi(order); err == nil && o > 0 {
 			stepParams.StepOrder = o
 		}
 	}
@@ -237,6 +259,16 @@ func UpdateWizardStepParamsAndReturn(w http.ResponseWriter, r *http.Request, a *
 	if !stepParams.Validate() {
 		w.WriteHeader(http.StatusBadRequest)
 		toastData.Message = "Parámetros inválidos"
+		toastData.Type = components.ToastError
+		components.ToasterToast(toastData).Render(r.Context(), w)
+		return
+	}
+
+	// Validate step order uniqueness
+	err = db.ValidateStepOrderUnique(r.Context(), wizardID, stepID, stepParams.StepOrder)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		toastData.Message = fmt.Sprintf("La posición %d ya está ocupada por otro paso", stepParams.StepOrder)
 		toastData.Type = components.ToastError
 		components.ToasterToast(toastData).Render(r.Context(), w)
 		return
