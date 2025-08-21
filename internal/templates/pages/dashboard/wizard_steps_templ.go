@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"encoding/json"
 	"github.com/vladwithcode/salon_catalog/internal/templates"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 )
@@ -62,7 +63,7 @@ func WizardSteps() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button></div><div id=\"wizardsteps-actions-container\" class=\"overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100\" data-wizardsteps-actions=\"closed\"><div class=\"flex flex-col gap-4 pt-4\"><!-- Search and Filters Row --><div class=\"flex flex-col lg:flex-row gap-4\"><!-- Search Input --><div class=\"flex-1\"><label for=\"wizardsteps-search\" class=\"sr-only\">Buscar pasos</label> <input type=\"search\" id=\"wizardsteps-search\" name=\"search\" placeholder=\"Buscar pasos por nombre o descripción...\" class=\"w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500\" hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"input changed delay:300ms, search\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-indicator=\"#wizardsteps-table-loading\" hx-include=\"[name='sort'], [name='categories']\"></div><!-- Category Filter --><div class=\"lg:w-64\"><label for=\"wizardsteps-categories\" class=\"sr-only\">Filtrar por categorías</label> <select id=\"wizardsteps-categories\" name=\"categories\" multiple class=\"w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500\" hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"change\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-indicator=\"#wizardsteps-table-loading\" hx-include=\"[name='search'], [name='sort']\"><!-- Categories will be loaded dynamically --></select></div></div><!-- Action Buttons Row --><div class=\"flex flex-col sm:flex-row gap-3\"><!-- New Step Button --><button id=\"wizardsteps-actions-new\" hx-get=\"/panel/asistentes/pasos/modal/nuevo\" hx-target=\"#wizardsteps-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex items-center justify-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500\" data-wizardsteps-modal-toggle=\"open\" data-click-handler-selector=\"wizardsteps-modal-toggle\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button></div><div id=\"wizardsteps-actions-container\" class=\"overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100\" data-wizardsteps-actions=\"closed\"><div class=\"flex flex-col xl:flex-row gap-4 pt-4\"><!-- Action Buttons Row --><div class=\"flex flex-col xl:basis-1/3 gap-2\"><!-- New Step Button --><button id=\"wizardsteps-actions-new\" hx-get=\"/panel/asistentes/pasos/modal/nuevo\" hx-target=\"#wizardsteps-modal\" hx-indicator=\"#global-loading-indicator\" class=\"flex items-center justify-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -78,7 +79,31 @@ func WizardSteps() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "Eliminar Seleccionados</button><!-- Clear Filters --><button type=\"button\" class=\"flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\" hx-get=\"/panel/asistentes/pasos/table\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-params=\"none\" data-click-handler-selector=\"[data-wizardsteps-filter-clear]\" data-wizardsteps-filter-clear>Limpiar Filtros</button></div></div></div></div><main class=\"relative z-0 flex-1 overflow-hidden pb-0.5\"><div class=\"h-full grid grid-rows-[auto_1fr_auto] bg-gray-100 rounded-xs shadow-sm overflow-hidden\"><!-- Table Header --><!-- Table Header with Grid Layout --><div class=\"sticky inset-x-0 top-0 z-20 bg-white border border-gray-100 rounded-sm shadow-sm\"><!-- Multi-selection styles --><style>\n                            [data-multi-selection-mode=\"all\"] [data-multi-selection-mode-display=\"all\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode=\"none\"] [data-multi-selection-mode-display=\"none\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode=\"some\"] [data-multi-selection-mode-display=\"some\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode-display] {\n                                transition: opacity 0.1s linear;\n                            }\n                            \n                            /* Table grid layout */\n                            .grid-cols-table {\n                                grid-template-columns: 3rem 1fr 1fr 1fr 1fr 8rem;\n                            }\n                            \n                            @media (max-width: 768px) {\n                                .grid-cols-table {\n                                    grid-template-columns: 3rem 1fr 6rem;\n                                }\n                            }\n                        </style><!-- Header Controls --><div class=\"flex items-center justify-between gap-3 p-2\"><button id=\"wizardsteps-table-multi-selection-ctl\" type=\"button\" class=\"shrink-0 grow-0 basis-5 aspect-square grid grid-cols-1 grid-rows-1\" data-click-handler-selector=\"wizardsteps-table-multi-selection-ctl\" data-multi-selection-mode=\"all\"><div class=\"col-start-1 row-start-1 w-full h-full border border-gray-300 rounded-xs\" data-multi-selection-mode-display=\"all\"></div><div class=\"col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0\" data-multi-selection-mode-display=\"none\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "Eliminar Seleccionados</button><!-- Clear Filters --><button type=\"button\" class=\"flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\" hx-get=\"/panel/asistentes/pasos/table\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-params=\"none\" data-click-handler-selector=\"wizardsteps-filter-clear\" data-wizardsteps-filter-clear>Limpiar Filtros</button></div><!-- Search and Filters Row --><div class=\"flex xl:flex-col xl:basis-full xl:justify-start gap-4\"><!-- Search Input --><div class=\"flex-1 xl:basis-auto\"><label for=\"wizardsteps-search\" class=\"sr-only\">Buscar pasos</label> <input type=\"search\" id=\"wizardsteps-search\" name=\"search\" placeholder=\"Buscar pasos por nombre o descripción...\" class=\"w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500\" hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"input changed delay:300ms, search\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-indicator=\"#wizardsteps-table-loading\" hx-include=\"[name='sort'], [name='categories']\"></div><!-- Category Filter --><div class=\"flex-1 xl:basis-auto\"><label for=\"categories-select\" class=\"sr-only\">Filtrar por categorías</label><div hx-get=\"/panel/categorias/select\" hx-target=\"this\" hx-trigger=\"load\" hx-swap=\"outerHTML\" hx-indicator=\"#wizardsteps-table-loading\" hx-vals=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getCategorySelectAttributesStr(map[string]string{
+				"name":                               "categories",
+				"get":                                "/panel/asistentes/pasos/table",
+				"trigger":                            "change",
+				"indicator":                          "#wizardsteps-table-loading",
+				"target":                             "#wizardsteps-table",
+				"swap":                               "outerHTML swap:0.5s",
+				"multiple":                           "",
+				"size":                               "3",
+				"data-wizardsteps-categories-select": "",
+				"data-click-handler-selector":        "category-select",
+			}))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/dashboard/wizard_steps.templ`, Line: 112, Col: 42}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"></div></div></div></div></div></div><main class=\"relative z-0 flex-1 overflow-hidden pb-0.5\"><div class=\"h-full grid grid-rows-[auto_1fr_auto] bg-gray-100 rounded-xs shadow-sm overflow-hidden\"><!-- Table Header --><!-- Table Header with Grid Layout --><div class=\"sticky inset-x-0 top-0 z-20 bg-white border border-gray-100 rounded-sm shadow-sm\"><!-- Multi-selection styles --><style>\n                            [data-multi-selection-mode=\"all\"] [data-multi-selection-mode-display=\"all\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode=\"none\"] [data-multi-selection-mode-display=\"none\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode=\"some\"] [data-multi-selection-mode-display=\"some\"] {\n                                opacity: 1;\n                            }\n                            [data-multi-selection-mode-display] {\n                                transition: opacity 0.1s linear;\n                            }\n                            \n                            /* Table grid layout */\n                            .grid-cols-table {\n                                grid-template-columns: 3rem 1fr 1fr 1fr 1fr 8rem;\n                            }\n                            \n                            @media (max-width: 768px) {\n                                .grid-cols-table {\n                                    grid-template-columns: 3rem 1fr 6rem;\n                                }\n                            }\n                        </style><!-- Header Controls --><div class=\"flex items-center justify-between gap-3 p-2\"><button id=\"wizardsteps-table-multi-selection-ctl\" type=\"button\" class=\"shrink-0 grow-0 basis-5 aspect-square grid grid-cols-1 grid-rows-1\" data-click-handler-selector=\"wizardsteps-table-multi-selection-ctl\" data-multi-selection-mode=\"all\"><div class=\"col-start-1 row-start-1 w-full h-full border border-gray-300 rounded-xs\" data-multi-selection-mode-display=\"all\"></div><div class=\"col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0\" data-multi-selection-mode-display=\"none\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -86,7 +111,7 @@ func WizardSteps() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0\" data-multi-selection-mode-display=\"some\"><div class=\"w-3/4 h-0.5 bg-stone-50 rounded-xs\"></div></div></button><h4 class=\"flex-1 basis-full text-gray-900\">Pasos de Asistentes <span id=\"wizardsteps-table-count\" hx-swap-oob>(0/0)</span></h4><select hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"change\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-indicator=\"#wizardsteps-table-loading\" hx-include='[name=\"search\"], [name=\"categories\"]' name=\"sort\" id=\"sort\" class=\"block px-2 py-1 border border-gray-200 rounded-md text-sm\"><option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"step_order\">Orden de Paso</option> <option value=\"newest\">Más Recientes</option> <option value=\"oldest\">Más Antiguos</option></select></div><!-- Table Column Headers --><div class=\"hidden md:grid grid-cols-table gap-2 px-2 py-2 border-t border-gray-100 bg-gray-50 text-sm font-medium text-gray-700\"><div></div><!-- Checkbox column --><div>Nombre</div><div>Descripción</div><div>Categorías</div><div>Configuración</div><div>Acciones</div></div></div><!-- Table Body --><div id=\"wizardsteps-table-wrapper\" class=\"relative z-0 h-full row-start-2 col-span-full overflow-auto\"><div id=\"wizardsteps-table-loading\" class=\"absolute inset-0 z-10 bg-gray-100 flex flex-col items-center justify-center gap-4 p-4 text-center text-accent invisible\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div class=\"col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0\" data-multi-selection-mode-display=\"some\"><div class=\"w-3/4 h-0.5 bg-stone-50 rounded-xs\"></div></div></button><h4 class=\"flex-1 basis-full text-gray-900\">Pasos de Asistentes <span id=\"wizardsteps-table-count\" hx-swap-oob>(0/0)</span></h4><select hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"change\" hx-target=\"#wizardsteps-table\" hx-swap=\"outerHTML swap:0.5s\" hx-indicator=\"#wizardsteps-table-loading\" hx-include='[name=\"search\"], [name=\"categories\"]' name=\"sort\" id=\"sort\" class=\"block px-2 py-1 border border-gray-200 rounded-md text-sm\"><option value=\"name_asc\">Nombre A-Z</option> <option value=\"name_desc\">Nombre Z-A</option> <option value=\"newest\">Más Recientes</option> <option value=\"oldest\">Más Antiguos</option></select></div><!-- Table Column Headers --><div class=\"hidden md:grid grid-cols-table gap-2 px-2 py-2 border-t border-gray-100 bg-gray-50 text-sm font-medium text-gray-700\"><div></div><!-- Checkbox column --><div>Nombre</div><div>Descripción</div><div>Categorías</div><div>Configuración</div><div>Acciones</div></div></div><!-- Table Body --><div id=\"wizardsteps-table-wrapper\" class=\"relative z-0 h-full row-start-2 col-span-full overflow-auto\"><div id=\"wizardsteps-table-loading\" class=\"absolute inset-0 z-10 bg-gray-100 flex flex-col items-center justify-center gap-4 p-4 text-center text-accent invisible\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -94,7 +119,7 @@ func WizardSteps() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<p class=\"text-lg\">Cargando pasos...</p></div><div hx-target=\"this\" hx-swap=\"outerHTML swap:0.5s\" hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"load\" hx-indicator=\"#wizardsteps-table-loading\"></div></div><div id=\"wizardsteps-table-pagination\"></div></div></main><div id=\"wizardsteps-modal-container\" class=\"fixed inset-0 w-screen z-40 flex flex-col justify-center items-center overflow-hidden opacity-0 pointer-events-none\"><div id=\"wizardsteps-modal-backdrop\" class=\"absolute h-full w-full z-0 bg-dark/30\" data-wizardsteps-modal-toggle=\"close\" data-click-handler-selector=\"wizardsteps-modal-toggle\"></div><div id=\"wizardsteps-modal\" class=\"relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0\" data-wizardsteps-modal=\"closed\"></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<p class=\"text-lg\">Cargando pasos...</p></div><div hx-target=\"this\" hx-swap=\"outerHTML swap:0.5s\" hx-get=\"/panel/asistentes/pasos/table\" hx-trigger=\"load\" hx-indicator=\"#wizardsteps-table-loading\"></div></div><div id=\"wizardsteps-table-pagination\"></div></div></main><div id=\"wizardsteps-modal-container\" class=\"fixed inset-0 w-screen z-40 flex flex-col justify-center items-center overflow-hidden opacity-0 pointer-events-none\"><div id=\"wizardsteps-modal-backdrop\" class=\"absolute h-full w-full z-0 bg-dark/30\" data-wizardsteps-modal-toggle=\"close\" data-click-handler-selector=\"wizardsteps-modal-toggle\"></div><div id=\"wizardsteps-modal\" class=\"relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0\" data-wizardsteps-modal=\"closed\"></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -110,62 +135,43 @@ func WizardSteps() templ.Component {
 
 func wizardStepsScript() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_wizardStepsScript_a608`,
-		Function: `function __templ_wizardStepsScript_a608(){document.addEventListener('DOMContentLoaded', function() {
+		Name: `__templ_wizardStepsScript_e8a7`,
+		Function: `function __templ_wizardStepsScript_e8a7(){document.addEventListener('DOMContentLoaded', function() {
 		// Initialize GSAP animations
 		gsap.set("#wizardsteps-modal", { opacity: 0, y: 50 });
 		gsap.set("#wizardsteps-modal-backdrop", { opacity: 0 });
 		
-		// Modal toggle handlers
-		function openModal() {
-			gsap.to("#wizardsteps-modal-container", { 
-				opacity: 1, 
-				pointerEvents: "auto", 
-				duration: 0.3 
-			});
-			gsap.to("#wizardsteps-modal-backdrop", { 
-				opacity: 1, 
-				duration: 0.3 
-			});
-			gsap.to("#wizardsteps-modal", { 
-				opacity: 1, 
-				y: 0, 
-				duration: 0.3,
-				ease: "power2.out"
-			});
-		}
-		
-		function closeModal() {
-			gsap.to("#wizardsteps-modal", { 
-				opacity: 0, 
-				y: 50, 
-				duration: 0.2 
-			});
-			gsap.to("#wizardsteps-modal-backdrop", { 
-				opacity: 0, 
-				duration: 0.2 
-			});
-			gsap.to("#wizardsteps-modal-container", { 
-				opacity: 0, 
-				pointerEvents: "none", 
-				duration: 0.2,
-				delay: 0.1
-			});
-		}
-		
-		// Modal event handlers
-		document.addEventListener('click', function(e) {
-			if (e.target.closest('[data-wizardsteps-modal-toggle="open"]')) {
-				openModal();
-			}
-			if (e.target.closest('[data-wizardsteps-modal-toggle="close"]')) {
-				closeModal();
-			}
-		});
-		
-		// Actions toggle for mobile
-		document.addEventListener('click', function(e) {
-			if (e.target.closest('#wizardsteps-actions-toggle')) {
+        eventManager
+            .register('afterSwap', '#wizardsteps-table', function(e) {
+				animateTableRows();
+				updateMultiSelectionState();
+            })
+            .register('afterSwap', '#wizardsteps-modal', function(e) {
+                openModal();
+            })
+            .register('change', '#category-select', function(e) {
+                clearFilters();
+            })
+            .register('change', '[data-wizard-step-checkbox]', function(e) {
+                updateMultiSelectionState();
+            })
+            .registerClick('wizardsteps-modal-toggle', function(e) {
+                const modalEl = document.getElementById('wizardsteps-modal');
+                const isOpen = modalEl.dataset.wizardstepsModal === 'open';
+
+                if (isOpen) {
+                    closeModal();
+                } else {
+                    openModal();
+                }
+            })
+            .registerClick('wizardsteps-filter-clear', function(e) {
+                clearFilters();
+            })
+            .registerClick('wizardsteps-table-multi-selection-ctl', function(e) {
+                toggleAllCheckboxes();
+            })
+            .registerClick('wizardsteps-actions-toggle', function(e) {
 				const container = document.getElementById('wizardsteps-actions-container');
 				const isOpen = container.getAttribute('data-wizardsteps-actions') === 'open';
 				
@@ -181,18 +187,11 @@ func wizardStepsScript() templ.ComponentScript {
 						{ height: autoHeight, opacity: 1, duration: 0.3 }
 					);
 				}
-			}
-		});
-		
-		// Multi-selection checkbox handlers
-		document.addEventListener('change', function(e) {
-			if (e.target.matches('[data-wizard-step-checkbox]')) {
-				updateMultiSelectionState();
-			}
-			if (e.target.matches('#wizardsteps-table-multi-selection-ctl')) {
-				toggleAllCheckboxes();
-			}
-		});
+            });
+
+        document.addEventListener('app:closeModal', function(e) {
+            closeModal();
+        })
 		
 		function updateMultiSelectionState() {
 			const checkboxes = document.querySelectorAll('[data-wizard-step-checkbox]');
@@ -241,15 +240,58 @@ func wizardStepsScript() templ.ComponentScript {
 				ease: "power2.out"
 			});
 		}
+
+        function clearFilters() {
+            const sort = document.querySelector('[name="sort"]')
+            const search = document.querySelector('[name="search"]')
+
+            if (sort) {
+                sort.selectedIndex = 0
+            }
+            if (search) {
+                search.value = ''
+            }
+        }
+
+		// Modal toggle handlers
+		function openModal() {
+			gsap.to("#wizardsteps-modal-container", { 
+				opacity: 1, 
+				pointerEvents: "auto", 
+				duration: 0.3 
+			});
+			gsap.to("#wizardsteps-modal-backdrop", { 
+				opacity: 1, 
+				duration: 0.3 
+			});
+			gsap.to("#wizardsteps-modal", { 
+				opacity: 1, 
+				y: 0, 
+				duration: 0.3,
+				ease: "power2.out"
+			});
+            document.getElementById('wizardsteps-modal').dataset.wizardstepsModal = 'open';
+		}
 		
-		// Listen for HTMX events to trigger animations
-		document.addEventListener('htmx:afterSwap', function(e) {
-			if (e.target.id === 'wizardsteps-table-wrapper' || e.target.closest('#wizardsteps-table-wrapper')) {
-				animateTableRows();
-				updateMultiSelectionState();
-			}
-		});
-		
+		function closeModal() {
+			gsap.to("#wizardsteps-modal", { 
+				opacity: 0, 
+				y: 50, 
+				duration: 0.2 
+			});
+			gsap.to("#wizardsteps-modal-backdrop", { 
+				opacity: 0, 
+				duration: 0.2 
+			});
+			gsap.to("#wizardsteps-modal-container", { 
+				opacity: 0, 
+				pointerEvents: "none", 
+				duration: 0.2,
+				delay: 0.1
+			});
+            document.getElementById('wizardsteps-modal').dataset.wizardstepsModal = 'closed';
+		}
+
 		// Initial animation
 		gsap.from("#wizardsteps-actions-container", { 
 			opacity: 0, 
@@ -259,9 +301,16 @@ func wizardStepsScript() templ.ComponentScript {
 		});
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_wizardStepsScript_a608`),
-		CallInline: templ.SafeScriptInline(`__templ_wizardStepsScript_a608`),
+		Call:       templ.SafeScript(`__templ_wizardStepsScript_e8a7`),
+		CallInline: templ.SafeScriptInline(`__templ_wizardStepsScript_e8a7`),
 	}
+}
+
+func getCategorySelectAttributesStr(attrs map[string]string) string {
+	withHtmxAttrs := map[string]any{}
+	withHtmxAttrs["withHtmxAttrs"] = attrs
+	bts, _ := json.Marshal(withHtmxAttrs)
+	return string(bts)
 }
 
 var _ = templruntime.GeneratedTemplate

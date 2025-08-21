@@ -400,6 +400,19 @@ func RenderCategorySelect(w http.ResponseWriter, r *http.Request) {
 	}
 	params.Args = args
 
+	if params.Args["name"] != "" {
+		params.ReplaceArgs = map[string]string{"name": params.Args["name"]}
+		delete(params.Args, "name")
+	}
+	if params.Args["id"] != "" {
+		params.ReplaceArgs = map[string]string{"id": params.Args["id"]}
+		delete(params.Args, "id")
+	}
+	if params.Args["class"] != "" {
+		params.ReplaceArgs = map[string]string{"value": params.Args["value"]}
+		delete(params.Args, "value")
+	}
+
 	ctgs, err := db.FindAllCategories()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

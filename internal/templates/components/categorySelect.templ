@@ -1,6 +1,9 @@
 package components
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
+import (
+	"encoding/json"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
 
 type CategorySelectValueType string
 
@@ -10,16 +13,26 @@ const (
 )
 
 type CategorySelectParams struct {
-	Selected  string
-	ValueType CategorySelectValueType
-	Args      map[string]string
+	Selected    string                  `json:"selected"`
+	ValueType   CategorySelectValueType `json:"value_type"`
+	Args        map[string]string       `json:"args"`
+	ReplaceArgs map[string]string       `json:"replace_args"`
+}
+
+func (csp *CategorySelectParams) String() string {
+	bts, _ := json.Marshal(csp)
+	return string(bts)
 }
 
 templ CategorySelect(categories []db.Category, params *CategorySelectParams) {
 	<select
 		id="category-select"
-		class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
-		name="category"
+		class="block w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+		if params.ReplaceArgs != nil && params.ReplaceArgs["name"] != "" {
+			name={ params.ReplaceArgs["name"] }
+		} else {
+			name="category"
+		}
 		{ getCategorySelectAttributes(params)... }
 	>
 		<option value="" selected?={ params.Selected == "" }>Selecciona una categoría</option>
@@ -58,6 +71,10 @@ func getCategorySelectAttributes(params *CategorySelectParams) templ.Attributes 
 			attrs["hx-trigger"] = val
 		case "indicator":
 			attrs["hx-indicator"] = val
+		case "swap":
+			attrs["hx-swap"] = val
+		case "vals":
+			attrs["hx-vals"] = val
 		default:
 			attrs[key] = val
 		}

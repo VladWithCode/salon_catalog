@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"slices"
 )
 
 templ WizardStepsTable(result *db.WizardStepFilterResult) {
@@ -38,7 +39,7 @@ templ WizardStepsTable(result *db.WizardStepFilterResult) {
 			</div>
 		} else {
 			<!-- Wizard Steps Grid -->
-			<div class="grid grid-cols-table gap-2">
+			<div class="xl:grid grid-cols-table xl:gap-2 space-y-2 xl:space-y-0 [&>*]:odd:bg-gray-50">
 				for _, step := range result.WizardSteps {
 					@WizardStepTableRow(step)
 				}
@@ -53,9 +54,9 @@ templ WizardStepsTable(result *db.WizardStepFilterResult) {
 }
 
 templ WizardStepTableRow(step *db.WizardStep) {
-	<div class="contents group hover:bg-gray-50 transition-colors duration-150">
+	<div class="grid grid-cols-8 xl:contents group hover:bg-gray-50 transition-colors duration-150">
 		<!-- Selection checkbox -->
-		<div class="flex items-center justify-center p-2">
+		<div class="col-span-1 flex items-start justify-center p-2">
 			<input
 				type="checkbox"
 				name="wizard-step-selection"
@@ -65,11 +66,11 @@ templ WizardStepTableRow(step *db.WizardStep) {
 			/>
 		</div>
 		<!-- Step name -->
-		<div class="p-2 font-medium text-gray-900">
+		<div class="col-span-5 xl:col-span-1 p-2 font-medium text-gray-900">
 			{ step.Name }
 		</div>
 		<!-- Description -->
-		<div class="p-2 text-gray-600 text-sm">
+		<div class="hidden xl:block p-2 text-gray-600 text-sm">
 			if step.Description != "" {
 				{ step.Description }
 			} else {
@@ -77,9 +78,9 @@ templ WizardStepTableRow(step *db.WizardStep) {
 			}
 		</div>
 		<!-- Categories -->
-		<div class="p-2">
+		<div class="col-span-2 xl:col-span-1 pt-2">
 			if len(step.Categories) > 0 {
-				<div class="flex flex-wrap gap-1">
+				<div class="flex flex-wrap gap-1 max-h-20 overflow-y-auto overflow-x-hidden">
 					for _, category := range step.Categories {
 						<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
 							{ category }
@@ -87,11 +88,11 @@ templ WizardStepTableRow(step *db.WizardStep) {
 					}
 				</div>
 			} else {
-				<span class="text-gray-400 italic text-sm">Sin categorías</span>
+				<span class="text-gray-400 italic text-sm px-2">Sin categorías</span>
 			}
 		</div>
 		<!-- Configuration -->
-		<div class="p-2">
+		<div class="col-start-2 xl:col-start-auto col-span-4 xl:col-span-1 p-2">
 			<div class="flex flex-col gap-1 text-xs">
 				if step.Required {
 					<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -102,17 +103,15 @@ templ WizardStepTableRow(step *db.WizardStep) {
 					<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
 						Multi-selección
 					</span>
-				}
-				if step.MinSelected > 0 || step.MaxSelected > 1 {
-					<span class="text-gray-600">
+					<span class="text-gray-600 px-2">
 						{ fmt.Sprintf("Min: %d, Max: %d", step.MinSelected, step.MaxSelected) }
 					</span>
 				}
 			</div>
 		</div>
 		<!-- Actions -->
-		<div class="p-2">
-			<div class="flex items-center gap-2">
+		<div class="col-span-3 xl:col-span-1 self-center justify-self-center p-2">
+			<div class="flex gap-2">
 				<button
 					hx-get={ fmt.Sprintf("/panel/asistentes/pasos/modal/%s", step.ID) }
 					hx-target="#wizardsteps-modal"
@@ -236,7 +235,7 @@ templ WizardStepCreateModal(state *WizardStepCreateModalState) {
 				</div>
 			</div>
 			<!-- Min/Max Selection -->
-			<div class="grid grid-cols-3 gap-4">
+			<div class="grid grid-cols-2 gap-4">
 				<div>
 					<label for="min_selected" class="block text-sm font-medium text-gray-700 mb-1">
 						Mínimo a seleccionar
@@ -266,23 +265,6 @@ templ WizardStepCreateModal(state *WizardStepCreateModalState) {
 						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 						if state.WizardStep != nil {
 							value={ fmt.Sprintf("%d", state.WizardStep.MaxSelected) }
-						} else {
-							value="1"
-						}
-					/>
-				</div>
-				<div>
-					<label for="step_order" class="block text-sm font-medium text-gray-700 mb-1">
-						Orden del paso
-					</label>
-					<input
-						type="number"
-						id="step_order"
-						name="step_order"
-						min="1"
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						if state.WizardStep != nil {
-							value={ fmt.Sprintf("%d", state.WizardStep.StepOrder) }
 						} else {
 							value="1"
 						}
@@ -415,7 +397,7 @@ templ WizardStepEditModal(step *db.WizardStep, state *WizardStepEditModalState) 
 				</div>
 			</div>
 			<!-- Min/Max Selection -->
-			<div class="grid grid-cols-3 gap-4">
+			<div class="grid grid-cols-2 gap-4">
 				<div>
 					<label for="min_selected" class="block text-sm font-medium text-gray-700 mb-1">
 						Mínimo a seleccionar
@@ -442,19 +424,6 @@ templ WizardStepEditModal(step *db.WizardStep, state *WizardStepEditModalState) 
 						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					/>
 				</div>
-				<div>
-					<label for="step_order" class="block text-sm font-medium text-gray-700 mb-1">
-						Orden del paso
-					</label>
-					<input
-						type="number"
-						id="step_order"
-						name="step_order"
-						min="1"
-						value={ fmt.Sprintf("%d", step.StepOrder) }
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					/>
-				</div>
 			</div>
 			<!-- Categories -->
 			<div>
@@ -464,12 +433,14 @@ templ WizardStepEditModal(step *db.WizardStep, state *WizardStepEditModalState) 
 				<div class="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
 					if len(state.Categories) > 0 {
 						for _, category := range state.Categories {
+							{{ selected := slices.Contains(step.CategoryIDs, category.ID) }}
 							<label class="flex items-center">
 								<input
 									type="checkbox"
 									name="category_ids"
 									value={ category.ID }
 									class="mr-2"
+									checked?={ selected }
 								/>
 								<span class="text-sm text-gray-700">{ category.Name }</span>
 							</label>

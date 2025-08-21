@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/vladwithcode/salon_catalog/internal/db"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
@@ -192,7 +193,7 @@ templ WizardModal(wizard *db.Wizard, availableEventKinds []*db.EventKind, err st
 				</div>
 			</div>
 		} else {
-			<div class="flex-1 basis-full grid grid-cols-1 grid-rows-1 overflow-hidden">
+			<div class="flex-1 basis-full grid grid-cols-1 grid-rows-1 overflow-hidden pt-2">
 				<div
 					id="wizards-modal-form"
 					class="relative col-start-1 row-start-1 bg-gray-50 h-full overflow-y-auto overflow-x-hidden flex flex-col z-10"
@@ -232,7 +233,7 @@ templ WizardModal(wizard *db.Wizard, availableEventKinds []*db.EventKind, err st
 }
 
 templ WizardEditForm(wizard *db.Wizard, availableEventKinds []*db.EventKind) {
-	<div class="flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-hidden">
+	<div class="flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-x-hidden overflow-y-auto">
 		<!-- Basic Info Form -->
 		<div class="bg-white rounded-sm border border-gray-200 p-4">
 			<h4 class="text-lg font-medium text-gray-700 mb-4">Información Básica</h4>
@@ -336,7 +337,7 @@ if swapOOBStepSectionVal != nil {
 
 templ WizardStepRow(wizardID string, step *db.WizardStep) {
 	<div class="bg-gray-50 rounded border p-3" data-step-id={ step.ID }>
-		<div class="flex items-start justify-between">
+		<div class="flex items-start justify-between gap-2">
 			<div class="flex-1">
 				<h5 class="font-medium text-gray-800">{ step.Name }</h5>
 				if step.Description != "" {
@@ -353,7 +354,7 @@ templ WizardStepRow(wizardID string, step *db.WizardStep) {
 					<span>Min: { fmt.Sprintf("%d", step.MinSelected) }, Max: { fmt.Sprintf("%d", step.MaxSelected) }</span>
 				</div>
 			</div>
-			<div class="flex gap-1 ml-2">
+			<div class="flex flex-col sm:flex-row gap-1">
 				<button
 					type="button"
 					class="p-1 text-blue-600 hover:bg-blue-100 rounded"
@@ -450,7 +451,7 @@ templ WizardCreateModal(state *WizardCreateModalState) {
 }
 
 templ WizardCreateForm(state *WizardCreateModalState) {
-	<div class="2xl:col-span-full 2xl:row-start-2 flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-hidden p-4">
+	<div class="2xl:col-span-full 2xl:row-start-2 flex-1 basis-full grid grid-cols-1 lg:grid-cols-2 gap-4 h-full overflow-x-hidden overflow-y-auto">
 		<!-- Basic Info Form -->
 		<div class="bg-white rounded-sm border border-gray-200 p-4">
 			<h4 class="text-lg font-medium text-gray-700 mb-4">Información Básica</h4>
@@ -596,12 +597,14 @@ templ AddStepToWizardModal(wizard *db.Wizard, availableSteps []*db.WizardStep) {
 			</div>
 		} else {
 			<form
+				id="wizard-steps-form"
 				hx-post={ fmt.Sprintf("/panel/asistentes/%s/pasos", wizard.ID) }
 				hx-target="this"
 				hx-target-error="this"
 				hx-swap="outerHTML swap:500ms"
 				hx-indicator="wizard-steps-loading"
 				class="space-y-4"
+				data-step-data={ MarshalStepData(availableSteps) }
 			>
 				<div class="space-y-2">
 					<label for="step-select" class="block text-sm font-medium text-gray-700">Seleccionar Paso</label>
@@ -811,10 +814,15 @@ templ WizardStepsManagementSection(wizard *db.Wizard) {
 	</div>
 }
 
+func MarshalStepData(steps []*db.WizardStep) string {
+	bts, _ := json.Marshal(steps)
+	return string(bts)
+}
+
 func NextStepAvailable(wizard *db.Wizard) int {
 	nextStep := 1
 	for _, step := range wizard.Steps {
-		if step.StepOrder > nextStep {
+		if step.StepOrder >= nextStep {
 			nextStep = step.StepOrder + 1
 		}
 	}

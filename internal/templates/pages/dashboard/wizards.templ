@@ -187,7 +187,29 @@ templ Wizards() {
 templ wizardScript() {
 	<script>
         document.addEventListener('DOMContentLoaded', function() {
+            let stepData = null;
+            const actionsTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power2.out'}});
+            actionsTl.to('#wizards-actions-container', {
+                height: 'auto',
+                opacity: 1,
+            })
+
             eventManager
+                .registerClick('wizards-actions-toggle', function(e) {
+                    const container = document.getElementById('wizards-actions-container');
+                    const isOpen = container.getAttribute('data-wizards-actions') === 'open';
+
+                    if (isOpen) {
+                        actionsTl.reverse();
+                        gsap.delayedCall(0.5, () => {
+                            actionsTl.revert();
+                        });
+                        container.dataset.wizardsActions = 'closed';
+                    } else {
+                        actionsTl.play();
+                        container.dataset.wizardsActions = 'open';
+                    }
+                })
                 .register('afterSwap', '#wizards-modal', function(e) {
                     toggleWizardModal(false);
                 }, { excludeExternal: true, includeChildren: false })
@@ -222,9 +244,31 @@ templ wizardScript() {
                         }, '-=0.2');
                         target.dataset.wizardStepsModal = 'open';
                     }
+
+                    const form = e.target.querySelector('#wizard-steps-form');
+                    if (form && form.dataset.stepData) {
+                        stepData = JSON.parse(form.dataset.stepData);
+                    }
                 })
                 .registerClick('wizard-steps-modal-close', function () {
                     closeWizardStepForm();
+                })
+                .register('change', '#step-select', function(e) {
+                    const form = e.target.closest('#wizard-steps-form');
+                    if (!stepData) {
+                        return;
+                    }
+
+                    const step = stepData.find(s => s.id === e.target.value);
+                    if (!step) {
+                        form.reset();
+                        return;
+                    }
+
+                    form.querySelector('[name="required"]').checked = step.required;
+                    form.querySelector('[name="multi_select"]').checked = step.multi_select;
+                    form.querySelector('[name="min_selected"]').value = step.min_selected;
+                    form.querySelector('[name="max_selected"]').value = step.max_selected;
                 });
                 document.addEventListener('app:closeStepsModal', function() {
                     closeWizardStepForm(true);
@@ -288,6 +332,8 @@ templ wizardScript() {
                         }, '-=0.2');
                         modal.dataset.wizardStepsModal = 'open';
                     }
+
+                    stepData = null;
                 }
         });
     </script>

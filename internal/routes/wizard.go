@@ -586,6 +586,7 @@ func CreateWizardStepAndReturnTable(w http.ResponseWriter, r *http.Request, a *a
 		wizardSteps = &db.WizardStepFilterResult{HasError: true, Error: "Error al recargar pasos"}
 	}
 
+	w.Header().Set("HX-Trigger", `{"app:closeModal": {}}`)
 	comp := templ.Join(
 		dashboard.WizardStepsTable(wizardSteps),
 		components.ToasterToast(toastData),
@@ -684,6 +685,7 @@ func UpdateWizardStepAndReturnTable(w http.ResponseWriter, r *http.Request, a *a
 		wizardSteps = &db.WizardStepFilterResult{HasError: true, Error: "Error al recargar pasos"}
 	}
 
+	w.Header().Set("HX-Trigger", `{"app:closeModal": {}}`)
 	comp := templ.Join(
 		dashboard.WizardStepsTable(wizardSteps),
 		components.ToasterToast(toastData),
@@ -828,11 +830,22 @@ func parseWizardFilterParams(r *http.Request) (*db.WizardFilterParams, error) {
 	return params, nil
 }
 
+// filterValidUUIDs filters out empty and invalid UUID strings from a slice
+func filterValidUUIDs(ids []string) []string {
+	var valid []string
+	for _, id := range ids {
+		if trimmed := strings.TrimSpace(id); trimmed != "" && len(trimmed) > 0 {
+			valid = append(valid, trimmed)
+		}
+	}
+	return valid
+}
+
 func parseWizardStepFilterParams(r *http.Request) (*db.WizardStepFilterParams, error) {
 	params := &db.WizardStepFilterParams{
 		Search:     strings.TrimSpace(r.URL.Query().Get("search")),
 		SearchMode: db.SearchMode(r.URL.Query().Get("search_mode")),
-		Categories: r.URL.Query()["categories"],
+		Categories: filterValidUUIDs(r.URL.Query()["categories"]),
 		Sort:       r.URL.Query().Get("sort"),
 	}
 

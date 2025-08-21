@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"github.com/vladwithcode/salon_catalog/internal/templates"
 	"github.com/vladwithcode/salon_catalog/internal/templates/components"
 )
@@ -25,47 +26,9 @@ templ WizardSteps() {
 					</button>
 				</div>
 				<div id="wizardsteps-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-wizardsteps-actions="closed">
-					<div class="flex flex-col gap-4 pt-4">
-						<!-- Search and Filters Row -->
-						<div class="flex flex-col lg:flex-row gap-4">
-							<!-- Search Input -->
-							<div class="flex-1">
-								<label for="wizardsteps-search" class="sr-only">Buscar pasos</label>
-								<input
-									type="search"
-									id="wizardsteps-search"
-									name="search"
-									placeholder="Buscar pasos por nombre o descripción..."
-									class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-									hx-get="/panel/asistentes/pasos/table"
-									hx-trigger="input changed delay:300ms, search"
-									hx-target="#wizardsteps-table"
-									hx-swap="outerHTML swap:0.5s"
-									hx-indicator="#wizardsteps-table-loading"
-									hx-include="[name='sort'], [name='categories']"
-								/>
-							</div>
-							<!-- Category Filter -->
-							<div class="lg:w-64">
-								<label for="wizardsteps-categories" class="sr-only">Filtrar por categorías</label>
-								<select
-									id="wizardsteps-categories"
-									name="categories"
-									multiple
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-									hx-get="/panel/asistentes/pasos/table"
-									hx-trigger="change"
-									hx-target="#wizardsteps-table"
-									hx-swap="outerHTML swap:0.5s"
-									hx-indicator="#wizardsteps-table-loading"
-									hx-include="[name='search'], [name='sort']"
-								>
-									<!-- Categories will be loaded dynamically -->
-								</select>
-							</div>
-						</div>
+					<div class="flex flex-col xl:flex-row gap-4 pt-4">
 						<!-- Action Buttons Row -->
-						<div class="flex flex-col sm:flex-row gap-3">
+						<div class="flex flex-col xl:basis-1/3 gap-2">
 							<!-- New Step Button -->
 							<button
 								id="wizardsteps-actions-new"
@@ -73,8 +36,6 @@ templ WizardSteps() {
 								hx-target="#wizardsteps-modal"
 								hx-indicator="#global-loading-indicator"
 								class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-								data-wizardsteps-modal-toggle="open"
-								data-click-handler-selector="wizardsteps-modal-toggle"
 							>
 								@components.PlusIcon("w-5", nil)
 								Nuevo Paso
@@ -103,11 +64,54 @@ templ WizardSteps() {
 								hx-target="#wizardsteps-table"
 								hx-swap="outerHTML swap:0.5s"
 								hx-params="none"
-								data-click-handler-selector="[data-wizardsteps-filter-clear]"
+								data-click-handler-selector="wizardsteps-filter-clear"
 								data-wizardsteps-filter-clear
 							>
 								Limpiar Filtros
 							</button>
+						</div>
+						<!-- Search and Filters Row -->
+						<div class="flex xl:flex-col xl:basis-full xl:justify-start gap-4">
+							<!-- Search Input -->
+							<div class="flex-1 xl:basis-auto">
+								<label for="wizardsteps-search" class="sr-only">Buscar pasos</label>
+								<input
+									type="search"
+									id="wizardsteps-search"
+									name="search"
+									placeholder="Buscar pasos por nombre o descripción..."
+									class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									hx-get="/panel/asistentes/pasos/table"
+									hx-trigger="input changed delay:300ms, search"
+									hx-target="#wizardsteps-table"
+									hx-swap="outerHTML swap:0.5s"
+									hx-indicator="#wizardsteps-table-loading"
+									hx-include="[name='sort'], [name='categories']"
+								/>
+							</div>
+							<!-- Category Filter -->
+							<div class="flex-1 xl:basis-auto">
+								<label for="categories-select" class="sr-only">Filtrar por categorías</label>
+								<div
+									hx-get="/panel/categorias/select"
+									hx-target="this"
+									hx-trigger="load"
+									hx-swap="outerHTML"
+									hx-indicator="#wizardsteps-table-loading"
+									hx-vals={ getCategorySelectAttributesStr(map[string]string{
+                                            "name": "categories",
+                                            "get": "/panel/asistentes/pasos/table",
+                                            "trigger": "change",
+                                            "indicator": "#wizardsteps-table-loading",
+                                            "target": "#wizardsteps-table",
+                                            "swap": "outerHTML swap:0.5s",
+                                            "multiple": "",
+                                            "size": "3",
+                                            "data-wizardsteps-categories-select": "",
+                                            "data-click-handler-selector": "category-select",
+                                        }) }
+								></div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -186,7 +190,6 @@ templ WizardSteps() {
 							>
 								<option value="name_asc">Nombre A-Z</option>
 								<option value="name_desc">Nombre Z-A</option>
-								<option value="step_order">Orden de Paso</option>
 								<option value="newest">Más Recientes</option>
 								<option value="oldest">Más Antiguos</option>
 							</select>
@@ -244,56 +247,37 @@ script wizardStepsScript() {
 		gsap.set("#wizardsteps-modal", { opacity: 0, y: 50 });
 		gsap.set("#wizardsteps-modal-backdrop", { opacity: 0 });
 		
-		// Modal toggle handlers
-		function openModal() {
-			gsap.to("#wizardsteps-modal-container", { 
-				opacity: 1, 
-				pointerEvents: "auto", 
-				duration: 0.3 
-			});
-			gsap.to("#wizardsteps-modal-backdrop", { 
-				opacity: 1, 
-				duration: 0.3 
-			});
-			gsap.to("#wizardsteps-modal", { 
-				opacity: 1, 
-				y: 0, 
-				duration: 0.3,
-				ease: "power2.out"
-			});
-		}
-		
-		function closeModal() {
-			gsap.to("#wizardsteps-modal", { 
-				opacity: 0, 
-				y: 50, 
-				duration: 0.2 
-			});
-			gsap.to("#wizardsteps-modal-backdrop", { 
-				opacity: 0, 
-				duration: 0.2 
-			});
-			gsap.to("#wizardsteps-modal-container", { 
-				opacity: 0, 
-				pointerEvents: "none", 
-				duration: 0.2,
-				delay: 0.1
-			});
-		}
-		
-		// Modal event handlers
-		document.addEventListener('click', function(e) {
-			if (e.target.closest('[data-wizardsteps-modal-toggle="open"]')) {
-				openModal();
-			}
-			if (e.target.closest('[data-wizardsteps-modal-toggle="close"]')) {
-				closeModal();
-			}
-		});
-		
-		// Actions toggle for mobile
-		document.addEventListener('click', function(e) {
-			if (e.target.closest('#wizardsteps-actions-toggle')) {
+        eventManager
+            .register('afterSwap', '#wizardsteps-table', function(e) {
+				animateTableRows();
+				updateMultiSelectionState();
+            })
+            .register('afterSwap', '#wizardsteps-modal', function(e) {
+                openModal();
+            })
+            .register('change', '#category-select', function(e) {
+                clearFilters();
+            })
+            .register('change', '[data-wizard-step-checkbox]', function(e) {
+                updateMultiSelectionState();
+            })
+            .registerClick('wizardsteps-modal-toggle', function(e) {
+                const modalEl = document.getElementById('wizardsteps-modal');
+                const isOpen = modalEl.dataset.wizardstepsModal === 'open';
+
+                if (isOpen) {
+                    closeModal();
+                } else {
+                    openModal();
+                }
+            })
+            .registerClick('wizardsteps-filter-clear', function(e) {
+                clearFilters();
+            })
+            .registerClick('wizardsteps-table-multi-selection-ctl', function(e) {
+                toggleAllCheckboxes();
+            })
+            .registerClick('wizardsteps-actions-toggle', function(e) {
 				const container = document.getElementById('wizardsteps-actions-container');
 				const isOpen = container.getAttribute('data-wizardsteps-actions') === 'open';
 				
@@ -309,18 +293,11 @@ script wizardStepsScript() {
 						{ height: autoHeight, opacity: 1, duration: 0.3 }
 					);
 				}
-			}
-		});
-		
-		// Multi-selection checkbox handlers
-		document.addEventListener('change', function(e) {
-			if (e.target.matches('[data-wizard-step-checkbox]')) {
-				updateMultiSelectionState();
-			}
-			if (e.target.matches('#wizardsteps-table-multi-selection-ctl')) {
-				toggleAllCheckboxes();
-			}
-		});
+            });
+
+        document.addEventListener('app:closeModal', function(e) {
+            closeModal();
+        })
 		
 		function updateMultiSelectionState() {
 			const checkboxes = document.querySelectorAll('[data-wizard-step-checkbox]');
@@ -369,15 +346,58 @@ script wizardStepsScript() {
 				ease: "power2.out"
 			});
 		}
+
+        function clearFilters() {
+            const sort = document.querySelector('[name="sort"]')
+            const search = document.querySelector('[name="search"]')
+
+            if (sort) {
+                sort.selectedIndex = 0
+            }
+            if (search) {
+                search.value = ''
+            }
+        }
+
+		// Modal toggle handlers
+		function openModal() {
+			gsap.to("#wizardsteps-modal-container", { 
+				opacity: 1, 
+				pointerEvents: "auto", 
+				duration: 0.3 
+			});
+			gsap.to("#wizardsteps-modal-backdrop", { 
+				opacity: 1, 
+				duration: 0.3 
+			});
+			gsap.to("#wizardsteps-modal", { 
+				opacity: 1, 
+				y: 0, 
+				duration: 0.3,
+				ease: "power2.out"
+			});
+            document.getElementById('wizardsteps-modal').dataset.wizardstepsModal = 'open';
+		}
 		
-		// Listen for HTMX events to trigger animations
-		document.addEventListener('htmx:afterSwap', function(e) {
-			if (e.target.id === 'wizardsteps-table-wrapper' || e.target.closest('#wizardsteps-table-wrapper')) {
-				animateTableRows();
-				updateMultiSelectionState();
-			}
-		});
-		
+		function closeModal() {
+			gsap.to("#wizardsteps-modal", { 
+				opacity: 0, 
+				y: 50, 
+				duration: 0.2 
+			});
+			gsap.to("#wizardsteps-modal-backdrop", { 
+				opacity: 0, 
+				duration: 0.2 
+			});
+			gsap.to("#wizardsteps-modal-container", { 
+				opacity: 0, 
+				pointerEvents: "none", 
+				duration: 0.2,
+				delay: 0.1
+			});
+            document.getElementById('wizardsteps-modal').dataset.wizardstepsModal = 'closed';
+		}
+
 		// Initial animation
 		gsap.from("#wizardsteps-actions-container", { 
 			opacity: 0, 
@@ -386,4 +406,11 @@ script wizardStepsScript() {
 			delay: 0.2
 		});
 	});
+}
+
+func getCategorySelectAttributesStr(attrs map[string]string) string {
+	withHtmxAttrs := map[string]any{}
+	withHtmxAttrs["withHtmxAttrs"] = attrs
+	bts, _ := json.Marshal(withHtmxAttrs)
+	return string(bts)
 }

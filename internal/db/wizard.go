@@ -704,10 +704,26 @@ func FilterWizardSteps(filters WizardStepFilterParams) (*WizardStepFilterResult,
 		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	// Get total count (distinct wizard steps)
-	countQuery := "SELECT COUNT(DISTINCT ws.id) " + baseQuery
+	// Get total count (distinct wizard steps) - need to handle HAVING clause
 	var total int
-	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
+	if len(filters.Categories) > 0 {
+		// When filtering by categories, use subquery to count after HAVING clause
+		namedArgs["category_ids"] = filters.Categories
+		countQuery := fmt.Sprintf(`
+			SELECT COUNT(*) FROM (
+				SELECT DISTINCT ws.id
+				%s
+				GROUP BY ws.id, ws.name, ws.description, ws.required, ws.multi_select,
+					ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at
+				HAVING array_remove(array_agg(DISTINCT c.id), NULL) && @category_ids
+			) AS filtered_steps
+		`, baseQuery)
+		err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
+	} else {
+		// When not filtering by categories, use simple count
+		countQuery := "SELECT COUNT(DISTINCT ws.id) " + baseQuery
+		err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get total count: %w", err)
 	}
@@ -719,6 +735,14 @@ func FilterWizardSteps(filters WizardStepFilterParams) (*WizardStepFilterResult,
 	// Add pagination to named args
 	namedArgs["limit"] = filters.Limit
 	namedArgs["offset"] = offset
+
+	// Build HAVING clause for category filtering
+	havingClause := ""
+	if len(filters.Categories) > 0 {
+		havingClause = " HAVING array_remove(array_agg(DISTINCT c.id), NULL) && @category_ids"
+		// Add category_ids to namedArgs for the HAVING clause
+		namedArgs["category_ids"] = filters.Categories
+	}
 
 	// Build final query with sorting and pagination
 	orderBy := buildWizardStepOrderByClause(filters)
@@ -732,7 +756,8 @@ func FilterWizardSteps(filters WizardStepFilterParams) (*WizardStepFilterResult,
 		GROUP BY ws.id, ws.name, ws.description, ws.required, ws.multi_select,
 			ws.min_selected, ws.max_selected, ws.step_order, ws.created_at, ws.updated_at
 		%s
-		LIMIT @limit OFFSET @offset`, baseQuery, orderBy)
+		%s
+		LIMIT @limit OFFSET @offset`, baseQuery, havingClause, orderBy)
 
 	// Execute query
 	rows, err := conn.Query(ctx, selectQuery, namedArgs)
@@ -765,7 +790,7 @@ func buildWizardStepQueryConditions(filters WizardStepFilterParams) ([]string, p
 	var conditions []string
 	namedArgs := make(pgx.NamedArgs)
 
-	// Add search condition
+	// Add search condition (WHERE clause only - category filtering moved to HAVING clause)
 	if filters.Search != "" {
 		switch filters.SearchMode {
 		case SearchModeFullText:
@@ -780,12 +805,6 @@ func buildWizardStepQueryConditions(filters WizardStepFilterParams) ([]string, p
 			conditions = append(conditions, "(ws.name ILIKE @fuzzy_search OR ws.description ILIKE @fuzzy_search)")
 			namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
 		}
-	}
-
-	// Add category filter
-	if len(filters.Categories) > 0 {
-		conditions = append(conditions, "c.id = ANY(@category_ids)")
-		namedArgs["category_ids"] = filters.Categories
 	}
 
 	return conditions, namedArgs
