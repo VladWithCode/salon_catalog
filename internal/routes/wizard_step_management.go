@@ -302,8 +302,9 @@ func UpdateWizardStepParamsAndReturn(w http.ResponseWriter, r *http.Request, a *
 		components.ToasterToast(toastData),
 	)
 	w.Header().Set("HX-Trigger", `{"app:closeStepsModal": {}}`)
-	reCtx := context.WithValue(r.Context(), "swapOOBStepSection", true)
-	templ.RenderFragments(reCtx, w, comp, "toaster-toast", "wizardStepsSection")
+	w.Header().Set("HX-Reswap", "outerHTML")
+	w.Header().Set("HX-Retarget", "#wizard-steps-section")
+	templ.RenderFragments(r.Context(), w, comp, "toaster-toast", "wizardStepsSection")
 }
 
 func DetachStepFromWizardAndReturn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
