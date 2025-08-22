@@ -70,15 +70,13 @@ templ WizardScript() {
 					.register('afterSwap', '#wizard-modal', (e) => {
 						this.reinitializeAfterSwap();
 					})
-                    .register('beforeRequest', '[data-wizard-next-step], [data-wizard-nav], [data-wizard-complete]', (e) => {
+                    .register('configRequest', '#wizard-modal', (e) => {
 						// Include localStorage data in request
 						if (this.currentWizardId) {
 							const allSelections = this.getAllSelections(this.currentWizardId);
-							const hiddenInput = document.createElement('input');
-							hiddenInput.type = 'hidden';
-							hiddenInput.name = 'wizard_localStorage';
-							hiddenInput.value = JSON.stringify(allSelections);
-							e.detail.elt.appendChild(hiddenInput);
+                            const jsonPayload = JSON.stringify(allSelections);
+
+                            e.detail.parameters['wizard_localStorage'] = jsonPayload;
 						}
 
 						// Validate step before navigation (except for previous button)

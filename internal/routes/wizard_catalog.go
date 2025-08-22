@@ -98,7 +98,7 @@ func RenderWizardStep(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Handle localStorage selections if provided
-	selectionsJSON := r.FormValue("wizard_localStorage")
+	selectionsJSON := r.URL.Query().Get("wizard_localStorage")
 	var savedSelections map[string][]string
 	if selectionsJSON != "" {
 		if err := json.Unmarshal([]byte(selectionsJSON), &savedSelections); err == nil {
