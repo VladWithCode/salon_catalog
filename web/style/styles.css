@@ -179,4 +179,8 @@ body {
     *[disabled] {
         @apply opacity-80 brightness-80;
     }
+
+    button:not([disabled]) {
+        @apply cursor-pointer;
+    }
 }

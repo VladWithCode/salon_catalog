@@ -41,6 +41,7 @@ func (s *CatalogState) Serialize() string {
 templ Catalog(state *CatalogState) {
 	@templates.BaseLayout("Catálogo - Villa Chenacolo", nil, false) {
 		@CatalogScript()
+		@components.WizardBannerScript()
 		<div class="fixed bottom-20 right-4 z-40">
 			<button id="scroll-top-btn" class="bg-dark text-secondary rounded-xs p-2 opacity-0 pointer-events-none">
 				<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,56 +67,6 @@ templ Catalog(state *CatalogState) {
 				</div>
 			</div>
 		</section>
-		<!-- Wizard vs Browse Choice -->
-		/* <section class="py-8 px-4 bg-stone-50" id="catalog-intro">
-			<div class="max-w-4xl mx-auto text-center">
-				<h2 class="text-2xl font-bold mb-4">¿Cómo quieres planear tu evento?</h2>
-				<div class="grid md:grid-cols-2 gap-6 mt-8">
-					<!-- Wizard Option -->
-					<div
-						class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent hover:border-accent transition-colors"
-					>
-						<div class="text-accent mb-4">
-							<svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-								<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold mb-2">Asistente de Planeación</h3>
-						<p class="text-gray-600 mb-4">Te guiamos paso a paso para crear el evento perfecto</p>
-						<button
-							class="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
-							hx-get="/wizard/categories"
-							hx-target="#wizard-modal"
-							hx-trigger="click"
-							data-wizard-trigger
-						>
-							Usar Asistente
-						</button>
-					</div>
-					<!-- Browse Option -->
-					<div
-						class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent hover:border-primary transition-colors"
-					>
-						<div class="text-primary mb-4">
-							<svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold mb-2">Explorar Catálogo</h3>
-						<p class="text-gray-600 mb-4">Navega libremente por todos nuestros productos</p>
-						<button
-							class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-							data-click-handler-selector="browse-trigger"
-							data-browse-trigger
-						>
-							Ver Catálogo
-						</button>
-					</div>
-				</div>
-			</div>
-		</section> */
 		<div id="catalog-browse" class="relative">
 			<!-- Search Bar -->
 			<section class="py-4 px-4 bg-white" id="catalog-search" data-active-search="">
@@ -176,9 +127,11 @@ templ Catalog(state *CatalogState) {
 		</div>
 		<!-- Floating Cart -->
 		@components.FloatingCart(0, false)
+		<!-- Wizard Banner -->
+		@components.WizardBanner()
 		<!-- Wizard Modal -->
-		<div id="wizard-modal" class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 pointer-events-none">
-			<!-- Wizard content loaded here -->
+		<div id="wizard-modal" class="relative z-50 invisible">
+			<!-- Wizard content loaded here via HTMX -->
 		</div>
 	}
 }
@@ -265,29 +218,46 @@ templ CatalogScript() {
         }
 
         function showWizardModal() {
-            const modal = document.getElementById('wizard-modal');
-            modal.classList.remove('hidden');
-            gsap.to(modal, {
-                opacity: 1,
-                duration: 0.3,
-                onComplete: () => {
-                    modal.classList.remove('pointer-events-none');
+            if (window.wizardManager) {
+                window.wizardManager.showModal();
+            } else {
+                // Fallback for direct modal access
+                const modal = document.getElementById('wizard-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    gsap.to(modal, {
+                        opacity: 1,
+                        duration: 0.3,
+                        onComplete: () => {
+                            modal.classList.remove('pointer-events-none');
+                        }
+                    });
                 }
-            });
+            }
         }
         function closeWizardModal() {
-            const modal = document.getElementById('wizard-modal');
-            modal.classList.add('pointer-events-none');
-            gsap.to(modal, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => {
-                    modal.classList.add('hidden');
-                    modal.innerHTML = '';
+            if (window.wizardManager) {
+                window.wizardManager.hideModal();
+            } else {
+                // Fallback for direct modal access
+                const modal = document.getElementById('wizard-modal');
+                if (modal) {
+                    modal.classList.add('pointer-events-none');
+                    gsap.to(modal, {
+                        opacity: 0,
+                        duration: 0.3,
+                        onComplete: () => {
+                            modal.classList.add('hidden');
+                            modal.innerHTML = '';
+                        }
+                    });
                 }
-            });
+            }
         }
 
+        // Make wizard functions globally available
+        window.showWizardModal = showWizardModal;
+        window.closeWizardModal = closeWizardModal;
         const scrollTopBtn = document.getElementById('scroll-top-btn');
         const scrollTopBtnThreshold = document.getElementById('scroll-top-btn-threshold');
         const scroll = ScrollTrigger.create({

@@ -1,0 +1,82 @@
+package components
+
+templ WizardBanner() {
+	<div
+		id="wizard-banner"
+		class="fixed bottom-0 inset-x-0 z-40 bg-gradient-to-r from-accent to-primary text-white p-4 shadow-2xl"
+		data-wizard-banner
+	>
+		<div class="max-w-6xl mx-auto grid grid-cols-[1fr_auto] grid-rows-[1fr_auto] gap-y-4 xl:flex xl:items-center xl:justify-between">
+			<div class="flex items-center space-x-4">
+				<div class="hidden sm:block">
+					<svg class="w-12 h-12 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+				</div>
+				<div>
+					<h3 class="font-bold text-lg sm:text-xl">¿Necesitas ayuda planificando tu evento?</h3>
+					<p class="text-white/90 text-sm sm:text-base">Usa nuestro Asistente para Creación de Eventos y obtén recomendaciones personalizadas</p>
+				</div>
+			</div>
+			<button
+				class="row-start-2 col-span-full self-center justify-self-stretch px-6 py-2 bg-white text-accent font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+				hx-get="/wizard/selection"
+				hx-target="#wizard-modal"
+				hx-indicator="#wizard-modal-loading"
+				data-open-wizard
+				data-click-handler-selector="open-wizard"
+			>
+				Usar Asistente
+			</button>
+			<button
+				class="col-start-2 row-start-1 self-start p-2 text-white/80 hover:text-white transition-colors"
+				data-dismiss-wizard-banner
+				data-click-handler-selector="dismiss-wizard-banner"
+			>
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+	</div>
+}
+
+templ WizardBannerScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const banner = document.getElementById('wizard-banner');
+			let bannerDismissed = localStorage.getItem('wizardBannerDismissed') === 'true';
+			
+			// Show banner after 3 seconds if not dismissed
+			if (!bannerDismissed) {
+				setTimeout(() => {
+					if (banner) {
+						banner.classList.remove('translate-y-full');
+						banner.classList.add('translate-y-0');
+					}
+				}, 1000);
+			} else {
+				// Hide banner if previously dismissed
+				if (banner) {
+					banner.classList.add('translate-y-full');
+				}
+			}
+
+            eventManager
+                .registerClick('dismiss-wizard-banner', function(e) {
+                    localStorage.setItem('wizardBannerDismissed', 'true');
+
+                    const banner = document.getElementById('wizard-banner');
+                    if (banner) {
+                        banner.classList.add('hidden');
+                    }
+                })
+				.registerClick('open-wizard', function(e) {
+                    console.log(e)
+					if (typeof showWizardModal === 'function') {
+						showWizardModal();
+					}
+				});
+		});
+	</script>
+}
