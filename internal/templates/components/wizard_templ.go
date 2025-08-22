@@ -121,7 +121,7 @@ func WizardSelectionView(wizards []*db.Wizard) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</button><div class=\"pr-12\"><h2 class=\"text-2xl font-bold mb-2\">Asistente para Creación de Eventos</h2><p class=\"text-current/80\">Selecciona el tipo de evento que estás planeando para obtener recomendaciones personalizadas</p></div></div><div class=\"flex-1 p-4 overflow-y-auto\"><div class=\"\"><h3 class=\"text-lg font-semibold text-gray-800 mb-4\">¿Qué tipo de evento estás organizando?</h3></div><div class=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</button><div class=\"pr-12\"><h2 class=\"text-2xl font-bold mb-2\">Asistente para Creación de Eventos</h2><p class=\"text-current/80\">Selecciona el tipo de evento que estás planeando para obtener recomendaciones personalizadas</p></div></div><div class=\"flex-1 p-4 overflow-y-auto space-y-4\"><div class=\"\"><h3 class=\"text-lg font-semibold text-gray-800\">¿Qué tipo de evento estás organizando?</h3></div><div class=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -207,7 +207,7 @@ func WizardSelectionView(wizards []*db.Wizard) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div id=\"wizard-modal-footer\" class=\"absolute bottom-4 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400\" data-wizard-modal-footer=\"show\"><div class=\"flex gap-4\"><div class=\"flex-shrink-0\"><svg class=\"w-5 h-5 text-blue-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\"></path></svg></div><p class=\"text-sm text-blue-700\"><strong>¿Cómo funciona?</strong> El asistente te guiará paso a paso para seleccionar los productos perfectos para tu evento. Cada paso te mostrará opciones específicas según el tipo de evento que elijas.</p><div class=\"ml-auto\"><button id=\"wizard-modal-close\" class=\"text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300\" data-click-handler-selector=\"close-wizard\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div id=\"wizard-modal-footer\" class=\"sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400\" data-wizard-modal-footer=\"show\"><div class=\"flex gap-4\"><div class=\"flex-shrink-0\"><svg class=\"w-5 h-5 text-blue-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\"></path></svg></div><p class=\"text-sm text-blue-700\"><strong>¿Cómo funciona?</strong> El asistente te guiará paso a paso para seleccionar los productos perfectos para tu evento. Cada paso te mostrará opciones específicas según el tipo de evento que elijas.</p><div class=\"ml-auto\"><button id=\"wizard-modal-close\" class=\"text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300\" data-click-handler-selector=\"close-wizard\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -382,7 +382,7 @@ func WizardStepView(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><div class=\"w-80 bg-gray-50 p-4 border-r overflow-y-auto\"><h3 class=\"font-semibold text-gray-700 mb-4\">Pasos del Asistente</h3><div class=\"space-y-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><div class=\"hidden xl:block w-80 bg-gray-50 p-4 border-r overflow-y-auto\"><h3 class=\"font-semibold text-gray-700 mb-4\">Pasos del Asistente</h3><div class=\"space-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -485,7 +485,7 @@ func WizardStepView(state *WizardModalState) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div></div><div class=\"flex-1 flex flex-col\"><div class=\"flex-1 overflow-y-auto p-4 gap-4\"><div class=\"space-y-1\"><h3 class=\"text-2xl font-bold text-gray-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div></div><div class=\"flex-1 flex flex-col max-w-full overflow-hidden\"><div class=\"flex-1 overflow-y-auto p-4 gap-4\"><div class=\"space-y-1\"><h3 class=\"text-2xl font-bold text-gray-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

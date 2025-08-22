@@ -68,9 +68,9 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 			<p class="text-current/80">Selecciona el tipo de evento que estás planeando para obtener recomendaciones personalizadas</p>
 		</div>
 	</div>
-	<div class="flex-1 p-4 overflow-y-auto">
+	<div class="flex-1 p-4 overflow-y-auto space-y-4">
 		<div class="">
-			<h3 class="text-lg font-semibold text-gray-800 mb-4">¿Qué tipo de evento estás organizando?</h3>
+			<h3 class="text-lg font-semibold text-gray-800">¿Qué tipo de evento estás organizando?</h3>
 		</div>
 		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 			for _, wizard := range wizards {
@@ -102,7 +102,7 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 		</div>
 		<div
 			id="wizard-modal-footer"
-			class="absolute bottom-4 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400"
+			class="sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400"
 			data-wizard-modal-footer="show"
 		>
 			<div class="flex gap-4">
@@ -164,7 +164,7 @@ templ WizardStepView(state *WizardModalState) {
 		data-min-selected={ fmt.Sprintf("%d", state.CurrentStep.MinSelected) }
 		data-max-selected={ fmt.Sprintf("%d", state.CurrentStep.MaxSelected) }
 	>
-		<div class="w-80 bg-gray-50 p-4 border-r overflow-y-auto">
+		<div class="hidden xl:block w-80 bg-gray-50 p-4 border-r overflow-y-auto">
 			<h3 class="font-semibold text-gray-700 mb-4">Pasos del Asistente</h3>
 			<div class="space-y-2">
 				for i, step := range state.CurrentWizard.Steps {
@@ -202,7 +202,7 @@ templ WizardStepView(state *WizardModalState) {
 				}
 			</div>
 		</div>
-		<div class="flex-1 flex flex-col">
+		<div class="flex-1 flex flex-col max-w-full overflow-hidden">
 			<div class="flex-1 overflow-y-auto p-4 gap-4">
 				<div class="space-y-1">
 					<h3 class="text-2xl font-bold text-gray-800">{ state.CurrentStep.Name }</h3>
