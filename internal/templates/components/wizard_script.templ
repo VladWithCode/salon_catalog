@@ -163,36 +163,24 @@ templ WizardScript() {
 			}
 
 			handleProductInputChange(input) {
-				const card = input.closest('[data-wizard-product-card]');
-				const overlay = card.querySelector('[data-selection-overlay]');
-				const button = card.querySelector('[data-selection-button]');
-				const buttonText = button.querySelector('[data-selection-text]');
+				// Handle radio button selection for single-select steps
+				if (input.type === 'radio' && input.checked) {
+					// Reset all cards in this step to default styling first
+					this.resetAllCardStylesInStep(input.name);
+					// Then uncheck other radio buttons
+					this.deselectOtherRadioButtons(input);
+				}
 				
+				// Update card styling based on selection state
+				this.updateCardStyling(input, input.checked);
+				
+				// Add selection animation for selected items
 				if (input.checked) {
-					// Product selected
-					card.classList.add('ring-2', 'ring-accent');
-					overlay.classList.remove('opacity-0');
-					button.classList.remove('border-gray-300', 'bg-gray-50', 'text-gray-700');
-					button.classList.add('border-accent', 'bg-accent', 'text-gray-50');
-					buttonText.textContent = 'Seleccionado';
-					
-					// Handle radio button deselection for single-select steps
-					if (input.type === 'radio') {
-						this.deselectOtherRadioButtons(input);
-					}
-					
-					// Add selection animation
+					const card = input.closest('[data-wizard-product-card]');
 					gsap.fromTo(card, 
 						{ scale: 1 },
 						{ scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }
 					);
-				} else {
-					// Product deselected
-					card.classList.remove('ring-2', 'ring-accent');
-					overlay.classList.add('opacity-0');
-					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700');
-					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
-					buttonText.textContent = 'Seleccionar';
 				}
 				
 				// Save to localStorage
@@ -202,14 +190,54 @@ templ WizardScript() {
 				this.updateStepValidation();
 			}
 
+			resetAllCardStylesInStep(inputName) {
+				// Reset all cards in this step to default (unselected) styling
+				const allRadios = document.querySelectorAll(`input[name="${inputName}"]`);
+				allRadios.forEach(radio => {
+					const card = radio.closest('[data-wizard-product-card]');
+					const overlay = card.querySelector('[data-selection-overlay]');
+					const button = card.querySelector('[data-selection-button]');
+					const buttonText = button.querySelector('[data-selection-text]');
+					
+					// Reset to default styling
+					card.classList.remove('ring-2', 'ring-accent');
+					overlay.classList.add('opacity-0');
+					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
+					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					buttonText.textContent = 'Seleccionar';
+				});
+			}
+			
 			deselectOtherRadioButtons(selectedInput) {
 				const allRadios = document.querySelectorAll(`input[name="${selectedInput.name}"]`);
 				allRadios.forEach(radio => {
 					if (radio !== selectedInput && radio.checked) {
 						radio.checked = false;
-						this.handleProductInputChange(radio);
 					}
 				});
+			}
+			
+			updateCardStyling(input, isSelected) {
+				const card = input.closest('[data-wizard-product-card]');
+				const overlay = card.querySelector('[data-selection-overlay]');
+				const button = card.querySelector('[data-selection-button]');
+				const buttonText = button.querySelector('[data-selection-text]');
+				
+				if (isSelected) {
+					// Product selected
+					card.classList.add('ring-2', 'ring-accent');
+					overlay.classList.remove('opacity-0');
+					button.classList.remove('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					button.classList.add('border-accent', 'bg-accent', 'text-gray-50');
+					buttonText.textContent = 'Seleccionado';
+				} else {
+					// Product deselected
+					card.classList.remove('ring-2', 'ring-accent');
+					overlay.classList.add('opacity-0');
+					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
+					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					buttonText.textContent = 'Seleccionar';
+				}
 			}
 
 			updateSelectionSummary() {
@@ -320,7 +348,7 @@ templ WizardScript() {
 				// Load any existing selections from the server state
 				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
 				selectedInputs.forEach(input => {
-					this.handleProductInputChange(input);
+					this.updateCardStyling(input, true);
 				});
 			}
 
@@ -348,7 +376,7 @@ templ WizardScript() {
 					const input = document.querySelector(`[data-product-id="${productId}"][data-wizard-product-input]`);
 					if (input && !input.checked) {
 						input.checked = true;
-						this.handleProductInputChange(input);
+						this.updateCardStyling(input, true);
 					}
 				});
 			}
