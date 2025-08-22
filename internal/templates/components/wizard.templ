@@ -1,258 +1,460 @@
 package components
 
-import "github.com/vladwithcode/salon_catalog/internal/db"
-import "fmt"
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
 
-templ WizardModal(steps []db.WizardStep, currentStep int) {
-	<div class="flex items-center justify-center min-h-screen p-4">
-		<div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" data-wizard-container>
-			<!-- Header -->
-			<div class="bg-gradient-to-r from-primary to-accent p-6 text-white relative">
-				<button
-					class="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
-					data-close-wizard
-				>
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+// WizardModalState represents the different states and data for the wizard modal
+type WizardModalState struct {
+	CurrentView   string              `json:"current_view"` // "selection", "step", "completion"
+	Wizards       []*db.Wizard        `json:"wizards"`
+	CurrentWizard *db.Wizard          `json:"current_wizard"`
+	CurrentStep   *db.WizardStep      `json:"current_step"`
+	StepIndex     int                 `json:"step_index"`
+	StepCount     int                 `json:"step_count"`
+	Products      []*db.CatalogProd   `json:"products"`
+	Selections    map[string][]string `json:"selections"` // step_id -> product_ids
+	Error         string              `json:"error"`
+}
+
+templ WizardModal(state *WizardModalState) {
+	<div
+		id="wizard-modal-overlay"
+		class="fixed inset-0 h-screen w-screen bg-primary/60 z-50 overflow-hidden"
+		data-wizard-modal-overlay
+	>
+		<div
+			class="absolute inset-0 z-40 h-full bg-light flex items-center justify-center flex-col gap-4 text-primary opacity-0 pointer-events-none htmx-indicator transition-opacity duration-300"
+			id="wizard-modal-loading"
+		>
+			@LoadingIcon("h-16", nil)
+			<p class="text-lg font-bold">Cargando asistente...</p>
+		</div>
+		<div class="flex items-stretch justify-center h-full px-4 py-6">
+			<div
+				class="flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0"
+				id="wizard-modal-content"
+				data-wizard-modal-content
+			>
+				if state != nil {
+					switch state.CurrentView {
+						case "selection":
+							@WizardSelectionView(state.Wizards)
+						case "step":
+							@WizardStepView(state)
+						case "completion":
+							@WizardCompletionView(state)
+						default:
+							@WizardSelectionView(state.Wizards)
+					}
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ WizardSelectionView(wizards []*db.Wizard) {
+	<div class="basis-auto bg-gradient-to-r from-primary to-accent p-4 text-light relative">
+		<button
+			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
+			data-close-wizard
+		>
+			@TimesIcon("h-8", nil)
+		</button>
+		<div class="pr-12">
+			<h2 class="text-2xl font-bold mb-2">Asistente para Creación de Eventos</h2>
+			<p class="text-current/80">Selecciona el tipo de evento que estás planeando para obtener recomendaciones personalizadas</p>
+		</div>
+	</div>
+	<div class="flex-1 p-4 overflow-y-auto">
+		<div class="">
+			<h3 class="text-lg font-semibold text-gray-800 mb-4">¿Qué tipo de evento estás organizando?</h3>
+		</div>
+		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+			for _, wizard := range wizards {
+				<div class="bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm p-6 hover:border-primary transition-colors cursor-pointer group">
+					<div class="text-center space-y-4">
+						<div class="w-fit mx-auto bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors p-4">
+							@WizardIcon("w-8", nil)
+						</div>
+						<div class="space-y-1">
+							<h4 class="font-bold text-lg">{ wizard.Name }</h4>
+							if wizard.EventKind != "" {
+								<p class="text-gray-600 text-sm">{ wizard.EventKind }</p>
+							}
+							if wizard.Description != "" {
+								<p class="text-gray-600 text-xs">{ wizard.Description }</p>
+							}
+						</div>
+						<button
+							class="w-full bg-primary text-light py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+							hx-get={ fmt.Sprintf("/wizard/%s/start", wizard.ID) }
+							hx-target="#wizard-modal"
+							hx-indicator="#wizard-modal-loading"
+						>
+							Usar este Asistente
+						</button>
+					</div>
+				</div>
+			}
+		</div>
+		<div
+			id="wizard-modal-footer"
+			class="absolute bottom-4 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400"
+			data-wizard-modal-footer="show"
+		>
+			<div class="flex gap-4">
+				<div class="flex-shrink-0">
+					<svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
 					</svg>
-				</button>
-				<h2 class="text-2xl font-bold mb-2">Asistente de Planeación</h2>
-				<p class="text-white/90">Te ayudamos a crear el evento perfecto paso a paso</p>
-				<!-- Progress Bar -->
-				<div class="mt-6">
-					<div class="flex justify-between items-center mb-2">
-						<span class="text-sm font-medium">Progreso</span>
-						<span class="text-sm font-medium" data-progress-text>
-							Paso { currentStep + 1 } de { len(steps) }
-						</span>
-					</div>
-					<div class="w-full bg-white/20 rounded-full h-2">
-						<div
-							class="bg-white h-2 rounded-full transition-all duration-500"
-							style={ templ.KV("width", fmt.Sprintf("%.1f%%", float64(currentStep+1)/float64(len(steps))*100)) }
-							data-progress-bar
-						></div>
-					</div>
+				</div>
+				<p class="text-sm text-blue-700">
+					<strong>¿Cómo funciona?</strong> El asistente te guiará paso a paso para seleccionar los productos perfectos para tu evento. Cada paso te mostrará opciones específicas según el tipo de evento que elijas.
+				</p>
+				<div class="ml-auto">
+					<button
+						id="wizard-modal-close"
+						class="text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300"
+						data-wizard-modal-footer-close
+						data-click-handler-selector="wizard-modal-footer-close"
+					>
+						@TimesIcon("w-6", nil)
+					</button>
 				</div>
 			</div>
-			<!-- Content Area -->
-			<div class="flex h-[calc(90vh-180px)]">
-				<!-- Steps Sidebar -->
-				<div class="w-1/4 bg-gray-50 p-4 border-r overflow-y-auto">
-					<h3 class="font-semibold text-gray-700 mb-4">Pasos</h3>
-					<div class="space-y-2">
-						for i, step := range steps {
-							<div
-								class={
-									"flex items-center p-3 rounded-lg transition-colors cursor-pointer",
-									templ.KV("bg-accent text-white", i == currentStep),
-									templ.KV("bg-white hover:bg-gray-100", i != currentStep),
-									templ.KV("opacity-50", i > currentStep),
-								}
-							>
-								<div
-									class={
-										"w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3",
-										templ.KV("bg-white text-accent", i == currentStep),
-										templ.KV("bg-gray-300 text-gray-600", i != currentStep && i > currentStep),
-										templ.KV("bg-green-500 text-white", i < currentStep),
-									}
-								>
-									if i < currentStep {
-										✓
-									} else {
-										{ fmt.Sprintf("%d", i+1) }
-									}
-								</div>
-								<span class="text-sm font-medium">{ step.Name }</span>
-							</div>
-						}
-					</div>
+		</div>
+	</div>
+}
+
+templ WizardStepView(state *WizardModalState) {
+	<div class="basis-auto bg-gradient-to-r from-primary to-accent p-4 text-light relative">
+		<button
+			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
+			data-close-wizard
+		>
+			@TimesIcon("h-6", nil)
+		</button>
+		<div class="pr-12">
+			<h2 class="text-xl font-bold mb-1">{ state.CurrentWizard.Name }</h2>
+			<p class="text-current/80 text-sm mb-4">{ state.CurrentStep.Name }</p>
+			<div class="space-y-2">
+				<div class="flex justify-between items-center">
+					<span class="text-sm font-medium">Progreso</span>
+					<span class="text-sm font-medium">
+						Paso { state.StepIndex } de { len(state.CurrentWizard.Steps) }
+					</span>
 				</div>
-				<!-- Main Content -->
-				<div class="flex-1 flex flex-col">
-					<div class="flex-1 overflow-y-auto" id="wizard-step-content">
-						if currentStep < len(steps) {
-							@WizardStep(steps[currentStep], currentStep)
+				<div class="w-full bg-gray-50/20 rounded-full h-2">
+					<div
+						class="bg-gray-50 h-2 rounded-full transition-all duration-500"
+						style={ fmt.Sprintf("width: %.1f%%", float64(state.StepIndex)/float64(len(state.CurrentWizard.Steps))*100) }
+					></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="flex-1 flex overflow-hidden">
+		<div class="w-80 bg-gray-50 p-4 border-r overflow-y-auto">
+			<h3 class="font-semibold text-gray-700 mb-4">Pasos del Asistente</h3>
+			<div class="space-y-2">
+				for i, step := range state.CurrentWizard.Steps {
+					{{ i := i + 1 }}
+					<div
+						class={
+							"flex items-center p-3 rounded-lg transition-colors",
+							templ.KV("bg-accent text-gray-50", i == state.StepIndex),
+							templ.KV("bg-gray-50 text-gray-700", i != state.StepIndex && i < state.StepIndex),
+							templ.KV("bg-green-100 text-green-800", i < state.StepIndex),
+							templ.KV("bg-gray-50 text-gray-400", i > state.StepIndex),
 						}
-					</div>
-					<!-- Footer Actions -->
-					<div class="p-6 border-t bg-gray-50 flex justify-between items-center">
-						<button
+					>
+						<div
 							class={
-								"px-6 py-2 rounded-lg font-medium transition-colors",
-								templ.KV("bg-gray-200 text-gray-400 cursor-not-allowed", currentStep == 0),
-								templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", currentStep > 0),
+								"w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3",
+								templ.KV("bg-gray-50 text-accent", i == state.StepIndex),
+								templ.KV("bg-green-500 text-gray-50", i < state.StepIndex),
+								templ.KV("bg-gray-300 text-gray-600", i > state.StepIndex),
 							}
-							if currentStep > 0 {
-								hx-get={ fmt.Sprintf("/wizard/step/%s", steps[currentStep-1].ID) }
-								hx-target="#wizard-modal"
-								hx-include="[data-wizard-selections]"
-							}
-							disabled?={ currentStep == 0 }
 						>
-							← Anterior
-						</button>
-						<div class="flex gap-3">
-							<button
-								class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-								data-close-wizard
-							>
-								Cancelar
-							</button>
-							if currentStep < len(steps)-1 {
-								<button
-									class="px-6 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-colors"
-									hx-post={ fmt.Sprintf("/wizard/step/%s", steps[currentStep].ID) }
-									hx-target="#wizard-modal"
-									hx-include="[data-wizard-selections]"
-									data-next-step
-								>
-									Siguiente →
-								</button>
+							if i < state.StepIndex {
+								@CheckIcon("w-5", nil)
 							} else {
-								<button
-									class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-									hx-post="/event/save-plan"
-									hx-include="[data-wizard-selections]"
-									data-finish-wizard
-								>
-									Finalizar Planeación
-								</button>
+								{ fmt.Sprintf("%d", i) }
+							}
+						</div>
+						<div class="flex-1">
+							<span class="text-sm font-medium">{ step.Name }</span>
+							if step.Required {
+								<span class="block text-xs text-current/75">Requerido</span>
 							}
 						</div>
 					</div>
+				}
+			</div>
+		</div>
+		<div class="flex-1 flex flex-col">
+			<div class="flex-1 overflow-y-auto p-4 gap-4">
+				<div class="space-y-1">
+					<h3 class="text-2xl font-bold text-gray-800">{ state.CurrentStep.Name }</h3>
+					if state.CurrentStep.Description != "" {
+						<p class="text-gray-600">{ state.CurrentStep.Description }</p>
+					}
+					<div class="flex flex-wrap gap-2">
+						if state.CurrentStep.Required {
+							<span class="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+								Requerido
+							</span>
+						}
+						if state.CurrentStep.MultiSelect {
+							<span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+								Selección múltiple
+							</span>
+							if state.CurrentStep.MinSelected > 0 {
+								<span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+									Mínimo: { fmt.Sprintf("%d", state.CurrentStep.MinSelected) }
+								</span>
+							}
+							if state.CurrentStep.MaxSelected > 0 && state.CurrentStep.MaxSelected != 1 {
+								<span class="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded">
+									Máximo: { fmt.Sprintf("%d", state.CurrentStep.MaxSelected) }
+								</span>
+							}
+						} else {
+							<span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded">
+								Selección única
+							</span>
+						}
+					</div>
+				</div>
+				<div class="flex flex-col gap-4 pt-6">
+					<div class="flex-1 basis-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-hidden overflow-y-auto" id="wizard-products-grid">
+						for _, product := range state.Products {
+							@WizardProductCard(product, state.CurrentStep.MultiSelect, state.StepIndex)
+						}
+					</div>
+					<div class="p-4 bg-gray-50 rounded-lg sticky bottom-0">
+						<h4 class="font-semibold text-gray-700 mb-2">Productos Seleccionados:</h4>
+						<div class="text-sm text-gray-600" data-selected-summary>
+							Ningún producto seleccionado
+						</div>
+						if state.CurrentStep.Required {
+							<p class="text-xs text-red-600 mt-2">
+								* Debes seleccionar al menos un producto para continuar
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+			<div class="p-4 border-t bg-gray-50 flex justify-between items-center">
+				<button
+					class={
+						"px-6 py-2 rounded-lg font-medium transition-colors",
+						templ.KV("bg-gray-200 text-gray-400 cursor-not-allowed", state.StepIndex == 1),
+						templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", state.StepIndex > 1),
+					}
+					if state.StepIndex > 1 {
+						hx-get={ fmt.Sprintf(
+                            "/wizard/%s/step/%s",
+                            state.CurrentWizard.ID,
+                            state.CurrentWizard.Steps[state.StepIndex-2].ID, // Step idx is one-based
+                        ) }
+						hx-target="#wizard-modal"
+						hx-include="[data-wizard-selections]"
+						hx-indicator="#wizard-modal-loading"
+					}
+					disabled?={ state.StepIndex == 1 }
+				>
+					← Anterior
+				</button>
+				<div class="flex gap-3">
+					<button
+						class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+						data-close-wizard
+					>
+						Cancelar
+					</button>
+					if state.StepIndex < len(state.CurrentWizard.Steps) {
+						<button
+							class="px-6 py-2 bg-accent text-gray-50 rounded-lg font-medium hover:bg-accent/90 transition-colors"
+							hx-get={ fmt.Sprintf(
+                                "/wizard/%s/step/%s",
+                                state.CurrentWizard.ID,
+                                state.CurrentWizard.Steps[state.StepIndex].ID, // Step idx is one-based
+                            ) }
+							hx-target="#wizard-modal"
+							hx-include="[data-wizard-selections]"
+							hx-indicator="#wizard-modal-loading"
+							data-wizard-next-step
+						>
+							Siguiente →
+						</button>
+					} else {
+						<button
+							class="px-6 py-2 bg-green-600 text-gray-50 rounded-lg font-medium hover:bg-green-700 transition-colors"
+							hx-post={ fmt.Sprintf("/wizard/%s/complete", state.CurrentWizard.ID) }
+							hx-target="#wizard-modal"
+							hx-include="[data-wizard-selections]"
+							hx-indicator="#wizard-modal-loading"
+							data-wizard-complete
+						>
+							Completar Asistente
+						</button>
+					}
 				</div>
 			</div>
 		</div>
 	</div>
 }
 
-templ WizardStep(step db.WizardStep, stepIndex int) {
-	<div class="p-6" data-wizard-step={ fmt.Sprintf("%d", stepIndex) }>
-		<div class="mb-6">
-			<h3 class="text-2xl font-bold text-gray-800 mb-2">{ step.Name }</h3>
-			<p class="text-gray-600">{ step.Description }</p>
-			if step.Required {
-				<span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
-					Requerido
-				</span>
+templ WizardCompletionView(state *WizardModalState) {
+	<div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-gray-50 relative">
+		<button
+			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
+			data-close-wizard
+		>
+			@TimesIcon("h-6", nil)
+		</button>
+		<div class="text-center pr-12">
+			<div class="w-16 h-16 bg-gray-50/20 rounded-full flex items-center justify-center mx-auto mb-4">
+				@CheckIcon("w-8 h-8", nil)
+			</div>
+			<h2 class="text-2xl font-bold mb-2">¡Asistente Completado!</h2>
+			<p class="text-current/90">Hemos añadido los productos seleccionados a tu carrito</p>
+		</div>
+	</div>
+	<div class="p-6 max-h-[calc(90vh-160px)] overflow-y-auto">
+		<div class="mb-8">
+			<h3 class="text-xl font-bold text-gray-800 mb-4">Resumen de tu selección</h3>
+			<div class="bg-gray-50 rounded-lg p-4">
+				<div class="flex items-center justify-between mb-2">
+					<span class="font-medium">Evento:</span>
+					<span class="text-gray-600">{ state.CurrentWizard.Name }</span>
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="font-medium">Productos seleccionados:</span>
+					<span class="text-gray-600">Ver detalles abajo</span>
+				</div>
+			</div>
+		</div>
+		<div class="space-y-6">
+			for _, step := range state.CurrentWizard.Steps {
+				<div class="border rounded-lg p-4">
+					<h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+						<div class="p-1 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-sm font-bold mr-2">
+							@CheckIcon("w-5", nil)
+						</div>
+						{ step.Name }
+					</h4>
+					<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+						<div class="flex items-center p-2 bg-gray-50 rounded">
+							<div class="w-10 h-10 bg-gray-300 rounded mr-3"></div>
+							<div>
+								<p class="text-sm font-medium">Productos seleccionados</p>
+								<p class="text-xs text-gray-600">Ver en carrito</p>
+							</div>
+						</div>
+					</div>
+				</div>
 			}
 		</div>
-		<!-- Selection Type Indicator -->
-		<div class="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-			<p class="text-sm text-blue-800">
-				if step.MultiSelect {
-					<strong>Selección múltiple:</strong> Puedes elegir varios elementos
-				} else {
-					<strong>Selección única:</strong> Elige solo una opción
-				}
+		<div class="mt-8 p-6 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
+			<h3 class="text-lg font-bold text-gray-800 mb-2">¿Qué sigue?</h3>
+			<p class="text-gray-600 mb-4">
+				Los productos están listos en tu carrito. Puedes continuar navegando el catálogo para añadir más artículos o proceder a solicitar una cotización.
 			</p>
-		</div>
-		<!-- Products Grid -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			// TODO: Add product fetching
-		</div>
-		<!-- Selected Items Summary -->
-		<div class="mt-8 p-4 bg-gray-50 rounded-lg" id={ fmt.Sprintf("selected-summary-%d", stepIndex) }>
-			<h4 class="font-semibold text-gray-700 mb-2">Seleccionados:</h4>
-			<div class="text-sm text-gray-600" data-selected-items>
-				Ningún elemento seleccionado
+			<div class="flex flex-col sm:flex-row gap-3">
+				<button
+					class="flex-1 bg-primary text-gray-50 py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+					hx-get="/cotizacion"
+					hx-target="body"
+					hx-push-url="/cotizacion"
+				>
+					Solicitar Cotización
+				</button>
+				<button
+					class="flex-1 bg-gray-50 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+					data-close-wizard
+				>
+					Continuar Navegando
+				</button>
 			</div>
 		</div>
 	</div>
 }
 
-templ WizardScript() {
-	<script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-        });
-
-        class WizardManager {
-            constructor() {
-                this.initializeSelections();
-                this.bindEvents();
-            }
-
-            initializeSelections() {
-                document.querySelectorAll('[data-product-checkbox], [data-product-radio]').forEach(input => {
-                    input.addEventListener('change', (e) => {
-                        this.handleSelection(e.target);
-                    });
-                });
-            }
-
-            handleSelection(input) {
-                const card = input.closest('[data-product-card]');
-                const overlay = card.querySelector('[data-selection-overlay]');
-                const button = card.querySelector('[data-selection-button]');
-
-                if (input.checked) {
-                    card.classList.add('border-accent', 'bg-accent/5');
-                    overlay.classList.remove('opacity-0');
-                    button.textContent = 'Seleccionado';
-                    button.classList.add('bg-accent', 'text-white', 'border-accent');
-
-                    if (input.type === 'radio') {
-                        this.deselectOthersInGroup(input);
-                    }
-                } else {
-                    card.classList.remove('border-accent', 'bg-accent/5');
-                    overlay.classList.add('opacity-0');
-                    button.textContent = 'Seleccionar';
-                    button.classList.remove('bg-accent', 'text-white', 'border-accent');
-                }
-
-                this.updateSelectedSummary();
-                this.animateSelection(card);
-            }
-
-            deselectOthersInGroup(selectedInput) {
-                document.querySelectorAll(`[name="${selectedInput.name}"]`).forEach(input => {
-                    if (input !== selectedInput && input.checked) {
-                        input.checked = false;
-                        this.handleSelection(input);
-                    }
-                });
-            }
-
-            updateSelectedSummary() {
-                const currentStep = document.querySelector('[data-wizard-step]');
-                const stepIndex = currentStep.dataset.wizardStep;
-                const summaryContainer = document.querySelector(`[data-selected-items]`);
-
-                const selected = document.querySelectorAll(`[name*="step_${stepIndex}"][checked], [name*="step_${stepIndex}"]:checked`);
-
-                if (selected.length === 0) {
-                    summaryContainer.textContent = 'Ningún elemento seleccionado';
-                } else {
-                    const items = Array.from(selected).map(input => {
-                        const card = input.closest('[data-product-card]');
-                        const name = card.querySelector('h4').textContent;
-                        return name;
-                    });
-                    summaryContainer.textContent = items.join(', ');
-                }
-            }
-
-            animateSelection(card) {
-                gsap.fromTo(card,
-                    {scale: 1},
-                    {scale: 1.05, duration: 0.1, yoyo: true, repeat: 1}
-                );
-            }
-
-            bindEvents() {
-                // Handle wizard step navigation
-                document.body.addEventListener('htmx:afterSwap', (e) => {
-                    if (e.detail.target.id === 'wizard-step-content' ||
-                        e.detail.target.closest('#wizard-modal')) {
-                        // Re-initialize selections when step changes
-                        setTimeout(() => this.initializeSelections(), 50);
-                    }
-                });
-            }
-        }
-    </script>
+templ WizardProductCard(product *db.CatalogProd, multiSelect bool, stepIndex int) {
+	{{ inputName := fmt.Sprintf("step_%d_products", stepIndex) }}
+	{{ inputType := "radio" }}
+	if multiSelect {
+		{{ inputType = "checkbox" }}
+	}
+	<div
+		class="bg-gray-50 flex flex-col border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 relative"
+		data-wizard-product-card
+		data-product-id={ product.ID }
+	>
+		<div
+			class="absolute inset-0 bg-accent/20 border-4 border-accent opacity-0 pointer-events-none transition-opacity duration-300"
+			data-selection-overlay
+		></div>
+		<div class="shrink-0 grow-0 aspect-square overflow-hidden bg-gray-100 relative">
+			<img
+				src={ fmt.Sprintf("/static/uploads/%s", product.ImageURL) }
+				alt={ product.Name }
+				class="w-full h-full object-cover"
+				loading="lazy"
+			/>
+			<div class="absolute top-3 right-3">
+				<input
+					type={ inputType }
+					name={ inputName }
+					value={ product.ID }
+					class="w-5 h-5 text-accent border-2 border-gray-50 bg-gray-100/90 rounded focus:bg-gray-50 focus:ring-accent focus:ring-2"
+					data-wizard-product-input
+					data-wizard-selections
+				/>
+			</div>
+			<div class="absolute top-3 left-3">
+				if product.Available {
+					<span class="px-2 py-1 bg-green-500 text-gray-50 text-xs font-medium rounded-full">
+						Disponible
+					</span>
+				} else {
+					<span class="px-2 py-1 bg-red-500 text-gray-50 text-xs font-medium rounded-full">
+						No disponible
+					</span>
+				}
+			</div>
+		</div>
+		<div class="flex-1 flex flex-col gap-2 p-4">
+			<div class="basis-auto">
+				<h4 class="font-semibold text-gray-800 line-clamp-1 mb-1">{ product.Name }</h4>
+				<p class="text-sm text-gray-600 line-clamp-2">{ product.Description }</p>
+			</div>
+			<div class="mt-auto flex items-center justify-between text-sm text-gray-500">
+				<span>{ product.CategoryName }</span>
+				<span>{ fmt.Sprintf("%d", product.Quantity) } pcs</span>
+			</div>
+			<button
+				class={
+					"block w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 border-2",
+					templ.KV("border-accent bg-accent text-gray-50", false),
+					templ.KV("border-gray-300 bg-gray-50 text-gray-700 hover:border-accent hover:bg-accent/5", true),
+				}
+				data-selection-button
+				disabled?={ !product.Available }
+				onclick="toggleWizardProductSelection(this)"
+			>
+				<span data-selection-text>
+					if product.Available {
+						Seleccionar
+					} else {
+						No Disponible
+					}
+				</span>
+			</button>
+		</div>
+	</div>
 }

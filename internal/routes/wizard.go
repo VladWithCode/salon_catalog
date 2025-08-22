@@ -15,6 +15,11 @@ import (
 )
 
 func RegisterWizardRoutes(router *customServeMux) {
+	// Catalog wizards
+	router.HandleFunc("GET /wizard/selection", RenderWizardModal)
+	router.HandleFunc("GET /wizard/{wizard_id}/start", RenderWizardStep)
+	router.HandleFunc("GET /wizard/{wizard_id}/step/{step_id}", RenderWizardStep)
+
 	// Dashboard page
 	router.HandleFunc("GET /panel/asistentes", auth.ValidateAuth(RenderWizard))
 	router.HandleFunc("GET /panel/asistentes/pasos", auth.ValidateAuth(RenderWizardSteps))

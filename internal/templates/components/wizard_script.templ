@@ -1,0 +1,290 @@
+package components
+
+templ WizardScript() {
+	<script>
+		// Wizard Management JavaScript
+		class WizardManager {
+			constructor() {
+				this.selections = new Map(); // stepIndex -> Set of productIds
+				this.currentStep = 0;
+				this.init();
+			}
+
+			init() {
+				this.bindEvents();
+				this.loadExistingSelections();
+			}
+
+			bindEvents() {
+				// Handle modal show/hide
+				window.eventManager
+					.registerClick('open-wizard', (e) => this.showModal())
+					.registerClick('close-wizard', (e) => this.hideModal())
+					
+				// Handle wizard navigation
+				window.eventManager
+					.register('afterSwap', '#wizard-modal', (e) => {
+						this.reinitializeAfterSwap();
+					})
+                    .register('beforeRequest', '[data-wizard-next-step]', (e) => {
+						if (!this.validateCurrentStep()) {
+							e.preventDefault();
+							this.showStepValidationError();
+						}
+                    })
+                    .registerClick('wizard-selection-button', (e) => {
+						e.preventDefault();
+						this.handleProductCardClick(e.target);
+                    })
+                    .registerClick('wizard-selection-input', (e) => {
+                        this.handleProductInputChange(e.target);
+                    });
+			}
+
+			showModal() {
+				const overlay = document.getElementById('wizard-modal-overlay');
+				const content = document.getElementById('wizard-modal-content');
+				
+				if (overlay && content) {
+					// Animate in
+					gsap.timeline({defaults: {duration: 0.25, ease: 'power2.out'}})
+                        .to('#wizard-modal', {autoAlpha: 1})
+						.to(content, { 
+							scale: 1, 
+							opacity: 1, 
+						}, "-=0.15");
+					
+					overlay.classList.remove('pointer-events-none');
+				}
+			}
+
+			hideModal() {
+				const overlay = document.getElementById('wizard-modal-overlay');
+				const content = document.getElementById('wizard-modal-content');
+				
+				if (overlay && content) {
+					overlay.classList.add('pointer-events-none');
+					
+					// Animate out
+					gsap.timeline()
+						.to(content, { 
+							scale: 0.95, 
+							opacity: 0, 
+							duration: 0.2 
+						})
+						.to(overlay, { 
+							opacity: 0, 
+							duration: 0.3,
+							onComplete: () => {
+								overlay.classList.add('hidden');
+								document.body.style.overflow = '';
+								// Clear modal content
+								overlay.innerHTML = '';
+							}
+						}, "-=0.1");
+				}
+			}
+
+			handleProductCardClick(button) {
+				const card = button.closest('[data-wizard-product-card]');
+				const input = card.querySelector('[data-wizard-product-input]');
+				
+				if (input && !input.disabled) {
+					input.checked = !input.checked;
+					this.handleProductInputChange(input);
+				}
+			}
+
+			handleProductInputChange(input) {
+				const card = input.closest('[data-wizard-product-card]');
+				const overlay = card.querySelector('[data-selection-overlay]');
+				const button = card.querySelector('[data-selection-button]');
+				const buttonText = button.querySelector('[data-selection-text]');
+				
+				if (input.checked) {
+					// Product selected
+					card.classList.add('ring-2', 'ring-accent');
+					overlay.classList.remove('opacity-0');
+					button.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+					button.classList.add('border-accent', 'bg-accent', 'text-white');
+					buttonText.textContent = 'Seleccionado';
+					
+					// Handle radio button deselection for single-select steps
+					if (input.type === 'radio') {
+						this.deselectOtherRadioButtons(input);
+					}
+					
+					// Add selection animation
+					gsap.fromTo(card, 
+						{ scale: 1 },
+						{ scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }
+					);
+				} else {
+					// Product deselected
+					card.classList.remove('ring-2', 'ring-accent');
+					overlay.classList.add('opacity-0');
+					button.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+					button.classList.remove('border-accent', 'bg-accent', 'text-white');
+					buttonText.textContent = 'Seleccionar';
+				}
+				
+				this.updateSelectionSummary();
+				this.updateStepValidation();
+			}
+
+			deselectOtherRadioButtons(selectedInput) {
+				const allRadios = document.querySelectorAll(`input[name="${selectedInput.name}"]`);
+				allRadios.forEach(radio => {
+					if (radio !== selectedInput && radio.checked) {
+						radio.checked = false;
+						this.handleProductInputChange(radio);
+					}
+				});
+			}
+
+			updateSelectionSummary() {
+				const summaryElement = document.querySelector('[data-selected-summary]');
+				if (!summaryElement) return;
+
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				
+				if (selectedInputs.length === 0) {
+					summaryElement.textContent = 'Ningún producto seleccionado';
+				} else {
+					const productNames = Array.from(selectedInputs).map(input => {
+						const card = input.closest('[data-wizard-product-card]');
+						const nameElement = card.querySelector('h4');
+						return nameElement ? nameElement.textContent.trim() : 'Producto';
+					});
+					
+					summaryElement.innerHTML = productNames.map(name => 
+						`<span class="inline-block bg-accent/10 text-accent px-2 py-1 rounded-full text-xs mr-2 mb-1">${name}</span>`
+					).join('');
+				}
+			}
+
+			updateStepValidation() {
+				const nextButton = document.querySelector('[data-wizard-next-step]');
+				const completeButton = document.querySelector('[data-wizard-complete]');
+				const button = nextButton || completeButton;
+				
+				if (!button) return;
+
+				const isValid = this.validateCurrentStep();
+				
+				if (isValid) {
+					button.classList.remove('opacity-50', 'cursor-not-allowed');
+					button.disabled = false;
+				} else {
+					button.classList.add('opacity-50', 'cursor-not-allowed');
+					button.disabled = true;
+				}
+			}
+
+			validateCurrentStep() {
+				// Get current step requirements from the page
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement) return true;
+
+				const isRequired = stepElement.querySelector('.bg-red-100') !== null; // Check if required badge exists
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				
+				// If step is required, must have at least one selection
+				if (isRequired && selectedInputs.length === 0) {
+					return false;
+				}
+				
+				// TODO: Add min/max selection validation based on step configuration
+				
+				return true;
+			}
+
+			showStepValidationError() {
+				const summaryElement = document.querySelector('[data-selected-summary]');
+				if (summaryElement) {
+					// Shake animation for error
+					gsap.fromTo(summaryElement.parentElement, 
+						{ x: 0 },
+						{ x: -10, duration: 0.1, yoyo: true, repeat: 5, ease: "power2.inOut" }
+					);
+					
+					// Show error message temporarily
+					const originalContent = summaryElement.innerHTML;
+					summaryElement.innerHTML = '<span class="text-red-600">⚠️ Debes seleccionar al menos un producto para continuar</span>';
+					
+					setTimeout(() => {
+						summaryElement.innerHTML = originalContent;
+					}, 3000);
+				}
+			}
+
+			loadExistingSelections() {
+				// Load any existing selections from the server state
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				selectedInputs.forEach(input => {
+					this.handleProductInputChange(input);
+				});
+			}
+
+			reinitializeAfterSwap() {
+				// Reinitialize after HTMX swaps new content
+				setTimeout(() => {
+					this.loadExistingSelections();
+					this.updateSelectionSummary();
+					this.updateStepValidation();
+					
+					// Animate in new content
+					const productCards = document.querySelectorAll('[data-wizard-product-card]');
+					if (productCards.length > 0) {
+						gsap.fromTo(productCards,
+							{ opacity: 0, y: 20 },
+							{ opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }
+						);
+					}
+				}, 50);
+			}
+
+			// Helper method for product card toggle (called from inline onclick)
+			static toggleProductSelection(button) {
+				if (window.wizardManager) {
+					window.wizardManager.handleProductCardClick(button);
+				}
+			}
+		}
+
+		// Initialize wizard manager when DOM is ready
+		document.addEventListener('DOMContentLoaded', function() {
+			window.wizardManager = new WizardManager();
+			
+			// Make toggle function globally available
+			window.toggleWizardProductSelection = WizardManager.toggleProductSelection;
+
+            eventManager
+                .register('afterSwap', '#wizard-modal', function(e) {
+                    wizardManager.showModal();
+                })
+		});
+
+		// Handle clicking outside modal to close
+		document.addEventListener('click', function(e) {
+			const overlay = document.getElementById('wizard-modal-overlay');
+			if (e.target === overlay && !overlay.classList.contains('hidden')) {
+				if (window.wizardManager) {
+					window.wizardManager.hideModal();
+				}
+			}
+		});
+
+		// Handle escape key to close modal
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				const overlay = document.getElementById('wizard-modal-overlay');
+				if (overlay && !overlay.classList.contains('hidden')) {
+					if (window.wizardManager) {
+						window.wizardManager.hideModal();
+					}
+				}
+			}
+		});
+	</script>
+}
