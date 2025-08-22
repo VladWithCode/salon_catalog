@@ -7,15 +7,16 @@ import (
 
 // WizardModalState represents the different states and data for the wizard modal
 type WizardModalState struct {
-	CurrentView   string              `json:"current_view"` // "selection", "step", "completion"
-	Wizards       []*db.Wizard        `json:"wizards"`
-	CurrentWizard *db.Wizard          `json:"current_wizard"`
-	CurrentStep   *db.WizardStep      `json:"current_step"`
-	StepIndex     int                 `json:"step_index"`
-	StepCount     int                 `json:"step_count"`
-	Products      []*db.CatalogProd   `json:"products"`
-	Selections    map[string][]string `json:"selections"` // step_id -> product_ids
-	Error         string              `json:"error"`
+	CurrentView    string                         `json:"current_view"` // "selection", "step", "completion"
+	Wizards        []*db.Wizard                   `json:"wizards"`
+	CurrentWizard  *db.Wizard                     `json:"current_wizard"`
+	CurrentStep    *db.WizardStep                 `json:"current_step"`
+	StepIndex      int                            `json:"step_index"`
+	StepCount      int                            `json:"step_count"`
+	Products       []*db.CatalogProd              `json:"products"`
+	ProductsResult *db.CatalogProductFilterResult `json:"products_result"` // Full pagination data
+	Selections     map[string][]string            `json:"selections"`      // step_id -> product_ids
+	Error          string                         `json:"error"`
 }
 
 templ WizardModal(state *WizardModalState) {
@@ -241,6 +242,9 @@ templ WizardStepView(state *WizardModalState) {
 							@WizardProductCard(product, state.CurrentStep, state.StepIndex)
 						}
 					</div>
+					if state.ProductsResult != nil && (state.ProductsResult.HasNext || state.ProductsResult.HasPrevious) {
+						@WizardStepPagination(state)
+					}
 					<div class="p-4 bg-gray-50 rounded-lg sticky bottom-0">
 						<h4 class="font-semibold text-gray-700 mb-2">Productos Seleccionados:</h4>
 						<div class="text-sm text-gray-600" data-selected-summary>
@@ -249,6 +253,11 @@ templ WizardStepView(state *WizardModalState) {
 						if state.CurrentStep.Required {
 							<p class="text-xs text-red-600 mt-2">
 								* Debes seleccionar al menos un producto para continuar
+							</p>
+						}
+						if state.ProductsResult != nil {
+							<p class="text-xs text-gray-500 mt-2">
+								Mostrando { fmt.Sprintf("%d", len(state.Products)) } de { fmt.Sprintf("%d", state.ProductsResult.Total) } productos
 							</p>
 						}
 					</div>
@@ -311,6 +320,56 @@ templ WizardStepView(state *WizardModalState) {
 					}
 				</div>
 			</div>
+		</div>
+	</div>
+}
+
+templ WizardStepPagination(state *WizardModalState) {
+	<div class="flex items-center justify-between py-4 px-4 bg-gray-50 rounded-lg">
+		<div class="flex items-center text-sm text-gray-600">
+			<span>Página { fmt.Sprintf("%d", state.ProductsResult.Page) } de { fmt.Sprintf("%d", state.ProductsResult.TotalPages) }</span>
+		</div>
+		<div class="flex items-center space-x-2">
+			if state.ProductsResult.HasPrevious {
+				<button
+					class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+					hx-get={ fmt.Sprintf(
+						"/wizard/%s/step/%s?page=%d",
+						state.CurrentWizard.ID,
+						state.CurrentStep.ID,
+						state.ProductsResult.Page-1,
+					) }
+					hx-target="#wizard-modal"
+					hx-indicator="#wizard-modal-loading"
+					data-wizard-nav="page"
+				>
+					← Anterior
+				</button>
+			} else {
+				<button class="px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
+					← Anterior
+				</button>
+			}
+			if state.ProductsResult.HasNext {
+				<button
+					class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+					hx-get={ fmt.Sprintf(
+						"/wizard/%s/step/%s?page=%d",
+						state.CurrentWizard.ID,
+						state.CurrentStep.ID,
+						state.ProductsResult.Page+1,
+					) }
+					hx-target="#wizard-modal"
+					hx-indicator="#wizard-modal-loading"
+					data-wizard-nav="page"
+				>
+					Siguiente →
+				</button>
+			} else {
+				<button class="px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
+					Siguiente →
+				</button>
+			}
 		</div>
 	</div>
 }

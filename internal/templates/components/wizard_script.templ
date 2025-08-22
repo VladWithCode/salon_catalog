@@ -79,12 +79,17 @@ templ WizardScript() {
                             e.detail.parameters['wizard_localStorage'] = jsonPayload;
 						}
 
-						// Validate step before navigation (except for previous button)
+						// Validate step before navigation (except for previous button and pagination)
 						if (e.detail.elt.dataset.wizardNextStep || e.detail.elt.dataset.wizardComplete) {
 							if (!this.validateCurrentStep()) {
 								e.preventDefault();
 								this.showStepValidationError();
 							}
+						}
+						
+						// Don't validate for pagination navigation or previous button
+						if (e.detail.elt.dataset.wizardNav === 'page' || e.detail.elt.dataset.wizardNav === 'prev') {
+							// Allow navigation without validation
 						}
                     })
                     .registerClick('wizard-selection-button', (e) => {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/vladwithcode/salon_catalog/internal/db"
@@ -89,11 +90,29 @@ func RenderWizardStep(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	products, err := db.FilterCatalogProductsForWizard(state.CurrentStep.CategoryIDs, []string{}, 10)
+	// Get pagination parameters
+	page := 1
+	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
+		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
+	}
+
+	// Filter products using pagination
+	productsResult, err := db.FilterCatalogProducts(db.CatalogProductFilterParams{
+		Categories:  state.CurrentStep.CategoryIDs,
+		ExcludeIDs:  []string{}, // Will be updated below with selected products
+		Available:   1,          // Only available products
+		MinQuantity: 1,          // Only products with stock
+		Page:        page,
+		Limit:       12, // Show 12 products per page in wizard
+		Sort:        "available_first",
+		SearchMode:  db.SearchModeFullText,
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error al recuperar productos"))
-		log.Printf("failed to find wizard step: %v\n", err)
+		log.Printf("failed to find wizard step products: %v\n", err)
 		return
 	}
 
@@ -107,7 +126,8 @@ func RenderWizardStep(w http.ResponseWriter, r *http.Request) {
 	}
 
 	state.CurrentWizard = wizard
-	state.Products = products.Products
+	state.Products = productsResult.Products
+	state.ProductsResult = productsResult
 	state.StepIndex = state.CurrentStep.StepOrder
 
 	err = components.WizardModal(&state).Render(r.Context(), w)
