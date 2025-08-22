@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -433,6 +434,7 @@ type WizardFilterParams struct {
 	Sort       string     `json:"sort"`
 	Page       int        `json:"page"`
 	Limit      int        `json:"limit"`
+	Enabled    int        `json:"enabled"` // 0 = all, 1 = enabled, -1 = disabled
 }
 
 type WizardFilterResult struct {
@@ -471,17 +473,42 @@ func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
 	// Build query conditions and named arguments
 	conditions, namedArgs := buildWizardQueryConditions(filters)
 
+	if filters.Enabled != 0 {
+		conditions = append(conditions, "w.enabled = @enabled")
+		switch filters.Enabled {
+		case 1:
+			namedArgs["enabled"] = true
+		case -1:
+			namedArgs["enabled"] = false
+		}
+	}
+
 	// Base query with explicit column selection
 	baseQuery := `
 		FROM wizards w
 		LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
 		`
+
+	// When enabled filter is set to true, add join to filter out wizards with no steps
+	if filters.Enabled == 1 {
+		baseQuery = `
+			FROM wizards w
+			LEFT JOIN event_kinds ek ON w.event_kind_id = ek.id
+			INNER JOIN wizard_steps_wizards wsw ON w.id = wsw.wizard_id
+			`
+	}
+
 	if len(conditions) > 0 {
 		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	// Get total count
-	countQuery := "SELECT COUNT(*) " + baseQuery
+	// Get total count - use DISTINCT when joining with wizard_steps_wizards to avoid duplicates
+	var countQuery string
+	if filters.Enabled == 1 {
+		countQuery = "SELECT COUNT(DISTINCT w.id) " + baseQuery
+	} else {
+		countQuery = "SELECT COUNT(*) " + baseQuery
+	}
 	var total int
 	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
 	if err != nil {
@@ -498,14 +525,27 @@ func FilterWizards(filters WizardFilterParams) (*WizardFilterResult, error) {
 
 	// Build final query with sorting and pagination
 	orderBy := buildWizardOrderByClause(filters)
-	selectQuery := fmt.Sprintf(`
-		SELECT 
-			w.id, w.name, w.event_kind_id, w.is_general, w.enabled,
-			ek.name as event_kind,
-			%s
-		%s %s
-		LIMIT @limit OFFSET @offset`,
-		buildWizardSearchRankSelect(filters), baseQuery, orderBy)
+	var selectQuery string
+	if filters.Enabled == 1 {
+		// Use DISTINCT when joining with wizard_steps_wizards to avoid duplicates
+		selectQuery = fmt.Sprintf(`
+			SELECT DISTINCT
+				w.id, w.name, w.description, w.event_kind_id, w.is_general, w.enabled,
+				ek.name as event_kind,
+				%s
+			%s %s
+			LIMIT @limit OFFSET @offset`,
+			buildWizardSearchRankSelect(filters), baseQuery, orderBy)
+	} else {
+		selectQuery = fmt.Sprintf(`
+			SELECT 
+				w.id, w.name, w.description, w.event_kind_id, w.is_general, w.enabled,
+				ek.name as event_kind,
+				%s
+			%s %s
+			LIMIT @limit OFFSET @offset`,
+			buildWizardSearchRankSelect(filters), baseQuery, orderBy)
+	}
 
 	// Execute query
 	rows, err := conn.Query(ctx, selectQuery, namedArgs)
@@ -629,6 +669,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 			err := rows.Scan(
 				&wizard.ID,
 				&wizard.Name,
+				&wizard.Description,
 				&eventKindID,
 				&wizard.IsGeneral,
 				&wizard.Enabled,
@@ -642,6 +683,7 @@ func scanWizards(rows pgx.Rows, includeRank bool) ([]*Wizard, error) {
 			err := rows.Scan(
 				&wizard.ID,
 				&wizard.Name,
+				&wizard.Description,
 				&eventKindID,
 				&wizard.IsGeneral,
 				&wizard.Enabled,
@@ -1181,13 +1223,7 @@ func GetNextAvailableStepPosition(ctx context.Context, wizardID string) (int, er
 
 	// Find the first gap in the sequence
 	for i := 1; i <= len(usedPositions)+1; i++ {
-		found := false
-		for _, pos := range usedPositions {
-			if pos == i {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(usedPositions, i)
 		if !found {
 			return i, nil
 		}
