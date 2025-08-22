@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -36,6 +37,21 @@ type CatalogProd struct {
 	Images          []string `json:"images"`
 	Available       bool     `json:"available"`
 	Quantity        int      `json:"quantity"`
+}
+
+// CatalogProductFilterParams defines parameters for filtering catalog products
+type CatalogProductFilterParams struct {
+	Search      string     `json:"search"`       // Search term for name/description
+	SearchMode  SearchMode `json:"search_mode"`  // fulltext, exact, fuzzy
+	Categories  []string   `json:"categories"`   // Category IDs to filter by
+	Available   int        `json:"available"`    // -1=unavailable, 0=all, 1=available
+	MinQuantity int        `json:"min_quantity"` // Minimum quantity filter
+	MaxQuantity int        `json:"max_quantity"` // Maximum quantity filter
+	Sort        string     `json:"sort"`         // Sorting option
+	Page        int        `json:"page"`         // Page number
+	Limit       int        `json:"limit"`        // Items per page
+	ExcludeIDs  []string   `json:"exclude_ids"`  // Product IDs to exclude
+	OnlyIDs     []string   `json:"only_ids"`     // Only include these IDs
 }
 
 func FindCatalogCategories(search string) ([]*CatalogCtg, error) {
@@ -165,7 +181,46 @@ type CatalogProductFilterResult struct {
 	Error       string         `json:"error"`
 }
 
+
+// FindCatalogProducts is a backward-compatible wrapper around FilterCatalogProducts
 func FindCatalogProducts(categoryID string, search string, page int, limit int) (*CatalogProductFilterResult, error) {
+	filters := CatalogProductFilterParams{
+		Search:     search,
+		SearchMode: SearchModeFullText,
+		Page:       page,
+		Limit:      limit,
+	}
+
+	// Handle category filter - support both ID and name
+	if categoryID != "" {
+		if _, err := uuid.Parse(categoryID); err == nil {
+			// It's a valid UUID, use as category ID
+			filters.Categories = []string{categoryID}
+		} else {
+			// It's a category name, need to look up ID
+			// For backward compatibility, we'll do a quick lookup
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			conn, err := GetConn()
+			if err != nil {
+				return nil, err
+			}
+			defer conn.Release()
+
+			var foundCategoryID string
+			err = conn.QueryRow(ctx, "SELECT id FROM categories WHERE name = $1", categoryID).Scan(&foundCategoryID)
+			if err == nil {
+				filters.Categories = []string{foundCategoryID}
+			}
+			// If not found, the filter will just not match anything (which is fine)
+		}
+	}
+
+	return FilterCatalogProducts(filters)
+}
+
+// FilterCatalogProducts provides comprehensive filtering for catalog products
+func FilterCatalogProducts(filters CatalogProductFilterParams) (*CatalogProductFilterResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -176,125 +231,74 @@ func FindCatalogProducts(categoryID string, search string, page int, limit int) 
 	defer conn.Release()
 
 	// Set defaults
-	if page < 1 {
-		page = 1
+	if filters.Page < 1 {
+		filters.Page = 1
 	}
-	if limit < 1 || limit > 100 {
-		limit = DefaultCatalogPageSize
+	if filters.Limit < 1 || filters.Limit > 100 {
+		filters.Limit = DefaultCatalogPageSize
 	}
-
-	// Build base query conditions
-	var conditions []string
-	args := pgx.NamedArgs{}
-
-	// Add category filter if provided
-	if categoryID != "" {
-		if _, err := uuid.Parse(categoryID); err == nil {
-			conditions = append(conditions, "category_id = @category_id")
-			args["category_id"] = categoryID
-		} else {
-			conditions = append(conditions, "category_name = @category_name")
-			args["category_name"] = categoryID
-		}
+	if filters.SearchMode == "" {
+		filters.SearchMode = SearchModeFullText
 	}
 
-	// Add search filter if provided
-	if search != "" {
-		conditions = append(conditions, "search_vector @@ plainto_tsquery('spanish', @search)")
-		args["search"] = search
-	}
+	// Build query conditions and named arguments
+	conditions, namedArgs := buildCatalogProductQueryConditions(filters)
 
-	// Build WHERE clause
-	whereClause := ""
+	// Base query using catalog_products view
+	baseQuery := `FROM catalog_products`
 	if len(conditions) > 0 {
-		whereClause = " AND " + strings.Join(conditions, " AND ")
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
 	// Get total count
-	countQuery := `SELECT COUNT(*) FROM catalog_products WHERE 1=1` + whereClause
+	countQuery := "SELECT COUNT(*) " + baseQuery
 	var total int
-	err = conn.QueryRow(ctx, countQuery, args).Scan(&total)
+	err = conn.QueryRow(ctx, countQuery, namedArgs).Scan(&total)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get total count: %w", err)
 	}
 
 	// Calculate pagination
-	offset := (page - 1) * limit
-	totalPages := int((total + limit - 1) / limit) // Ceiling division
+	offset := (filters.Page - 1) * filters.Limit
+	totalPages := int(math.Ceil(float64(total) / float64(filters.Limit)))
 
-	// Add pagination parameters
-	args["limit"] = limit
-	args["offset"] = offset
+	// Add pagination to named args
+	namedArgs["limit"] = filters.Limit
+	namedArgs["offset"] = offset
 
-	// Build main query with ordering and pagination
-	query := `SELECT 
-		id, name, description, long_description, category_id, category_name, 
-		image_url, available, images, slug, quantity
-		FROM catalog_products WHERE 1=1` + whereClause
+	// Build final query with sorting and pagination
+	orderBy := buildCatalogProductOrderByClause(filters)
+	selectQuery := fmt.Sprintf(`
+		SELECT 
+			id, name, description, long_description, category_id, category_name, 
+			image_url, available, images, slug, quantity,
+			%s
+		%s %s
+		LIMIT @limit OFFSET @offset`,
+		buildCatalogProductSearchRankSelect(filters), baseQuery, orderBy)
 
-	// Add ordering - prioritize search ranking if search is provided
-	if search != "" {
-		query += " ORDER BY ts_rank(search_vector, plainto_tsquery('spanish', @search)) DESC, name ASC"
-	} else {
-		query += " ORDER BY name"
-	}
-
-	query += " LIMIT @limit OFFSET @offset"
-
-	rows, err := conn.Query(ctx, query, args)
+	// Execute query
+	rows, err := conn.Query(ctx, selectQuery, namedArgs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
-	var products []*CatalogProd
-	for rows.Next() {
-		var product CatalogProd
-		var imagesJSON []byte
-
-		err = rows.Scan(
-			&product.ID,
-			&product.Name,
-			&product.Description,
-			&product.LongDescription,
-			&product.CategoryID,
-			&product.CategoryName,
-			&product.ImageURL,
-			&product.Available,
-			&imagesJSON,
-			&product.Slug,
-			&product.Quantity,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan product: %w", err)
-		}
-
-		// Unmarshal JSON fields
-		if err = json.Unmarshal(imagesJSON, &product.Images); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
-		}
-
-		if product.Quantity <= 0 {
-			product.Available = false
-		}
-
-		products = append(products, &product)
-	}
-
-	// Check for iteration errors
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
+	// Scan results
+	products, err := scanCatalogProducts(rows, filters.SearchMode == SearchModeFullText)
+	if err != nil {
+		return nil, err
 	}
 
 	// Build result
 	result := &CatalogProductFilterResult{
 		Products:    products,
 		Total:       total,
-		Page:        page,
-		Limit:       limit,
+		Page:        filters.Page,
+		Limit:       filters.Limit,
 		TotalPages:  totalPages,
-		HasNext:     page < totalPages,
-		HasPrevious: page > 1,
+		HasNext:     filters.Page < totalPages,
+		HasPrevious: filters.Page > 1,
 	}
 
 	return result, nil
@@ -743,3 +747,250 @@ func FindRelatedProductsSimple(productID string, limit int) ([]*CatalogProd, err
 
 	return products, nil
 }
+
+
+// buildCatalogProductQueryConditions creates WHERE conditions and named arguments
+func buildCatalogProductQueryConditions(filters CatalogProductFilterParams) ([]string, pgx.NamedArgs) {
+	var conditions []string
+	namedArgs := make(pgx.NamedArgs)
+
+	// Filter by specific IDs only (if provided, ignore other filters except exclude)
+	if len(filters.OnlyIDs) > 0 {
+		conditions = append(conditions, "id = ANY(@only_ids)")
+		namedArgs["only_ids"] = filters.OnlyIDs
+	} else {
+		// Add search condition
+		if filters.Search != "" {
+			switch filters.SearchMode {
+			case SearchModeFullText:
+				// Full-text search with ranking
+				conditions = append(conditions, "search_vector @@ plainto_tsquery(\"spanish\", @search_query)")
+				namedArgs["search_query"] = filters.Search
+
+			case SearchModeExact:
+				// Exact match search
+				conditions = append(conditions, "(name ILIKE @exact_search OR description ILIKE @exact_search)")
+				namedArgs["exact_search"] = filters.Search
+
+			case SearchModeFuzzy:
+				// Fuzzy search (LIKE with wildcards)
+				conditions = append(conditions, "(name ILIKE @fuzzy_search OR description ILIKE @fuzzy_search OR category_name ILIKE @fuzzy_search)")
+				namedArgs["fuzzy_search"] = "%" + filters.Search + "%"
+			}
+		}
+
+		// Add categories filter (multiple categories with OR logic)
+		if len(filters.Categories) > 0 {
+			conditions = append(conditions, "category_id = ANY(@categories)")
+			namedArgs["categories"] = filters.Categories
+		}
+
+		// Add availability filter
+		if filters.Available > 0 {
+			conditions = append(conditions, "available = true")
+		} else if filters.Available < 0 {
+			conditions = append(conditions, "available = false")
+		}
+
+		// Add quantity filters
+		if filters.MinQuantity > 0 {
+			conditions = append(conditions, "quantity >= @min_quantity")
+			namedArgs["min_quantity"] = filters.MinQuantity
+		}
+
+		if filters.MaxQuantity > 0 {
+			conditions = append(conditions, "quantity <= @max_quantity")
+			namedArgs["max_quantity"] = filters.MaxQuantity
+		}
+	}
+
+	// Exclude specific IDs (applies even with OnlyIDs)
+	if len(filters.ExcludeIDs) > 0 {
+		conditions = append(conditions, "id != ALL(@exclude_ids)")
+		namedArgs["exclude_ids"] = filters.ExcludeIDs
+	}
+
+	return conditions, namedArgs
+}
+
+// buildCatalogProductSearchRankSelect adds search ranking column when using full-text search
+func buildCatalogProductSearchRankSelect(filters CatalogProductFilterParams) string {
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		return "ts_rank(search_vector, plainto_tsquery(\"spanish\", @search_query)) as search_rank"
+	}
+	return "0 as search_rank"
+}
+
+// buildCatalogProductOrderByClause constructs the ORDER BY clause
+func buildCatalogProductOrderByClause(filters CatalogProductFilterParams) string {
+	// If using full-text search with a query, prioritize search ranking
+	if filters.Search != "" && filters.SearchMode == SearchModeFullText {
+		switch strings.ToLower(filters.Sort) {
+		case "relevance", "":
+			return "ORDER BY search_rank DESC, name ASC"
+		case "name_asc", "name":
+			return "ORDER BY name ASC"
+		case "name_desc":
+			return "ORDER BY name DESC"
+		case "quantity_asc":
+			return "ORDER BY quantity ASC, search_rank DESC"
+		case "quantity_desc":
+			return "ORDER BY quantity DESC, search_rank DESC"
+		case "category_asc":
+			return "ORDER BY category_name ASC, search_rank DESC"
+		case "category_desc":
+			return "ORDER BY category_name DESC, search_rank DESC"
+		case "available_first":
+			return "ORDER BY available DESC, search_rank DESC, name ASC"
+		default:
+			return "ORDER BY search_rank DESC, name ASC"
+		}
+	}
+
+	// Regular sorting without search ranking
+	switch strings.ToLower(filters.Sort) {
+	case "name_asc", "name", "":
+		return "ORDER BY name ASC"
+	case "name_desc":
+		return "ORDER BY name DESC"
+	case "quantity_asc":
+		return "ORDER BY quantity ASC"
+	case "quantity_desc":
+		return "ORDER BY quantity DESC"
+	case "category_asc":
+		return "ORDER BY category_name ASC, name ASC"
+	case "category_desc":
+		return "ORDER BY category_name DESC, name ASC"
+	case "available_first":
+		return "ORDER BY available DESC, name ASC"
+	case "available_last":
+		return "ORDER BY available ASC, name ASC"
+	case "newest":
+		return "ORDER BY id DESC"
+	case "oldest":
+		return "ORDER BY id ASC"
+	default:
+		return "ORDER BY name ASC"
+	}
+}
+
+// scanCatalogProducts scans the query results into CatalogProd structs
+func scanCatalogProducts(rows pgx.Rows, includeRank bool) ([]*CatalogProd, error) {
+	var products []*CatalogProd
+
+	for rows.Next() {
+		var product CatalogProd
+		var imagesJSON []byte
+		var searchRank float32
+
+		if includeRank {
+			err := rows.Scan(
+				&product.ID,
+				&product.Name,
+				&product.Description,
+				&product.LongDescription,
+				&product.CategoryID,
+				&product.CategoryName,
+				&product.ImageURL,
+				&product.Available,
+				&imagesJSON,
+				&product.Slug,
+				&product.Quantity,
+				&searchRank,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan product with rank: %w", err)
+			}
+		} else {
+			err := rows.Scan(
+				&product.ID,
+				&product.Name,
+				&product.Description,
+				&product.LongDescription,
+				&product.CategoryID,
+				&product.CategoryName,
+				&product.ImageURL,
+				&product.Available,
+				&imagesJSON,
+				&product.Slug,
+				&product.Quantity,
+				&searchRank, // Still need to scan the rank column (will be 0)
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan product: %w", err)
+			}
+		}
+
+		// Unmarshal JSON fields
+		if err := json.Unmarshal(imagesJSON, &product.Images); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal images: %w", err)
+		}
+
+		// Apply business logic
+		if product.Quantity <= 0 {
+			product.Available = false
+		}
+
+		products = append(products, &product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return products, nil
+}
+
+
+// FilterCatalogProductsByCategories is a convenience function for wizard steps
+// that need to filter products by multiple categories
+func FilterCatalogProductsByCategories(categoryIDs []string, excludeIDs []string, limit int) (*CatalogProductFilterResult, error) {
+	return FilterCatalogProducts(CatalogProductFilterParams{
+		Categories:  categoryIDs,
+		ExcludeIDs:  excludeIDs,
+		Available:   1, // Only available products
+		Page:        1,
+		Limit:       limit,
+		Sort:        "name_asc",
+		SearchMode:  SearchModeFullText,
+	})
+}
+
+// FilterAvailableCatalogProducts is a convenience function that returns only available products
+func FilterAvailableCatalogProducts(search string, categoryIDs []string, page int, limit int) (*CatalogProductFilterResult, error) {
+	return FilterCatalogProducts(CatalogProductFilterParams{
+		Search:     search,
+		SearchMode: SearchModeFullText,
+		Categories: categoryIDs,
+		Available:  1, // Only available products
+		Page:       page,
+		Limit:      limit,
+		Sort:       "available_first",
+	})
+}
+
+// FilterCatalogProductsForWizard is a specialized function for wizard step product selection
+func FilterCatalogProductsForWizard(stepCategoryIDs []string, selectedProductIDs []string, limit int) (*CatalogProductFilterResult, error) {
+	return FilterCatalogProducts(CatalogProductFilterParams{
+		Categories:  stepCategoryIDs,
+		ExcludeIDs:  selectedProductIDs, // Exclude already selected products
+		Available:   1,                  // Only available products
+		MinQuantity: 1,                  // Only products with stock
+		Page:        1,
+		Limit:       limit,
+		Sort:        "available_first",
+		SearchMode:  SearchModeFullText,
+	})
+}
+
+// GetCatalogProductsByIDs retrieves specific products by their IDs
+func GetCatalogProductsByIDs(productIDs []string) (*CatalogProductFilterResult, error) {
+	return FilterCatalogProducts(CatalogProductFilterParams{
+		OnlyIDs:    productIDs,
+		Page:       1,
+		Limit:      len(productIDs),
+		Sort:       "name_asc",
+		SearchMode: SearchModeFullText,
+	})
+}
+
