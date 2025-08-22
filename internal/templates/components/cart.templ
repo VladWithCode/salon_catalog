@@ -145,19 +145,21 @@ templ CartSidebar(state CartState) {
 				</div>
 			}
 			<!-- Footer -->
-			if len(items) > 0 {
-				<div class="p-4 bg-gray-50">
-					<!-- Action Buttons -->
-					<div class="space-y-2">
-						/*<button
-							class="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
-							hx-post="/event/save-plan"
-							hx-include="[data-cart-items]"
-							hx-target="#cart-sidebar"
-							data-cart-save
-						>
-							Guardar Selección
-						</button> */
+			<div class="p-4 bg-gray-50">
+				<!-- Action Buttons -->
+				<div class="space-y-2">
+					<!-- Wizard Button - Always visible -->
+					<button
+						class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-95"
+						hx-get="/wizard/selection"
+						hx-target="#wizard-modal"
+						hx-swap="outerHTML"
+						data-click-handler-selector="open-wizard"
+					>
+						@WizardIcon("w-5 h-5", nil)
+						Asistente de Eventos
+					</button>
+					if len(items) > 0 {
 						<a
 							href="/solicitar-cotizacion"
 							class="w-full bg-accent/90 text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent transition-[background,_transform] text-center block active:bg-accent active:scale-95"
@@ -174,9 +176,9 @@ templ CartSidebar(state CartState) {
 						>
 							Limpiar Todo
 						</button>
-					</div>
+					}
 				</div>
-			}
+			</div>
 		</div>
 	}
 }
@@ -279,9 +281,19 @@ templ EmptyCart() {
 		</div>
 		<h3 class="text-xl font-semibold text-gray-500 mb-2">No has seleccionado nada aún</h3>
 		<p class="text-gray-400 mb-6">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p>
-		<div class="space-y-2">
+		<div class="space-y-3">
 			<button
-				class="block px-6 py-2 text-light bg-primary/90 rounded-sm cursor-pointer hover:bg-primary hover:scale-102 active:scale-95 transition-[background,_transform] font-medium"
+				class="block w-full px-6 py-3 text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-lg cursor-pointer hover:scale-102 active:scale-95 transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
+				hx-get="/wizard/selection"
+				hx-target="#wizard-modal"
+				hx-swap="outerHTML"
+				data-click-handler-selector="open-wizard"
+			>
+				@WizardIcon("w-5 h-5", nil)
+				Asistente de Eventos
+			</button>
+			<button
+				class="block w-full px-6 py-3 text-light bg-primary/90 rounded-lg cursor-pointer hover:bg-primary hover:scale-102 active:scale-95 transition-[background,_transform] font-medium"
 				data-cart-close
 				data-click-handler-selector="browse-trigger,cart-close"
 				data-browse-catalog

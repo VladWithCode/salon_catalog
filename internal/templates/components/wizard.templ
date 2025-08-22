@@ -20,7 +20,7 @@ type WizardModalState struct {
 
 templ WizardModal(state *WizardModalState) {
 	<div
-		id="wizard-modal-overlay"
+		id="wizard-modal"
 		class="fixed inset-0 h-screen w-screen bg-primary/60 z-50 overflow-hidden"
 		data-wizard-modal-overlay
 	>
@@ -58,7 +58,7 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 	<div class="basis-auto bg-gradient-to-r from-primary to-accent p-4 text-light relative">
 		<button
 			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
-			data-close-wizard
+			data-click-handler-selector="close-wizard"
 		>
 			@TimesIcon("h-8", nil)
 		</button>
@@ -117,8 +117,7 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 					<button
 						id="wizard-modal-close"
 						class="text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300"
-						data-wizard-modal-footer-close
-						data-click-handler-selector="wizard-modal-footer-close"
+						data-click-handler-selector="close-wizard"
 					>
 						@TimesIcon("w-6", nil)
 					</button>
@@ -132,7 +131,7 @@ templ WizardStepView(state *WizardModalState) {
 	<div class="basis-auto bg-gradient-to-r from-primary to-accent p-4 text-light relative">
 		<button
 			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
-			data-close-wizard
+			data-click-handler-selector="close-wizard"
 		>
 			@TimesIcon("h-6", nil)
 		</button>
@@ -155,7 +154,13 @@ templ WizardStepView(state *WizardModalState) {
 			</div>
 		</div>
 	</div>
-	<div class="flex-1 flex overflow-hidden">
+		<div class="flex-1 flex overflow-hidden"
+		     data-wizard-step
+		     data-step-id={ state.CurrentStep.ID }
+		     data-required={ fmt.Sprintf("%t", state.CurrentStep.Required) }
+		     data-multi-select={ fmt.Sprintf("%t", state.CurrentStep.MultiSelect) }
+		     data-min-selected={ fmt.Sprintf("%d", state.CurrentStep.MinSelected) }
+		     data-max-selected={ fmt.Sprintf("%d", state.CurrentStep.MaxSelected) }>
 		<div class="w-80 bg-gray-50 p-4 border-r overflow-y-auto">
 			<h3 class="font-semibold text-gray-700 mb-4">Pasos del Asistente</h3>
 			<div class="space-y-2">
@@ -230,9 +235,9 @@ templ WizardStepView(state *WizardModalState) {
 				</div>
 				<div class="flex flex-col gap-4 pt-6">
 					<div class="flex-1 basis-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-hidden overflow-y-auto" id="wizard-products-grid">
-						for _, product := range state.Products {
-							@WizardProductCard(product, state.CurrentStep.MultiSelect, state.StepIndex)
-						}
+					for _, product := range state.Products {
+						@WizardProductCard(product, state.CurrentStep, state.StepIndex)
+					}
 					</div>
 					<div class="p-4 bg-gray-50 rounded-lg sticky bottom-0">
 						<h4 class="font-semibold text-gray-700 mb-2">Productos Seleccionados:</h4>
@@ -263,6 +268,7 @@ templ WizardStepView(state *WizardModalState) {
 						hx-target="#wizard-modal"
 						hx-include="[data-wizard-selections]"
 						hx-indicator="#wizard-modal-loading"
+						data-wizard-nav="prev"
 					}
 					disabled?={ state.StepIndex == 1 }
 				>
@@ -271,7 +277,7 @@ templ WizardStepView(state *WizardModalState) {
 				<div class="flex gap-3">
 					<button
 						class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-						data-close-wizard
+						data-click-handler-selector="close-wizard"
 					>
 						Cancelar
 					</button>
@@ -287,6 +293,8 @@ templ WizardStepView(state *WizardModalState) {
 							hx-include="[data-wizard-selections]"
 							hx-indicator="#wizard-modal-loading"
 							data-wizard-next-step
+							data-step-required={ fmt.Sprintf("%t", state.CurrentStep.Required) }
+							data-min-selected={ fmt.Sprintf("%d", state.CurrentStep.MinSelected) }
 						>
 							Siguiente →
 						</button>
@@ -309,10 +317,10 @@ templ WizardStepView(state *WizardModalState) {
 }
 
 templ WizardCompletionView(state *WizardModalState) {
-	<div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-gray-50 relative">
+	<div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-gray-50 relative" data-wizard-completion-view>
 		<button
 			class="absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors"
-			data-close-wizard
+			data-click-handler-selector="close-wizard"
 		>
 			@TimesIcon("h-6", nil)
 		</button>
@@ -375,7 +383,7 @@ templ WizardCompletionView(state *WizardModalState) {
 				</button>
 				<button
 					class="flex-1 bg-gray-50 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-					data-close-wizard
+					data-click-handler-selector="close-wizard"
 				>
 					Continuar Navegando
 				</button>
@@ -384,16 +392,17 @@ templ WizardCompletionView(state *WizardModalState) {
 	</div>
 }
 
-templ WizardProductCard(product *db.CatalogProd, multiSelect bool, stepIndex int) {
+templ WizardProductCard(product *db.CatalogProd, step *db.WizardStep, stepIndex int) {
 	{{ inputName := fmt.Sprintf("step_%d_products", stepIndex) }}
 	{{ inputType := "radio" }}
-	if multiSelect {
+	if step.MultiSelect {
 		{{ inputType = "checkbox" }}
 	}
 	<div
 		class="bg-gray-50 flex flex-col border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 relative"
 		data-wizard-product-card
 		data-product-id={ product.ID }
+		data-step-id={ step.ID }
 	>
 		<div
 			class="absolute inset-0 bg-accent/20 border-4 border-accent opacity-0 pointer-events-none transition-opacity duration-300"
@@ -414,6 +423,8 @@ templ WizardProductCard(product *db.CatalogProd, multiSelect bool, stepIndex int
 					class="w-5 h-5 text-accent border-2 border-gray-50 bg-gray-100/90 rounded focus:bg-gray-50 focus:ring-accent focus:ring-2"
 					data-wizard-product-input
 					data-wizard-selections
+					data-step-id={ step.ID }
+					data-product-id={ product.ID }
 				/>
 			</div>
 			<div class="absolute top-3 left-3">

@@ -7,12 +7,58 @@ templ WizardScript() {
 			constructor() {
 				this.selections = new Map(); // stepIndex -> Set of productIds
 				this.currentStep = 0;
+				this.currentWizardId = null;
+				this.currentStepId = null;
 				this.init();
 			}
+
+			/* localStorage Clearing Behavior:
+			 * - Cleared when wizard completes successfully (completion view shown)
+			 * - Cleared when wizard is cancelled/closed (unless from completion view)
+			 * - Cleared when switching between different wizards
+			 * - Preserved during step navigation within the same wizard
+			 */
 
 			init() {
 				this.bindEvents();
 				this.loadExistingSelections();
+			}
+
+			// localStorage Methods
+			getStorageKey(wizardId) {
+				return `wizard_selections_${wizardId}`;
+			}
+
+			saveSelections(wizardId, stepId, productIds) {
+				const data = this.loadWizardData(wizardId) || {
+					wizard_id: wizardId,
+					selections: {},
+					timestamp: Date.now()
+				};
+				
+				data.selections[stepId] = productIds;
+				data.timestamp = Date.now();
+				
+				localStorage.setItem(this.getStorageKey(wizardId), JSON.stringify(data));
+			}
+
+			loadWizardData(wizardId) {
+				const stored = localStorage.getItem(this.getStorageKey(wizardId));
+				return stored ? JSON.parse(stored) : null;
+			}
+
+			getStepSelections(wizardId, stepId) {
+				const data = this.loadWizardData(wizardId);
+				return data?.selections[stepId] || [];
+			}
+
+			clearWizardData(wizardId) {
+				localStorage.removeItem(this.getStorageKey(wizardId));
+			}
+
+			getAllSelections(wizardId) {
+				const data = this.loadWizardData(wizardId);
+				return data?.selections || {};
 			}
 
 			bindEvents() {
@@ -20,16 +66,27 @@ templ WizardScript() {
 				window.eventManager
 					.registerClick('open-wizard', (e) => this.showModal())
 					.registerClick('close-wizard', (e) => this.hideModal())
-					
-				// Handle wizard navigation
-				window.eventManager
+                    // Handle wizard navigation
 					.register('afterSwap', '#wizard-modal', (e) => {
 						this.reinitializeAfterSwap();
 					})
-                    .register('beforeRequest', '[data-wizard-next-step]', (e) => {
-						if (!this.validateCurrentStep()) {
-							e.preventDefault();
-							this.showStepValidationError();
+                    .register('beforeRequest', '[data-wizard-next-step], [data-wizard-nav], [data-wizard-complete]', (e) => {
+						// Include localStorage data in request
+						if (this.currentWizardId) {
+							const allSelections = this.getAllSelections(this.currentWizardId);
+							const hiddenInput = document.createElement('input');
+							hiddenInput.type = 'hidden';
+							hiddenInput.name = 'wizard_localStorage';
+							hiddenInput.value = JSON.stringify(allSelections);
+							e.detail.elt.appendChild(hiddenInput);
+						}
+
+						// Validate step before navigation (except for previous button)
+						if (e.detail.elt.dataset.wizardNextStep || e.detail.elt.dataset.wizardComplete) {
+							if (!this.validateCurrentStep()) {
+								e.preventDefault();
+								this.showStepValidationError();
+							}
 						}
                     })
                     .registerClick('wizard-selection-button', (e) => {
@@ -42,7 +99,7 @@ templ WizardScript() {
 			}
 
 			showModal() {
-				const overlay = document.getElementById('wizard-modal-overlay');
+				const overlay = document.getElementById('wizard-modal');
 				const content = document.getElementById('wizard-modal-content');
 				
 				if (overlay && content) {
@@ -52,18 +109,31 @@ templ WizardScript() {
 						.to(content, { 
 							scale: 1, 
 							opacity: 1, 
+                            onComplete: () => {
+                                document.body.style.overflow = 'hidden';
+                            }
 						}, "-=0.15");
 					
 					overlay.classList.remove('pointer-events-none');
 				}
 			}
 
-			hideModal() {
-				const overlay = document.getElementById('wizard-modal-overlay');
+			hideModal(clearData = true) {
+				const overlay = document.getElementById('wizard-modal');
 				const content = document.getElementById('wizard-modal-content');
 				
 				if (overlay && content) {
 					overlay.classList.add('pointer-events-none');
+					
+					// Clear localStorage if requested (when cancelled, not when completed)
+					if (clearData && this.currentWizardId) {
+						// Check if this is a completion view - don't clear data as it's already been cleared
+						const completionView = document.querySelector('[data-wizard-completion-view]');
+						if (!completionView) {
+							this.clearWizardData(this.currentWizardId);
+							console.log(`Wizard ${this.currentWizardId} cancelled - localStorage cleared`);
+						}
+					}
 					
 					// Animate out
 					gsap.timeline()
@@ -73,13 +143,12 @@ templ WizardScript() {
 							duration: 0.2 
 						})
 						.to(overlay, { 
-							opacity: 0, 
+							autoAlpha: 0, 
 							duration: 0.3,
 							onComplete: () => {
-								overlay.classList.add('hidden');
 								document.body.style.overflow = '';
-								// Clear modal content
-								overlay.innerHTML = '';
+								// Return to placeholder state for next HTMX load
+								overlay.outerHTML = '<div id="wizard-modal" class="relative z-50 invisible"></div>';
 							}
 						}, "-=0.1");
 				}
@@ -105,8 +174,8 @@ templ WizardScript() {
 					// Product selected
 					card.classList.add('ring-2', 'ring-accent');
 					overlay.classList.remove('opacity-0');
-					button.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
-					button.classList.add('border-accent', 'bg-accent', 'text-white');
+					button.classList.remove('border-gray-300', 'bg-gray-50', 'text-gray-700');
+					button.classList.add('border-accent', 'bg-accent', 'text-gray-50');
 					buttonText.textContent = 'Seleccionado';
 					
 					// Handle radio button deselection for single-select steps
@@ -123,10 +192,13 @@ templ WizardScript() {
 					// Product deselected
 					card.classList.remove('ring-2', 'ring-accent');
 					overlay.classList.add('opacity-0');
-					button.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
-					button.classList.remove('border-accent', 'bg-accent', 'text-white');
+					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700');
+					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
 					buttonText.textContent = 'Seleccionar';
 				}
+				
+				// Save to localStorage
+				this.saveCurrentStepSelections();
 				
 				this.updateSelectionSummary();
 				this.updateStepValidation();
@@ -182,26 +254,54 @@ templ WizardScript() {
 			}
 
 			validateCurrentStep() {
-				// Get current step requirements from the page
 				const stepElement = document.querySelector('[data-wizard-step]');
 				if (!stepElement) return true;
 
-				const isRequired = stepElement.querySelector('.bg-red-100') !== null; // Check if required badge exists
-				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				const isRequired = stepElement.dataset.required === 'true';
+				const isMultiSelect = stepElement.dataset.multiSelect === 'true';
+				const minSelected = parseInt(stepElement.dataset.minSelected) || 0;
+				const maxSelected = parseInt(stepElement.dataset.maxSelected) || 0;
 				
-				// If step is required, must have at least one selection
-				if (isRequired && selectedInputs.length === 0) {
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				const selectionCount = selectedInputs.length;
+
+				// Required validation
+				if (isRequired && selectionCount === 0) {
 					return false;
 				}
-				
-				// TODO: Add min/max selection validation based on step configuration
-				
+
+				// Multi-select validation
+				if (isMultiSelect) {
+					if (minSelected > 0 && selectionCount < minSelected) {
+						return false;
+					}
+					if (maxSelected > 0 && selectionCount > maxSelected) {
+						return false;
+					}
+				}
+
 				return true;
 			}
 
 			showStepValidationError() {
+				const stepElement = document.querySelector('[data-wizard-step]');
 				const summaryElement = document.querySelector('[data-selected-summary]');
-				if (summaryElement) {
+				
+				if (summaryElement && stepElement) {
+					const isRequired = stepElement.dataset.required === 'true';
+					const minSelected = parseInt(stepElement.dataset.minSelected) || 0;
+					const maxSelected = parseInt(stepElement.dataset.maxSelected) || 0;
+					const selectedCount = document.querySelectorAll('[data-wizard-product-input]:checked').length;
+					
+					let errorMessage = '⚠️ ';
+					if (isRequired && selectedCount === 0) {
+						errorMessage += 'Debes seleccionar al menos un producto para continuar';
+					} else if (minSelected > 0 && selectedCount < minSelected) {
+						errorMessage += `Debes seleccionar al menos ${minSelected} productos para continuar`;
+					} else if (maxSelected > 0 && selectedCount > maxSelected) {
+						errorMessage += `No puedes seleccionar más de ${maxSelected} productos`;
+					}
+
 					// Shake animation for error
 					gsap.fromTo(summaryElement.parentElement, 
 						{ x: 0 },
@@ -210,7 +310,7 @@ templ WizardScript() {
 					
 					// Show error message temporarily
 					const originalContent = summaryElement.innerHTML;
-					summaryElement.innerHTML = '<span class="text-red-600">⚠️ Debes seleccionar al menos un producto para continuar</span>';
+					summaryElement.innerHTML = `<span class="text-red-600">${errorMessage}</span>`;
 					
 					setTimeout(() => {
 						summaryElement.innerHTML = originalContent;
@@ -226,9 +326,75 @@ templ WizardScript() {
 				});
 			}
 
+			saveCurrentStepSelections() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement || !this.currentWizardId) return;
+
+				const stepId = stepElement.dataset.stepId;
+				const selectedProducts = Array.from(
+					document.querySelectorAll(`[data-step-id="${stepId}"][data-wizard-product-input]:checked`)
+				).map(input => input.dataset.productId || input.value);
+				
+				this.saveSelections(this.currentWizardId, stepId, selectedProducts);
+			}
+
+			restoreStepSelections() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement || !this.currentWizardId) return;
+
+				const stepId = stepElement.dataset.stepId;
+				const savedSelections = this.getStepSelections(this.currentWizardId, stepId);
+
+				// Pre-select saved products
+				savedSelections.forEach(productId => {
+					const input = document.querySelector(`[data-product-id="${productId}"][data-wizard-product-input]`);
+					if (input && !input.checked) {
+						input.checked = true;
+						this.handleProductInputChange(input);
+					}
+				});
+			}
+
+			extractCurrentContext() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (stepElement) {
+					this.currentStepId = stepElement.dataset.stepId;
+				}
+				
+				// Extract wizard ID from buttons or other elements
+				const wizardButton = document.querySelector('[hx-get*="/wizard/"], [hx-post*="/wizard/"]');
+				if (wizardButton) {
+					const url = wizardButton.getAttribute('hx-get') || wizardButton.getAttribute('hx-post');
+					const match = url.match(/\/wizard\/([^\/]+)/);
+					if (match) {
+						const newWizardId = match[1];
+						
+						// If this is a different wizard than before, clear the old wizard's data
+						if (this.currentWizardId && this.currentWizardId !== newWizardId) {
+							this.clearWizardData(this.currentWizardId);
+							console.log(`Switching from wizard ${this.currentWizardId} to ${newWizardId} - previous data cleared`);
+						}
+						
+						this.currentWizardId = newWizardId;
+					}
+				}
+			}
+
 			reinitializeAfterSwap() {
 				// Reinitialize after HTMX swaps new content
 				setTimeout(() => {
+					this.extractCurrentContext();
+					
+					// Check if completion view is shown and clear localStorage
+					const completionView = document.querySelector('[data-wizard-completion-view]');
+					if (completionView && this.currentWizardId) {
+						// Wizard completed successfully - clear localStorage
+						this.clearWizardData(this.currentWizardId);
+						console.log(`Wizard ${this.currentWizardId} completed - localStorage cleared`);
+						return; // Don't reinitialize for completion view
+					}
+					
+					this.restoreStepSelections();
 					this.loadExistingSelections();
 					this.updateSelectionSummary();
 					this.updateStepValidation();
@@ -267,7 +433,7 @@ templ WizardScript() {
 
 		// Handle clicking outside modal to close
 		document.addEventListener('click', function(e) {
-			const overlay = document.getElementById('wizard-modal-overlay');
+			const overlay = document.getElementById('wizard-modal');
 			if (e.target === overlay && !overlay.classList.contains('hidden')) {
 				if (window.wizardManager) {
 					window.wizardManager.hideModal();
@@ -278,7 +444,7 @@ templ WizardScript() {
 		// Handle escape key to close modal
 		document.addEventListener('keydown', function(e) {
 			if (e.key === 'Escape') {
-				const overlay = document.getElementById('wizard-modal-overlay');
+				const overlay = document.getElementById('wizard-modal');
 				if (overlay && !overlay.classList.contains('hidden')) {
 					if (window.wizardManager) {
 						window.wizardManager.hideModal();

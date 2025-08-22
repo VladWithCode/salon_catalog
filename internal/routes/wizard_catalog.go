@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -93,6 +94,15 @@ func RenderWizardStep(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Error al recuperar productos"))
 		log.Printf("failed to find wizard step: %v\n", err)
 		return
+	}
+
+	// Handle localStorage selections if provided
+	selectionsJSON := r.FormValue("wizard_localStorage")
+	var savedSelections map[string][]string
+	if selectionsJSON != "" {
+		if err := json.Unmarshal([]byte(selectionsJSON), &savedSelections); err == nil {
+			state.Selections = savedSelections
+		}
 	}
 
 	state.CurrentWizard = wizard

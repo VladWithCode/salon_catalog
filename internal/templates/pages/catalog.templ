@@ -169,12 +169,6 @@ templ CatalogScript() {
                 .replace('bg-gray-200 text-gray-700 hover:bg-gray-300', 'bg-accent text-white');
         }
         function handleBrowseTrigger(e) {
-            gsap.to('#catalog-intro', {
-                opacity: 0,
-                y: -20,
-                duration: 0.3,
-            });
-            gsap.set('#catalog-intro', {display: 'none'});
             gsap.set('#catalog-browse', {display: 'block'})
             gsap.fromTo(['#catalog-search', '#category-filters', '#catalog-products'],
                 {opacity: 0, y: 20},
