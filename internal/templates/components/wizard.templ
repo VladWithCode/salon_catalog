@@ -32,7 +32,7 @@ templ WizardModal(state *WizardModalState) {
 			@LoadingIcon("h-16", nil)
 			<p class="text-lg font-bold">Cargando asistente...</p>
 		</div>
-		<div class="flex items-stretch justify-center h-full px-4 py-6">
+		<div class="flex items-stretch justify-center h-full px-4 pt-6 pb-16">
 			<div
 				class="flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0"
 				id="wizard-modal-content"
@@ -102,7 +102,7 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 		</div>
 		<div
 			id="wizard-modal-footer"
-			class="sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400"
+			class="sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400 overflow-hidden"
 			data-wizard-modal-footer="show"
 		>
 			<div class="flex gap-4">
@@ -116,9 +116,9 @@ templ WizardSelectionView(wizards []*db.Wizard) {
 				</p>
 				<div class="ml-auto">
 					<button
-						id="wizard-modal-close"
+						id="wizard-modal-advice-close"
 						class="text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300"
-						data-click-handler-selector="close-wizard"
+						data-click-handler-selector="close-wizard-advice"
 					>
 						@TimesIcon("w-6", nil)
 					</button>
@@ -263,10 +263,10 @@ templ WizardStepView(state *WizardModalState) {
 					</div>
 				</div>
 			</div>
-			<div class="p-4 border-t bg-gray-50 flex justify-between items-center">
+			<div class="p-4 border-t bg-gray-50 flex justify-between items-center gap-2 text-xs md:text-sm">
 				<button
 					class={
-						"px-6 py-2 rounded-lg font-medium transition-colors",
+						"flex gap-0.5 p-2 xl:p-3 xl:gap-1 rounded-lg transition-colors",
 						templ.KV("bg-gray-200 text-gray-400 cursor-not-allowed", state.StepIndex == 1),
 						templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", state.StepIndex > 1),
 					}
@@ -282,18 +282,19 @@ templ WizardStepView(state *WizardModalState) {
 					}
 					disabled?={ state.StepIndex == 1 }
 				>
-					← Anterior
+					@ChevronIcon("w-4 rotate-90", nil)
+					<span class="">Anterior</span>
 				</button>
-				<div class="flex gap-3">
+				<div class="flex items-center gap-2 xl:gap-3">
 					<button
-						class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+						class="p-2 xl:p-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
 						data-click-handler-selector="close-wizard"
 					>
 						Cancelar
 					</button>
 					if state.StepIndex < len(state.CurrentWizard.Steps) {
 						<button
-							class="px-6 py-2 bg-accent text-gray-50 rounded-lg font-medium hover:bg-accent/90 transition-colors"
+							class="p-2 xl:p-3 bg-accent text-gray-50 rounded-lg font-medium hover:bg-accent/90 transition-colors"
 							hx-get={ fmt.Sprintf(
                                 "/wizard/%s/step/%s",
                                 state.CurrentWizard.ID,
@@ -309,7 +310,7 @@ templ WizardStepView(state *WizardModalState) {
 						</button>
 					} else {
 						<button
-							class="px-6 py-2 bg-green-600 text-gray-50 rounded-lg font-medium hover:bg-green-700 transition-colors"
+							class="p-2 xl:p-3 bg-green-600 text-gray-50 rounded-lg font-medium hover:bg-green-700 transition-colors"
 							hx-post={ fmt.Sprintf("/wizard/%s/complete", state.CurrentWizard.ID) }
 							hx-target="#wizard-modal"
 							hx-indicator="#wizard-modal-loading"

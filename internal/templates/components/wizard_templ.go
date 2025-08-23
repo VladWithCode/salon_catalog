@@ -56,7 +56,7 @@ func WizardModal(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"text-lg font-bold\">Cargando asistente...</p></div><div class=\"flex items-stretch justify-center h-full px-4 py-6\"><div class=\"flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0\" id=\"wizard-modal-content\" data-wizard-modal-content>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"text-lg font-bold\">Cargando asistente...</p></div><div class=\"flex items-stretch justify-center h-full px-4 pt-6 pb-16\"><div class=\"flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0\" id=\"wizard-modal-content\" data-wizard-modal-content>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -207,7 +207,7 @@ func WizardSelectionView(wizards []*db.Wizard) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div id=\"wizard-modal-footer\" class=\"sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400\" data-wizard-modal-footer=\"show\"><div class=\"flex gap-4\"><div class=\"flex-shrink-0\"><svg class=\"w-5 h-5 text-blue-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\"></path></svg></div><p class=\"text-sm text-blue-700\"><strong>¿Cómo funciona?</strong> El asistente te guiará paso a paso para seleccionar los productos perfectos para tu evento. Cada paso te mostrará opciones específicas según el tipo de evento que elijas.</p><div class=\"ml-auto\"><button id=\"wizard-modal-close\" class=\"text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300\" data-click-handler-selector=\"close-wizard\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div id=\"wizard-modal-footer\" class=\"sticky bottom-0 inset-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400 overflow-hidden\" data-wizard-modal-footer=\"show\"><div class=\"flex gap-4\"><div class=\"flex-shrink-0\"><svg class=\"w-5 h-5 text-blue-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\"></path></svg></div><p class=\"text-sm text-blue-700\"><strong>¿Cómo funciona?</strong> El asistente te guiará paso a paso para seleccionar los productos perfectos para tu evento. Cada paso te mostrará opciones específicas según el tipo de evento que elijas.</p><div class=\"ml-auto\"><button id=\"wizard-modal-advice-close\" class=\"text-blue-600 hover:text-blue-800 text-sm font-medium rotate-0 hover:rotate-90 hover:scale-103 active:scale-95 transition-[rotate,_scale] duration-300\" data-click-handler-selector=\"close-wizard-advice\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -646,11 +646,11 @@ func WizardStepView(state *WizardModalState) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</div></div></div><div class=\"p-4 border-t bg-gray-50 flex justify-between items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</div></div></div><div class=\"p-4 border-t bg-gray-50 flex justify-between items-center gap-2 text-xs md:text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var30 = []any{"px-6 py-2 rounded-lg font-medium transition-colors",
+		var templ_7745c5c3_Var30 = []any{"flex gap-0.5 p-2 xl:p-3 xl:gap-1 rounded-lg transition-colors",
 			templ.KV("bg-gray-200 text-gray-400 cursor-not-allowed", state.StepIndex == 1),
 			templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300", state.StepIndex > 1),
 		}
@@ -704,12 +704,20 @@ func WizardStepView(state *WizardModalState) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, ">← Anterior</button><div class=\"flex gap-3\"><button class=\"px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors\" data-click-handler-selector=\"close-wizard\">Cancelar</button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ChevronIcon("w-4 rotate-90", nil).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<span class=\"\">Anterior</span></button><div class=\"flex items-center gap-2 xl:gap-3\"><button class=\"p-2 xl:p-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors\" data-click-handler-selector=\"close-wizard\">Cancelar</button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if state.StepIndex < len(state.CurrentWizard.Steps) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<button class=\"px-6 py-2 bg-accent text-gray-50 rounded-lg font-medium hover:bg-accent/90 transition-colors\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "<button class=\"p-2 xl:p-3 bg-accent text-gray-50 rounded-lg font-medium hover:bg-accent/90 transition-colors\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -720,62 +728,62 @@ func WizardStepView(state *WizardModalState) templ.Component {
 				state.CurrentWizard.Steps[state.StepIndex].ID, // Step idx is one-based
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 301, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 302, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-next-step data-step-required=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-next-step data-step-required=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", state.CurrentStep.Required))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 305, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 306, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\" data-min-selected=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "\" data-min-selected=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var35 string
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", state.CurrentStep.MinSelected))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 306, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 307, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "\">Siguiente →</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "\">Siguiente →</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<button class=\"px-6 py-2 bg-green-600 text-gray-50 rounded-lg font-medium hover:bg-green-700 transition-colors\" hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "<button class=\"p-2 xl:p-3 bg-green-600 text-gray-50 rounded-lg font-medium hover:bg-green-700 transition-colors\" hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/wizard/%s/complete", state.CurrentWizard.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 313, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 314, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-complete>Completar Asistente</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-complete>Completar Asistente</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -804,38 +812,38 @@ func WizardStepPagination(state *WizardModalState) templ.Component {
 			templ_7745c5c3_Var37 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<div class=\"flex items-center justify-between py-4 px-4 bg-gray-50 rounded-lg\"><div class=\"flex items-center text-sm text-gray-600\"><span>Página ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<div class=\"flex items-center justify-between py-4 px-4 bg-gray-50 rounded-lg\"><div class=\"flex items-center text-sm text-gray-600\"><span>Página ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", state.ProductsResult.Page))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 330, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 331, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, " de ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, " de ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", state.ProductsResult.TotalPages))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 330, Col: 121}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 331, Col: 121}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "</span></div><div class=\"flex items-center space-x-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</span></div><div class=\"flex items-center space-x-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if state.ProductsResult.HasPrevious {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<button class=\"px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<button class=\"px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -847,24 +855,24 @@ func WizardStepPagination(state *WizardModalState) templ.Component {
 				state.ProductsResult.Page-1,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 341, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 342, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-nav=\"page\">← Anterior</button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-nav=\"page\">← Anterior</button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "<button class=\"px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed\" disabled>← Anterior</button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<button class=\"px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed\" disabled>← Anterior</button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if state.ProductsResult.HasNext {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<button class=\"px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<button class=\"px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -876,23 +884,23 @@ func WizardStepPagination(state *WizardModalState) templ.Component {
 				state.ProductsResult.Page+1,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 361, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 362, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-nav=\"page\">Siguiente →</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "\" hx-target=\"#wizard-modal\" hx-indicator=\"#wizard-modal-loading\" data-wizard-nav=\"page\">Siguiente →</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<button class=\"px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed\" disabled>Siguiente →</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "<button class=\"px-3 py-2 text-sm bg-gray-100 text-gray-400 rounded cursor-not-allowed\" disabled>Siguiente →</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -921,7 +929,7 @@ func WizardCompletionView(state *WizardModalState) templ.Component {
 			templ_7745c5c3_Var42 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<div class=\"bg-gradient-to-r from-green-500 to-green-600 p-6 text-gray-50 relative\" data-wizard-completion-view><button class=\"absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors\" data-click-handler-selector=\"close-wizard\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<div class=\"bg-gradient-to-r from-green-500 to-green-600 p-6 text-gray-50 relative\" data-wizard-completion-view><button class=\"absolute top-4 right-4 text-gray-50 hover:text-gray-200 transition-colors\" data-click-handler-selector=\"close-wizard\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -929,7 +937,7 @@ func WizardCompletionView(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "</button><div class=\"text-center pr-12\"><div class=\"w-16 h-16 bg-gray-50/20 rounded-full flex items-center justify-center mx-auto mb-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</button><div class=\"text-center pr-12\"><div class=\"w-16 h-16 bg-gray-50/20 rounded-full flex items-center justify-center mx-auto mb-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -937,25 +945,25 @@ func WizardCompletionView(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</div><h2 class=\"text-2xl font-bold mb-2\">¡Asistente Completado!</h2><p class=\"text-current/90\">Hemos añadido los productos seleccionados a tu carrito</p></div></div><div class=\"p-6 max-h-[calc(90vh-160px)] overflow-y-auto\"><div class=\"mb-8\"><h3 class=\"text-xl font-bold text-gray-800 mb-4\">Resumen de tu selección</h3><div class=\"bg-gray-50 rounded-lg p-4\"><div class=\"flex items-center justify-between mb-2\"><span class=\"font-medium\">Evento:</span> <span class=\"text-gray-600\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "</div><h2 class=\"text-2xl font-bold mb-2\">¡Asistente Completado!</h2><p class=\"text-current/90\">Hemos añadido los productos seleccionados a tu carrito</p></div></div><div class=\"p-6 max-h-[calc(90vh-160px)] overflow-y-auto\"><div class=\"mb-8\"><h3 class=\"text-xl font-bold text-gray-800 mb-4\">Resumen de tu selección</h3><div class=\"bg-gray-50 rounded-lg p-4\"><div class=\"flex items-center justify-between mb-2\"><span class=\"font-medium\">Evento:</span> <span class=\"text-gray-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var43 string
 		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(state.CurrentWizard.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 399, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 400, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "</span></div><div class=\"flex items-center justify-between\"><span class=\"font-medium\">Productos seleccionados:</span> <span class=\"text-gray-600\">Ver detalles abajo</span></div></div></div><div class=\"space-y-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "</span></div><div class=\"flex items-center justify-between\"><span class=\"font-medium\">Productos seleccionados:</span> <span class=\"text-gray-600\">Ver detalles abajo</span></div></div></div><div class=\"space-y-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, step := range state.CurrentWizard.Steps {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<div class=\"border rounded-lg p-4\"><h4 class=\"font-semibold text-gray-700 mb-3 flex items-center\"><div class=\"p-1 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-sm font-bold mr-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "<div class=\"border rounded-lg p-4\"><h4 class=\"font-semibold text-gray-700 mb-3 flex items-center\"><div class=\"p-1 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-sm font-bold mr-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -963,25 +971,25 @@ func WizardCompletionView(state *WizardModalState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(step.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 414, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 415, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "</h4><div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3\"><div class=\"flex items-center p-2 bg-gray-50 rounded\"><div class=\"w-10 h-10 bg-gray-300 rounded mr-3\"></div><div><p class=\"text-sm font-medium\">Productos seleccionados</p><p class=\"text-xs text-gray-600\">Ver en carrito</p></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "</h4><div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3\"><div class=\"flex items-center p-2 bg-gray-50 rounded\"><div class=\"w-10 h-10 bg-gray-300 rounded mr-3\"></div><div><p class=\"text-sm font-medium\">Productos seleccionados</p><p class=\"text-xs text-gray-600\">Ver en carrito</p></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "</div><div class=\"mt-8 p-6 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20\"><h3 class=\"text-lg font-bold text-gray-800 mb-2\">¿Qué sigue?</h3><p class=\"text-gray-600 mb-4\">Los productos están listos en tu carrito. Puedes continuar navegando el catálogo para añadir más artículos o proceder a solicitar una cotización.</p><div class=\"flex flex-col sm:flex-row gap-3\"><a class=\"flex-1 bg-primary text-gray-50 py-3 px-6 rounded-lg text-center font-semibold hover:bg-primary/90 transition-colors\" href=\"/solicitar-cotizacion\">Solicitar Cotización</a> <button class=\"flex-1 bg-gray-50 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors\" hx-get=\"/carrito\" hx-target=\"#cart-sidebar\" data-click-handler-selector=\"close-wizard\">Continuar Navegando</button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "</div><div class=\"mt-8 p-6 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20\"><h3 class=\"text-lg font-bold text-gray-800 mb-2\">¿Qué sigue?</h3><p class=\"text-gray-600 mb-4\">Los productos están listos en tu carrito. Puedes continuar navegando el catálogo para añadir más artículos o proceder a solicitar una cotización.</p><div class=\"flex flex-col sm:flex-row gap-3\"><a class=\"flex-1 bg-primary text-gray-50 py-3 px-6 rounded-lg text-center font-semibold hover:bg-primary/90 transition-colors\" href=\"/solicitar-cotizacion\">Solicitar Cotización</a> <button class=\"flex-1 bg-gray-50 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors\" hx-get=\"/carrito\" hx-target=\"#cart-sidebar\" data-click-handler-selector=\"close-wizard\">Continuar Navegando</button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1015,191 +1023,191 @@ func WizardProductCard(product *db.CatalogProd, step *db.WizardStep, stepIndex i
 		if step.MultiSelect {
 			inputType = "checkbox"
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "<div class=\"bg-gray-50 flex flex-col border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 relative\" data-wizard-product-card data-product-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "<div class=\"bg-gray-50 flex flex-col border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 relative\" data-wizard-product-card data-product-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 462, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 463, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" data-step-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "\" data-step-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(step.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 463, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 464, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "\"><div class=\"absolute inset-0 bg-accent/20 border-4 border-accent opacity-0 pointer-events-none transition-opacity duration-300\" data-selection-overlay></div><div class=\"shrink-0 grow-0 aspect-square overflow-hidden bg-gray-100 relative\"><img src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "\"><div class=\"absolute inset-0 bg-accent/20 border-4 border-accent opacity-0 pointer-events-none transition-opacity duration-300\" data-selection-overlay></div><div class=\"shrink-0 grow-0 aspect-square overflow-hidden bg-gray-100 relative\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/static/uploads/%s", product.ImageURL))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 471, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 472, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "\" alt=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "\" alt=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var49 string
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 472, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 473, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "\" class=\"w-full h-full object-cover\" loading=\"lazy\"><div class=\"absolute top-3 right-3\"><input type=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "\" class=\"w-full h-full object-cover\" loading=\"lazy\"><div class=\"absolute top-3 right-3\"><input type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(inputType)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 478, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 479, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(inputName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 479, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 480, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 480, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 481, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "\" class=\"w-5 h-5 text-accent border-2 border-gray-50 bg-gray-100/90 rounded focus:bg-gray-50 focus:ring-accent focus:ring-2\" data-wizard-product-input data-wizard-selections data-step-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "\" class=\"w-5 h-5 text-accent border-2 border-gray-50 bg-gray-100/90 rounded focus:bg-gray-50 focus:ring-accent focus:ring-2\" data-wizard-product-input data-wizard-selections data-step-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(step.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 484, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 485, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "\" data-product-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "\" data-product-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(product.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 485, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 486, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "\" data-click-handler-selector=\"wizard-selection-input\"></div><div class=\"absolute top-3 left-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "\" data-click-handler-selector=\"wizard-selection-input\"></div><div class=\"absolute top-3 left-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if product.Available {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "<span class=\"px-2 py-1 bg-green-500 text-gray-50 text-xs font-medium rounded-full\">Disponible</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<span class=\"px-2 py-1 bg-green-500 text-gray-50 text-xs font-medium rounded-full\">Disponible</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<span class=\"px-2 py-1 bg-red-500 text-gray-50 text-xs font-medium rounded-full\">No disponible</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<span class=\"px-2 py-1 bg-red-500 text-gray-50 text-xs font-medium rounded-full\">No disponible</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "</div></div><div class=\"flex-1 flex flex-col gap-2 p-4\"><div class=\"basis-auto\"><h4 class=\"font-semibold text-gray-800 line-clamp-1 mb-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</div></div><div class=\"flex-1 flex flex-col gap-2 p-4\"><div class=\"basis-auto\"><h4 class=\"font-semibold text-gray-800 line-clamp-1 mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(product.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 503, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 504, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</h4><p class=\"text-sm text-gray-600 line-clamp-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</h4><p class=\"text-sm text-gray-600 line-clamp-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(product.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 504, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 505, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</p></div><div class=\"mt-auto flex items-center justify-between text-sm text-gray-500\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</p></div><div class=\"mt-auto flex items-center justify-between text-sm text-gray-500\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(product.CategoryName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 507, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 508, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</span> <span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</span> <span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", product.Quantity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 508, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/wizard.templ`, Line: 509, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, " pcs</span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, " pcs</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1211,7 +1219,7 @@ func WizardProductCard(product *db.CatalogProd, step *db.WizardStep, stepIndex i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<button class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<button class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1224,32 +1232,32 @@ func WizardProductCard(product *db.CatalogProd, step *db.WizardStep, stepIndex i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "\" data-selection-button")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "\" data-selection-button")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !product.Available {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, " disabled")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, " onclick=\"toggleWizardProductSelection(this)\"><span data-selection-text>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, " onclick=\"toggleWizardProductSelection(this)\"><span data-selection-text>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if product.Available {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "Seleccionar")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "Seleccionar")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "No Disponible")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "No Disponible")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "</span></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

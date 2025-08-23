@@ -98,6 +98,10 @@ templ WizardScript() {
                     })
                     .registerClick('wizard-selection-input', (e) => {
                         this.handleProductInputChange(e.target);
+                    })
+                    .registerClick('close-wizard-advice', (e) => {
+                        const footerEl = document.querySelector('#wizard-modal-footer');
+                        gsap.to(footerEl, {autoAlpha: 0, height: '0px', duration: 0.2, ease: 'power2.out'});
                     });
 			}
 
