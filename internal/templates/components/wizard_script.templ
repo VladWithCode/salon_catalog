@@ -102,6 +102,9 @@ templ WizardScript() {
                     .registerClick('close-wizard-advice', (e) => {
                         const footerEl = document.querySelector('#wizard-modal-footer');
                         gsap.to(footerEl, {autoAlpha: 0, height: '0px', duration: 0.2, ease: 'power2.out'});
+                    })
+                    .registerClick('toggle-selection-summary', (e) => {
+                        this.toggleSelectionSummary();
                     });
 			}
 
@@ -251,12 +254,18 @@ templ WizardScript() {
 
 			updateSelectionSummary() {
 				const summaryElement = document.querySelector('[data-selected-summary]');
-				if (!summaryElement) return;
-
+				const summarySlimElement = document.querySelector('[data-selected-summary-slim]');
+				
 				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
 				
 				if (selectedInputs.length === 0) {
-					summaryElement.textContent = 'Ningún producto seleccionado';
+					// Update both views with empty state
+					if (summaryElement) {
+						summaryElement.textContent = 'Ningún producto seleccionado';
+					}
+					if (summarySlimElement) {
+						summarySlimElement.textContent = 'Ningún producto seleccionado';
+					}
 				} else {
 					const productNames = Array.from(selectedInputs).map(input => {
 						const card = input.closest('[data-wizard-product-card]');
@@ -264,9 +273,78 @@ templ WizardScript() {
 						return nameElement ? nameElement.textContent.trim() : 'Producto';
 					});
 					
-					summaryElement.innerHTML = productNames.map(name => 
-						`<span class="inline-block bg-accent/10 text-accent px-2 py-1 rounded-full text-xs mr-2 mb-1">${name}</span>`
-					).join('');
+					// Update full view with badges
+					if (summaryElement) {
+						summaryElement.innerHTML = productNames.map(name => 
+							`<span class="inline-block bg-accent/10 text-accent px-2 py-1 rounded-full text-xs mr-2 mb-1">${name}</span>`
+						).join('');
+					}
+					
+					// Update slim view with truncated text
+					if (summarySlimElement) {
+						const shortNames = productNames.map(name => {
+							// Truncate long product names for slim view
+							return name.length > 20 ? name.substring(0, 17) + '...' : name;
+						});
+						const joinedText = shortNames.join(', ');
+						summarySlimElement.textContent = joinedText;
+						summarySlimElement.title = productNames.join(', '); // Full names on hover
+					}
+				}
+			}
+
+			toggleSelectionSummary() {
+				const container = document.querySelector('[data-selection-summary]');
+				const slimView = container.querySelector('[data-summary-slim]');
+				const fullView = container.querySelector('[data-summary-full]');
+				const chevronIcon = container.querySelector('[data-chevron-icon]');
+				
+				if (!container || !slimView || !fullView || !chevronIcon) return;
+
+				const currentState = container.dataset.summaryState;
+				const isSlim = currentState === 'slim';
+				
+				// Toggle state
+				container.dataset.summaryState = isSlim ? 'full' : 'slim';
+				
+				// Animate the transition using GSAP
+				if (isSlim) {
+					// Expanding to full view
+					gsap.to(chevronIcon, { rotation: 180, duration: 0.2 });
+					gsap.to(slimView, { 
+						height: 0, 
+						opacity: 0, 
+						duration: 0.2,
+						onComplete: () => {
+							slimView.classList.add('hidden');
+							fullView.classList.remove('hidden');
+							gsap.fromTo(fullView, 
+								{ height: 0, opacity: 0 },
+								{ height: 'auto', opacity: 1, duration: 0.2 }
+							);
+						}
+					});
+				} else {
+					// Collapsing to slim view
+					gsap.to(chevronIcon, { rotation: 0, duration: 0.2 });
+					gsap.to(fullView, {
+						height: 0,
+						opacity: 0,
+						duration: 0.2,
+						onComplete: () => {
+							fullView.classList.add('hidden');
+							slimView.classList.remove('hidden');
+							gsap.fromTo(slimView,
+								{ height: 0, opacity: 0 },
+								{ height: 'auto', opacity: 1, duration: 0.2 }
+							);
+						}
+					});
+				}
+
+				// Save preference in sessionStorage for current wizard session
+				if (this.currentWizardId) {
+					sessionStorage.setItem(`wizard_summary_state_${this.currentWizardId}`, container.dataset.summaryState);
 				}
 			}
 
@@ -433,6 +511,7 @@ templ WizardScript() {
 					this.loadExistingSelections();
 					this.updateSelectionSummary();
 					this.updateStepValidation();
+					this.restoreSummaryState();
 					
 					// Animate in new content
 					const productCards = document.querySelectorAll('[data-wizard-product-card]');
@@ -443,6 +522,29 @@ templ WizardScript() {
 						);
 					}
 				}, 50);
+			}
+
+			restoreSummaryState() {
+				if (!this.currentWizardId) return;
+				
+				const container = document.querySelector('[data-selection-summary]');
+				if (!container) return;
+
+				// Restore saved summary state preference
+				const savedState = sessionStorage.getItem(`wizard_summary_state_${this.currentWizardId}`);
+				if (savedState && savedState !== 'slim') {
+					// If user previously expanded, restore to expanded state
+					const slimView = container.querySelector('[data-summary-slim]');
+					const fullView = container.querySelector('[data-summary-full]');
+					const chevronIcon = container.querySelector('[data-chevron-icon]');
+					
+					if (slimView && fullView && chevronIcon) {
+						container.dataset.summaryState = 'full';
+						slimView.classList.add('hidden');
+						fullView.classList.remove('hidden');
+						gsap.set(chevronIcon, { rotation: 180 });
+					}
+				}
 			}
 
 			// Helper method for product card toggle (called from inline onclick)

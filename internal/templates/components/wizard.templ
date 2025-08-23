@@ -245,21 +245,47 @@ templ WizardStepView(state *WizardModalState) {
 					if state.ProductsResult != nil && (state.ProductsResult.HasNext || state.ProductsResult.HasPrevious) {
 						@WizardStepPagination(state)
 					}
-					<div class="p-4 bg-gray-50 rounded-lg sticky bottom-0">
-						<h4 class="font-semibold text-gray-700 mb-2">Productos Seleccionados:</h4>
-						<div class="text-sm text-gray-600" data-selected-summary>
-							Ningún producto seleccionado
+					<div
+						id="wizard-modal-selection-summary"
+						class="bg-gray-50 rounded-lg sticky bottom-0 transition-all duration-300"
+						data-selection-summary
+						data-summary-state="slim"
+					>
+						<!-- Toggle Button -->
+						<div class="flex items-center justify-between p-2 border-b border-gray-200">
+							<h4 class="font-semibold text-gray-700 text-sm">Productos Seleccionados</h4>
+							<button 
+								class="p-1 hover:bg-gray-200 rounded-full transition-colors"
+								data-click-handler-selector="toggle-selection-summary"
+								title="Expandir/Contraer resumen"
+							>
+								@ChevronIcon("w-4 h-4 transform transition-transform duration-200", map[string]any{"data-chevron-icon": "true"})
+							</button>
 						</div>
-						if state.CurrentStep.Required {
-							<p class="text-xs text-red-600 mt-2">
-								* Debes seleccionar al menos un producto para continuar
-							</p>
-						}
-						if state.ProductsResult != nil {
-							<p class="text-xs text-gray-500 mt-2">
-								Mostrando { fmt.Sprintf("%d", len(state.Products)) } de { fmt.Sprintf("%d", state.ProductsResult.Total) } productos
-							</p>
-						}
+						
+						<!-- Slim View (Default) -->
+						<div class="p-2 block" data-summary-slim>
+							<div class="text-sm text-gray-600 line-clamp-1" data-selected-summary-slim>
+								Ningún producto seleccionado
+							</div>
+						</div>
+						
+						<!-- Full View (Hidden by default) -->
+						<div class="p-4 hidden" data-summary-full>
+							<div class="text-sm text-gray-600 mb-2" data-selected-summary>
+								Ningún producto seleccionado
+							</div>
+							if state.CurrentStep.Required {
+								<p class="text-xs text-red-600 mb-2">
+									* Debes seleccionar al menos un producto para continuar
+								</p>
+							}
+							if state.ProductsResult != nil {
+								<p class="text-xs text-gray-500">
+									Mostrando { fmt.Sprintf("%d", len(state.Products)) } de { fmt.Sprintf("%d", state.ProductsResult.Total) } productos
+								</p>
+							}
+						</div>
 					</div>
 				</div>
 			</div>
