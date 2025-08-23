@@ -56,7 +56,7 @@ func WizardModal(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"text-lg font-bold\">Cargando asistente...</p></div><div class=\"flex items-stretch justify-center h-full px-4 pt-6 pb-16\"><div class=\"flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0\" id=\"wizard-modal-content\" data-wizard-modal-content>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"text-lg font-bold\">Cargando asistente...</p></div><div class=\"flex items-stretch justify-center h-full px-4 pt-6 pb-16 lg:pb-6\"><div class=\"flex flex-col bg-gray-100 rounded-xl w-full h-full overflow-hidden scale-95 opacity-0\" id=\"wizard-modal-content\" data-wizard-modal-content>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -382,7 +382,7 @@ func WizardStepView(state *WizardModalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><div class=\"hidden xl:block w-80 bg-gray-50 p-4 border-r overflow-y-auto\"><h3 class=\"font-semibold text-gray-700 mb-4\">Pasos del Asistente</h3><div class=\"space-y-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><div class=\"hidden lg:block w-80 bg-gray-50 p-4 border-r overflow-y-auto\"><h3 class=\"font-semibold text-gray-700 mb-4\">Pasos del Asistente</h3><div class=\"space-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
