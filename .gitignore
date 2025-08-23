@@ -10,6 +10,7 @@ web/static/qrcodes/*
 
 dist/
 bin/
+salon_catalog
 
 # ignore tailwindls hack
 tailwind.config.js
