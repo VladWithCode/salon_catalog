@@ -16,6 +16,7 @@ type ImageSelectorConfig struct {
 	SelectedIds    []string `json:"selected_ids,omitempty"` // Currently selected image IDs
 	AllowUpload    bool     `json:"allow_upload"`           // Show upload tab
 	SuccessTarget  string   `json:"success_target"`         // Target for swap on update success
+	FileTypeFilter string   `json:"file_type_filter"`       // Filter by file type (e.g., "image/svg+xml")
 }
 
 func (is *ImageSelectorConfig) ToJSONString() (string, error) {
@@ -43,6 +44,20 @@ func NewImageSelectorConfig(mode string, updateEndpoint string, title string, ma
 		SelectedIds:    selectedIds,
 		AllowUpload:    allowUpload,
 		SuccessTarget:  successTarget,
+		FileTypeFilter: "",
+	}
+}
+
+func NewImageSelectorConfigWithFileType(mode string, updateEndpoint string, title string, maxSelection int, selectedIds []string, allowUpload bool, successTarget string, fileTypeFilter string) ImageSelectorConfig {
+	return ImageSelectorConfig{
+		Mode:           mode,
+		UpdateEndpoint: updateEndpoint,
+		Title:          title,
+		MaxSelection:   maxSelection,
+		SelectedIds:    selectedIds,
+		AllowUpload:    allowUpload,
+		SuccessTarget:  successTarget,
+		FileTypeFilter: fileTypeFilter,
 	}
 }
 

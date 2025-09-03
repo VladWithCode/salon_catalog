@@ -675,6 +675,11 @@ func parseImageFilters(r *http.Request) db.ImageFilterParams {
 		filters.Name = trimmedSearch
 	}
 
+	// File type filter
+	if fileType := strings.TrimSpace(query.Get("file_type")); fileType != "" {
+		filters.FileType = fileType
+	}
+
 	// Parse sorting
 	rawSort := query.Get("sort")
 	filters.SortOrder, filters.SortBy = parseImagesSort(rawSort)

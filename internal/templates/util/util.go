@@ -11,6 +11,15 @@ import (
 	"github.com/vladwithcode/salon_catalog/internal"
 )
 
+func ExtractSocialLinks(ctx context.Context) map[string]string {
+	socialLinks, ok := ctx.Value("socialLinks").(map[string]string)
+	if !ok {
+		return map[string]string{}
+	}
+
+	return socialLinks
+}
+
 func ExtractURLPath(ctx context.Context) string {
 	val, _ := ctx.Value("urlPath").(string)
 

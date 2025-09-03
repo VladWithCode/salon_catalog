@@ -40,6 +40,7 @@ func NewRouter() http.Handler {
 	RegisterCatalogRoutes(router)
 	RegisterCartRoutes(router)
 	RegisterUserRoutes(router)
+	RegisterSocialRoutes(router)
 
 	// Api
 	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))
@@ -281,12 +282,22 @@ func render500Page(w http.ResponseWriter, r *http.Request) {
 
 func publicMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		socialLinks, err := db.GetSocialLinks()
+		if err != nil {
+			log.Printf("Error fetching social links: %v", err)
+		}
+		socialLinkMap := make(map[string]string)
+		for _, link := range socialLinks {
+			socialLinkMap[link.Name] = link.Link
+		}
+		req := r.WithContext(context.WithValue(r.Context(), "socialLinks", socialLinkMap))
+
 		// Gives templ's ctx access to the request path and query params
-		req := r.WithContext(context.WithValue(r.Context(), "urlPath", r.URL.Path))
-		req = r.WithContext(context.WithValue(r.Context(), "urlQueryParams", r.URL.Query()))
+		req = r.WithContext(context.WithValue(req.Context(), "urlPath", r.URL.Path))
+		req = r.WithContext(context.WithValue(req.Context(), "urlQueryParams", r.URL.Query()))
 
 		// Ensure there's a cart id for the catalog to use
-		_, err := r.Cookie("cart_id")
+		_, err = r.Cookie("cart_id")
 		if err != nil {
 			http.SetCookie(w, &http.Cookie{
 				Name:    "cart_id",

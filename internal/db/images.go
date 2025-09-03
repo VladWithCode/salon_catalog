@@ -26,7 +26,9 @@ type Image struct {
 	Name       string    `db:"name" json:"name"`
 	NoOptimize bool      `db:"no_optimize" json:"noOptimize"`
 	Size       int       `db:"size" json:"size"`
+	FileType   string    `db:"file_type" json:"fileType"`
 	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt  time.Time `db:"updated_at" json:"updatedAt"`
 
 	// Not from schema
 	Pinned bool `db:"pinned" json:"pinned"`
@@ -34,6 +36,7 @@ type Image struct {
 
 type ImageFilterParams struct {
 	Name       string    `json:"name"`
+	FileType   string    `json:"file_type"`
 	ExactDate  time.Time `json:"exact_date"`
 	DateAfter  time.Time `json:"date_after"`
 	DateBefore time.Time `json:"date_before"`
@@ -74,13 +77,14 @@ func CreateImages(imgs []*Image) error {
 	for _, img := range imgs {
 		_, err = tx.Exec(
 			ctx,
-			`INSERT INTO images (id, filename, name, no_optimize, size)
-				VALUES ($1, $2, $3, $4, $5)`,
+			`INSERT INTO images (id, filename, name, no_optimize, size, file_type)
+				VALUES ($1, $2, $3, $4, $5, $6)`,
 			img.ID,
 			img.Filename,
 			img.Name,
 			img.NoOptimize,
 			img.Size,
+			img.FileType,
 		)
 
 		if err != nil {
@@ -107,12 +111,13 @@ func CreateImage(img *Image) error {
 
 	_, err = conn.Exec(
 		ctx,
-		`INSERT INTO images (id, filename, name, no_optimize, size) VALUES ($1, $2, $3, $4, $5)`,
+		`INSERT INTO images (id, filename, name, no_optimize, size, file_type) VALUES ($1, $2, $3, $4, $5, $6)`,
 		img.ID,
 		img.Filename,
 		img.Name,
 		img.NoOptimize,
 		img.Size,
+		img.FileType,
 	)
 	if err != nil {
 		return err
@@ -434,7 +439,7 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 	orderBy := buildImageOrderByClause(filters)
 	selectQuery := fmt.Sprintf(`
 		SELECT 
-			id, filename, name, no_optimize, size, created_at,
+			id, filename, name, no_optimize, size, file_type, created_at, updated_at,
 			%s %s
 		%s %s 
 		LIMIT @limit OFFSET @offset`,
@@ -464,7 +469,9 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 				&image.Name,
 				&image.NoOptimize,
 				&image.Size,
+				&image.FileType,
 				&image.CreatedAt,
+				&image.UpdatedAt,
 				&image.Pinned,
 				&searchRank,
 			)
@@ -475,7 +482,9 @@ func FilterImages(filters ImageFilterParams) (*ImageFilterResult, error) {
 				&image.Name,
 				&image.NoOptimize,
 				&image.Size,
+				&image.FileType,
 				&image.CreatedAt,
+				&image.UpdatedAt,
 				&image.Pinned,
 				&searchRank, // Still need to scan the rank column (will be 0)
 			)
@@ -515,6 +524,12 @@ func buildImageQueryConditions(filters ImageFilterParams) ([]string, pgx.NamedAr
 	if filters.Name != "" {
 		conditions = append(conditions, "search_vector @@ plainto_tsquery('spanish', @search_query)")
 		namedArgs["search_query"] = filters.Name
+	}
+
+	// File type filter
+	if filters.FileType != "" {
+		conditions = append(conditions, "file_type = @file_type")
+		namedArgs["file_type"] = filters.FileType
 	}
 
 	// Exact date filter

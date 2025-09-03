@@ -53,6 +53,7 @@ func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	}
 	successTarget := r.URL.Query().Get("success_target")
 
+	fileTypeFilter := r.URL.Query().Get("file_type_filter")
 	config := dashboard.ImageSelectorConfig{
 		Mode:           mode,
 		UpdateEndpoint: updateEndpoint,
@@ -64,6 +65,9 @@ func RenderImageSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
 	}
 
 	filters.Pinned = config.SelectedIds
+	if fileTypeFilter != "" {
+		filters.FileType = fileTypeFilter
+	}
 	// Get images
 	result, err := db.FilterImages(filters)
 	if err != nil {
@@ -123,6 +127,8 @@ func GetImagesForSelector(w http.ResponseWriter, r *http.Request, a *auth.Auth) 
 			return
 		}
 	}
+
+	// File type filter can be applied directly to filters if needed
 
 	if addToSelection := r.URL.Query()["add_to_selection"]; len(addToSelection) > 0 {
 		if config.Mode == "multiple" {
