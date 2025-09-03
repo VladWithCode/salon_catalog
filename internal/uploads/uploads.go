@@ -30,11 +30,11 @@ type WrittenFile struct {
 }
 
 func writeFile(file *multipart.FileHeader, writePath string) (int64, error) {
-	p, err := file.Open()
+	inFile, err := file.Open()
 	if err != nil {
 		return 0, errors.Join(ErrFileHeaderOpenFail, err)
 	}
-	defer p.Close()
+	defer inFile.Close()
 
 	outFile, err := os.Create(writePath)
 	if err != nil {
@@ -42,7 +42,7 @@ func writeFile(file *multipart.FileHeader, writePath string) (int64, error) {
 	}
 	defer outFile.Close()
 
-	written, err := io.Copy(outFile, p)
+	written, err := io.Copy(outFile, inFile)
 	if err != nil {
 		return 0, errors.Join(ErrFileCopyFail, err)
 	}
