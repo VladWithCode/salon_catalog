@@ -69,7 +69,7 @@ func SocialsIndex(links []db.SocialLink, sections []db.SocialSection, sectionLin
 				return templ_7745c5c3_Err
 			}
 			if len(links) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"w-full grid grid-cols-3 auto-rows-auto overflow-auto divide-y divide-gray-200\"><div class=\"col-span-full row-start-1 grid grid-cols-subgrid bg-gray-50 w-full overflow-auto\"><div class=\"col-span-full grid grid-cols-subgrid grid-rows-1\"><div class=\"col-start-1 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Nombre</div><div class=\"col-start-2 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Enlace</div><div class=\"col-start-3 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Acciones</div></div></div><div class=\"col-span-full row-start-2 grid grid-cols-subgrid grid-rows-auto bg-white divide-y divide-gray-200\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"w-full grid grid-cols-[auto_minmax(40%,_1fr)_auto] auto-rows-auto divide-y divide-gray-200\"><div class=\"col-span-full row-start-1 grid grid-cols-subgrid bg-gray-50 w-full overflow-auto\"><div class=\"col-span-full grid grid-cols-subgrid grid-rows-1\"><div class=\"col-start-1 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Nombre</div><div class=\"col-start-2 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Enlace</div><div class=\"col-start-3 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Acciones</div></div></div><div class=\"w-full col-span-full row-start-2 grid grid-cols-subgrid grid-rows-auto bg-white divide-y divide-gray-200 overflow-hidden\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -87,7 +87,7 @@ func SocialsIndex(links []db.SocialLink, sections []db.SocialSection, sectionLin
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"col-start-2 p-4 whitespace-nowrap text-sm text-gray-500\"><a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"col-start-2 p-4 text-sm text-gray-500 break-words\"><a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
