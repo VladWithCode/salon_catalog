@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# backend-owned product uploads, copied locally for development
+# (see docs/00-project-setup.md for the copy step)
+/public/assets/uploads/
 
 # vercel
 .vercel
