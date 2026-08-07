@@ -1,0 +1,47 @@
+package templates
+
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+var headHandle = templ.NewOnceHandle()
+
+templ BaseLayout(title string, contents templ.Component, isMainPage bool) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="description" content="En Villa Chenacolo no organizamos tu evento: te entregamos el escenario perfecto para que lo vivas como lo imaginaste, sin complicaciones. Nuestra renta de salón incluye un espacio de alto nivel, con cada detalle pensado para brindar comodidad, elegancia y funcionalidad. Tú eliges a tus proveedores, nosotros ponemos lo mejor para recibirlos."/>
+			<meta name="htmx-config" content='{"historyRestoreAsHxRequest": false, "historyEnabled": false, "refreshOnHistoryMiss": true}'/>
+			<title>
+				if title == "" {
+					Villa Chenacolo
+				} else {
+					{ title }
+				}
+			</title>
+			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
+			@headHandle.Once() {
+				<link rel="dns-prefetch" href={ `//fonts.googleapis.com` }/>
+				<link rel="dns-prefetch" href={ `//fonts.gstatic.com` }/>
+				<link rel="preconnect" href="https://fonts.googleapis.com"/>
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+				<link rel="stylesheet" href="/static/css/styles.css"/>
+				<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"/>
+				<script src="/static/js/htmx.js"></script>
+				<script src="/static/js/htmx-response-targets.js"></script>
+				<script src="/static/js/htmx-json-enc.js"></script>
+				<script src="/static/js/scroll-trigger.min.js" type="module"></script>
+				<script src="/static/js/gsap.js"></script>
+				<script src="/static/js/eventManager.js" defer></script>
+			}
+		</head>
+		<body>
+			<div class="grid grid-rows-page grid-cols-1 min-h-screen w-full overflow-x-hidden overflow-y-auto" hx-ext="response-targets">
+				@components.Header(isMainPage)
+				{ children... }
+				@components.Footer()
+				@components.Toaster()
+			</div>
+		</body>
+	</html>
+}

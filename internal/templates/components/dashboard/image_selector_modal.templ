@@ -1,0 +1,479 @@
+package dashboard
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"strings"
+)
+
+type ImageSelectorConfig struct {
+	Mode           string   `json:"mode"`                   // "single" or "multiple"
+	UpdateEndpoint string   `json:"update_endpoint"`        // API endpoint for updates
+	Title          string   `json:"title"`                  // Modal title
+	MaxSelection   int      `json:"max_selection"`          // Max images for multi-select
+	SelectedIds    []string `json:"selected_ids,omitempty"` // Currently selected image IDs
+	AllowUpload    bool     `json:"allow_upload"`           // Show upload tab
+	SuccessTarget  string   `json:"success_target"`         // Target for swap on update success
+	FileTypeFilter string   `json:"file_type_filter"`       // Filter by file type (e.g., "image/svg+xml")
+}
+
+func (is *ImageSelectorConfig) ToJSONString() (string, error) {
+	jsonRaw, err := json.Marshal(is)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonRaw), nil
+}
+
+func (is *ImageSelectorConfig) FromJSONString(jsonString string) error {
+	err := json.Unmarshal([]byte(jsonString), is)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewImageSelectorConfig(mode string, updateEndpoint string, title string, maxSelection int, selectedIds []string, allowUpload bool, successTarget string) ImageSelectorConfig {
+	return ImageSelectorConfig{
+		Mode:           mode,
+		UpdateEndpoint: updateEndpoint,
+		Title:          title,
+		MaxSelection:   maxSelection,
+		SelectedIds:    selectedIds,
+		AllowUpload:    allowUpload,
+		SuccessTarget:  successTarget,
+		FileTypeFilter: "",
+	}
+}
+
+func NewImageSelectorConfigWithFileType(mode string, updateEndpoint string, title string, maxSelection int, selectedIds []string, allowUpload bool, successTarget string, fileTypeFilter string) ImageSelectorConfig {
+	return ImageSelectorConfig{
+		Mode:           mode,
+		UpdateEndpoint: updateEndpoint,
+		Title:          title,
+		MaxSelection:   maxSelection,
+		SelectedIds:    selectedIds,
+		AllowUpload:    allowUpload,
+		SuccessTarget:  successTarget,
+		FileTypeFilter: fileTypeFilter,
+	}
+}
+
+templ ImageSelectorModal(config ImageSelectorConfig, result *db.ImageFilterResult) {
+	// @imageSelectorScript()
+	<!-- Image Selector Modal -->
+	<form
+		id="image-selector-modal"
+		class="fixed inset-0 bg-primary/60 z-50 flex items-center justify-center p-2"
+		data-mode={ config.Mode }
+		data-update-endpoint={ config.UpdateEndpoint }
+		data-title={ config.Title }
+		data-max-selection={ fmt.Sprintf("%d", config.MaxSelection) }
+		data-selected-ids={ strings.Join(config.SelectedIds, ",") }
+		data-allow-upload={ fmt.Sprintf("%t", config.AllowUpload) }
+		hx-put={ config.UpdateEndpoint }
+		hx-target={ config.SuccessTarget }
+		hx-target-error="#images-selector-modal"
+		hx-trigger="submit"
+	>
+		<input id="selectorConfigInput" type="hidden" name="selectorConfig" data-images-selector-config value={ config.ToJSONString() }/>
+		<div class="relative max-w-6xl max-h-full w-full h-full flex flex-col bg-white rounded-lg shadow-xl">
+			<!-- Modal Header -->
+			<div class="flex items-start justify-between p-2 border-b border-gray-200">
+				if result.HasError {
+					<h2 class="text-xl font-semibold text-red-700 px-2">{ result.Error }</h2>
+				} else {
+					<h2 class="text-xl font-semibold text-gray-900 px-2">{ config.Title }</h2>
+				}
+				<button
+					data-close-selector
+					type="button"
+					class="text-gray-400 hover:text-gray-600 transition-colors mt-2"
+					aria-label="Cerrar selector"
+					data-click-handler-selector="close-images-selector-modal"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			<!-- Tab Navigation -->
+			<div class="flex gap-2 bg-gray-200 p-2">
+				<button
+					type="button"
+					data-click-handler-selector="images-selector-modal-switch-tab"
+					data-tab="select"
+					class="basis-1/2 p-2 text-sm font-medium text-gray-50 hover:text-gray-50 active:text-gray-50 rounded-md bg-gray-700 hover:bg-gray-700/90 active:bg-gray-700/80 scale-100 hover:scale-102 active:scale-96 transition-[background,_scale] duration-300"
+				>
+					Seleccionar Imágenes
+				</button>
+				if config.AllowUpload {
+					<button
+						data-click-handler-selector="images-selector-modal-switch-tab"
+						data-tab="upload"
+						type="button"
+						class="basis-1/2 p-2 text-sm font-medium text-gray-700 hover:text-gray-50 active:text-gray-50 rounded-md bg-transparent hover:bg-gray-700/90 active:bg-gray-700/80 scale-100 hover:scale-102 active:scale-96 transition-[background,_scale] duration-300"
+					>
+						Subir Nuevas
+					</button>
+				}
+			</div>
+			<!-- Tab Content -->
+			<div class="flex-1 grid grid-cols-1 grid-rows-1 overflow-hidden">
+				<!-- Select Tab -->
+				<div id="images-selector-modal-select-container" class="col-start-1 row-start-1 overflow-hidden" data-images-selector-modal-tab="select">
+					@ImagesSelectorTab(config, result)
+				</div>
+				<!-- Upload Tab -->
+				if config.AllowUpload {
+					<div id="images-selector-modal-upload-container" class="col-start-1 row-start-1 invisible translate-x-6 overflow-hidden" data-images-selector-modal-tab="upload">
+						@ImagesSelectorUploadForm(&config, &ImagesSelectorUploadFormState{})
+					</div>
+				}
+			</div>
+			<!-- Modal Footer -->
+			<div class="flex items-center justify-end gap-2 p-2 border-t border-gray-200">
+				<button
+					type="button"
+					data-close-selector
+					class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+					data-click-handler-selector="close-images-selector-modal"
+				>
+					Cancelar
+				</button>
+				<button
+					type="submit"
+					data-confirm-selection
+					class="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					Confirmar Selección
+				</button>
+			</div>
+		</div>
+	</form>
+}
+
+templ ImageSelectorPagination(result *db.ImageFilterResult) {
+	<div class="flex items-center justify-between">
+		<div class="text-sm text-gray-700">
+			Mostrando { fmt.Sprintf("%d", len(result.Images)) } de { fmt.Sprintf("%d", result.Total) } imágenes
+		</div>
+		<div class="flex space-x-1">
+			if result.HasPrevious {
+				<button
+					type="button"
+					data-load-page
+					data-page={ fmt.Sprintf("%d", result.Page-1) }
+					hx-get={ fmt.Sprintf("/api/images/selector?page=%d", result.Page-1) }
+					hx-target="#images-selector-grid"
+					hx-include="[data-sort-select], [data-search-input], [data-image-selector-selected-imgs], [data-images-selector-config]"
+					class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+				>
+					Anterior
+				</button>
+			}
+			<!-- Page numbers -->
+			for i := max(1, result.Page-2); i <= min(result.TotalPages, result.Page+2); i++ {
+				<button
+					type="button"
+					data-load-page
+					data-page={ fmt.Sprintf("%d", i) }
+					hx-get={ fmt.Sprintf("/api/images/selector?page=%d", i) }
+					hx-target="#images-selector-grid"
+					hx-include="[data-sort-select], [data-search-input], [data-image-selector-selected-imgs], [data-images-selector-config]"
+					class={ "px-3 py-2 text-sm border rounded-md",
+						templ.KV("bg-accent text-white border-accent", i == result.Page),
+						templ.KV("border-gray-300 hover:bg-gray-50", i != result.Page) }
+				>
+					{ fmt.Sprintf("%d", i) }
+				</button>
+			}
+			if result.HasNext {
+				<button
+					type="button"
+					data-load-page
+					data-page={ fmt.Sprintf("%d", result.Page+1) }
+					hx-get={ fmt.Sprintf("/api/images/selector?page=%d", result.Page+1) }
+					hx-target="#images-selector-grid"
+					hx-include="[data-sort-select], [data-search-input], [data-image-selector-selected-imgs], [data-images-selector-config]"
+					class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+				>
+					Siguiente
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ ImagesSelectorTab(config ImageSelectorConfig, result *db.ImageFilterResult) {
+	{{
+	swpVal := ctx.Value("swapOOBSelectorTab")
+	swapOOB := false
+	if swpVal != nil {
+		swapOOB = swpVal.(bool)
+	}
+	}}
+	<div
+		id="images-selector-modal-select"
+		class="h-full flex flex-col"
+		data-content="select"
+		if swapOOB {
+			hx-swap-oob="outerHTML"
+		}
+	>
+		<div class="shrink-0 grow-0 p-4">
+			<div class="flex gap-2 items-stretch">
+				<div class="flex-1">
+					<input
+						type="text"
+						data-search-input
+						placeholder="Buscar imágenes..."
+						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
+						name="search"
+						hx-get="/api/images/selector"
+						hx-target="#images-selector-grid"
+						hx-trigger="input changed delay:500ms"
+						hx-include="[data-sort-select][name='sort'], [data-image-selector-selected-imgs], [data-images-selector-config]"
+					/>
+				</div>
+				<select
+					name="sort"
+					data-sort-select
+					class="px-4 py-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
+					hx-get="/api/images/selector"
+					hx-target="#images-selector-grid"
+					hx-trigger="change"
+					hx-include="[data-search-input][name='search'], [data-image-selector-selected-imgs], [data-images-selector-config]"
+				>
+					<option value="createdAt_desc">Más recientes</option>
+					<option value="createdAt_asc">Más antiguos</option>
+					<option value="name_asc">Nombre A-Z</option>
+					<option value="name_desc">Nombre Z-A</option>
+					<option value="size_desc">Tamaño mayor</option>
+					<option value="size_asc">Tamaño menor</option>
+				</select>
+			</div>
+		</div>
+		@templ.Fragment("imagesGrid") {
+			<div
+				id="images-selector-grid"
+				class="flex-1 basis-full overflow-y-auto overflow-x-hidden"
+			>
+				<input
+					type="hidden"
+					name="selected"
+					data-image-selector-selected-imgs
+					value={ strings.Join(config.SelectedIds, ",") }
+				/>
+				<!-- Images Grid -->
+				<div class="relative z-0 overflow-visible p-4">
+					@templ.Fragment("imagesGridError") {
+						<div
+							id="images-selector-modal-error"
+							class="absolute top-0 inset-x-0 z-30 w-full px-4 pointer-events-none"
+							if result.HasError {
+								hx-swap-oob="innerHTML"
+							}
+						>
+							if result.HasError {
+								<div class="flex items-center justify-center bg-red-50 border-l-4 rounded-lg border-red-700 gap-4 py-2 pointer-events-auto">
+									<div class="bg-red-700 text-red-100 p-0.5 rounded-full">
+										@components.TimesIcon("w-8 mx-auto", nil)
+									</div>
+									<p class="text-red-700">Algo salió mal</p>
+									<button
+										type="button"
+										class="text-sm underline underline-offset-2 text-accent font-bold tracking-wide"
+										data-images-selector-modal-close
+										data-click-handler-selector="close-images-selector-error"
+									>
+										@components.TimesIcon("w-6 mx-auto", nil)
+									</button>
+								</div>
+							}
+						</div>
+					}
+					<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+						@ImageSelectorGrid(&config, result)
+					</div>
+					<!-- Loading Indicator -->
+					<div data-loading class="hidden flex justify-center items-center py-8">
+						<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+					</div>
+				</div>
+				<!-- Pagination -->
+				if result.TotalPages > 1 {
+					<div class="p-4 border-t border-gray-200">
+						@ImageSelectorPagination(result)
+					</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+templ ImageSelectorGrid(config *ImageSelectorConfig, result *db.ImageFilterResult) {
+	for _, image := range result.Images {
+		@ImageSelectorItem(config, image, image.Pinned)
+	}
+}
+
+templ ImageSelectorItem(config *ImageSelectorConfig, image *db.Image, isSelected bool) {
+	<button
+		type="button"
+		class={ "relative group cursor-pointer rounded-lg overflow-hidden outline-4 outline-current transition-all duration-200",
+			templ.KV("text-accent bg-accent/10", isSelected),
+			templ.KV("text-gray-200 hover:text-gray-300", !isSelected) }
+		data-image-id={ image.ID }
+		data-image-item
+		hx-get="/api/images/selector"
+		if isSelected {
+			hx-vals={ fmt.Sprintf(`{"remove_from_selection": "%s"}`, image.ID) }
+		} else {
+			hx-vals={ fmt.Sprintf(`{"add_to_selection": "%s"}`, image.ID) }
+		}
+		hx-target="#images-selector-grid"
+		hx-trigger="click"
+		hx-include="[data-image-selector-selected-imgs], [data-sort-select], [data-search-input], [data-images-selector-config]"
+	>
+		<!-- Selection Indicator -->
+		<div
+			data-selection-indicator
+			class={ "absolute top-2 right-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+			templ.KV("bg-accent border-accent", isSelected),
+			templ.KV("bg-white border-gray-300 group-hover:border-gray-400", !isSelected) }
+		>
+			if isSelected {
+				<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+				</svg>
+			}
+		</div>
+		<!-- Image -->
+		<div class="aspect-square">
+			<img
+				src={ fmt.Sprintf("/static/uploads/%s", image.Filename) }
+				alt={ image.Name }
+				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+				loading="lazy"
+			/>
+		</div>
+		<!-- Image Info -->
+		<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+			<p class="text-white text-sm font-medium truncate">{ image.Name }</p>
+			<p class="text-white/80 text-xs">{ formatFileSize(image.Size) }</p>
+		</div>
+	</button>
+}
+
+type ImagesSelectorUploadFormState struct {
+	HasError   bool
+	ErrorMsg   string
+	HasSuccess bool
+	SuccessMsg string
+}
+
+templ ImagesSelectorUploadForm(conf *ImageSelectorConfig, state *ImagesSelectorUploadFormState) {
+	<form
+		id="images-selector-modal-upload"
+		class="relative h-full flex flex-col gap-4 px-4 py-2"
+		hx-post="/panel/imagenes/selector/subir"
+		hx-target="#images-selector-modal-upload-container"
+		hx-target-error="#images-selector-modal-upload"
+		hx-swap="innerHTML"
+		hx-encoding="multipart/form-data"
+		hx-include="[data-images-selector-config]"
+	>
+		<div id="images-selector-modal-upload-feedback" class="absolute"></div>
+		@templ.Fragment("imagesUploadFormError") {
+			if state.HasError {
+				<div
+					id="images-selector-modal-upload-feedback"
+					class="absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-red-50 border-l-4 rounded-lg px-4 py-2 text-red-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0"
+					hx-swap-oob="outerHTML"
+				>
+					@components.TimesIcon("w-8", nil)
+					<span class="block">{ state.ErrorMsg }</span>
+				</div>
+			}
+		}
+		@templ.Fragment("imagesUploadFormSuccess") {
+			if state.HasSuccess {
+				<div
+					id="images-selector-modal-upload-feedback"
+					class="absolute top-0 inset-x-0 z-30 flex items-center justify-center bg-green-50 border-l-4 rounded-lg px-4 py-2 text-green-700 text-sm font-medium whitespace-nowrap pointer-events-none -translate-y-6 opacity-0"
+					hx-swap-oob="outerHTML"
+				>
+					@components.CheckIcon("w-8", nil)
+					<span class="block">{ state.SuccessMsg }</span>
+				</div>
+			}
+		}
+		<div
+			id="images-selector-modal-upload-dropzone"
+			class="relative flex-1 basis-full grid grid-cols-1 grid-rows-1 border-2 border-gray-200 border-dashed rounded-lg overflow-hidden"
+		>
+			<input
+				type="file"
+				id="images-selector-modal-upload-files"
+				name="upload_file_0"
+				class="col-start-1 row-start-1 z-30 w-full h-full opacity-0"
+				hx-preserve="true"
+				multiple?={ conf.MaxSelection > 1 }
+				data-max-selection={ fmt.Sprintf("%d", conf.MaxSelection) }
+			/>
+			<label
+				for="upload_name_0"
+				class="col-start-1 row-start-1 z-0 place-self-center space-y-4 text-center text-gray-700/80 px-4"
+				id="images-selector-modal-upload-dropzone-label"
+			>
+				@components.UploadIcon("w-12 text-current/80 mx-auto", nil)
+				<span class="block">Da click o arrastra las imágenes que deseas subir.</span>
+			</label>
+			<div
+				id="images-selector-modal-upload-preview"
+				class="col-start-1 row-start-1 grid grid-cols-3 auto-cols-auto gap-1 w-full h-full bg-gray-100 z-10 opacity-0 m-auto pointer-events-none overflow-auto"
+			>
+				<template id="images-selector-modal-upload-preview-item">
+					<div class="col-span-1 row-span-1 w-full aspect-square rounded-lg overflow-hidden" data-image-item>
+						<img src="" class="w-full h-full object-cover" data-image-item-img/>
+					</div>
+				</template>
+			</div>
+		</div>
+		<div class="shrink-0 grow-0 basis-auto space-y-1">
+			@components.Input(components.InputProps{
+				ID:          "images-selector-modal-upload-files-name",
+				Name:        "upload_name_0",
+				Label:       "Nombre para las imágenes (opcional)",
+				Type:        "text",
+				Class:       "block w-full border border-gray-200 rounded-lg px-4 py-2",
+				Placeholder: "Nombre para las imágenes",
+			})
+		</div>
+		<div class="shrink-0 grow-0 basis-auto">
+			<button class="block w-full text-gray-50 bg-gray-700/90 hover:bg-gray-700 active:bg-gray-700 scale-100 hover:scale-104 active:scale-96 py-2 rounded-lg transition-[background,_scale]">Subir</button>
+		</div>
+	</form>
+}
+
+// Helper functions
+func marshalConfig(config ImageSelectorConfig) string {
+	data, err := json.Marshal(config)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+func formatFileSize(size int) string {
+	if size < 1024 {
+		return fmt.Sprintf("%d B", size)
+	} else if size < 1024*1024 {
+		return fmt.Sprintf("%.1f KB", float64(size)/1024)
+	} else {
+		return fmt.Sprintf("%.1f MB", float64(size)/(1024*1024))
+	}
+}

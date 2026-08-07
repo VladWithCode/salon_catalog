@@ -1,0 +1,653 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal/templates/util"
+
+templ Header(isMainPage bool) {
+	@Script()
+	<div
+		id="top-observer-target"
+		class={
+			"absolute left-0 right-0 pointer-events-none",
+			templ.KV("top-[20vh]", !isMainPage),
+			templ.KV("top-[90vh]", isMainPage),
+		}
+	></div>
+	<header
+		id="header"
+		class="absolute top-0 left-0 right-0 h-12 lg:h-16 z-40 flex items-center justify-between text-stone-50 px-4"
+	>
+		<div class="flex items-center">
+			<a href="/" class="flex items-center gap-4">
+				<svg class="w-8 h-8 lg:hidden fill-current">
+					<use href="/static/assets/logo.svg#logo"></use>
+				</svg>
+				<img
+					id="logo-name-img"
+					src="/static/assets/logo_name.webp"
+					alt="Logotipo del Villa Chenacolo"
+					class="hidden lg:block invert h-12 w-auto"
+				/>
+			</a>
+		</div>
+		@DesktopNavigation(isMainPage)
+		<!-- Mobile menu -->
+		<button
+			id="mobile-menu-button"
+			class="lg:hidden focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-2"
+			aria-label="Toggle menu"
+		>
+			<span class="w-6 h-6 flex flex-col justify-center items-center space-y-1.5">
+				<span id="hamburger-line-1" class="block w-6 h-0.5 bg-current"></span>
+				<span id="hamburger-line-2" class="block w-6 h-0.5 bg-current"></span>
+				<span id="hamburger-line-3" class="block w-6 h-0.5 bg-current"></span>
+			</span>
+		</button>
+	</header>
+	<!-- Mobile Menu Overlay -->
+	<div
+		id="mobile-menu-overlay"
+		class="fixed inset-0 bg-black bg-black/50 z-40 lg:hidden"
+		style="opacity: 0; visibility: hidden;"
+	></div>
+	<!-- Mobile Menu -->
+	<nav
+		id="mobile-menu"
+		class="fixed top-0 right-0 h-full w-80 max-w-sm bg-white shadow-2xl z-50 lg:hidden"
+		style="transform: translateX(100%);"
+	>
+		<div class="flex flex-col h-full">
+			<!-- Menu Header -->
+			<div class="bg-brand-1 bg-repeat bg-contain p-6">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center space-x-3 text-secondary">
+						<svg class="w-10 h-10 fill-current my-auto">
+							<use href="/static/assets/logo.svg#logo"></use>
+						</svg>
+						<div>
+							<h2 class="text-white font-serif font-bold text-xl uppercase">Villa Chenacolo</h2>
+							<p class="text-white text-xs opacity-90">Sala de Acontecimientos Especiales</p>
+						</div>
+					</div>
+					<button
+						id="close-menu"
+						class="text-white hover:bg-white hover:bg-white/20 rounded-full p-2 transition-colors"
+					>
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<!-- Menu Items -->
+			<div class="flex-1 py-6">
+				<ul class="space-y-2" id="menu-items">
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-hero"
+							} else {
+								href="/"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 hover:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+								></path>
+							</svg>
+							<span class="font-medium">Inicio</span>
+						</a>
+					</li>
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-oferta"
+							} else {
+								href="/servicios"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg class="w-5 h-5 mr-3 text-primary stroke-current menu-icon">
+								<use href="/static/assets/briefcase.svg#briefcase"></use>
+							</svg>
+							<span class="font-medium">Servicios</span>
+						</a>
+					</li>
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-catalogo"
+							} else {
+								href="/catalogo"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg class="w-5 h-5 mr-3 text-primary fill-current menu-icon">
+								<use href="/static/assets/glass.svg#glass"></use>
+							</svg>
+							<span class="font-medium">Catálogo</span>
+						</a>
+					</li>
+					<li class="menu-item">
+						<a
+							href="/experiencia"
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									d="M3 8.976C3 4.05476 4.05476 3 8.976 3H15.024C19.9452 3 21 4.05476 21 8.976V15.024C21 19.9452 19.9452 21 15.024 21H8.976C4.05476 21 3 19.9452 3 15.024V8.976Z"
+									stroke-width="2"
+								></path>
+								<path
+									d="M17.0045 16.5022L12.7279 12.2256C9.24808 8.74578 7.75642 8.74578 4.27658 12.2256L3 13.5022"
+									stroke-width="2"
+									stroke-linecap="round"
+								></path>
+								<path
+									d="M21 13.6702C18.9068 12.0667 17.4778 12.2919 15.198 14.3459"
+									stroke="#323232"
+									stroke-width="2"
+									stroke-linecap="round"
+								></path>
+								<path
+									d="M17 8C17 8.55228 16.5523 9 16 9C15.4477 9 15 8.55228 15 8C15 7.44772 15.4477 7 16 7C16.5523 7 17 7.44772 17 8Z"
+									stroke-width="2"
+								></path>
+							</svg>
+							<span class="font-medium">Experiencía</span>
+						</a>
+					</li>
+					/* <li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-galeria"
+							} else {
+								href="/galeria"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20  active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+								></path>
+							</svg>
+							<span class="font-medium">Galería</span>
+						</a>
+					</li> */
+					/* if !isMainPage {
+						<li class="menu-item">
+							<a
+								href="/reservaciones"
+								class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+							>
+								<svg
+									class="w-5 h-5 mr-3 text-primary menu-icon"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									></path>
+								</svg>
+								<span class="font-medium">Consultar disponibilidad</span>
+							</a>
+						</li>
+					} */
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-contacto"
+							} else {
+								href="/solicitar-cotizacion"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+								></path>
+							</svg>
+							<span class="font-medium">Solicitar cotización</span>
+						</a>
+					</li>
+					<li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-ubicacion"
+							} else {
+								href="/#seccion-ubicacion"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+								></path>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+								></path>
+							</svg>
+							<span class="font-medium">Ubicación</span>
+						</a>
+					</li>
+					/* <li class="menu-item">
+						<a
+							if isMainPage {
+								href="#seccion-contacto"
+							} else {
+								href="/contacto"
+							}
+							class="flex items-center px-6 py-3 text-gray-700 hover:bg-accent/20 active:bg-accent/20 hover:text-dark active:text-dark transition-colors group"
+						>
+							<svg
+								class="w-5 h-5 mr-3 text-primary menu-icon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+								></path>
+							</svg>
+							<span class="font-medium">Contacto</span>
+						</a>
+					</li> */
+				</ul>
+			</div>
+			<!-- Menu Footer -->
+			<div class="border-t border-gray-200 p-6" id="menu-footer">
+				<div class="text-center mb-4">
+					<p class="text-sm text-gray-600 mb-2">Siguenos en nuestras redes sociales</p>
+					@HeaderSocials()
+				</div>
+				<div class="text-center">
+					<p class="text-xs text-gray-500">© 2024 Elegance Event Salon</p>
+					<p class="text-xs text-gray-500">All rights reserved</p>
+				</div>
+			</div>
+		</div>
+	</nav>
+}
+
+templ Script() {
+	<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Animations
+        const tl = gsap.timeline({paused: true, defaults: {duration: 0.4, ease: "power2.out"}});
+        tl.to("#header", {
+            position: "fixed",
+            backgroundColor: "var(--color-secondary)",
+            color: "var(--color-dark)",
+            boxShadow: "var(--shadow-sm)",
+        }, "<+=0.2")
+        tl.to("#logo-name-img", {
+            filter: "invert(0)",
+        }, "<");
+
+        const pageTopObserver = new IntersectionObserver(entries => {
+            const ent = entries[0];
+
+            if (!ent.isIntersecting) {
+                gsap.fromTo("#header", {
+                    y: "-20rem"
+                }, {
+                    y: "0rem",
+                })
+                tl.play();
+            } else {
+                gsap.to("#header", {
+                    y: "0rem",
+                });
+                tl.reverse();
+            }
+        });
+        pageTopObserver.observe(document.getElementById("top-observer-target"))
+
+        // GSAP Mobile menu functionality
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const closeMenuButton = document.getElementById('close-menu');
+        const hamburgerLine1 = document.getElementById('hamburger-line-1');
+        const hamburgerLine2 = document.getElementById('hamburger-line-2');
+        const hamburgerLine3 = document.getElementById('hamburger-line-3');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const menuIcons = document.querySelectorAll('.menu-icon');
+        const socialIcons = document.querySelectorAll('.social-icon');
+        const menuFooter = document.getElementById('menu-footer');
+
+        let isMenuOpen = false;
+
+        // Set initial states
+        gsap.set(mobileMenu, {x: '100%'});
+        gsap.set(mobileMenuOverlay, {opacity: 0, visibility: 'hidden'});
+        gsap.set(menuItems, {x: 50, opacity: 0});
+        gsap.set(menuFooter, {y: 30, opacity: 0});
+
+        function openMenu() {
+            if (isMenuOpen) return;
+            isMenuOpen = true;
+
+            // Create timeline for opening animation
+            const tl = gsap.timeline();
+
+            // Animate overlay
+            tl.to(mobileMenuOverlay, {
+                opacity: 0.5,
+                visibility: 'visible',
+                duration: 0.3,
+                ease: 'power2.out'
+            })
+                // Animate menu slide in
+                .to(mobileMenu, {
+                    x: '0%',
+                    duration: 0.4,
+                    ease: 'power3.out'
+                }, 0.1)
+                // Animate hamburger to X
+                .to(hamburgerLine1, {
+                    rotation: 45,
+                    y: 8,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                }, 0)
+                .to(hamburgerLine2, {
+                    opacity: 0,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                }, 0)
+                .to(hamburgerLine3, {
+                    rotation: -45,
+                    y: -8,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                }, 0)
+                // Stagger animate menu items
+                .to(menuItems, {
+                    x: 0,
+                    opacity: 1,
+                    duration: 0.4,
+                    stagger: 0.08,
+                    ease: 'power2.out'
+                }, 0.3)
+                // Animate footer
+                .to(menuFooter, {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.4,
+                    ease: 'power2.out'
+                }, 0.5)
+                // Animate social icons with bounce
+                .to(socialIcons, {
+                    scale: 1.1,
+                    duration: 0.2,
+                    stagger: 0.05,
+                    ease: 'back.out(1.7)',
+                    yoyo: true,
+                    repeat: 1
+                }, 0.7);
+
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeMenu() {
+            if (!isMenuOpen) return;
+            isMenuOpen = false;
+
+            // Create timeline for closing animation
+            const tl = gsap.timeline();
+
+            // Animate menu items out
+            tl.to(menuItems, {
+                x: 50,
+                opacity: 0,
+                duration: 0.2,
+                stagger: 0.03,
+                ease: 'power2.in'
+            })
+                // Animate footer out
+                .to(menuFooter, {
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.2,
+                    ease: 'power2.in'
+                }, 0)
+                // Animate menu slide out
+                .to(mobileMenu, {
+                    x: '100%',
+                    duration: 0.3,
+                    ease: 'power3.in'
+                }, 0.1)
+                // Animate overlay out
+                .to(mobileMenuOverlay, {
+                    opacity: 0,
+                    visibility: 'hidden',
+                    duration: 0.2,
+                    ease: 'power2.in'
+                }, 0.2)
+                // Animate X back to hamburger
+                .to([hamburgerLine1, hamburgerLine3], {
+                    rotation: 0,
+                    y: 0,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                }, 0)
+                .to(hamburgerLine2, {
+                    opacity: 1,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                }, 0.1);
+
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Event listeners
+        mobileMenuButton.addEventListener('click', () => {
+            if (isMenuOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        closeMenuButton.addEventListener('click', closeMenu);
+        mobileMenuOverlay.addEventListener('click', closeMenu);
+
+        // Close menu when clicking on menu links with smooth animation
+        const menuLinks = mobileMenu.querySelectorAll('a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                //e.preventDefault();
+
+                // Add a subtle click animation
+                gsap.to(link, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    ease: 'power2.out',
+                    yoyo: true,
+                    repeat: 1,
+                    onComplete: closeMenu
+                });
+            });
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isMenuOpen) {
+                closeMenu();
+            }
+        });
+
+        // Add hover animations for menu items
+        menuItems.forEach(item => {
+            const icon = item.querySelector('.menu-icon');
+
+            item.addEventListener('mouseenter', () => {
+                gsap.to(icon, {
+                    scale: 1.2,
+                    rotation: 5,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+
+            item.addEventListener('mouseleave', () => {
+                gsap.to(icon, {
+                    scale: 1,
+                    rotation: 0,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // Add hover animations for social icons
+        socialIcons.forEach(icon => {
+            icon.addEventListener('mouseenter', () => {
+                gsap.to(icon, {
+                    scale: 1.15,
+                    rotation: 10,
+                    duration: 0.3,
+                    ease: 'back.out(1.7)'
+                });
+            });
+
+            icon.addEventListener('mouseleave', () => {
+                gsap.to(icon, {
+                    scale: 1,
+                    rotation: 0,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // Desktop navigation smooth scrolling
+        const desktopNavLinks = document.querySelectorAll('.desktop-nav-link');
+        desktopNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                
+                // Only handle section links (starting with #)
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    
+                    const targetSection = document.querySelector(href);
+                    if (targetSection) {
+                        // Smooth scroll to section
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Add subtle click animation
+                        gsap.to(link, {
+                            scale: 0.95,
+                            duration: 0.1,
+                            ease: 'power2.out',
+                            yoyo: true,
+                            repeat: 1
+                        });
+                    }
+                }
+            });
+
+            // Add hover animation for desktop nav links
+            link.addEventListener('mouseenter', () => {
+                gsap.to(link, {
+                    scale: 1.05,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+
+            link.addEventListener('mouseleave', () => {
+                gsap.to(link, {
+                    scale: 1,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+        });
+    });
+</script>
+}
+
+templ HeaderSocials() {
+	{{ socialLinks := util.ExtractSocialLinks(ctx) }}
+	<div class="flex justify-center space-x-4" id="social-icons">
+		<a
+			href={ string(socialLinks["Facebook"]) }
+			class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:bg-primary/80 transition-colors social-icon"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-7 w-7 m-auto text-light"
+				fill="none"
+				viewBox="0 0 512 512"
+			>
+				<path
+					d="M352 176h-48c-8.8 0-16 7.2-16 16v32h64l-8 64h-56v160h-64V288h-48v-64h48v-40c0-39.8 32.2-72 72-72h56v64z"
+					fill="#fff"
+				></path>
+			</svg>
+		</a>
+		<a
+			href={ string(socialLinks["Instagram"]) }
+			class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:bg-primary/80 transition-colors social-icon"
+		>
+			<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+				<path
+					d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+				></path>
+			</svg>
+		</a>
+	</div>
+}

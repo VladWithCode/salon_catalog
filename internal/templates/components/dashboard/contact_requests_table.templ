@@ -1,0 +1,704 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ ContactRequestsTable(result *db.QuoteFilterResult) {
+	<span id="contact-requests-table-count" hx-swap-oob="true">({ fmt.Sprintf("%d", len(result.Quotes)) }/ { fmt.Sprintf("%d", result.Total) })</span>
+	<div class="flex flex-col p-1 mx-auto">
+		if result.HasError {
+			<div class="flex-1 flex items-center justify-center gap-4 p-4">
+				<h3 class="text-lg text-red-700 font-semibold">Algo salió mal</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/solicitudes/table"
+					hx-target="#contact-requests-table"
+					hx-params="none"
+					data-click-handler-selector="[data-contact-requests-filter-clear]"
+					data-contact-requests-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		}
+		if len(result.Quotes) == 0 {
+			<div class="text-center p-4 space-y-2">
+				<h3 class="">No se encontraron solicitudes que coincidan con tu búsqueda</h3>
+				<button
+					type="button"
+					class="text-lg underline underline-offset-2 text-accent font-bold tracking-wide"
+					hx-get="/solicitudes/table"
+					hx-target="#contact-requests-table"
+					hx-params="none"
+					data-click-handler-selector="[data-contact-requests-filter-clear]"
+					data-contact-requests-filter-clear
+				>Limpiar Filtros</button>
+			</div>
+		} else {
+			<!-- Contact Requests Table -->
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white rounded-lg shadow-sm">
+					<thead class="bg-gray-50 border-b border-gray-200">
+						<tr>
+							<th class="w-8 px-2 py-3 text-left">
+								<!-- Header checkbox handled by main page -->
+							</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Cliente</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Tipo Evento</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Tipo Solicitud</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Fecha Evento</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Estado</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Creada</th>
+							<th class="px-4 py-3 text-left text-xs font-medium text-gray-700/80 uppercase tracking-wider">Acciones</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-gray-200">
+						for _, quote := range result.Quotes {
+							@ContactRequestTableRow(quote)
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</div>
+	if result.TotalPages > 1 {
+		<div hx-swap-oob="innerHTML:#contact-requests-table-pagination">
+			<!-- Pagination -->
+			if result.TotalPages > 1 {
+				@ContactRequestsPagination(result)
+			}
+		</div>
+	}
+}
+
+templ ContactRequestTableRow(quote *db.Quote) {
+	<tr
+		class="hover:bg-gray-50 transition-colors duration-150"
+		data-contact-requests-table-row={ quote.ID }
+		data-quote-id={ quote.ID }
+	>
+		<td class="px-2 py-4">
+			<input
+				type="checkbox"
+				name="contact-request-table-selection"
+				id={ fmt.Sprintf("contact-request-table-selection-%s", quote.ID) }
+				value={ quote.ID }
+				class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+			/>
+		</td>
+		<td class="px-4 py-4">
+			<div class="flex flex-col">
+				<div class="text-sm font-medium text-gray-900">{ quote.CustomerName }</div>
+				<div class="text-sm text-gray-700/80">{ quote.CustomerPhone }</div>
+			</div>
+		</td>
+		<td class="px-4 py-4">
+			<div class="text-sm text-gray-900">
+				if quote.EventKindName.String != "" {
+					{ quote.EventKindName.String }
+				} else {
+					<span class="text-gray-700/60 italic">Sin especificar</span>
+				}
+			</div>
+		</td>
+		<td class="px-4 py-4">
+			<div class="text-sm text-gray-900 capitalize">{ quote.RequestType }</div>
+		</td>
+		<td class="px-4 py-4">
+			<div class="text-sm text-gray-900">
+				if quote.TimeStart != nil && !quote.TimeStart.IsZero() {
+					{ quote.TimeStart.Format("02/01/2006 03:04pm") }
+					if quote.TimeEnd != nil && !quote.TimeEnd.IsZero() {
+						<div class="text-xs text-gray-700/80">hasta { quote.TimeEnd.Format("03:04pm") }</div>
+					}
+				} else {
+					<span class="text-gray-700/60 italic">Sin especificar</span>
+				}
+			</div>
+		</td>
+		<td class="px-4 py-4">
+			@StatusBadge(quote.Status)
+		</td>
+		<td class="px-4 py-4">
+			<div class="text-sm text-gray-900">{ quote.CreatedAt.Format("02/01/2006") }</div>
+			<div class="text-xs text-gray-700/80">{ quote.CreatedAt.Format("03:04pm") }</div>
+		</td>
+		<td class="px-4 py-4">
+			<div class="flex space-x-2">
+				<button
+					hx-get={ fmt.Sprintf("/solicitudes/%s", quote.ID) }
+					hx-target="#contact-requests-modal"
+					hx-indicator="#global-loading-indicator"
+					class="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					title="Ver detalles"
+				>
+					@components.ViewIcon("w-4 h-4", nil)
+				</button>
+				<button
+					hx-get={ fmt.Sprintf("/solicitudes/%s/editar", quote.ID) }
+					hx-target="#contact-requests-modal"
+					hx-indicator="#global-loading-indicator"
+					class="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					title="Editar"
+				>
+					@components.EditIcon("w-4 h-4", nil)
+				</button>
+				<button
+					hx-delete={ fmt.Sprintf("/solicitudes/%s", quote.ID) }
+					hx-confirm="¿Seguro que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
+					hx-indicator="#global-loading-indicator"
+					hx-target="#contact-requests-table"
+					hx-include='[name="sort"], [name="customer_name"], [name="phone"], [name="created_from"], [name="created_to"], [name="event_start_from"], [name="event_start_to"], [name="status"], [name="request_type"], [name="comments"]'
+					class="inline-flex items-center px-2 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+					title="Eliminar"
+				>
+					@components.BinIcon("w-4 h-4", nil)
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ StatusBadge(status db.QuoteStatus) {
+	switch string(status) {
+		case "pendiente":
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-yellow-100 text-yellow-800">
+				Pendiente
+			</span>
+		case "procesada":
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-green-100 text-green-800">
+				Procesada
+			</span>
+		case "en_progreso":
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">
+				En Progreso
+			</span>
+		case "cancelada":
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-red-100 text-red-800">
+				Cancelada
+			</span>
+		default:
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-gray-100 text-gray-800">
+				{ status }
+			</span>
+	}
+}
+
+templ ContactRequestsPagination(result *db.QuoteFilterResult) {
+	<div class="flex gap-0.5 h-10 items-center">
+		<button
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasPrevious),
+			}
+			hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", result.Page-1) }
+			hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
+			hx-indicator="#contact-requests-table-loading"
+			hx-target="#contact-requests-table"
+		>
+			@components.ChevronIcon("w-6 rotate-90", nil)
+		</button>
+		<!-- Page numbers -->
+		<div class="flex-1 basis-full flex justify-center gap-0.5 overflow-x-auto">
+			for i, lim:= max(1, result.Page-2), min(result.TotalPages, result.Page+2); i <= lim; i++ {
+				<button
+					class="w-8 aspect-square rounded-sm disabled:font-medium disabled:text-gray-800 disabled:bg-secondary"
+					hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", i) }
+					hx-target="#contact-requests-table"
+					hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
+					hx-indicator="#contact-requests-table-loading"
+					disabled?={ i==result.Page }
+				>
+					{ fmt.Sprintf("%d", i) }
+				</button>
+			}
+		</div>
+		<button
+			class={
+				"w-8 aspect-square",
+				templ.KV("opacity-0 invisible", !result.HasNext),
+			}
+			hx-get={ fmt.Sprintf("/solicitudes/table?page=%d", result.Page+1) }
+			hx-include="[name='customer_name'], [name='phone'], [name='created_from'], [name='created_to'], [name='event_start_from'], [name='event_start_to'], [name='status'], [name='request_type'], [name='comments'], [name='sort']"
+			hx-target="#contact-requests-table"
+			hx-indicator="#contact-requests-table-loading"
+		>
+			@components.ChevronIcon("w-6 -rotate-90", nil)
+		</button>
+	</div>
+}
+
+templ ContactRequestModal(quote *db.Quote, err string) {
+	<div id="contact-requests-modal-content" class="h-full flex flex-col gap-4 bg-stone-100 rounded-sm shadow p-2">
+		<div class="flex-1 flex justify-between items-center px-2">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				if err != "" {
+					Ocurrió un error al cargar la solicitud
+				} else {
+					Solicitud de { quote.CustomerName }
+				}
+			</h3>
+			<button
+				id="contact-requests-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-contact-requests-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-modal-toggle]"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if err != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+				</div>
+			</div>
+		} else {
+			@ContactRequestDetails(quote)
+		}
+		<div class="flex-1 flex gap-2 xl:gap-4 justify-end items-center">
+			<button
+				id="contact-requests-modal-back"
+				class="flex items-center gap-1 px-2.5 py-2 bg-gray-700/20 text-gray-700 text-xs xl:text-lg font-medium rounded-sm scale-100 hover:scale-104 active:scale-96 brightness-100 hover:scale-104 active:scale-96 transition-[scale,_filter] cursor-pointer"
+				data-contact-requests-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-modal-toggle]"
+			>
+				@components.ChevronIcon("w-5 xl:w-6 rotate-90 stroke-4", nil)
+				Volver
+			</button>
+			if err == "" {
+				<button
+					hx-get={ fmt.Sprintf("/solicitudes/%s/editar", quote.ID) }
+					hx-target="#contact-requests-modal"
+					hx-indicator="#global-loading-indicator"
+					class="flex items-center gap-1 xl:gap-2 px-2.5 py-2 bg-gray-700 text-gray-50 font-medium text-xs xl:text-lg rounded-sm scale-100 hover:scale-104 active:scale-96 brightness-104 hover:brightness-100 active:brightness-96 transition-[scale,_filter] cursor-pointer"
+				>
+					@components.EditIcon("w-5", nil)
+					Editar
+				</button>
+				<button
+					id="contact-requests-modal-delete"
+					class="flex items-center gap-1 px-2.5 py-2 bg-red-700/20 text-red-700 font-medium text-xs xl:text-lg rounded-sm scale-100 hover:scale-104 active:scale-96 brightness-100 hover:brightness-104 active:brightness-96 transition-[scale,_filter] cursor-pointer"
+					hx-delete={ fmt.Sprintf("/solicitudes/%s", quote.ID) }
+					hx-target="#contact-requests-table"
+					hx-include='[name="sort"], [name="customer_name"], [name="phone"], [name="created_from"], [name="created_to"], [name="event_start_from"], [name="event_start_to"], [name="status"], [name="request_type"], [name="comments"]'
+					hx-indicator="#global-loading-indicator"
+					hx-confirm="¿Seguro que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
+					data-contact-requests-modal-toggle="close"
+					data-click-handler-selector="[data-contact-requests-modal-toggle]"
+				>
+					@components.BinIcon("w-5 xl:w-6 mx-auto", nil)
+					Eliminar
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ ContactRequestDetails(quote *db.Quote) {
+	<div class="flex-1 basis-full w-full overflow-auto space-y-4 px-2">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Nombre del Cliente</label>
+				<div class="py-2">
+					{ quote.CustomerName }
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Teléfono</label>
+				<div class="py-2">
+					{ quote.CustomerPhone }
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Tipo de Evento</label>
+				<div class="py-2">
+					if quote.EventKindName.String != "" {
+						{ quote.EventKindName.String }
+					} else {
+						<span class="text-gray-700/60">Sin especificar</span>
+					}
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Tipo de Solicitud</label>
+				<div class="py-2 capitalize">
+					{ quote.RequestType }
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Fecha y Hora del Evento</label>
+				<div class="py-2">
+					if quote.TimeStart != nil && !quote.TimeStart.IsZero() {
+						{ quote.TimeStart.Format("02/01/2006 15:04") }
+						if quote.TimeEnd != nil && !quote.TimeEnd.IsZero() {
+							- { quote.TimeEnd.Format("15:04") }
+						}
+					} else {
+						<span class="text-gray-700/60">Sin especificar</span>
+					}
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Estado</label>
+				<div class="py-2">
+					@StatusBadge(quote.Status)
+				</div>
+			</div>
+		</div>
+		<div class="space-y-2">
+			<label class="block text-sm font-medium text-gray-700">Comentarios</label>
+			if quote.Comments.String != "" {
+				<div class="py-2">
+					{ quote.Comments.String }
+				</div>
+			} else {
+				<div class="py-2">
+					<span class="text-gray-700/60">No hay comentarios</span>
+				</div>
+			}
+		</div>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Fecha de Creación</label>
+				<div class="py-2">
+					{ quote.CreatedAt.Format("02/01/2006 15:04") }
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label class="block text-sm font-medium text-gray-700">Última Actualización</label>
+				<div class="py-2">
+					{ quote.UpdatedAt.Format("02/01/2006 15:04") }
+				</div>
+			</div>
+		</div>
+		<div class="space-y-4">
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-medium text-gray-900">Artículos en el carrito</h3>
+				<button
+					id="contact-requests-modal-cart-toggle"
+					class="p-2 rounded-sm text-gray-700 bg-stone-50"
+					data-contact-requests-modal-cart-toggle="open"
+					data-click-handler-selector="[data-contact-requests-modal-cart-toggle]"
+				>
+					@components.ChevronIcon("w-6 mx-auto", nil)
+				</button>
+			</div>
+			@ContactRequestCart(quote)
+		</div>
+	</div>
+}
+
+templ ContactRequestEditModal(quote *db.Quote, eventKinds []*db.EventKind, err string) {
+	<div id="contact-requests-modal-content" class="h-full flex flex-col gap-2 bg-stone-50 rounded-sm shadow p-2">
+		<div class="flex-1 flex justify-between items-center px-2">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				if err != "" {
+					Ocurrió un error al cargar la solicitud
+				} else {
+					Editar Solicitud de { quote.CustomerName }
+				}
+			</h3>
+			<button
+				id="contact-requests-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-contact-requests-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-modal-toggle]"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		if err != "" {
+			<div class="flex-1 basis-full w-full overflow-hidden">
+				<div class="flex flex-col items-center justify-center h-full">
+					<p class="text-red-700/70 mx-auto">
+						@components.TimesIcon("w-10 mx-auto", nil)
+					</p>
+					<p class="text-red-700 font-medium text-center mx-auto">{ err }</p>
+				</div>
+			</div>
+		} else {
+			@ContactRequestEditForm(quote, eventKinds)
+		}
+		<div class="flex-1 flex gap-2 justify-end items-center">
+			<button
+				id="contact-requests-modal-back"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-contact-requests-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-modal-toggle]"
+			>
+				@components.ChevronIcon("w-5 rotate-90 stroke-4", nil)
+				Cancelar
+			</button>
+		</div>
+	</div>
+}
+
+templ ContactRequestEditForm(quote *db.Quote, eventKinds []*db.EventKind) {
+	<form
+		hx-put={ fmt.Sprintf("/solicitudes/%s", quote.ID) }
+		hx-target="#contact-requests-table"
+		hx-indicator="#global-loading-indicator"
+		class="flex-1 basis-full w-full overflow-auto space-y-4 p-2"
+	>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div class="space-y-2">
+				<label for="customer_name" class="block text-sm font-medium text-gray-700">Nombre del Cliente</label>
+				<input
+					id="customer_name"
+					name="customer_name"
+					type="text"
+					value={ quote.CustomerName }
+					required
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="customer_phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+				<input
+					id="customer_phone"
+					name="customer_phone"
+					type="text"
+					value={ quote.CustomerPhone }
+					required
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="event_kind_id" class="block text-sm font-medium text-gray-700">Tipo de Evento</label>
+				<select
+					id="event_kind_id"
+					name="event_kind_id"
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+				>
+					<option value="">Seleccionar tipo de evento</option>
+					for _, eventKind := range eventKinds {
+						<option
+							value={ eventKind.ID }
+							selected?={ !quote.EventKindID.Valid && quote.EventKindID.String == eventKind.ID }
+						>
+							{ eventKind.Name }
+						</option>
+					}
+				</select>
+			</div>
+			<div class="space-y-2">
+				<label for="request_type" class="block text-sm font-medium text-gray-700">Tipo de Solicitud</label>
+				<select name="request_type" id="request_type" class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 capitalize bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent">
+					<option
+						value="reservación"
+						selected?={ quote.RequestType == "reservación" }
+					>
+						Reservación
+					</option>
+					<option
+						value="cotización"
+						selected?={ quote.RequestType == "cotización" }
+					>
+						Cotización
+					</option>
+					<option
+						value="contacto"
+						selected?={ quote.RequestType == "contacto" }
+					>
+						Contacto
+					</option>
+				</select>
+			</div>
+			<div class="space-y-2">
+				<label for="time_start" class="block text-sm font-medium text-gray-700">Fecha y Hora de Inicio</label>
+				<input
+					id="time_start"
+					name="time_start"
+					type="date"
+					value={ templ.SafeURL(func() string {
+						if quote.TimeStart != nil && !quote.TimeStart.IsZero() {
+							return quote.TimeStart.Format("2006-01-02")
+						}
+						return ""
+					}()) }
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="time_end" class="block text-sm font-medium text-gray-700">Fecha y Hora de Fin</label>
+				<input
+					id="time_end"
+					name="time_end"
+					type="date"
+					value={ templ.SafeURL(func() string {
+						if quote.TimeEnd != nil && !quote.TimeEnd.IsZero() {
+							return quote.TimeEnd.Format("2006-01-02")
+						}
+						return ""
+					}()) }
+					class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				/>
+			</div>
+		</div>
+		<div class="space-y-2">
+			<label for="status" class="block text-sm font-medium text-gray-700">Estado</label>
+			<select
+				id="status"
+				name="status"
+				required
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+			>
+				<option value="pendiente" selected?={ quote.Status == "pendiente" }>Pendiente</option>
+				<option value="procesada" selected?={ quote.Status == "procesada" }>Procesada</option>
+				<option value="en_progreso" selected?={ quote.Status == "en_progreso" }>En Progreso</option>
+				<option value="cancelada" selected?={ quote.Status == "cancelada" }>Cancelada</option>
+			</select>
+		</div>
+		<div class="space-y-2">
+			<label for="comments" class="block text-sm font-medium text-gray-700">Comentarios</label>
+			<textarea
+				id="comments"
+				name="comments"
+				rows="4"
+				class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+				placeholder="Comentarios adicionales..."
+			>{ quote.Comments.String }</textarea>
+		</div>
+		<div class="flex gap-2 pt-4">
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+			>
+				Guardar Cambios
+			</button>
+		</div>
+	</form>
+}
+
+templ ContactRequestCart(quote *db.Quote) {
+	<div class="grid grid-cols-1 px-2">
+		if len(quote.Cart.Items) > 0 {
+			<div class="grid grid-rows-1 auto-cols-[100%] lg:auto-cols-[60%] h-48 overflow-auto gap-4 px-2 -mx-2 py-4 -my-4">
+				for _, item := range quote.Cart.Items {
+					<div class="w-full row-start-1 flex gap-4 bg-gray-50 border border-gray-200 shadow-sm rounded-md overflow-hidden">
+						<div class="h-full aspect-square bg-blue-100 rounded-md flex items-center justify-center">
+							<img src={ fmt.Sprintf("/static/uploads/%s", item.ImageURL) } alt={ item.Name } class="w-full h-full object-cover"/>
+						</div>
+						<div class="flex-1 basis-full flex flex-col gap-2 text-gray-700 py-4 pr-4 overflow-hidden">
+							<div class="basis-auto">
+								<h4 class="font-medium line-clamp-2">{ item.Name }</h4>
+								<p class="text-sm text-current/80">{ item.Category }</p>
+							</div>
+							<div class="flex gap-2">
+								<p class="flex items-center gap-2 text-current/80 font-medium">
+									@components.BoxIcon("w-5", nil)
+									<span class="text-gray-700">{ item.Quantity }</span> / <span class="text-current/60">{ item.MaxQty } disponibles</span>
+								</p>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		} else {
+			<div class="w-full h-32 flex items-center justify-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-center">
+				<p class="text-gray-700/80">No hay artículos en el carrito</p>
+			</div>
+		}
+	</div>
+}
+
+templ ContactRequestsFiltersModal() {
+	<div id="contact-requests-filters-modal-content" class="h-full max-w-xl flex flex-col gap-4 bg-stone-50 rounded-sm shadow py-2 px-4 mx-auto">
+		<div class="flex-1 flex justify-between items-center">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				Filtrar Solicitudes
+			</h3>
+			<button
+				id="contact-requests-filters-modal-close"
+				class="p-2 rounded-sm text-gray-700 bg-stone-50"
+				data-contact-requests-filters-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-filters-modal-toggle]"
+			>
+				@components.TimesIcon("w-8 mx-auto", nil)
+			</button>
+		</div>
+		<form
+			id="contact-requests-filters-form"
+			hx-get="/solicitudes/table"
+			hx-target="#contact-requests-table"
+			hx-indicator="#contact-requests-table-loading"
+			hx-include='[name="sort"]'
+			class="flex-1 basis-full w-full overflow-auto space-y-4"
+		>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="space-y-1">
+					<label for="filters-customer_name" class="block text-sm font-medium text-gray-700">Nombre del Cliente</label>
+					<input
+						id="filters-customer_name"
+						name="customer_name"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+						type="text"
+						placeholder="Buscar por nombre..."
+					/>
+				</div>
+				<div class="space-y-1">
+					<label for="filters-phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+					<input
+						id="filters-phone"
+						name="phone"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+						type="text"
+						placeholder="Buscar por teléfono..."
+					/>
+				</div>
+				<div class="space-y-1">
+					<label for="filters-status" class="block text-sm font-medium text-gray-700">Estado</label>
+					<select
+						id="filters-status"
+						name="status"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+					>
+						<option value="">Todos los estados</option>
+						<option value="pendiente">Pendiente</option>
+						<option value="procesada">Procesada</option>
+						<option value="en_progreso">En Progreso</option>
+						<option value="cancelada">Cancelada</option>
+					</select>
+				</div>
+				<div class="space-y-1">
+					<label for="filters-request_type" class="block text-sm font-medium text-gray-700">Tipo de Solicitud</label>
+					<input
+						id="filters-request_type"
+						name="request_type"
+						class="block w-full px-4 py-2 border border-gray-200 rounded-xs leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+						type="text"
+						placeholder="Buscar por tipo..."
+					/>
+				</div>
+			</div>
+		</form>
+		<div class="flex-1 flex gap-2 justify-end items-center">
+			<button
+				id="contact-requests-filters-modal-clear"
+				type="button"
+				class="flex gap-1 px-4 py-2 bg-gray-700/20 text-gray-700 font-medium rounded-sm"
+				data-click-handler-selector="[data-contact-requests-filters-clear]"
+				data-contact-requests-filters-clear
+			>
+				Limpiar Filtros
+			</button>
+			<button
+				id="contact-requests-filters-modal-apply"
+				type="submit"
+				form="contact-requests-filters-form"
+				class="flex gap-1 px-4 py-2 bg-accent text-white font-medium rounded-sm hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+				data-contact-requests-filters-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-filters-modal-toggle]"
+			>
+				@components.FilterIcon("w-5", nil)
+				Aplicar Filtros
+			</button>
+		</div>
+	</div>
+}

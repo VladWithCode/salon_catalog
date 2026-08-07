@@ -1,0 +1,244 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal"
+import "fmt"
+
+// Toaster component
+//
+// It should always be loaded at page render (hence it should be used in the layout template).
+// This is because Toaster needs to register event listeners for htmx events
+// so it knows when to push a new toast message.
+templ Toaster() {
+	@toasterScript()
+	<div
+		id="toaster-container"
+		class="fixed flex flex-col items-end gap-2 bottom-0 inset-x-0 z-50 p-2 pointer-events-none"
+		data-toaster-count="0"
+	></div>
+}
+
+templ toasterScript() {
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toasterContainer = document.getElementById('toaster-container');
+
+        // Register with global event manager
+        window.eventManager
+            .registerClick('[toaster-toast-close]', (e) => closeToaster())
+
+        document.addEventListener('htmx:afterRequest', (e) => {
+            if (e.detail.xhr.getResponseHeader('X-Includes-Toast') !== 'true') {
+                return;
+            }
+            const toastElt = toasterContainer.querySelector('[data-toaster-toast-id]');
+            if (!toastElt) {
+                return;
+            }
+
+            window.toastManager.pushToast(toastElt)
+        });
+    });
+
+    (function () {
+        class ToastManager {
+            #toasts = new Map();
+            toasterElement;
+
+            constructor() {
+                this.toasterElement = document.getElementById('toaster-container');
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                this.toasterElement.addEventListener('click', this.onToastClose.bind(this));
+            }
+
+            pushToast(toastElt) {
+                const isPinned = toastElt.hasAttribute('data-toaster-toast-pinned');
+                const isClosable = toastElt.hasAttribute('data-toaster-toast-closable');
+                const duration = Number(toastElt.dataset.toasterToastDuration);
+                const type = toastElt.dataset.toasterToastType;
+                const toast = {
+                    id: toastElt.dataset.toasterToastId,
+                    type: type,
+                    duration: duration,
+                    closable: isClosable,
+                    pinned: isPinned,
+                    timeoutID: null,
+                }
+
+                if (!isNaN(duration) && duration > 0) {
+                    toast.timeoutID = setTimeout(() => {
+                        this.popToast(toast.id);
+                    }, duration);
+                }
+                
+                this.#toasts.set(toast.id, toast)
+                this.animateToastIn(toast.id);
+            }
+
+            popToast(id) {
+                const toast = this.#toasts.get(id);
+                if (!toast) {
+                    return;
+                }
+
+                if (toast.timeoutID) {
+                    clearTimeout(toast.timeoutID);
+                }
+                this.animateToastOut(toast.id);
+                this.#toasts.delete(id);
+            }
+
+            onToastClose(e) {
+                const toastParent = e.target.closest('[data-toaster-toast-id]');
+                if (!toastParent) {
+                    return;
+                }
+                const toastId = toastParent.getAttribute('data-toaster-toast-id');
+                this.popToast(toastId);
+            }
+
+            animateToastOut(id) {
+                const toastElt = document.getElementById(`toaster-toast-${id}`);
+                if (!toastElt) {
+                    return;
+                }
+
+                gsap.to(toastElt, {
+                    opacity: 0,
+                    x: "150%",
+                    height: "0rem",
+                    duration: 0.3,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        toastElt.remove();
+                    }
+                });
+            }
+
+            animateToastIn(id) {
+                const toastElt = document.getElementById(`toaster-toast-${id}`);
+                if (!toastElt) {
+                    return;
+                }
+
+                gsap.to(toastElt, {
+                    opacity: 1,
+                    y: "0rem",
+                    ease: "power3.in"
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => window.toastManager = new ToastManager());
+    })();
+</script>
+}
+
+type ToastType string
+
+const (
+	ToastSuccess ToastType = "success"
+	ToastError   ToastType = "error"
+	ToastWarning ToastType = "warning"
+	ToastInfo    ToastType = "info"
+
+	DefaultToastDuration = 3000 // in ms
+)
+
+type ToastData struct {
+	ID       string    `json:"id"`
+	Message  string    `json:"message"`
+	Type     ToastType `json:"type"`
+	Duration int       `json:"duration"`
+	Closable bool      `json:"closable"`
+	Pinned   bool      `json:"pinned"`
+}
+
+func NewToastData(message string, toastType ToastType, duration int, closable, pinned bool) *ToastData {
+	td := &ToastData{
+		ID:       internal.GenerateHTMLID(),
+		Message:  message,
+		Type:     toastType,
+		Duration: duration,
+		Closable: closable,
+		Pinned:   pinned,
+	}
+	if pinned {
+		td.Duration = 0
+	}
+
+	return td
+}
+
+func (td *ToastData) GetClass() string {
+	switch td.Type {
+	case ToastSuccess:
+		return "bg-green-100 text-green-500 border-2"
+	case ToastError:
+		return "bg-red-100 text-red-500 border-2"
+	case ToastWarning:
+		return "bg-yellow-100 text-yellow-500 border-2"
+	case ToastInfo:
+		return "bg-blue-100 text-blue-500 border-2"
+	default:
+		return "bg-blue-100 text-blue-500 border-2"
+	}
+}
+
+func (td *ToastData) GetDuration() int {
+	if td.Duration == 0 {
+		td.Duration = DefaultToastDuration
+	}
+	return td.Duration
+}
+
+func (td *ToastData) GetIcon() templ.Component {
+	switch td.Type {
+	case ToastSuccess:
+		return CheckIcon("w-6", nil)
+	case ToastError:
+		return AlertIcon("w-6", nil)
+	case ToastWarning:
+		return AlertIcon("w-6", nil)
+	case ToastInfo:
+		return AlertIcon("w-6", nil)
+	default:
+		return AlertIcon("w-6", nil)
+	}
+}
+
+templ ToasterToast(data *ToastData) {
+	@templ.Fragment("toaster-toast") {
+		<div hx-swap-oob="afterbegin:#toaster-container">
+			<div
+				id={ fmt.Sprintf("toaster-toast-%s", data.ID) }
+				class={ "relative z-0 flex gap-4 p-2 rounded-sm shadow translate-y-6 opacity-0 pointer-events-auto " , data.GetClass() }
+				data-toaster-toast-id={ data.ID }
+				if !data.Pinned {
+					data-toaster-toast-duration={ data.GetDuration() }
+				}
+				if data.Closable {
+					data-toaster-toast-closable
+				}
+				if data.Pinned {
+					data-toaster-toast-pinned
+				}
+			>
+				if data.Pinned {
+					<div class="absolute -top-2 -right-2 z-10 bg-accent rounded-full aspect-square h-4"></div>
+				}
+				<div class="flex gap-2">
+					@data.GetIcon()
+					<span class="block flex-1 text-sm font-bold tracking-wide">{ data.Message }</span>
+				</div>
+				if data.Closable || data.Pinned {
+					<button class="ml-auto" data-toaster-toast-close={ data.ID } data-click-handler-selector="[data-toaster-toast-close]">
+						@TimesIcon("w-6", nil)
+					</button>
+				}
+			</div>
+		</div>
+	}
+}

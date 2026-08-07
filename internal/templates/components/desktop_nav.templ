@@ -1,0 +1,76 @@
+package components
+
+templ DesktopNavigation(isMainPage bool) {
+	<nav class="hidden lg:flex items-center space-x-6 lg:space-x-8">
+		<a
+			if isMainPage {
+				href="#seccion-hero"
+			} else {
+				href="/"
+			}
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="hero"
+		>
+			Inicio
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-oferta"
+			} else {
+				href="/servicios"
+			}
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="oferta"
+		>
+			Servicios
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-catalogo"
+			} else {
+				href="/catalogo"
+			}
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="catalogo"
+		>
+			Catálogo
+		</a>
+		if isMainPage {
+			<a
+				href="#seccion-galeria"
+				class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+				data-section="galeria"
+			>
+				Galería
+			</a>
+		}
+		<a
+			if isMainPage {
+				href="#seccion-contacto"
+			} else {
+				href="/solicitar-cotizacion"
+			}
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="contacto"
+		>
+			Contacto
+		</a>
+		<a
+			href="/experiencia"
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+		>
+			Experiencia
+		</a>
+		<a
+			if isMainPage {
+				href="#seccion-ubicacion"
+			} else {
+				href="/#seccion-ubicacion"
+			}
+			class="text-sm lg:text-lg font-medium text-current hover:text-accent transition-colors duration-200 desktop-nav-link"
+			data-section="ubicacion"
+		>
+			Ubicación
+		</a>
+	</nav>
+}

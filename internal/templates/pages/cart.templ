@@ -1,0 +1,69 @@
+package pages
+
+import (
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+// CartPageStatus is the fixed, server-selected message a redirect to
+// /carrito lands on. It never carries client- or database-supplied text:
+// only one of the approved cart_status/cart_error codes is ever translated
+// into a CartPageStatus.
+type CartPageStatus struct {
+	Message string
+	IsError bool
+}
+
+// CartPage is the full, standalone HTML rendering of the cart — the only
+// way the cart is visible or usable without JavaScript. It renders the same
+// item data as the HTMX sidebar, but with real forms instead of hx-* only
+// buttons.
+templ CartPage(cartValue *db.Cart, status *CartPageStatus) {
+	@templates.BaseLayout("Tu selección | Villa Chenacolo", nil, false) {
+		<main class="px-4 py-16 max-w-3xl mx-auto min-h-[60vh]">
+			<h1 class="text-3xl font-bold text-primary mb-6">Tu selección</h1>
+			if status != nil && status.Message != "" {
+				<div
+					if status.IsError {
+						role="alert"
+						class="mb-6 rounded-lg bg-red-50 text-red-700 border border-red-200 px-4 py-3"
+					} else {
+						role="status"
+						class="mb-6 rounded-lg bg-green-50 text-green-700 border border-green-200 px-4 py-3"
+					}
+				>
+					{ status.Message }
+				</div>
+			}
+			if cartValue == nil || len(cartValue.Items) == 0 {
+				@components.EmptyCart()
+			} else {
+				<ul class="space-y-4">
+					for _, item := range cartValue.Items {
+						<li>
+							@components.CartPageItem(*item)
+						</li>
+					}
+				</ul>
+				<div class="mt-8 flex flex-wrap items-center gap-4">
+					<a
+						href="/solicitar-cotizacion"
+						class="inline-flex min-h-11 items-center bg-accent/90 text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent"
+					>
+						Solicitar Cotización
+					</a>
+					<form method="post" action="/carrito/vaciar">
+						<input type="hidden" name="return_to" value="/carrito"/>
+						<button
+							type="submit"
+							class="min-h-11 px-4 text-neutral/60 hover:text-red-600 font-medium"
+						>
+							Limpiar todo
+						</button>
+					</form>
+				</div>
+			}
+		</main>
+	}
+}

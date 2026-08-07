@@ -1,0 +1,306 @@
+// Package routes contains the routing logic for the application
+package routes
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/vladwithcode/salon_catalog/internal"
+	"github.com/vladwithcode/salon_catalog/internal/auth"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	appsecurity "github.com/vladwithcode/salon_catalog/internal/security"
+	"github.com/vladwithcode/salon_catalog/internal/session"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+	"github.com/vladwithcode/salon_catalog/internal/templates/pages"
+)
+
+func NewRouter(cartSessions *session.CartManager, csrfGuard *appsecurity.CSRFGuard) http.Handler {
+	router := NewCustomServeMux()
+
+	router.HandleFunc("GET /{$}", publicMiddleware(cartSessions, RenderIndex))
+	router.HandleFunc("GET /catalogo", publicMiddleware(cartSessions, RenderCatalog))
+	router.HandleFunc("GET /servicios", publicMiddleware(cartSessions, RenderServices))
+	router.HandleFunc("GET /reservaciones", publicMiddleware(cartSessions, RenderReservations))
+	router.HandleFunc("GET /experiencia", publicMiddleware(cartSessions, RenderSalon))
+	router.HandleFunc("GET /politica-privacidad", publicMiddleware(cartSessions, RenderPrivacyPolicy))
+	router.HandleFunc("GET /terminos-servicio", publicMiddleware(cartSessions, RenderTermsOfService))
+	router.HandleFunc("GET /politica-cookies", publicMiddleware(cartSessions, RenderCookiePolicy))
+	router.HandleFunc("GET /iniciar-sesion", publicMiddleware(cartSessions, auth.PopulateAuth(RenderSignIn)))
+	router.HandleFunc("GET /cerrar-sesion", publicMiddleware(cartSessions, auth.PopulateAuth(SignOut)))
+
+	RegisterDashboardRoutes(router)
+	RegisterImagesRoutes(router)
+	RegisterImageSelectorRoutes(router)
+	RegisterCategoriesRoutes(router)
+	RegisterProductsRoutes(router)
+	RegisterEventKindsRoutes(router)
+	RegisterContactRequestsRoutes(router, cartSessions, csrfGuard)
+	RegisterWizardRoutes(router, cartSessions, csrfGuard)
+	RegisterCatalogRoutes(router, cartSessions)
+	RegisterCartRoutes(router, cartSessions, csrfGuard)
+	RegisterCartAPIRoutes(router, cartSessions)
+	RegisterCartAPIMutationRoutes(router, cartSessions, csrfGuard)
+	RegisterUserRoutes(router)
+	RegisterSocialRoutes(router)
+	RegisterPublicAPIRoutes(router)
+	RegisterCatalogProductAPIRoutes(router)
+
+	// Api
+	router.HandleFunc("POST /api/sign-in", auth.PopulateAuth(SignIn))
+
+	// Serve static files
+	fs := http.FileServer(http.Dir("web/static/"))
+	router.Handle("GET /static/", http.StripPrefix("/static/", fs))
+
+	router.NotFoundHandleFunc(render404Page)
+
+	return router
+}
+
+func RenderIndex(w http.ResponseWriter, r *http.Request) {
+	rawListings, err := db.FindCatalogListings()
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Index err: %v\n", err)
+		return
+	}
+
+	listings := make(components.CatalogListings)
+	for ctg, list := range rawListings {
+		listings[ctg] = make([]db.CatalogProd, len(list))
+		for i, prod := range list {
+			listings[ctg][i] = *prod
+		}
+	}
+
+	err = pages.Index(listings).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Index err: %v\n", err)
+	}
+}
+
+func RenderCatalog(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("buscar")
+	category := r.URL.Query().Get("categoria")
+
+	state := &pages.CatalogState{
+		Search:         search,
+		ActiveCategory: category,
+	}
+	err := pages.Catalog(state).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Algo salió mal"))
+		log.Printf("failed to render Catalog err: %v\n", err)
+	}
+}
+
+func RenderServices(w http.ResponseWriter, r *http.Request) {
+	err := pages.Services().Render(r.Context(), w)
+	if err != nil {
+		log.Printf("failed to render Services err: %v\n", err)
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+	}
+}
+
+func RenderSalon(w http.ResponseWriter, r *http.Request) {
+	err := pages.Salon().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Gallery err: %v\n", err)
+	}
+}
+
+func RenderReservations(w http.ResponseWriter, r *http.Request) {
+	err := pages.Reservations().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render Gallery err: %v\n", err)
+	}
+}
+
+func RenderPrivacyPolicy(w http.ResponseWriter, r *http.Request) {
+	err := pages.PrivacyPolicy().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render PrivacyPolicy err: %v\n", err)
+	}
+}
+
+func RenderTermsOfService(w http.ResponseWriter, r *http.Request) {
+	err := pages.TermsOfService().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render TermsOfService err: %v\n", err)
+	}
+}
+
+func RenderCookiePolicy(w http.ResponseWriter, r *http.Request) {
+	err := pages.CookiePolicy().Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render CookiePolicy err: %v\n", err)
+	}
+}
+
+func RenderSignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	if a.ID != "" && a.ID != auth.InvalidTokenID && a.ID != auth.ExpiredTokenID {
+		internal.HandleRedirect("/panel", http.StatusFound, w, r)
+		return
+	}
+
+	err := pages.SignIn(
+		&pages.FormState{},
+	).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Something went wrong"))
+		log.Printf("failed to render SignIn err: %v\n", err)
+	}
+}
+
+func SignIn(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	if a.ID != "" && a.ID != auth.InvalidTokenID && a.ID != auth.ExpiredTokenID {
+		internal.HandleRedirect("/panel", http.StatusFound, w, r)
+		return
+	}
+
+	signinPage := pages.SignIn
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = signinPage(&pages.FormState{
+			ServerError: "Error inesperado",
+		}).Render(r.Context(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	username := r.FormValue("user")
+	password := r.FormValue("password")
+
+	if username == "" || password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		err = signinPage(&pages.FormState{
+			UserError:     "El nombre de usuario es requerido",
+			UserValue:     username,
+			PasswordError: "La contraseña es requerida",
+		}).Render(r.Context(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	user, err := db.GetUserByUsername(username)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		err = signinPage(&pages.FormState{
+			UserError:     "Revisa que el nombre de usuario sea correcto",
+			UserValue:     username,
+			PasswordError: "Revisa que la contraseña sea correcta",
+		}).Render(r.Context(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	err = user.ValidatePass(password)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		err = signinPage(&pages.FormState{
+			UserError:     "Revisa que el nombre de usuario sea correcto",
+			UserValue:     username,
+			PasswordError: "Revisa que la contraseña sea correcta",
+		}).Render(r.Context(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	token, err := auth.CreateToken(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = signinPage(&pages.FormState{
+			ServerError: "Error inesperado",
+		}).Render(r.Context(), w)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("Error inesperado"))
+		}
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24 * 7),
+		Path:     "/",
+		HttpOnly: true,
+		// Secure:   true,
+	})
+
+	internal.HandleRedirect("/panel", http.StatusFound, w, r)
+}
+
+func SignOut(w http.ResponseWriter, r *http.Request, a *auth.Auth) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Expires:  time.Now().Add(time.Hour * -24),
+		Path:     "/",
+		HttpOnly: true,
+		// Secure:   true,
+	})
+
+	internal.HandleRedirect("/", http.StatusFound, w, r)
+}
+
+func render404Page(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 page not found"))
+}
+
+func render500Page(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 Server Error"))
+}
+
+func publicMiddleware(cartSessions *session.CartManager, next http.HandlerFunc) http.HandlerFunc {
+	return withCartSession(cartSessions, func(w http.ResponseWriter, r *http.Request) {
+		socialLinks, err := db.GetSocialLinks()
+		if err != nil {
+			log.Printf("Error fetching social links: %v", err)
+		}
+		socialLinkMap := make(map[string]string)
+		for _, link := range socialLinks {
+			socialLinkMap[link.Name] = link.Link
+		}
+		req := r.WithContext(context.WithValue(r.Context(), "socialLinks", socialLinkMap))
+
+		// Gives templ's ctx access to the request path and query params
+		req = r.WithContext(context.WithValue(req.Context(), "urlPath", r.URL.Path))
+		req = r.WithContext(context.WithValue(req.Context(), "urlQueryParams", r.URL.Query()))
+
+		next(w, req)
+	})
+}

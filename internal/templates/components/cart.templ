@@ -1,0 +1,483 @@
+package components
+
+import "fmt"
+import "github.com/vladwithcode/salon_catalog/internal/db"
+import "errors"
+
+templ FloatingCart(cartCount int, hasError bool) {
+	@CartScript()
+	<!-- Floating Cart Button -->
+	<div class="fixed bottom-2 right-4 z-40 cur" id="floating-cart">
+		@templ.Fragment("cartToggle") {
+			<button
+				class="bg-accent text-white rounded-full p-3.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative group cursor-pointer"
+				id="floating-cart-toggle"
+				data-click-handler-selector="cart-toggle"
+				data-cart-toggle
+				hx-get="/carrito"
+				hx-target="#cart-sidebar"
+				hx-indicator="#floating-cart-loading"
+				hx-swap-oob="outerHTML:#floating-cart-toggle"
+			>
+				<div id="floating-cart-loading" class="absolute inset-0 z-10 bg-secondary duration-300 htmx-indicator">
+					@LoadingIcon("h-6", nil)
+				</div>
+				<!-- Cart Icon -->
+				<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5H19"
+					></path>
+				</svg>
+				<!-- Item Count Badge -->
+				<div
+					class={
+						"absolute -top-2 -right-2 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1",
+						templ.KV("opacity-0 scale-0 bg-accent transition-all duration-200", !hasError),
+						templ.KV("bg-red-500", hasError),
+					}
+					data-cart-count
+				>
+					if !hasError {
+						@TimesIcon("w-5", nil)
+					} else {
+						{ fmt.Sprintf("%d", cartCount) }
+					}
+				</div>
+				<!-- Tooltip -->
+				<div class="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+					Ver selección
+				</div>
+			</button>
+		}
+	</div>
+	<!-- Backdrop -->
+	<div
+		class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40"
+		id="cart-backdrop"
+		data-click-handler-selector="cart-backdrop"
+		data-cart-close
+	></div>
+	<!-- Cart Sidebar -->
+	<div
+		class="fixed inset-y-0 right-0 w-96 max-w-[90vw] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-40"
+		id="cart-sidebar"
+	>
+		<!-- Cart content will be loaded here -->
+	</div>
+}
+
+var (
+	ErrNilCart = errors.New("Provided cart is nil")
+)
+
+type CartState struct {
+	Cart      *db.Cart `json:"cart"`
+	HasError  bool     `json:"has_error"`
+	ErrorMsg  string   `json:"error"`
+	HasUpdate bool     `json:"has_update"`
+	UpdateMsg string   `json:"update_msg"`
+}
+
+templ CartSidebar(state CartState) {
+	{{
+	if state.Cart == nil {
+		return ErrNilCart
+	}
+	items := state.Cart.Items
+	}}
+	@templ.Fragment("cartSidebar") {
+		<div class="flex flex-col h-full w-full">
+			<!-- Header -->
+			<div class="p-6 border-b bg-brand-1 from-primary to-accent text-white">
+				<div class="flex items-center justify-between">
+					<h2 class="text-xl font-bold uppercase">Tu evento</h2>
+					<button
+						class="text-white hover:text-gray-200 transition-colors"
+						data-click-handler-selector="cart-close"
+						data-cart-close
+					>
+						<div class="p-4">
+							<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</div>
+					</button>
+				</div>
+				<p id="cart-count-header" class="flex gap-2 items-center text-white/90 text-sm mt-1">
+					@BoxIcon("w-5", nil)
+					{ fmt.Sprintf("%d", len(items)) } elemento(s) seleccionado(s)
+				</p>
+			</div>
+			<!-- Cart Items -->
+			<div class="flex-1 overflow-y-auto p-4" data-cart-items>
+				if len(items) == 0 {
+					@EmptyCart()
+				} else {
+					<div class="space-y-4">
+						for _, item := range items {
+							@CartItem(*item)
+						}
+					</div>
+				}
+			</div>
+			@templ.Fragment("cartError") {
+				<div
+					id="cart-sidebar-error"
+					class="h-0 opacity-0"
+				>
+					if state.HasError {
+						<div class="flex gap-6 items-center justify-center py-6 bg-red-500/30 text-red-700 px-4">
+							<div class="shrink-0 bg-current/80 rounded-full p-1">
+								@TimesIcon("w-12 text-gray-50", nil)
+							</div>
+							<p class="text-lg font-medium">{ state.ErrorMsg }</p>
+							<button
+								id="close-cart-error"
+								class="my-auto"
+							>
+								@TimesIcon("w-8", nil)
+							</button>
+						</div>
+					}
+				</div>
+			}
+			<!-- Footer -->
+			<div class="p-4 bg-gray-50">
+				<!-- Action Buttons -->
+				<div class="space-y-2">
+					<!-- Wizard Button - Always visible -->
+					<button
+						class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-95"
+						hx-get="/wizard/selection"
+						hx-target="#wizard-modal"
+						hx-swap="outerHTML"
+						data-click-handler-selector="open-wizard"
+					>
+						@WizardIcon("w-5 h-5", nil)
+						Asistente de Eventos
+					</button>
+					if len(items) > 0 {
+						<a
+							href="/solicitar-cotizacion"
+							class="w-full bg-accent/90 text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent transition-[background,_transform] text-center block active:bg-accent active:scale-95"
+							data-cart-close
+						>
+							Solicitar Cotización
+						</a>
+						<button
+							class="w-full text-neutral/60 py-2 px-6 rounded-lg font-medium hover:bg-red-500/30 hover:text-red-500 active:bg-red-500/40 active:text-red-500 transition-colors"
+							hx-delete="/carrito/items"
+							hx-target="#cart-sidebar"
+							hx-confirm="¿Estás seguro de que quieres limpiar tu selección?"
+							data-cart-clear
+						>
+							Limpiar Todo
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ CartItem(item db.CartItem) {
+	<div
+		class="relative z-0 grid grid-cols-[8rem_1fr] grid-rows-1 gap-4 h-32 pr-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+		data-cart-item={ item.ProductID }
+	>
+		<div
+			class="absolute inset-0 z-20 bg-gray-100 flex flex-col items-center justify-center gap-4 text-accent htmx-indicator"
+			data-cart-items-loading={ item.ProductID }
+		>
+			@LoadingIcon("w-12", nil)
+			Cargando...
+		</div>
+		<div class="row-span-1 col-start-1 h-full aspect-square shrink-0 grow-0 bg-gray-100 rounded-l-lg overflow-hidden">
+			<button
+				class="w-full h-full"
+				hx-get={ fmt.Sprintf("/catalogo/producto/%s", item.ProductID) }
+				hx-target="#product-modal"
+				hx-swap="outerHTML"
+				hx-indicator="#product-modal-loading"
+				hx-push-url={ fmt.Sprintf("/catalogo/producto/%s", item.ProductID) }
+			>
+				<img
+					src={ fmt.Sprintf("/static/uploads/%s", item.ImageURL) }
+					alt={ item.Name }
+					class="w-full h-full object-cover"
+				/>
+			</button>
+		</div>
+		<div class="row-span-1 col-start-2 flex flex-col py-2 gap-2">
+			<div class="flex-1">
+				<h4 class="font-semibold text-gray-800 line-clamp-2">{ item.Name }</h4>
+				<p class="text-sm text-gray-600 truncate">{ item.Category }</p>
+			</div>
+			<div class="flex overflow-hidden">
+				<div class="flex border border-gray-200 rounded-lg items-stretch justify-start">
+					<button
+						class="px-2 py-0.5 rounded-l-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors font-bold"
+						hx-patch="/carrito/items"
+						hx-vals={ fmt.Sprintf(`{"id": "%s", "action": "decrease"}`, item.ProductID) }
+						hx-target="#cart-sidebar"
+						hx-indicator={ fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID) }
+					>
+						@MinusIcon("w-4", nil)
+					</button>
+					<input
+						type="text"
+						class="block px-2 py-0.5 text-center w-12"
+						hx-patch="/carrito/items"
+						hx-vals={ fmt.Sprintf(`{"id": "%s", "action": "set"}`, item.ProductID) }
+						hx-target="#cart-sidebar"
+						hx-indicator={ fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID) }
+						max={ item.MaxQty }
+						min="1"
+						id={ fmt.Sprintf("quantity-%s", item.ProductID) }
+						name="quantity"
+						value={ fmt.Sprintf("%d", item.Quantity) }
+					/>
+					<button
+						class="px-2 py-0.5 rounded-r-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors font-bold"
+						hx-patch="/carrito/items"
+						hx-vals={ fmt.Sprintf(`{"id": "%s", "action": "increase"}`, item.ProductID) }
+						hx-target="#cart-sidebar"
+						hx-indicator={ fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID) }
+					>
+						@PlusIcon("w-4", nil)
+					</button>
+				</div>
+				<button
+					class="text-red-500 hover:text-red-700 transition-colors p-1"
+					hx-delete={ fmt.Sprintf("/carrito/items/%s", item.ProductID) }
+					hx-target="#cart-sidebar"
+					hx-confirm="¿Remover este elemento?"
+					hx-indicator={ fmt.Sprintf(`[data-cart-items-loading="%s"]`, item.ProductID) }
+					title="Remover elemento"
+				>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+						></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+// CartPageItem renders one cart line as the standalone /carrito page shows
+// it: real forms that work without JavaScript, not hx-* only buttons. The
+// server still validates quantity and stock atomically regardless of what
+// the client submits; min/max here are a hint, not the source of truth.
+templ CartPageItem(item db.CartItem) {
+	<div
+		class="flex gap-4 items-center border border-gray-200 rounded-lg p-4"
+		data-cart-page-item={ item.ProductID }
+	>
+		<img
+			src={ fmt.Sprintf("/static/uploads/%s", item.ImageURL) }
+			alt={ item.Name }
+			class="w-20 h-20 object-cover rounded-lg shrink-0 bg-gray-100"
+		/>
+		<div class="flex-1 min-w-0">
+			<h3 class="font-semibold text-gray-800 truncate">{ item.Name }</h3>
+			<p class="text-sm text-gray-600 truncate">{ item.Category }</p>
+			<div class="mt-3 flex flex-wrap items-center gap-3">
+				<form
+					method="post"
+					action={ templ.SafeURL(fmt.Sprintf("/carrito/items/%s/cantidad", item.ProductID)) }
+					class="flex items-center gap-2"
+				>
+					<label for={ fmt.Sprintf("cart-page-quantity-%s", item.ProductID) } class="text-sm text-gray-600">
+						Cantidad
+					</label>
+					<input
+						type="number"
+						id={ fmt.Sprintf("cart-page-quantity-%s", item.ProductID) }
+						name="quantity"
+						min="1"
+						max={ fmt.Sprintf("%d", item.MaxQty) }
+						value={ fmt.Sprintf("%d", item.Quantity) }
+						class="w-16 border border-gray-300 rounded-md px-2 py-2 text-center"
+					/>
+					<input type="hidden" name="return_to" value="/carrito"/>
+					<button
+						type="submit"
+						class="min-h-11 px-3 rounded-md bg-gray-200 hover:bg-gray-300 font-medium"
+					>
+						Actualizar
+					</button>
+				</form>
+				<form method="post" action={ templ.SafeURL(fmt.Sprintf("/carrito/items/%s/eliminar", item.ProductID)) }>
+					<input type="hidden" name="return_to" value="/carrito"/>
+					<button
+						type="submit"
+						class="min-h-11 px-3 rounded-md text-red-600 hover:bg-red-50 font-medium"
+					>
+						Eliminar
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+
+templ EmptyCart() {
+	<div class="flex flex-col items-center justify-center h-full text-center py-12">
+		<div class="text-gray-300 mb-6">
+			<svg class="w-20 h-20 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+				<path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+			</svg>
+		</div>
+		<h3 class="text-xl font-semibold text-gray-500 mb-2">No has seleccionado nada aún</h3>
+		<p class="text-gray-400 mb-6">Explora nuestro catálogo y agrega los artículos que te gustarían para tu evento</p>
+		<div class="space-y-3">
+			<button
+				class="block w-full px-6 py-3 text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-lg cursor-pointer hover:scale-102 active:scale-95 transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
+				hx-get="/wizard/selection"
+				hx-target="#wizard-modal"
+				hx-swap="outerHTML"
+				data-click-handler-selector="open-wizard"
+			>
+				@WizardIcon("w-5 h-5", nil)
+				Asistente de Eventos
+			</button>
+			<button
+				class="block w-full px-6 py-3 text-light bg-primary/90 rounded-lg cursor-pointer hover:bg-primary hover:scale-102 active:scale-95 transition-[background,_transform] font-medium"
+				data-cart-close
+				data-click-handler-selector="browse-trigger,cart-close"
+				data-browse-catalog
+			>
+				Regresar al catálogo
+			</button>
+		</div>
+	</div>
+}
+
+templ CartScript() {
+	<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            class CartManager {
+                constructor() {
+                    this.isOpen = false;
+                    this.registerEvents();
+                    this.updateCartCount();
+                }
+
+                registerEvents() {
+                    // Register with global event manager
+                    window.eventManager
+                        .register('afterRequest', 'cart-sidebar', (e) => this.onCartUpdate(e))
+                        .registerClick('cart-toggle', (e) => this.toggleCart(e))
+                        .registerClick('cart-close', (e) => this.closeCart())
+                        .registerClick('cart-backdrop', (e) => this.closeCart())
+                        .registerClick('browse-catalog', (e) => this.closeCart());
+                }
+
+                toggleCart() {
+                    if (this.isOpen) {
+                        this.closeCart();
+                    } else {
+                        this.openCart();
+                    }
+                }
+
+                onCartUpdate(event) {
+                    this.updateCartCount();
+                    this.animateCartUpdate();
+                    
+                    if (event.detail.xhr.status !== 200) {
+                        return;
+                    }
+                }
+
+                openCart() {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const backdrop = document.getElementById('cart-backdrop');
+                    
+                    this.isOpen = true;
+
+                    backdrop.classList.remove('pointer-events-none');
+                    gsap.to(backdrop, { opacity: 1, duration: 0.3 });
+                    gsap.to(sidebar, { 
+                        x: 0, 
+                        duration: 0.4, 
+                        ease: "power2.out" 
+                    });
+
+                    // Prevent body scroll
+                    document.body.style.overflow = 'hidden';
+                }
+
+                closeCart() {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const backdrop = document.getElementById('cart-backdrop');
+                    
+                    this.isOpen = false;
+                    
+                    // Hide backdrop
+                    gsap.to(backdrop, { 
+                        opacity: 0, 
+                        duration: 0.3,
+                        onComplete: () => {
+                            backdrop.classList.add('pointer-events-none');
+                        }
+                    });
+                    
+                    // Slide out sidebar
+                    gsap.to(sidebar, { 
+                        x: '100%', 
+                        duration: 0.4, 
+                        ease: "power2.in" 
+                    });
+
+                    // Restore body scroll
+                    document.body.style.overflow = '';
+                }
+
+                updateCartCount() {
+                    const cartItems = document.querySelectorAll('[data-cart-item]');
+                    const countBadge = document.querySelector('[data-cart-count]');
+                    const count = cartItems.length;
+
+                    countBadge.textContent = count;
+
+                    if (count > 0) {
+                        gsap.fromTo(countBadge, 
+                            { scale: 1.5 },
+                            { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                        );
+                        countBadge.classList.remove('opacity-0', 'scale-0');
+                        countBadge.classList.add('opacity-100', 'scale-100');
+                    } else {
+                        countBadge.classList.add('opacity-0', 'scale-0');
+                        countBadge.classList.remove('opacity-100', 'scale-100');
+                    }
+                }
+
+                animateCartUpdate() {
+                    const cartItems = document.querySelectorAll('[data-cart-item]');
+                    
+                    gsap.fromTo(cartItems, 
+                        { opacity: 0, x: 20 },
+                        { 
+                            opacity: 1, 
+                            x: 0, 
+                            duration: 0.3, 
+                            stagger: 0.05,
+                            ease: "power2.out" 
+                        }
+                    );
+                }
+            }
+            window.cartManager = new CartManager();
+        });
+    </script>
+}

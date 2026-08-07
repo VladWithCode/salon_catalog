@@ -1,0 +1,95 @@
+package components
+
+import (
+	"encoding/json"
+	"github.com/vladwithcode/salon_catalog/internal/db"
+)
+
+type CategorySelectValueType string
+
+const (
+	CategorySelectValueTypeID   CategorySelectValueType = "id"
+	CategorySelectValueTypeName CategorySelectValueType = "name"
+)
+
+type CategorySelectParams struct {
+	Selected    string                  `json:"selected"`
+	ValueType   CategorySelectValueType `json:"value_type"`
+	Args        map[string]string       `json:"args"`
+	ReplaceArgs map[string]string       `json:"replace_args"`
+}
+
+func (csp *CategorySelectParams) String() string {
+	bts, _ := json.Marshal(csp)
+	return string(bts)
+}
+
+templ CategorySelect(categories []db.Category, params *CategorySelectParams) {
+	<select
+		id="category-select"
+		class="block w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent"
+		if params.ReplaceArgs != nil && params.ReplaceArgs["name"] != "" {
+			name={ params.ReplaceArgs["name"] }
+		} else {
+			name="category"
+		}
+		{ getCategorySelectAttributes(params)... }
+	>
+		<option value="" selected?={ params.Selected == "" }>Selecciona una categoría</option>
+		for _, ctg := range categories {
+			@CategorySelectOption(ctg, params)
+		}
+	</select>
+}
+
+templ CategorySelectOption(ctg db.Category, params *CategorySelectParams) {
+	<option
+		value={ getCategorySelectValue(ctg, params.ValueType) }
+		selected?={ templ.Bool(ctg.Name == params.Selected) }
+	>
+		{ ctg.Name }
+	</option>
+}
+
+func getCategorySelectAttributes(params *CategorySelectParams) templ.Attributes {
+	attrs := templ.Attributes{}
+	for key, val := range params.Args {
+		switch key {
+		case "get":
+			attrs["hx-get"] = val
+		case "post":
+			attrs["hx-post"] = val
+		case "put":
+			attrs["hx-put"] = val
+		case "delete":
+			attrs["hx-delete"] = val
+		case "target":
+			attrs["hx-target"] = val
+		case "include":
+			attrs["hx-include"] = val
+		case "trigger":
+			attrs["hx-trigger"] = val
+		case "indicator":
+			attrs["hx-indicator"] = val
+		case "swap":
+			attrs["hx-swap"] = val
+		case "vals":
+			attrs["hx-vals"] = val
+		default:
+			attrs[key] = val
+		}
+	}
+
+	return attrs
+}
+
+func getCategorySelectValue(ctg db.Category, vtype CategorySelectValueType) string {
+	switch vtype {
+	case CategorySelectValueTypeID:
+		return ctg.ID
+	case CategorySelectValueTypeName:
+		return ctg.Name
+	default:
+		return ctg.ID
+	}
+}

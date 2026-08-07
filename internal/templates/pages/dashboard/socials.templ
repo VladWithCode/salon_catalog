@@ -1,0 +1,478 @@
+package dashboard
+
+import (
+	"github.com/vladwithcode/salon_catalog/internal/db"
+	"github.com/vladwithcode/salon_catalog/internal/forms"
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ SocialsIndex(links []db.SocialLink, sections []db.SocialSection, sectionLinks []db.SocialSectionLink) {
+	<script src="/static/js/imageSelectorManager.js" defer></script>
+	@socialScript()
+	@templates.AdminLayout("Redes Sociales | Panel Villa Chenacolo", "Administración de Redes Sociales") {
+		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5">
+			<div class="px-2">
+				<div class="flex gap-4 justify-between pb-2">
+					<div class="space-y-0.5">
+						<h1 class="text-3xl tracking-tight">Redes Sociales</h1>
+						<p class="text-xs text-current/50">Administra los enlaces de redes sociales para el sitio web.</p>
+					</div>
+				</div>
+				<div class="py-2">
+					<div class="lg:flex items-center gap-4">
+						<ul class="lg:basis-1/3 flex flex-col items-center gap-2">
+							<li class="w-full">
+								<button
+									hx-get="/panel/socials/new"
+									hx-target="#socials-modal"
+									hx-indicator="#global-loading-indicator"
+									class="w-full flex items-center justify-center gap-4 px-4 py-3 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+								>
+									@components.PlusIcon("w-5", nil)
+									Nueva Red Social
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<main class="relative z-0 flex-1 overflow-hidden">
+				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm">
+					<div class="px-4 py-3 border-b border-gray-200">
+						<h2 class="text-lg font-medium text-gray-900">Enlaces de Redes Sociales</h2>
+					</div>
+					<div class="flex-1 space-y-8">
+						<!-- Social Links Section -->
+						<div class="w-full overflow-hidden">
+							<div class="px-4 py-3 border-b border-gray-200">
+								<h3 class="text-lg font-medium text-gray-900">Enlaces de Redes Sociales</h3>
+								<p class="text-sm text-gray-600">Configura los enlaces básicos de las redes sociales</p>
+							</div>
+							if len(links) > 0 {
+								<div class="w-full grid grid-cols-[auto_minmax(40%,_1fr)_auto] auto-rows-auto divide-y divide-gray-200">
+									<div class="col-span-full row-start-1 grid grid-cols-subgrid bg-gray-50 w-full overflow-auto">
+										<div class="col-span-full grid grid-cols-subgrid grid-rows-1">
+											<div class="col-start-1 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+												Nombre
+											</div>
+											<div class="col-start-2 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+												Enlace
+											</div>
+											<div class="col-start-3 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+												Acciones
+											</div>
+										</div>
+									</div>
+									<div class="w-full col-span-full row-start-2 grid grid-cols-subgrid grid-rows-auto bg-white divide-y divide-gray-200 overflow-hidden">
+										for _, link := range links {
+											<div class="col-span-full grid grid-cols-subgrid grid-rows-subgrid">
+												<div class="col-start-1 p-4 whitespace-nowrap text-sm font-medium text-gray-900">
+													{ link.Name }
+												</div>
+												<div class="col-start-2 p-4 text-sm text-gray-500 break-words">
+													<a href={ templ.URL(link.Link) } target="_blank" class="text-blue-600 hover:text-blue-900">
+														{ link.Link }
+													</a>
+												</div>
+												<div class="col-start-3 flex flex-col gap-4 items-end justify-center p-4 whitespace-nowrap text-sm font-medium">
+													<button
+														hx-get={ "/panel/socials/" + link.ID + "/edit" }
+														hx-target="#socials-modal"
+														hx-indicator="#global-loading-indicator"
+														class="text-indigo-600 hover:text-indigo-900"
+													>
+														@components.EditIcon("w-5", nil)
+														<span class="sr-only">Editar</span>
+													</button>
+													<button
+														hx-delete={ "/panel/socials/" + link.ID }
+														hx-confirm="¿Eliminar esta red social?"
+														hx-target="closest tr"
+														hx-swap="outerHTML"
+														class="text-red-600 hover:text-red-900"
+													>
+														@components.BinIcon("w-5", nil)
+													</button>
+												</div>
+											</div>
+										}
+									</div>
+								</div>
+							} else {
+								<div class="p-8 text-center">
+									<p class="text-gray-500">No hay redes sociales configuradas.</p>
+									<button
+										hx-get="/panel/socials/new"
+										hx-target="#socials-modal"
+										hx-indicator="#global-loading-indicator"
+										class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+									>
+										Agregar Primera Red Social
+									</button>
+								</div>
+							}
+						</div>
+						<!-- Section Assignments -->
+						/* if len(links) > 0 && len(sections) > 0 {
+							<div>
+								<div class="px-4 py-3 border-b border-gray-200">
+									<h3 class="text-lg font-medium text-gray-900">Asignación por Secciones</h3>
+									<p class="text-sm text-gray-600">Configura qué enlaces aparecen en cada sección del sitio web</p>
+								</div>
+								<div class="p-4 space-y-6">
+									for _, section := range sections {
+										<div class="border border-gray-200 rounded-lg p-4">
+											<h4 class="font-medium text-gray-900 mb-4">{ section.Name }</h4>
+											<div class="space-y-3">
+												// Show current assignments for this section
+												for _, sectionLink := range sectionLinks {
+													if sectionLink.SectionID == section.ID {
+														<div class="flex items-center space-x-4 p-3 bg-gray-50 rounded">
+															<div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+																<span class="text-xs text-gray-500">SVG</span>
+															</div>
+															<div class="flex-1">
+																<span class="font-medium">{ sectionLink.LinkName }</span>
+																<span class="text-sm text-gray-500 ml-2">({ sectionLink.LinkURL })</span>
+															</div>
+															<button
+																hx-delete={ "/panel/socials/sections/" + sectionLink.LinkID + "/" + sectionLink.SectionID }
+																hx-confirm="¿Quitar este enlace de la sección?"
+																hx-target="closest div"
+																hx-swap="outerHTML"
+																class="text-red-600 hover:text-red-800 text-sm"
+															>
+																Quitar
+															</button>
+														</div>
+													}
+												}
+												// Add new assignment button
+												<button
+													hx-get={ "/panel/socials/sections/assign?section_id=" + section.ID }
+													hx-target="#socials-assignment-modal"
+													hx-indicator="#global-loading-indicator"
+													class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors"
+												>
+													<span class="text-sm text-gray-600">+ Agregar enlace a esta sección</span>
+												</button>
+											</div>
+										</div>
+									}
+								</div>
+							</div>
+						}*/
+					</div>
+				</div>
+			</main>
+		</div>
+		<!-- Modal Container -->
+		<div id="socials-modal"></div>
+		<!-- Assignment Modal Container -->
+		<div id="socials-assignment-modal"></div>
+	}
+}
+
+templ socialScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+            eventManager.register('afterSwap', '#socials-assignment-modal', function(e) {
+                const selectIconBtn = document.getElementById('select-icon-btn');
+                const selectedIconPreview = document.getElementById('selected-icon-preview');
+                const selectedIconName = document.getElementById('selected-icon-name');
+                const iconIdInput = document.getElementById('icon_id');
+
+                // Icon was selected, extract the selected icon data
+                const iconSelector = document.querySelector('#image-selector-modal');
+                if (iconSelector) {
+                    const selectedImages = iconSelector.querySelectorAll('[data-image-item][class*="text-accent"]');
+                    if (selectedImages.length > 0) {
+                        const selectedImage = selectedImages[0];
+                        const iconId = selectedImage.getAttribute('data-image-id');
+                        const iconName = selectedImage.querySelector('img').alt || 'Icono seleccionado';
+
+                        // Update the form
+                        iconIdInput.value = iconId;
+                        selectedIconName.textContent = iconName;
+                        selectedIconPreview.classList.remove('hidden');
+                        selectIconBtn.textContent = 'Cambiar Icono';
+                    }
+                }
+
+                window.ImageSelectorManager.create({
+                    mode: 'single',
+                    title: 'Seleccionar Icono SVG',
+                    maxSelection: 1,
+                    selectedIds: iconIdInput.value ? [iconIdInput.value] : [],
+                    allowUpload: false,
+                    updateEndpoint: '/panel/socials/icons/selector',
+                    targetField: 'icon_id',
+                });
+            })
+            .register('configRequest', '#socials-assignment-modal', function(e) {
+                console.log(e.detail);
+                const selectIconBtn = document.getElementById('select-icon-btn');
+                const selectedIconPreview = document.getElementById('selected-icon-preview');
+                const selectedIconName = document.getElementById('selected-icon-name');
+                const iconIdInput = document.getElementById('icon_id');
+
+                if (!iconIdInput.value) {
+                    e.preventDefault();
+                    alert('Por favor selecciona un icono');
+                    return false;
+                }
+            }, { triggerSource: "#assign-icon-btn" });
+		});
+	</script>
+}
+
+templ SocialAssignmentModal(links []db.SocialLink, sections []db.SocialSection, selectedSectionID string) {
+	<div class="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+			<div class="mt-3">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-medium text-gray-900">Asignar Enlace a Sección</h3>
+					<button
+						onclick="this.closest('.fixed').remove()"
+						class="text-gray-400 hover:text-gray-600"
+					>
+						@components.TimesIcon("w-6", nil)
+					</button>
+				</div>
+				<form id="social-assignment-form">
+					<div class="space-y-4">
+						<div>
+							<label for="section_id" class="block text-sm font-medium text-gray-700">Sección</label>
+							<select
+								id="section_id"
+								name="section_id"
+								value={ selectedSectionID }
+								class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent"
+								required
+							>
+								for _, section := range sections {
+									<option
+										value={ section.ID }
+										if selectedSectionID == section.ID {
+											selected
+										}
+									>
+										{ section.Name }
+									</option>
+								}
+							</select>
+						</div>
+						<div>
+							<label for="link_id" class="block text-sm font-medium text-gray-700">Enlace Social</label>
+							<select
+								id="link_id"
+								name="link_id"
+								class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent"
+								required
+							>
+								<option value="">Seleccionar enlace...</option>
+								for _, link := range links {
+									<option value={ link.ID }>{ link.Name }</option>
+								}
+							</select>
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Icono</label>
+							<div class="border border-gray-300 rounded-md p-3">
+								<div id="selected-icon-preview" class="hidden mb-3 p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+									<div class="flex items-center space-x-3">
+										<div class="w-10 h-10 bg-white rounded border flex items-center justify-center">
+											<span class="text-xs text-gray-500">SVG</span>
+										</div>
+										<span id="selected-icon-name" class="font-medium"></span>
+									</div>
+								</div>
+								<button
+									type="button"
+									id="select-icon-btn"
+									class="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-colors"
+									hx-get="/panel/socials/icons/selector"
+								>
+									Seleccionar Icono SVG
+								</button>
+								<input type="hidden" id="icon_id" name="icon_id" required/>
+							</div>
+						</div>
+					</div>
+					<div class="mt-6 flex justify-end space-x-3">
+						<button
+							type="button"
+							onclick="this.closest('.fixed').remove()"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+						>
+							Cancelar
+						</button>
+						<button
+							type="button"
+							hx-post="/panel/socials/sections/assign"
+							hx-include="#social-assignment-form"
+							hx-target="#socials-assignment-modal"
+							hx-swap="outerHTML"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+							id="assign-icon-btn"
+							data-click-handler-selector="assign-icon"
+						>
+							Asignar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+
+templ SocialsNew(formState *forms.SocialFormState) {
+	<div class="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+			<div class="mt-3">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-medium text-gray-900">Nueva Red Social</h3>
+					<button
+						onclick="this.closest('.fixed').remove()"
+						class="text-gray-400 hover:text-gray-600"
+					>
+						@components.TimesIcon("w-6", nil)
+					</button>
+				</div>
+				<form
+					hx-post="/panel/socials"
+					hx-target="#socials-modal"
+					hx-swap="outerHTML"
+				>
+					<div class="space-y-4">
+						<div>
+							<label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+							<input
+								type="text"
+								id="name"
+								name="name"
+								value={ formState.GetFieldValue("name") }
+								class={ "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent " + formState.GetFieldClass("name") }
+								required
+							/>
+							if formState.HasFieldError("name") {
+								<p class="mt-1 text-sm text-red-600">{ formState.GetFieldError("name") }</p>
+							}
+						</div>
+						<div>
+							<label for="link" class="block text-sm font-medium text-gray-700">Enlace</label>
+							<input
+								type="url"
+								id="link"
+								name="link"
+								value={ formState.GetFieldValue("link") }
+								class={ "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent " + formState.GetFieldClass("link") }
+								placeholder="https://..."
+								required
+							/>
+							if formState.HasFieldError("link") {
+								<p class="mt-1 text-sm text-red-600">{ formState.GetFieldError("link") }</p>
+							}
+						</div>
+						if formState.GetErrorMessage() != "" {
+							<div class="bg-red-50 border border-red-200 rounded-md p-4">
+								<p class="text-sm text-red-600">{ formState.GetErrorMessage() }</p>
+							</div>
+						}
+					</div>
+					<div class="mt-6 flex justify-end space-x-3">
+						<button
+							type="button"
+							onclick="this.closest('.fixed').remove()"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+						>
+							Cancelar
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+						>
+							Guardar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+
+templ SocialsEdit(formState *forms.SocialFormState, link *db.SocialLink) {
+	<div class="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+			<div class="mt-3">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-medium text-gray-900">Editar Red Social</h3>
+					<button
+						onclick="this.closest('.fixed').remove()"
+						class="text-gray-400 hover:text-gray-600"
+					>
+						@components.TimesIcon("w-6", nil)
+					</button>
+				</div>
+				<form
+					hx-put={ "/panel/socials/" + link.ID }
+					hx-target="#socials-modal"
+					hx-swap="outerHTML"
+				>
+					<div class="space-y-4">
+						<div>
+							<label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+							<input
+								type="text"
+								id="name"
+								name="name"
+								value={ formState.GetFieldValue("name") }
+								class={ "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent " + formState.GetFieldClass("name") }
+								required
+							/>
+							if formState.HasFieldError("name") {
+								<p class="mt-1 text-sm text-red-600">{ formState.GetFieldError("name") }</p>
+							}
+						</div>
+						<div>
+							<label for="link" class="block text-sm font-medium text-gray-700">Enlace</label>
+							<input
+								type="url"
+								id="link"
+								name="link"
+								value={ formState.GetFieldValue("link") }
+								class={ "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent " + formState.GetFieldClass("link") }
+								placeholder="https://..."
+								required
+							/>
+							if formState.HasFieldError("link") {
+								<p class="mt-1 text-sm text-red-600">{ formState.GetFieldError("link") }</p>
+							}
+						</div>
+						if formState.GetErrorMessage() != "" {
+							<div class="bg-red-50 border border-red-200 rounded-md p-4">
+								<p class="text-sm text-red-600">{ formState.GetErrorMessage() }</p>
+							</div>
+						}
+					</div>
+					<div class="mt-6 flex justify-end space-x-3">
+						<button
+							type="button"
+							onclick="this.closest('.fixed').remove()"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+						>
+							Cancelar
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+						>
+							Actualizar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}

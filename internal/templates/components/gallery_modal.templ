@@ -1,0 +1,156 @@
+package components
+
+import "github.com/vladwithcode/salon_catalog/internal/db"
+
+templ GalleryModal(product *db.Product) {
+	<!-- Gallery Modal -->
+	<div
+		id="gallery-modal"
+		class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4"
+		onclick="closeGalleryModal(event)"
+	>
+		<div class="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+			<!-- Close Button -->
+			<button
+				onclick="closeGalleryModal()"
+				class="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
+				aria-label="Cerrar galería"
+			>
+				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+			
+			if len(product.Gallery) > 0 {
+				<!-- Image Container -->
+				<div class="relative w-full h-full flex items-center justify-center">
+					<!-- Previous Button -->
+					if len(product.Gallery) > 1 {
+						<button
+							onclick="previousImage()"
+							class="absolute left-4 z-10 text-white hover:text-gray-300 transition-colors p-2"
+							aria-label="Imagen anterior"
+						>
+							<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+							</svg>
+						</button>
+					}
+					
+					<!-- Images -->
+					for i, image := range product.Gallery {
+						<img
+							id={ "gallery-image-" + string(rune(i)) }
+							src={ "/static/uploads/" + image }
+							alt={ "Imagen " + string(rune(i+1)) + " de " + product.Name }
+							class={ "max-w-full max-h-full object-contain gallery-image", templ.KV("hidden", i != 0) }
+						/>
+					}
+					
+					<!-- Next Button -->
+					if len(product.Gallery) > 1 {
+						<button
+							onclick="nextImage()"
+							class="absolute right-4 z-10 text-white hover:text-gray-300 transition-colors p-2"
+							aria-label="Siguiente imagen"
+						>
+							<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
+						</button>
+					}
+				</div>
+				
+				<!-- Image Counter -->
+				if len(product.Gallery) > 1 {
+					<div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded">
+						<span id="current-image-number">1</span> / <span>{ string(rune(len(product.Gallery))) }</span>
+					</div>
+				}
+			} else {
+				<!-- No Images Message -->
+				<div class="text-center text-white">
+					<svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+					</svg>
+					<h3 class="text-xl font-semibold mb-2">No hay imágenes disponibles</h3>
+					<p class="text-gray-300">Este producto no tiene galería de imágenes.</p>
+				</div>
+			}
+		</div>
+	</div>
+	
+	@GalleryModalScript(len(product.Gallery))
+}
+
+templ GalleryModalScript(imageCount int) {
+	<script>
+		let currentImageIndex = 0;
+		const totalImages = { string(rune(imageCount)) };
+		
+		function openGalleryModal(startIndex = 0) {
+			currentImageIndex = parseInt(startIndex) || 0;
+			const modal = document.getElementById('gallery-modal');
+			modal.classList.remove('hidden');
+			modal.classList.add('flex');
+			document.body.classList.add('overflow-hidden');
+			updateImageDisplay();
+		}
+		
+		function closeGalleryModal(event) {
+			if (event && event.target !== event.currentTarget) return;
+			const modal = document.getElementById('gallery-modal');
+			modal.classList.add('hidden');
+			modal.classList.remove('flex');
+			document.body.classList.remove('overflow-hidden');
+		}
+		
+		function nextImage() {
+			if (totalImages <= 1) return;
+			currentImageIndex = (currentImageIndex + 1) % totalImages;
+			updateImageDisplay();
+		}
+		
+		function previousImage() {
+			if (totalImages <= 1) return;
+			currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+			updateImageDisplay();
+		}
+		
+		function updateImageDisplay() {
+			// Hide all images
+			const images = document.querySelectorAll('.gallery-image');
+			images.forEach(img => img.classList.add('hidden'));
+			
+			// Show current image
+			const currentImage = document.getElementById('gallery-image-' + currentImageIndex);
+			if (currentImage) {
+				currentImage.classList.remove('hidden');
+			}
+			
+			// Update counter
+			const counter = document.getElementById('current-image-number');
+			if (counter) {
+				counter.textContent = currentImageIndex + 1;
+			}
+		}
+		
+		// Keyboard navigation
+		document.addEventListener('keydown', function(e) {
+			const modal = document.getElementById('gallery-modal');
+			if (!modal.classList.contains('hidden')) {
+				switch(e.key) {
+					case 'Escape':
+						closeGalleryModal();
+						break;
+					case 'ArrowLeft':
+						previousImage();
+						break;
+					case 'ArrowRight':
+						nextImage();
+						break;
+				}
+			}
+		});
+	</script>
+}

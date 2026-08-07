@@ -1,0 +1,320 @@
+package dashboard
+
+import "fmt"
+import "github.com/vladwithcode/salon_catalog/internal/forms"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+import "github.com/vladwithcode/salon_catalog/internal/db"
+
+templ CreateProductForm(formState forms.FormState, ctgs []db.Category) {
+	<div class="max-w-4xl space-y-4" id="product-form-container" hx-ext="response-targets">
+		<!-- Global Error Message -->
+		if formState.GetErrorMessage() != "" {
+			<div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-xs">
+				<div class="flex">
+					<svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+					</svg>
+					<div>
+						<h3 class="text-sm font-medium text-red-800">Error en el formulario</h3>
+						<p class="text-sm text-red-700 mt-1">{ formState.GetErrorMessage() }</p>
+					</div>
+				</div>
+			</div>
+		}
+		<!-- Success Message -->
+		if formState.GetSuccessMessage() != "" {
+			<div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-xs">
+				<div class="flex">
+					<svg class="h-5 w-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+					</svg>
+					<p class="text-sm text-green-700 font-medium">{ formState.GetSuccessMessage() }</p>
+				</div>
+			</div>
+		}
+		<form
+			hx-ext="json-enc"
+			hx-post="/api/products"
+			hx-target="#product-form-container"
+			hx-target-5xx="#product-form-container"
+			hx-target-400="#product-form-container"
+			hx-swap="outerHTML"
+			hx-disabled-elt="button[type=submit]"
+			data-product-form
+			class="space-y-4"
+		>
+			<!-- Basic Information Section -->
+			<div class="space-y-2 border-b border-gray-200 pb-2">
+				@FormField(formState, "name", "text", "Nombre del producto", "Ej: Mesa elegante para eventos", true, "")
+				@CategorySelect(formState, "category_id", "Categoría", ctgs)
+				@TextareaField(formState, "description", "Descripción corta", "Descripción breve del producto (máx. 120 caracteres)", true, 2)
+				@FormField(formState, "quantity", "number", "Cantidad", "Cantidad de productos en stock", false, "1")
+				@TextareaField(formState, "long_description", "Descripción detallada", "Descripción completa con todas las características", false, 4)
+			</div>
+			<!-- Images Section -->
+			<div class="space-y-4 border-b border-gray-200 pb-4">
+				<h2 class="text-lg font-semibold text-gray-700">Imágenes</h2>
+				
+				<!-- Hidden inputs for image fields -->
+				<input type="hidden" name="main_img" value={ formState.GetFieldValue("main_img") } />
+				<input type="hidden" name="gallery" value={ formState.GetFieldValue("gallery") } />
+				
+				<!-- Main Image Selector -->
+				<div class="space-y-2">
+					<label class="block text-sm font-medium text-gray-700">Imagen Principal</label>
+					<div class="flex items-center space-x-4">
+						<button
+							type="button"
+							onclick="openImageSelector('single', 'main_img', 'Seleccionar Imagen Principal', 1)"
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+						>
+							Seleccionar Imagen
+						</button>
+						<div id="main_img-preview" class="flex space-x-2">
+							<!-- Selected image preview will appear here -->
+						</div>
+					</div>
+				</div>
+				
+				<!-- Gallery Images Selector -->
+				<div class="space-y-2">
+					<label class="block text-sm font-medium text-gray-700">Galería de Imágenes</label>
+					<div class="flex items-center space-x-4">
+						<button
+							type="button"
+							onclick="openImageSelector('multiple', 'gallery', 'Seleccionar Imágenes para Galería', 10)"
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+						>
+							Seleccionar Imágenes
+						</button>
+						<div id="gallery-preview" class="flex flex-wrap gap-2">
+							<!-- Selected images preview will appear here -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Availability & Tags -->
+			<div class="">
+				<h2 class="text-lg font-semibold text-gray-700 mb-4">Disponibilidad</h2>
+				@CheckboxField(formState, "available", "Producto disponible")
+			</div>
+			<!-- Form Actions -->
+			<div class="grid grid-cols-2 justify-between items-start gap-2">
+				<button
+					type="button"
+					onclick="history.back()"
+					class="flex-1 basis-1/2 px-4 py-2 border border-gray-300 text-gray-700 rounded-xs font-medium hover:bg-gray-50 transition-colors"
+				>
+					Cancelar
+				</button>
+				<button
+					type="submit"
+					name="action"
+					value="publish"
+					class="px-4 py-2 bg-accent text-white rounded-xs font-semibold hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
+					data-submit-btn
+				>
+					<span data-btn-text>
+						Crear
+					</span>
+					<div class="hidden" data-btn-loading>
+						@components.LoadingIcon("h-5", nil)
+					</div>
+				</button>
+				/* if formState.FormMode == "create" {
+                    <button 
+                        type="submit" 
+                        name="action" 
+                        value="draft"
+                        class="col-start-2 px-4 py-2 bg-gray-700 text-white rounded-xs font-medium hover:bg-gray-700 transition-colors">
+                        Guardar Borrador
+                        </button>
+                } */
+			</div>
+		</form>
+	</div>
+	
+	<script>
+		function openImageSelector(mode, targetField, title, maxSelection) {
+			const selectedIds = document.querySelector(`[name="${targetField}"]`).value;
+			const params = new URLSearchParams({
+				mode: mode,
+				target_field: targetField,
+				title: title,
+				max_selection: maxSelection,
+				selected_ids: selectedIds
+			});
+			
+			fetch(`/imagenes/selector?${params}`)
+				.then(response => response.text())
+				.then(html => {
+					document.body.insertAdjacentHTML('beforeend', html);
+				})
+				.catch(error => {
+					console.error('Error loading image selector:', error);
+				});
+		}
+	</script>
+}
+
+// Form field components with enhanced error handling
+templ FormField(formState forms.FormState, name, inputType, label, placeholder string, required bool, defaultValue string) {
+	<div class="form-field">
+		<label class="block text-sm font-medium text-gray-700 mb-2">
+			{ label }
+			if required {
+				<span class="text-red-500 ml-1">*</span>
+			}
+		</label>
+		<input
+			type={ inputType }
+			name={ name }
+			value={ formState.GetFieldValue(name) }
+			placeholder={ placeholder }
+			required?={ required }
+			class={ "w-full px-4 py-3 rounded-xs border " + formState.GetFieldClass(name) }
+			data-field={ name }
+			defaultValue={ defaultValue }
+		/>
+		@FieldFeedback(formState, name)
+	</div>
+}
+
+templ TextareaField(formState forms.FormState, name, label, placeholder string, required bool, rows int) {
+	<div class="form-field">
+		<label class="block text-sm font-medium text-gray-700 mb-2">
+			{ label }
+			if required {
+				<span class="text-red-500 ml-1">*</span>
+			}
+		</label>
+		<textarea
+			name={ name }
+			placeholder={ placeholder }
+			required?={ required }
+			rows={ fmt.Sprintf("%d", rows) }
+			class={ "w-full px-4 py-3 rounded-xs resize-none border " + formState.GetFieldClass(name) }
+			data-field={ name }
+		>{ formState.GetFieldValue(name) }</textarea>
+		@FieldFeedback(formState, name)
+	</div>
+}
+
+templ CheckboxField(formState forms.FormState, name, label string) {
+	<div class="form-field">
+		<label class="flex items-center gap-3 cursor-pointer">
+			<input
+				type="checkbox"
+				name={ name }
+				checked?={ getBoolFieldValue(formState, name) }
+				class="w-4 h-4 text-accent bg-gray-100 border-gray-300 rounded-xs focus:ring-accent focus:ring-2"
+				data-field={ name }
+			/>
+			<span class="text-sm font-medium text-gray-700">{ label }</span>
+		</label>
+		@FieldFeedback(formState, name)
+	</div>
+}
+
+type SelectOption struct {
+	Value string
+	Label string
+}
+
+func optionsFromCategories(ctgs []db.Category) []SelectOption {
+	options := make([]SelectOption, len(ctgs)+1)
+	options[0] = SelectOption{
+		Value: "",
+		Label: "Seleccionar categoría",
+	}
+	for i, ctg := range ctgs {
+		options[i+1] = SelectOption{
+			Value: ctg.ID,
+			Label: ctg.Name,
+		}
+	}
+	return options
+}
+
+templ CategorySelect(formState forms.FormState, name, label string, ctgs []db.Category) {
+	<div class="form-field">
+		@SelectField(formState, name, label, optionsFromCategories(ctgs), true)
+		@FieldFeedback(formState, name)
+	</div>
+}
+
+templ SelectField(formState forms.FormState, name, label string, options []SelectOption, required bool) {
+	<div class="form-field">
+		<label class="block text-sm font-medium text-gray-700 mb-2">
+			{ label }
+			if required {
+				<span class="text-red-500 ml-1">*</span>
+			}
+		</label>
+		<select
+			name={ name }
+			required?={ required }
+			class={ "w-full px-4 py-3 rounded-xs border " + formState.GetFieldClass(name) }
+			data-field={ name }
+		>
+			for _, option := range options {
+				<option
+					value={ option.Value }
+					selected?={ formState.GetFieldValue( name) == option.Value }
+				>
+					{ option.Label }
+				</option>
+			}
+		</select>
+		@FieldFeedback(formState, name)
+	</div>
+}
+
+templ FieldFeedback(formState forms.FormState, fieldName string) {
+	<!-- Error Message -->
+	if formState.HasFieldError(fieldName) {
+		<div
+			class="field-error text-red-600 text-sm mt-1 flex items-center gap-2"
+			data-error={ fieldName }
+		>
+			<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			</svg>
+			<span>{ formState.GetFieldError(fieldName) }</span>
+		</div>
+	}
+	<!-- Warning Message -->
+	{{ fieldState := formState.GetFieldState(fieldName) }}
+	if fieldState.HasWarning && fieldState.WarningText != "" {
+		<div class="field-warning text-yellow-600 text-sm mt-1 flex items-center gap-2">
+			<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			</svg>
+			<span>{ fieldState.WarningText }</span>
+		</div>
+	}
+	<!-- Success Message -->
+	if fieldState.IsValid && fieldState.IsTouched && !formState.HasFieldError(fieldName) {
+		<div class="field-success text-green-600 text-sm mt-1 flex items-center gap-2">
+			<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+			</svg>
+			<span>Campo válido</span>
+		</div>
+	}
+	<!-- Help Text -->
+	if fieldState.HelpText != "" {
+		<div class="field-help text-gray-500 text-sm mt-1">
+			{ fieldState.HelpText }
+		</div>
+	}
+}
+
+func getBoolFieldValue(formState forms.FormState, fieldName string) bool {
+	switch fieldName {
+	case "available":
+		return formState.GetFieldValue(fieldName) == "on"
+	default:
+		return false
+	}
+}

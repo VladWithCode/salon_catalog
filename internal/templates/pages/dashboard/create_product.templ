@@ -1,0 +1,40 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+
+templ CreateProduct(form templ.Component) {
+	@createProductScript()
+	@templates.AdminLayout("Nuevo producto | Panel Villa Chenacolo", "Administración de Productos") {
+		<div class="flex-1 flex flex-col overflow-hidden space-y-2 px-0.5">
+			<div class="flex gap-4 border-b border-primary/70 pb-2 px-2">
+				<div class="flex-1 space-x-4 text-gray-700">
+					<h1 class="text-2xl tracking-tight">Nuevo Producto</h1>
+					<p class="text-xs text-current/50">
+						Agrega un nuevo producto a tu catálogo.
+					</p>
+				</div>
+				/* <button id="product-actions-toggle" class="shrink flex items-center justify-center text-current/80 xl:hidden"
+            data-click-handler="product-actions-toggle">
+            @components.BarsIcon("w-8", nil)
+        </button> */
+			</div>
+			<main id="main-content" class="flex-1 flex flex-col overflow-auto space-y-2">
+				<div class="flex-1 p-2 border border-gray-200 rounded-xs shadow-sm bg-white space-y-4">
+					<div class="space-y-0.5 text-gray-700">
+						<h2 class="text-lg font-medium">Información del producto</h2>
+						<p class="text-xs text-current/80">Ingresa los datos del producto nuevo</p>
+					</div>
+					@form
+				</div>
+			</main>
+		</div>
+	}
+}
+
+templ createProductScript() {
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('hello from createProductScript');
+    });
+</script>
+}

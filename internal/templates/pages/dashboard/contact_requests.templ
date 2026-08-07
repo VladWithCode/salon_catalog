@@ -1,0 +1,428 @@
+package dashboard
+
+import (
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ ContactRequests() {
+	<script src="/static/js/popup.js" defer></script>
+	@contactRequestsScript()
+	@templates.AdminLayout("Solicitudes de Contacto | Panel Villa Chenacolo", "Administración de Solicitudes") {
+		<div class="flex-1 flex flex-col overflow-hidden space-y-4 px-0.5" hx-ext="response-targets">
+			<div class="px-2">
+				<div class="flex gap-4 pb-2">
+					<div class="space-y-0.5">
+						<h1 class="text-2xl md:text-3xl tracking-tight">Solicitudes de Contacto</h1>
+						<p class="text-xs text-current/50">Administra las solicitudes de cotización recibidas por el sitio web.</p>
+					</div>
+					<button
+						id="quotes-actions-toggle"
+						class="shrink flex items-center justify-center text-current/80 xl:hidden cursor-pointer"
+						data-click-handler-selector="quotes-actions-toggle"
+					>
+						@components.BarsIcon("w-8", nil)
+					</button>
+				</div>
+				<div id="quotes-actions-container" class="overflow-hidden opacity-0 h-0 xl:h-auto xl:opacity-100" data-quotes-actions="closed">
+					<div class="py-2">
+						<div class="flex flex-col xl:flex-row xl:grid xl:grid-cols-5 xl:auto-rows-min gap-2">
+							<div class="xl:self-center xl:col-span-full">
+								@components.MenuSectionSep(components.MenuSectionSepParams{
+									Title:          "Multiselección",
+									PillClass:      "text-xs text-neutral/70 bg-gray-200",
+									SeparatorClass: "h-px bg-neutral",
+								})
+							</div>
+							<button
+								id="contact-requests-multi-selection-process"
+								data-contact-requests-multi-action="process"
+								hx-patch="/solicitudes/status"
+								hx-target="#contact-requests-table"
+								hx-confirm="¿Marcar las solicitudes seleccionadas como procesadas?"
+								hx-indicator="#contact-requests-table-loading"
+								hx-include='[name="contact-request-table-selection"]'
+								class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow xl:basis-1/2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-gray-700/80 disabled:cursor-not-allowed disabled:brightness-80"
+								disabled
+							>
+								@components.CheckIcon("w-4", nil)
+								Marcar como Procesadas
+							</button>
+							<button
+								id="contact-requests-multi-selection-delete"
+								data-contact-requests-multi-action="delete"
+								hx-delete="/solicitudes"
+								hx-target="#contact-requests-table"
+								hx-confirm="¿Eliminar las solicitudes seleccionadas? Esta acción no se puede deshacer."
+								hx-indicator="#contact-requests-table-loading"
+								hx-include='[name="contact-request-table-selection"]'
+								class="flex items-center justify-center gap-2 xl:shrink-2 xl:grow-1 xl:basis-1/2 px-4 py-2 text-sm bg-red-500 text-stone-50 font-medium rounded-lg transition-[background,_filter] duration-300 focus:outline-accent disabled:bg-red-500/80 disabled:cursor-not-allowed disabled:brightness-80"
+								disabled
+							>
+								@components.BinIcon("w-4", nil)
+								Eliminar Selección
+							</button>
+							<div class="relative z-0 -my-1 xl:col-span-full">
+								<div class="absolute z-0 top-1/2 inset-x-0 -translate-y-1/2 h-px w-full bg-current/70"></div>
+								<p class="relative left-4 w-fit text-xs text-current/70 px-4 py-2 bg-gray-200 z-10">Filtros</p>
+							</div>
+							<button
+								id="contact-requests-filters-button"
+								hx-get="/solicitudes/filters"
+								hx-target="#contact-requests-filters-modal"
+								hx-indicator="#global-loading-indicator"
+								class="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-700 text-stone-50 font-medium rounded-lg focus:outline-accent"
+							>
+								@components.FilterIcon("w-5", nil)
+								Filtros
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<main class="relative z-0 flex-1 basis-full overflow-hidden">
+				<div class="h-full flex flex-col rounded-xs bg-white shadow-sm overflow-auto scroll-smooth pb-11" data-contact-requests-table-scroll>
+					<div
+						class="sticky inset-x-0 top-0 z-20 bg-white flex items-center justify-between gap-3 p-2 border border-gray-100 rounded-sm shadow-sm"
+					>
+						// Button modes: all, none, some
+						<style>
+                            [data-multi-selection-mode="all"] [data-multi-selection-mode-display="all"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="none"] [data-multi-selection-mode-display="none"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode="some"] [data-multi-selection-mode-display="some"] {
+                                opacity: 1;
+                            }
+                            [data-multi-selection-mode-display] {
+                                transition: opacity 0.1s linear;
+                            }
+                        </style>
+						<button
+							id="contact-requests-table-multi-selection-ctl"
+							type="button"
+							class="shrink-0 grow-0 basis-5 aspect-square grid grid-cols-1 grid-rows-1"
+							data-click-handler-selector="#contact-requests-table-multi-selection-ctl"
+							data-multi-selection-mode="all"
+						>
+							<div
+								class="col-start-1 row-start-1 w-full h-full border border-gray-300 rounded-xs"
+								data-multi-selection-mode-display="all"
+							></div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="none"
+							>
+								@components.CheckIcon("w-full text-gray-50", nil)
+							</div>
+							<div
+								class="col-start-1 row-start-1 w-full h-full flex items-center justify-center border border-blue-400 bg-blue-500 rounded-xs opacity-0"
+								data-multi-selection-mode-display="some"
+							>
+								<div class="w-3/4 h-0.5 bg-stone-50 rounded-xs"></div>
+							</div>
+						</button>
+						<h4 class="flex-1 basis-full text-gray-900">
+							Solicitudes de Contacto
+							<span id="contact-requests-table-count" hx-swap-oob>(0/0)</span>
+						</h4>
+						<select
+							hx-get="/solicitudes/table"
+							hx-trigger="change"
+							hx-target="#contact-requests-table"
+							hx-indicator="#contact-requests-table-loading"
+							hx-include='[name="customer_name"], [name="phone"], [name="created_from"], [name="created_to"], [name="event_start_from"], [name="event_start_to"], [name="status"], [name="request_type"], [name="comments"]'
+							name="sort"
+							id="sort"
+							class="block px-1 py-0.5 border border-gray-200 rounded-xs"
+						>
+							<option value="created_desc">Fecha Creación ↓</option>
+							<option value="created_asc">Fecha Creación ↑</option>
+							<option value="event_start_desc">Fecha Evento ↓</option>
+							<option value="event_start_asc">Fecha Evento ↑</option>
+							<option value="event_kind_asc">Tipo Evento A-Z ↑</option>
+							<option value="event_kind_desc">Tipo Evento A-Z ↓</option>
+							<option value="request_type_asc">Tipo Solicitud A-Z ↑</option>
+							<option value="request_type_desc">Tipo Solicitud A-Z ↓</option>
+							<option value="status_asc">Estado A-Z ↑</option>
+							<option value="status_desc">Estado A-Z ↓</option>
+						</select>
+					</div>
+					<div class="flex-1 grid grid-cols-1 grid-rows-1">
+						<div class="static h-full col-start-1 row-start-1 pointer-events-none z-10">
+							<div
+								id="contact-requests-table-loading"
+								class="h-full max-h-[60vh] bg-white p-8 text-center inset-0 flex flex-col items-center justify-center loading-table-indicator"
+							>
+								@components.LoadingIcon("h-12 text-primary mx-auto", nil)
+								<p class="mt-2 text-gray-500">Cargando solicitudes...</p>
+							</div>
+						</div>
+						<div
+							class="static col-start-1 row-start-1 z-0 h-0 opacity-0 -mt-px"
+							data-contact-requests-table-container="expanded"
+						>
+							<div
+								id="contact-requests-table"
+								hx-get="/solicitudes/table"
+								hx-include='[name="customer_name"], [name="phone"], [name="created_from"], [name="created_to"], [name="event_start_from"], [name="event_start_to"], [name="status"], [name="request_type"], [name="comments"], [name="sort"]'
+								hx-target-5xx="this"
+								hx-target-4xx="this"
+								hx-trigger="load"
+								hx-indicator="#contact-requests-table-loading"
+							></div>
+						</div>
+					</div>
+					<div
+						class="absolute inset-x-1.5 bottom-1.5 z-20 bg-white border border-gray-100 rounded-sm shadow-sm"
+						id="contact-requests-table-pagination"
+					></div>
+				</div>
+			</main>
+		</div>
+		<div id="contact-requests-modal-container" class="fixed inset-0 w-screen z-40 flex flex-col justify-center items-center overflow-hidden opacity-0 pointer-events-none">
+			<div
+				id="contact-requests-modal-backdrop"
+				class="absolute h-full w-full z-0 bg-dark/30"
+				data-contact-requests-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-modal-toggle]"
+			></div>
+			<div
+				id="contact-requests-modal"
+				class="relative w-full max-w-xl xl:max-w-5xl p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+				data-contact-requests-modal="closed"
+			></div>
+		</div>
+		<div id="contact-requests-filters-modal-container" class="fixed inset-0 w-screen z-40 flex flex-col justify-center items-center overflow-hidden opacity-0 pointer-events-none">
+			<div
+				id="contact-requests-filters-modal-backdrop"
+				class="absolute h-full w-full z-0 bg-dark/30"
+				data-contact-requests-filters-modal-toggle="close"
+				data-click-handler-selector="[data-contact-requests-filters-modal-toggle]"
+			></div>
+			<div
+				id="contact-requests-filters-modal"
+				class="relative w-full p-2 overflow-hidden z-20 translate-y-12 opacity-0"
+				data-contact-requests-filters-modal="closed"
+			></div>
+		</div>
+	}
+}
+
+templ contactRequestsScript() {
+	<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Register gsap plugins
+            gsap.registerPlugin(window.ScrollTrigger);
+
+        const modalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power3.out'}});
+        modalTl.set('#contact-requests-modal-container', {
+            pointerEvents: 'auto',
+        }).to('#contact-requests-modal-container', {
+            opacity: 1,
+            duration: 0.2,
+        }).to('#contact-requests-modal', {
+            opacity: 1,
+            y: '0rem',
+        }, "-=0.1");
+
+        const filtersModalTl = gsap.timeline({paused: true, defaults: {duration: 0.5, ease: 'power3.out'}});
+        filtersModalTl.set('#contact-requests-filters-modal-container', {
+            pointerEvents: 'auto',
+        }).to('#contact-requests-filters-modal-container', {
+            opacity: 1,
+            duration: 0.2,
+        }).to('#contact-requests-filters-modal', {
+            opacity: 1,
+            y: '0rem',
+        }, "-=0.1");
+        const toggleActionsTl = gsap.timeline({paused: true, defaults: {duration: 0.3, ease: 'power2.out'}});
+        toggleActionsTl.to('#quotes-actions-container', {opacity: 1, height: 'auto'});
+
+        eventManager
+            .register('beforeRequest', '#contact-requests-table', function (e) {
+                gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'none' });
+                gsap.to(
+                    '[data-contact-requests-table-container]', 
+                    { height: '0rem', opacity: 0, },
+                )
+                gsap.to(
+                    '[data-contact-requests-table-row]', 
+                    { y: '0rem', opacity: 1, stagger: 0.05, },
+                    { y: '10rem', opacity: 0, stagger: 0.05, },
+                );
+            })
+            .register('configRequest', '[data-contact-requests-multi-action]', function (e) {
+                const ids = e.detail.parameters.getAll('contact-request-table-selection');
+                for (const id of ids) {
+                    e.detail.parameters.append('ids', id);
+                }
+
+                e.detail.parameters.delete('contact-request-table-selection');
+                
+                // Add status for process action
+                if (e.detail.elt.dataset.contactRequestsMultiAction === 'process') {
+                    e.detail.parameters.append('status', 'procesada');
+                }
+            })
+            .register('afterSwap', '#contact-requests-table', function (e) {
+                gsap.to(
+                    '[data-contact-requests-table-container]', 
+                    { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' },
+                )
+                gsap.fromTo(
+                    '[data-contact-requests-table-row]', 
+                    { y: '1rem', opacity: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' },
+                    { y: '0rem', opacity: 1 },
+                    "<",
+                );
+                gsap.set('[data-contact-requests-table-container]', { pointerEvents: 'auto' });
+
+                // Scroll to top of table
+                const tableScroll = e.detail.target.closest('[data-contact-requests-table-scroll]');
+                if (tableScroll) {
+                    tableScroll.scrollTo(0, 0);
+                }
+
+                // Close modal if open
+                const modal = document.getElementById('contact-requests-modal');
+                if (modal.dataset.contactRequestsModal === 'open') {
+                    modalTl.reverse();
+                    modal.dataset.contactRequestsModal = 'closed';
+                }
+
+                updateContactRequestsTableSelection();
+            })
+            .register('afterSwap', '#contact-requests-modal', function (e) {
+                if (e.detail.elt.dataset.contactRequestsModal === 'closed') {
+                    modalTl.play();
+                    e.detail.elt.dataset.contactRequestsModal = 'open';
+                }
+            })
+            .register('afterSwap', '#contact-requests-filters-modal', function (e) {
+                if (e.detail.elt.dataset.contactRequestsFiltersModal === 'closed') {
+                    filtersModalTl.play();
+                    e.detail.elt.dataset.contactRequestsFiltersModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-modal-toggle]', function (e) {
+                const target = e.target.matches('[data-contact-requests-modal-toggle]')
+                    ? e.target
+                    : e.target.closest('[data-contact-requests-modal-toggle]');
+                const modal = document.getElementById('contact-requests-modal');
+
+                const force = target.dataset.contactRequestsModalToggle
+                const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsModal === 'open');
+                if (shouldClose) {
+                    modalTl.reverse();
+                    modal.dataset.contactRequestsModal = 'closed';
+                } else {
+                    modalTl.play();
+                    modal.dataset.contactRequestsModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-filters-modal-toggle]', function (e) {
+                const target = e.target.matches('[data-contact-requests-filters-modal-toggle]')
+                    ? e.target
+                    : e.target.closest('[data-contact-requests-filters-modal-toggle]');
+                const modal = document.getElementById('contact-requests-filters-modal');
+
+                const force = target.dataset.contactRequestsFiltersModalToggle
+                const shouldClose = (force === 'close') || (!force && modal.dataset.contactRequestsFiltersModal === 'open');
+                if (shouldClose) {
+                    filtersModalTl.reverse();
+                    modal.dataset.contactRequestsFiltersModal = 'closed';
+                } else {
+                    filtersModalTl.play();
+                    modal.dataset.contactRequestsFiltersModal = 'open';
+                }
+            })
+            .registerClick('[data-contact-requests-filter-clear]', function (e) {
+                clearContactRequestsTableFilters();
+            })
+            .registerClick('#contact-requests-table-multi-selection-ctl', function (e) {
+                const target = e.target.matches('[data-multi-selection-mode]')
+                    ? e.target
+                    : e.target.closest('[data-multi-selection-mode]');
+                    
+                const mode = target.dataset.multiSelectionMode;
+                switch (mode) {
+                    case 'none':
+                        document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
+                            req.checked = false;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                    case 'some':
+                        document.querySelectorAll('[name="contact-request-table-selection"]:checked').forEach(function (req) {
+                            req.checked = false;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                    case 'all':
+                    default:
+                        document.querySelectorAll('[name="contact-request-table-selection"]').forEach(function (req) {
+                            req.checked = true;
+                        });
+                        updateContactRequestsTableSelection();
+                        break;
+                }
+            })
+            .registerClick('quotes-actions-toggle', function (e) {
+                const actionsContainer = document.getElementById('quotes-actions-container')
+                if (actionsContainer.dataset.quotesActions === 'open') {
+                    toggleActionsTl.reverse();
+                    actionsContainer.dataset.quotesActions = 'closed';
+                    gsap.delayedCall(0.4, () => toggleActionsTl.revert())
+                } else {
+                    toggleActionsTl.play();
+                    actionsContainer.dataset.quotesActions = 'open';
+                }
+            });
+
+            document.addEventListener('input', function (e) {
+                if (!e.target.matches('[name="contact-request-table-selection"]')) {
+                    return;
+                }
+                updateContactRequestsTableSelection();
+            });
+
+            function updateContactRequestsTableSelection() {
+                const totalReqs = document.querySelectorAll('[name="contact-request-table-selection"]').length;
+                const selectedReqs = document.querySelectorAll('[name="contact-request-table-selection"]:checked');
+                if (selectedReqs.length === 0) {
+                    document.getElementById('contact-requests-multi-selection-delete').disabled = true;
+                    document.getElementById('contact-requests-multi-selection-process').disabled = true;
+                    document.getElementById('contact-requests-table-multi-selection-ctl').dataset.multiSelectionMode = 'all';
+                    return;
+                }
+
+                if (selectedReqs.length === totalReqs) {
+                    document.getElementById('contact-requests-table-multi-selection-ctl').dataset.multiSelectionMode = 'none';
+                } else {
+                    document.getElementById('contact-requests-table-multi-selection-ctl').dataset.multiSelectionMode = 'some';
+                }
+
+                document.getElementById('contact-requests-multi-selection-delete').disabled = false;
+                document.getElementById('contact-requests-multi-selection-process').disabled = false;
+            }
+
+            function clearContactRequestsTableFilters() {
+                document.getElementById('filters-customer_name').value = '';
+                document.getElementById('filters-phone').value = '';
+                document.getElementById('filters-created_from').value = '';
+                document.getElementById('filters-created_to').value = '';
+                document.getElementById('filters-event_start_from').value = '';
+                document.getElementById('filters-event_start_to').value = '';
+                document.getElementById('filters-status').value = '';
+                document.getElementById('filters-request_type').value = '';
+                document.getElementById('filters-comments').value = '';
+                
+                // Trigger the table update after clearing
+                document.getElementById('contact-requests-filters-form').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+}

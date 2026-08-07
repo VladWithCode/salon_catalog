@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+@font-face {
+    font-family: "Agatho";
+    src: url("/static/assets/agatho_bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap; /* <-- Important for performance */
+}
+
+@base {
+    input[type="datetime-local"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+}
+
+@theme {
+    --font-serif: "Agatho", serif;
+    --font-sans: "Inter", sans-serif;
+
+    --color-light: #efe5d2;
+    --color-dark: #110e0a;
+
+    --color-primary: #3A2E23;
+    --color-secondary: #E4D3B4;
+    --color-accent: #9C7B56;
+    --color-neutral: #544940;
+
+    --radius-xs: 0.15rem;
+}
+
+@layer utilities {
+    .grid-rows-page {
+        grid-template-rows: auto 1fr auto;
+    }
+    .grid-cols-table {
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    }
+    .bg-gradient-1 {
+        background: transparent;
+        background-image: radial-gradient(circle at 50% 50%, --alpha(var(--color-dark) / 100%) 70%, --alpha(var(--color-dark) / 0%) 100%);
+    }
+    .bg-brand-1 {
+        background: 
+            linear-gradient(to bottom, --alpha(var(--color-primary)/80%), --alpha(var(--color-primary)/80%)),
+            url("/static/assets/bg_repeat_1.png");
+        background-repeat: no-repeat, repeat;
+        background-size: cover, 10rem;
+    }
+    .bg-brand-1-lg {
+        background:
+            linear-gradient(to bottom, --alpha(var(--color-primary)/80%), --alpha(var(--color-primary)/80%)),
+            url("/static/assets/bg_repeat_1.png") 0/10rem repeat;
+    }
+    .bg-paper {
+        background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
+        background-blend-mode: luminosity, color;
+
+        @variant md {
+            background: 
+                url("/static/assets/bg_texture_lg.jpeg") 0/100% repeat, 
+                linear-gradient(to bottom, var(--color-secondary), var(--color-secondary));
+        }
+    }
+    .bg-paper-dark {
+        background: url("/static/assets/bg_texture.webp") 0/100% repeat, linear-gradient(to bottom, var(--color-primary), var(--color-primary));
+        background-blend-mode: color-burn, color;
+    }
+
+    .input-base {
+        @apply border-gray-300 bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400;
+     }
+    .input-error {
+        @apply border-red-300 bg-red-50 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500;
+    }
+    .input-disabled {
+        @apply border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed;
+    }
+
+    .loading-table-indicator {
+        scale: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition-property: scale, opacity;
+        transition-duration: 300ms;
+    }
+    .loading-table-indicator.htmx-request {
+        scale: 1;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .global-loading-indicator {
+        --gli-transition-duration: 300ms;
+        --gli-transition-timing-function: ease-out;
+
+        transition: opacity var(--gli-transition-duration) var(--gli-transition-timing-function);
+
+        .gli-content {
+            transition: 
+                opacity var(--gli-transition-duration) var(--gli-transition-timing-function),
+                translate var(--gli-transition-duration) var(--gli-transition-timing-function);
+        }
+    }
+    .global-loading-indicator.htmx-request {
+        opacity: 1;
+
+        .gli-content {
+            opacity: 1;
+            translate: 0 0
+        }
+    }
+
+    .htmx-indicator{
+        opacity:0;
+        transition: opacity 500ms ease-out;
+        pointer-events: none;
+    }
+    .htmx-request .htmx-indicator{
+        opacity:1;
+        pointer-events: auto;
+    }
+    .htmx-request.htmx-indicator{
+        opacity:1;
+        pointer-events: auto;
+    }
+
+    /* Dashboard multi-selection */
+    [data-multi-selection-mode="all"] [data-multi-selection-mode-display="all"] {
+        opacity: 1;
+    }
+    [data-multi-selection-mode="none"] [data-multi-selection-mode-display="none"] {
+        opacity: 1;
+    }
+    [data-multi-selection-mode="some"] [data-multi-selection-mode-display="some"] {
+        opacity: 1;
+    }
+    [data-multi-selection-mode-display] {
+        transition: opacity 0.1s linear;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2.5rem;
+}
+body {
+    @apply bg-gray-200 text-dark font-sans;
+}
+
+@layer base {
+    input[readonly] {
+        @apply bg-transparent text-current/60 border-0 border-b-2 border-current/60 pb-1 px-1 pointer-events-none;
+    }
+
+    *[disabled] {
+        @apply opacity-80 brightness-80;
+    }
+
+    button:not([disabled]) {
+        @apply cursor-pointer;
+    }
+}

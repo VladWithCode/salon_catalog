@@ -1,0 +1,593 @@
+package components
+
+templ WizardScript() {
+	<script>
+		// Wizard Management JavaScript
+		class WizardManager {
+			constructor() {
+				this.selections = new Map(); // stepIndex -> Set of productIds
+				this.currentStep = 0;
+				this.currentWizardId = null;
+				this.currentStepId = null;
+				this.init();
+			}
+
+			/* localStorage Clearing Behavior:
+			 * - Cleared when wizard completes successfully (completion view shown)
+			 * - Cleared when wizard is cancelled/closed (unless from completion view)
+			 * - Cleared when switching between different wizards
+			 * - Preserved during step navigation within the same wizard
+			 */
+
+			init() {
+				this.bindEvents();
+				this.loadExistingSelections();
+			}
+
+			// localStorage Methods
+			getStorageKey(wizardId) {
+				return `wizard_selections_${wizardId}`;
+			}
+
+			saveSelections(wizardId, stepId, productIds) {
+				const data = this.loadWizardData(wizardId) || {
+					wizard_id: wizardId,
+					selections: {},
+					timestamp: Date.now()
+				};
+				
+				data.selections[stepId] = productIds;
+				data.timestamp = Date.now();
+				
+				localStorage.setItem(this.getStorageKey(wizardId), JSON.stringify(data));
+			}
+
+			loadWizardData(wizardId) {
+				const stored = localStorage.getItem(this.getStorageKey(wizardId));
+				return stored ? JSON.parse(stored) : null;
+			}
+
+			getStepSelections(wizardId, stepId) {
+				const data = this.loadWizardData(wizardId);
+				return data?.selections[stepId] || [];
+			}
+
+			clearWizardData(wizardId) {
+				localStorage.removeItem(this.getStorageKey(wizardId));
+			}
+
+			getAllSelections(wizardId) {
+				const data = this.loadWizardData(wizardId);
+				return data?.selections || {};
+			}
+
+			bindEvents() {
+				// Handle modal show/hide
+				window.eventManager
+					.registerClick('open-wizard', (e) => this.showModal())
+					.registerClick('close-wizard', (e) => this.hideModal())
+                    // Handle wizard navigation
+					.register('afterSwap', '#wizard-modal', (e) => {
+						this.reinitializeAfterSwap();
+					})
+                    .register('configRequest', '#wizard-modal', (e) => {
+						// Include localStorage data in request
+						if (this.currentWizardId) {
+							const allSelections = this.getAllSelections(this.currentWizardId);
+                            const jsonPayload = JSON.stringify(allSelections);
+
+                            e.detail.parameters['wizard_localStorage'] = jsonPayload;
+						}
+
+						// Validate step before navigation (except for previous button and pagination)
+						if (e.detail.elt.dataset.wizardNextStep || e.detail.elt.dataset.wizardComplete) {
+							if (!this.validateCurrentStep()) {
+								e.preventDefault();
+								this.showStepValidationError();
+							}
+						}
+						
+						// Don't validate for pagination navigation or previous button
+						if (e.detail.elt.dataset.wizardNav === 'page' || e.detail.elt.dataset.wizardNav === 'prev') {
+							// Allow navigation without validation
+						}
+                    })
+                    .registerClick('wizard-selection-button', (e) => {
+						e.preventDefault();
+						this.handleProductCardClick(e.target);
+                    })
+                    .registerClick('wizard-selection-input', (e) => {
+                        this.handleProductInputChange(e.target);
+                    })
+                    .registerClick('close-wizard-advice', (e) => {
+                        const footerEl = document.querySelector('#wizard-modal-footer');
+                        gsap.to(footerEl, {autoAlpha: 0, height: '0px', duration: 0.2, ease: 'power2.out'});
+                    })
+                    .registerClick('toggle-selection-summary', (e) => {
+                        this.toggleSelectionSummary();
+                    });
+			}
+
+			showModal() {
+				const overlay = document.getElementById('wizard-modal');
+				const content = document.getElementById('wizard-modal-content');
+				
+				if (overlay && content) {
+					// Animate in
+					gsap.timeline({defaults: {duration: 0.25, ease: 'power2.out'}})
+                        .to('#wizard-modal', {autoAlpha: 1})
+						.to(content, { 
+							scale: 1, 
+							opacity: 1, 
+                            onComplete: () => {
+                                document.body.style.overflow = 'hidden';
+                            }
+						}, "-=0.15");
+					
+					overlay.classList.remove('pointer-events-none');
+				}
+			}
+
+			hideModal(clearData = true) {
+				const overlay = document.getElementById('wizard-modal');
+				const content = document.getElementById('wizard-modal-content');
+				
+				if (overlay && content) {
+					overlay.classList.add('pointer-events-none');
+					
+					// Clear localStorage if requested (when cancelled, not when completed)
+					if (clearData && this.currentWizardId) {
+						// Check if this is a completion view - don't clear data as it's already been cleared
+						const completionView = document.querySelector('[data-wizard-completion-view]');
+						if (!completionView) {
+							this.clearWizardData(this.currentWizardId);
+							console.log(`Wizard ${this.currentWizardId} cancelled - localStorage cleared`);
+						}
+					}
+					
+					// Animate out
+					gsap.timeline()
+						.to(content, { 
+							scale: 0.95, 
+							opacity: 0, 
+							duration: 0.2 
+						})
+						.to(overlay, { 
+							autoAlpha: 0, 
+							duration: 0.3,
+							onComplete: () => {
+								document.body.style.overflow = '';
+								// Return to placeholder state for next HTMX load
+								overlay.outerHTML = '<div id="wizard-modal" class="relative z-50 invisible"></div>';
+							}
+						}, "-=0.1");
+				}
+			}
+
+			handleProductCardClick(button) {
+				const card = button.closest('[data-wizard-product-card]');
+				const input = card.querySelector('[data-wizard-product-input]');
+				
+				if (input && !input.disabled) {
+					input.checked = !input.checked;
+					this.handleProductInputChange(input);
+				}
+			}
+
+			handleProductInputChange(input) {
+				// Handle radio button selection for single-select steps
+				if (input.type === 'radio' && input.checked) {
+					// Reset all cards in this step to default styling first
+					this.resetAllCardStylesInStep(input.name);
+					// Then uncheck other radio buttons
+					this.deselectOtherRadioButtons(input);
+				}
+				
+				// Update card styling based on selection state
+				this.updateCardStyling(input, input.checked);
+				
+				// Add selection animation for selected items
+				if (input.checked) {
+					const card = input.closest('[data-wizard-product-card]');
+					gsap.fromTo(card, 
+						{ scale: 1 },
+						{ scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }
+					);
+				}
+				
+				// Save to localStorage
+				this.saveCurrentStepSelections();
+				
+				this.updateSelectionSummary();
+				this.updateStepValidation();
+			}
+
+			resetAllCardStylesInStep(inputName) {
+				// Reset all cards in this step to default (unselected) styling
+				const allRadios = document.querySelectorAll(`input[name="${inputName}"]`);
+				allRadios.forEach(radio => {
+					const card = radio.closest('[data-wizard-product-card]');
+					const overlay = card.querySelector('[data-selection-overlay]');
+					const button = card.querySelector('[data-selection-button]');
+					const buttonText = button.querySelector('[data-selection-text]');
+					
+					// Reset to default styling
+					card.classList.remove('ring-2', 'ring-accent');
+					overlay.classList.add('opacity-0');
+					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
+					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					buttonText.textContent = 'Seleccionar';
+				});
+			}
+			
+			deselectOtherRadioButtons(selectedInput) {
+				const allRadios = document.querySelectorAll(`input[name="${selectedInput.name}"]`);
+				allRadios.forEach(radio => {
+					if (radio !== selectedInput && radio.checked) {
+						radio.checked = false;
+					}
+				});
+			}
+			
+			updateCardStyling(input, isSelected) {
+				const card = input.closest('[data-wizard-product-card]');
+				const overlay = card.querySelector('[data-selection-overlay]');
+				const button = card.querySelector('[data-selection-button]');
+				const buttonText = button.querySelector('[data-selection-text]');
+				
+				if (isSelected) {
+					// Product selected
+					card.classList.add('ring-2', 'ring-accent');
+					overlay.classList.remove('opacity-0');
+					button.classList.remove('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					button.classList.add('border-accent', 'bg-accent', 'text-gray-50');
+					buttonText.textContent = 'Seleccionado';
+				} else {
+					// Product deselected
+					card.classList.remove('ring-2', 'ring-accent');
+					overlay.classList.add('opacity-0');
+					button.classList.remove('border-accent', 'bg-accent', 'text-gray-50');
+					button.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-700', 'hover:border-accent', 'hover:bg-accent/5');
+					buttonText.textContent = 'Seleccionar';
+				}
+			}
+
+			updateSelectionSummary() {
+				const summaryElement = document.querySelector('[data-selected-summary]');
+				const summarySlimElement = document.querySelector('[data-selected-summary-slim]');
+				
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				
+				if (selectedInputs.length === 0) {
+					// Update both views with empty state
+					if (summaryElement) {
+						summaryElement.textContent = 'Ningún producto seleccionado';
+					}
+					if (summarySlimElement) {
+						summarySlimElement.textContent = 'Ningún producto seleccionado';
+					}
+				} else {
+					const productNames = Array.from(selectedInputs).map(input => {
+						const card = input.closest('[data-wizard-product-card]');
+						const nameElement = card.querySelector('h4');
+						return nameElement ? nameElement.textContent.trim() : 'Producto';
+					});
+					
+					// Update full view with badges
+					if (summaryElement) {
+						summaryElement.innerHTML = productNames.map(name => 
+							`<span class="inline-block bg-accent/10 text-accent px-2 py-1 rounded-full text-xs mr-2 mb-1">${name}</span>`
+						).join('');
+					}
+					
+					// Update slim view with truncated text
+					if (summarySlimElement) {
+						const shortNames = productNames.map(name => {
+							// Truncate long product names for slim view
+							return name.length > 20 ? name.substring(0, 17) + '...' : name;
+						});
+						const joinedText = shortNames.join(', ');
+						summarySlimElement.textContent = joinedText;
+						summarySlimElement.title = productNames.join(', '); // Full names on hover
+					}
+				}
+			}
+
+			toggleSelectionSummary() {
+				const container = document.querySelector('[data-selection-summary]');
+				const slimView = container.querySelector('[data-summary-slim]');
+				const fullView = container.querySelector('[data-summary-full]');
+				const chevronIcon = container.querySelector('[data-chevron-icon]');
+				
+				if (!container || !slimView || !fullView || !chevronIcon) return;
+
+				const currentState = container.dataset.summaryState;
+				const isSlim = currentState === 'slim';
+				
+				// Toggle state
+				container.dataset.summaryState = isSlim ? 'full' : 'slim';
+				
+				// Animate the transition using GSAP
+				if (isSlim) {
+					// Expanding to full view
+					gsap.to(chevronIcon, { rotation: 180, duration: 0.2 });
+					gsap.to(slimView, { 
+						height: 0, 
+						opacity: 0, 
+						duration: 0.2,
+						onComplete: () => {
+							slimView.classList.add('hidden');
+							fullView.classList.remove('hidden');
+							gsap.fromTo(fullView, 
+								{ height: 0, opacity: 0 },
+								{ height: 'auto', opacity: 1, duration: 0.2 }
+							);
+						}
+					});
+				} else {
+					// Collapsing to slim view
+					gsap.to(chevronIcon, { rotation: 0, duration: 0.2 });
+					gsap.to(fullView, {
+						height: 0,
+						opacity: 0,
+						duration: 0.2,
+						onComplete: () => {
+							fullView.classList.add('hidden');
+							slimView.classList.remove('hidden');
+							gsap.fromTo(slimView,
+								{ height: 0, opacity: 0 },
+								{ height: 'auto', opacity: 1, duration: 0.2 }
+							);
+						}
+					});
+				}
+
+				// Save preference in sessionStorage for current wizard session
+				if (this.currentWizardId) {
+					sessionStorage.setItem(`wizard_summary_state_${this.currentWizardId}`, container.dataset.summaryState);
+				}
+			}
+
+			updateStepValidation() {
+				const nextButton = document.querySelector('[data-wizard-next-step]');
+				const completeButton = document.querySelector('[data-wizard-complete]');
+				const button = nextButton || completeButton;
+				
+				if (!button) return;
+
+				const isValid = this.validateCurrentStep();
+				
+				if (isValid) {
+					button.classList.remove('opacity-50', 'cursor-not-allowed');
+					button.disabled = false;
+				} else {
+					button.classList.add('opacity-50', 'cursor-not-allowed');
+					button.disabled = true;
+				}
+			}
+
+			validateCurrentStep() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement) return true;
+
+				const isRequired = stepElement.dataset.required === 'true';
+				const isMultiSelect = stepElement.dataset.multiSelect === 'true';
+				const minSelected = parseInt(stepElement.dataset.minSelected) || 0;
+				const maxSelected = parseInt(stepElement.dataset.maxSelected) || 0;
+				
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				const selectionCount = selectedInputs.length;
+
+				// Required validation
+				if (isRequired && selectionCount === 0) {
+					return false;
+				}
+
+				// Multi-select validation
+				if (isMultiSelect) {
+					if (minSelected > 0 && selectionCount < minSelected) {
+						return false;
+					}
+					if (maxSelected > 0 && selectionCount > maxSelected) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			showStepValidationError() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				const summaryElement = document.querySelector('[data-selected-summary]');
+				
+				if (summaryElement && stepElement) {
+					const isRequired = stepElement.dataset.required === 'true';
+					const minSelected = parseInt(stepElement.dataset.minSelected) || 0;
+					const maxSelected = parseInt(stepElement.dataset.maxSelected) || 0;
+					const selectedCount = document.querySelectorAll('[data-wizard-product-input]:checked').length;
+					
+					let errorMessage = '⚠️ ';
+					if (isRequired && selectedCount === 0) {
+						errorMessage += 'Debes seleccionar al menos un producto para continuar';
+					} else if (minSelected > 0 && selectedCount < minSelected) {
+						errorMessage += `Debes seleccionar al menos ${minSelected} productos para continuar`;
+					} else if (maxSelected > 0 && selectedCount > maxSelected) {
+						errorMessage += `No puedes seleccionar más de ${maxSelected} productos`;
+					}
+
+					// Shake animation for error
+					gsap.fromTo(summaryElement.parentElement, 
+						{ x: 0 },
+						{ x: -10, duration: 0.1, yoyo: true, repeat: 5, ease: "power2.inOut" }
+					);
+					
+					// Show error message temporarily
+					const originalContent = summaryElement.innerHTML;
+					summaryElement.innerHTML = `<span class="text-red-600">${errorMessage}</span>`;
+					
+					setTimeout(() => {
+						summaryElement.innerHTML = originalContent;
+					}, 3000);
+				}
+			}
+
+			loadExistingSelections() {
+				// Load any existing selections from the server state
+				const selectedInputs = document.querySelectorAll('[data-wizard-product-input]:checked');
+				selectedInputs.forEach(input => {
+					this.updateCardStyling(input, true);
+				});
+			}
+
+			saveCurrentStepSelections() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement || !this.currentWizardId) return;
+
+				const stepId = stepElement.dataset.stepId;
+				const selectedProducts = Array.from(
+					document.querySelectorAll(`[data-step-id="${stepId}"][data-wizard-product-input]:checked`)
+				).map(input => input.dataset.productId || input.value);
+				
+				this.saveSelections(this.currentWizardId, stepId, selectedProducts);
+			}
+
+			restoreStepSelections() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (!stepElement || !this.currentWizardId) return;
+
+				const stepId = stepElement.dataset.stepId;
+				const savedSelections = this.getStepSelections(this.currentWizardId, stepId);
+
+				// Pre-select saved products
+				savedSelections.forEach(productId => {
+					const input = document.querySelector(`[data-product-id="${productId}"][data-wizard-product-input]`);
+					if (input && !input.checked) {
+						input.checked = true;
+						this.updateCardStyling(input, true);
+					}
+				});
+			}
+
+			extractCurrentContext() {
+				const stepElement = document.querySelector('[data-wizard-step]');
+				if (stepElement) {
+					this.currentStepId = stepElement.dataset.stepId;
+				}
+				
+				// Extract wizard ID from buttons or other elements
+				const wizardButton = document.querySelector('[hx-get*="/wizard/"], [hx-post*="/wizard/"]');
+				if (wizardButton) {
+					const url = wizardButton.getAttribute('hx-get') || wizardButton.getAttribute('hx-post');
+					const match = url.match(/\/wizard\/([^\/]+)/);
+					if (match) {
+						const newWizardId = match[1];
+						
+						// If this is a different wizard than before, clear the old wizard's data
+						if (this.currentWizardId && this.currentWizardId !== newWizardId) {
+							this.clearWizardData(this.currentWizardId);
+							console.log(`Switching from wizard ${this.currentWizardId} to ${newWizardId} - previous data cleared`);
+						}
+						
+						this.currentWizardId = newWizardId;
+					}
+				}
+			}
+
+			reinitializeAfterSwap() {
+				// Reinitialize after HTMX swaps new content
+				setTimeout(() => {
+					this.extractCurrentContext();
+					
+					// Check if completion view is shown and clear localStorage
+					const completionView = document.querySelector('[data-wizard-completion-view]');
+					if (completionView && this.currentWizardId) {
+						// Wizard completed successfully - clear localStorage
+						this.clearWizardData(this.currentWizardId);
+						console.log(`Wizard ${this.currentWizardId} completed - localStorage cleared`);
+						return; // Don't reinitialize for completion view
+					}
+					
+					this.restoreStepSelections();
+					this.loadExistingSelections();
+					this.updateSelectionSummary();
+					this.updateStepValidation();
+					this.restoreSummaryState();
+					
+					// Animate in new content
+					const productCards = document.querySelectorAll('[data-wizard-product-card]');
+					if (productCards.length > 0) {
+						gsap.fromTo(productCards,
+							{ opacity: 0, y: 20 },
+							{ opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }
+						);
+					}
+				}, 50);
+			}
+
+			restoreSummaryState() {
+				if (!this.currentWizardId) return;
+				
+				const container = document.querySelector('[data-selection-summary]');
+				if (!container) return;
+
+				// Restore saved summary state preference
+				const savedState = sessionStorage.getItem(`wizard_summary_state_${this.currentWizardId}`);
+				if (savedState && savedState !== 'slim') {
+					// If user previously expanded, restore to expanded state
+					const slimView = container.querySelector('[data-summary-slim]');
+					const fullView = container.querySelector('[data-summary-full]');
+					const chevronIcon = container.querySelector('[data-chevron-icon]');
+					
+					if (slimView && fullView && chevronIcon) {
+						container.dataset.summaryState = 'full';
+						slimView.classList.add('hidden');
+						fullView.classList.remove('hidden');
+						gsap.set(chevronIcon, { rotation: 180 });
+					}
+				}
+			}
+
+			// Helper method for product card toggle (called from inline onclick)
+			static toggleProductSelection(button) {
+				if (window.wizardManager) {
+					window.wizardManager.handleProductCardClick(button);
+				}
+			}
+		}
+
+		// Initialize wizard manager when DOM is ready
+		document.addEventListener('DOMContentLoaded', function() {
+			window.wizardManager = new WizardManager();
+			
+			// Make toggle function globally available
+			window.toggleWizardProductSelection = WizardManager.toggleProductSelection;
+
+            eventManager
+                .register('afterSwap', '#wizard-modal', function(e) {
+                    wizardManager.showModal();
+                })
+		});
+
+		// Handle clicking outside modal to close
+		document.addEventListener('click', function(e) {
+			const overlay = document.getElementById('wizard-modal');
+			if (e.target === overlay && !overlay.classList.contains('hidden')) {
+				if (window.wizardManager) {
+					window.wizardManager.hideModal();
+				}
+			}
+		});
+
+		// Handle escape key to close modal
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				const overlay = document.getElementById('wizard-modal');
+				if (overlay && !overlay.classList.contains('hidden')) {
+					if (window.wizardManager) {
+						window.wizardManager.hideModal();
+					}
+				}
+			}
+		});
+	</script>
+}

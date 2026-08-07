@@ -1,0 +1,155 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+import "github.com/vladwithcode/salon_catalog/internal/forms"
+import "fmt"
+
+templ ImagesNewForm(formState forms.FormState) {
+	<div
+		id="new-image-form-container"
+		class="w-full max-w-lg flex flex-col gap-2 bg-gray-100 rounded-sm p-4 pb-2 shadow-sm overflow-hidden m-auto"
+	>
+		<div class="flex-1 flex items-center pb-2border-b border-primary/40">
+			<h3 class="text-xl font-medium text-gray-700 tracking-tight flex-1 truncate">
+				Subir Imágen
+			</h3>
+			<button
+				class=""
+				id="new-image-form-close"
+				data-images-modal-toggle
+				data-click-handler-selector="[data-images-modal-toggle]"
+			>
+				@components.TimesIcon("w-7", nil)
+			</button>
+		</div>
+		@templ.Fragment("imagesNewForm") {
+			<form
+				id="new-image-form"
+				hx-post="/imagenes/subir"
+				hx-encoding="multipart/form-data"
+				hx-target="#images-table"
+				hx-target-5xx="#new-image-form-container"
+				hx-target-400="#new-image-form-container"
+				hx-swap="outerHTML"
+				hx-indicator="#global-loading-indicator"
+				hx-include='[name="sort"], [name="page"], [name="limit"], [name="date"], [name="date_after"], [name="date_before"]'
+				class="flex-1 basis-full flex flex-col overflow-hidden gap-4"
+				data-images-form
+				data-images-form-count="1"
+			>
+				if formState.GetErrorMessage() != "" {
+					<div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-xs">
+						<div class="flex">
+							<svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+							</svg>
+							<p class="text-sm text-red-700 font-medium">{ formState.GetErrorMessage() }</p>
+						</div>
+					</div>
+				}
+				@templ.Fragment("imagesFormInput") {
+					<div class="flex-1 basis-full overflow-auto space-y-4">
+						@ImagesFormInput(
+							formState,
+							"img_name_0",
+							"img_file_0",
+						)
+					</div>
+					/* <button
+							class="w-full flex flex-col items-center gap-0.5 py-2 border-dotted border-2 border-primary/40 text-primary/70 font-bold rounded-md"
+							type="button"
+							data-new-image-form-add-input
+							data-click-handler-selector="[data-new-image-form-add-input]"
+						>
+							@components.PlusIcon("w-8", nil)
+							Añadir otra imagen
+						</button> */
+				}
+				<div
+					id="new-image-form-preview"
+					class="shrink-0 grow-0 basis-0 w-full overflow-auto flex gap-4 items-center"
+					data-new-image-form-preview="collapsed"
+				>
+					<template id="new-image-form-preview-template">
+						<div
+							class="h-full basis-2/3 shrink-0 grow-0 rounded-md overflow-hidden"
+							data-image-preview-container
+						>
+							<img
+								src="/static/assets/placeholder.png"
+								alt=""
+								class="w-full object-cover object-center"
+								data-image-preview-imgelt
+							/>
+						</div>
+					</template>
+				</div>
+				<div class="flex-1 flex gap-2.5 items-center justify-end flex-wrap">
+					<button
+						type="reset"
+						class="bg-gray-500/80 text-gray-50 font-bold tracking-wide p-2 w-full rounded-sm"
+						data-click-handler-selector="[data-new-image-form-clear]"
+						data-new-image-form-clear
+					>
+						Limpiar
+					</button>
+					<button
+						type="button"
+						class="flex-1 bg-red-400 text-gray-50 font-bold tracking-wide px-4 py-2 rounded-sm"
+						data-click-handler-selector="[data-images-modal-toggle]"
+						data-images-modal-toggle="close"
+					>
+						Cancelar
+					</button>
+					<button
+						type="submit"
+						class="flex-1 bg-gray-700 text-gray-50 font-bold tracking-wide px-4 py-2 rounded-sm"
+						data-click-handler-selector="[data-images-filter-clear]"
+						data-images-filter-clear
+					>
+						Enviar
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+}
+
+templ ImagesFormInput(formState forms.FormState, nameField, fileField string) {
+	<div class="img-group flex flex-col items-stretch gap-2">
+		<div class="space-y-1">
+			<label for={ fmt.Sprintf("%s_%s_0", nameField, "name") } class="block text-xs font-light uppercase text-gray-700">Nombre de la(s) imágen(es)</label>
+			<input
+				type="text"
+				name={ nameField }
+				id={ nameField }
+				class={
+					formState.GetFieldClass(nameField),
+					"block w-full px-4 py-2 border rounded-xs leading-5 bg-white placeholder-gray-500",
+				}
+				if inpVal := formState.GetFieldValue(nameField); inpVal != "" {
+					value={ inpVal }
+				}
+				required
+			/>
+			@FieldFeedback(formState, nameField)
+		</div>
+		<div class="space-y-1">
+			<label for={ fmt.Sprintf("%s_%s_0", fileField, "file") } class="block text-xs font-light uppercase text-gray-700">Imágen(es)</label>
+			<input
+				type="file"
+				name={ fileField }
+				id={ fileField }
+				hx-preserve="true"
+				class={
+					formState.GetFieldClass(fileField),
+					"block w-full px-4 py-2 border border-gray-200 rounded-sm leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-accent focus:border-accent",
+				}
+				value={ formState.GetFieldValue(fileField) }
+				multiple
+				required
+			/>
+			@FieldFeedback(formState, fileField)
+		</div>
+	</div>
+}

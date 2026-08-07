@@ -1,0 +1,99 @@
+package dashboard
+
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ QuickActions() {
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        eventManager.registerClick('quick-actions-toggle', (e) => {
+            const list = document.getElementById('quick-actions-list');
+            const isOpen = list.dataset.quickActionsOpen === 'true';
+            const duration = 0.15;
+            const easing = 'power2.out';
+
+            if (isOpen) {
+                gsap.to(list, {
+                    height: 0,
+                    duration,
+                    ease: easing,
+                });
+                gsap.to('[data-quick-toggle-chevron]', {
+                    rotate: '-90deg',
+                    duration,
+                    ease: easing,
+                }, "<");
+                list.dataset.quickActionsOpen = 'false';
+            } else {
+                gsap.to(list, {
+                    height: 'auto',
+                    duration,
+                    ease: easing,
+                });
+                gsap.to('[data-quick-toggle-chevron]', {
+                    rotate: 0,
+                    duration,
+                    ease: easing,
+                }, "<");
+                list.dataset.quickActionsOpen = 'true';
+            }
+        });
+    });
+</script>
+	<div class="px-4 ">
+		<button
+			id="quick-actions-toggle"
+			class="flex w-full justify-between py-2 focus:outline-accent text-gray-700"
+			data-click-handler-selector="quick-actions-toggle"
+		>
+			<h3 class="text-lg font-semibold">Acciones Rápidas</h3>
+			@components.ChevronIcon("w-6", templ.Attributes{"data-quick-toggle-chevron": true})
+		</button>
+		<div class="h-px border-t border-gray-200 pb-2"></div>
+		<div
+			id="quick-actions-list"
+			class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden"
+			data-quick-actions-open="true"
+		>
+			@QuickActionCard(&QuickAction{
+				Name:  "Ver productos",
+				Label: "Listado de productos",
+				Icon:  components.BoxIcon("w-5 text-blue-600", nil),
+				Href:  "/panel/productos",
+			})
+			@QuickActionCard(&QuickAction{
+				Name:  "Ver mensajes",
+				Label: "Solicitudes de contacto",
+				Icon:  components.EmailIcon("w-5 text-green-600", nil),
+				Href:  "/panel/solicitudes",
+			})
+			@QuickActionCard(&QuickAction{
+				Name:  "Ver Perfil",
+				Label: "Perfil de usuario",
+				Icon:  components.UserIcon("w-5 text-blue-600", nil),
+				Href:  "/panel/usuario",
+			})
+		</div>
+	</div>
+}
+
+type QuickAction struct {
+	Name  string
+	Label string
+	Icon  templ.Component
+	Href  string
+}
+
+templ QuickActionCard(action *QuickAction) {
+	<a
+		href={ action.Href }
+		class="flex items-center bg-gray-100 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+	>
+		<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+			@action.Icon
+		</div>
+		<div>
+			<p class="font-medium text-gray-900">{ action.Name }</p>
+			<p class="text-sm text-gray-600">{ action.Label }</p>
+		</div>
+	</a>
+}

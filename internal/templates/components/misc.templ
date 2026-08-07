@@ -1,0 +1,41 @@
+package components
+
+import (
+	"fmt"
+	"net/url"
+)
+
+type MenuSectionSepParams struct {
+	Title          string `json:"title"`
+	PillClass      string `json:"pillClass"`
+	SeparatorClass string `json:"separatorClass"`
+}
+
+templ MenuSectionSep(params MenuSectionSepParams) {
+	<div class="relative flex items-center z-0 px-4">
+		<div
+			class={ "absolute z-0 inset-x-0 top-1/2", params.SeparatorClass }
+		></div>
+		<p
+			class={ "relative z-10 w-fit px-4 text-current/50", params.PillClass }
+		>{ params.Title }</p>
+	</div>
+}
+
+templ MoreInfoLink(msg string) {
+	{{if msg == "" {
+	msg = "Hola! Me gustaría conocer más sobre los servicios de Villa Chenacolo."
+}
+	}}
+	<a
+		target="_blank"
+		href={ fmt.Sprintf("https://wa.me/6182593026?text=%s", url.QueryEscape(msg)) }
+		class="flex items-center justify-center rounded-full gap-2 text-lg text-light font-bold tracking-wide underline underline-offset-2 bg-sky-700 hover:bg-sky-500 hover:scale-102 active:bg-sky-600 active:scale-98 transition-[transform,_background] py-4 translate-y-6 opacity-0"
+		data-intsc-animate-item="contact-form-section"
+	>
+		<svg class="h-6 w-6 fill-current">
+			<use href="/static/assets/wsp.svg#wsp"></use>
+		</svg>
+		<span class="block">Me interesa saber más ></span>
+	</a>
+}

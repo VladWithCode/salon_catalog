@@ -1,0 +1,71 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+type FormState struct {
+	UserValue     string
+	UserError     string
+	PasswordValue string
+	PasswordError string
+	ServerError   string
+}
+
+templ SignIn(formState *FormState) {
+	@templates.BaseLayout("Iniciar Sesión | Villa Chenacolo", nil, false) {
+		<main class="relative min-h-screen z-0 bg-brand-1-lg overflow-hidden" hx-ext="response-targets">
+			<div class="absolute inset-0 z-0 bg-paper" style="clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0% 100%);"></div>
+			<div class="absolute flex items-center justify-center inset-0 z-0">
+				<form
+					id="signin-form"
+					hx-post="/api/sign-in"
+					hx-select="#signin-form"
+					hx-target-5xx="#signin-form"
+					hx-target-4xx="#signin-form"
+					hx-swap="outerHTML"
+					hx-indicator=""
+					class="bg-stone-50 w-4/5 max-w-lg rounded-xs shadow-sm shadow-stone-800/30 px-4 py-6 space-y-6"
+					if formState.UserError != "" || formState.PasswordError != "" {
+						data-invalid="true"
+					}
+				>
+					<h1 class="text-3xl font-bold tracking-wide">Iniciar Sesión</h1>
+					<div class="space-y-4">
+						@components.Input(components.InputProps{
+							Name:     "user",
+							Type:     "text",
+							Value:    formState.UserValue,
+							Label:    "Nombre de Usuario",
+							Required: true,
+							Icon:     components.IconUser,
+							Error:    formState.UserError,
+						})
+						@components.Input(components.InputProps{
+							Name:     "password",
+							Type:     "password",
+							Value:    formState.PasswordValue,
+							Label:    "Contraseña",
+							Required: true,
+							Icon:     components.IconPassword,
+							Error:    formState.PasswordError,
+						})
+						<button
+							class="w-full bg-accent text-lg text-light font-bold py-2 px-4 rounded hover:cursor-pointer hover:scale-105 transition-[scale] active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500"
+						>
+							Iniciar
+							Sesión
+						</button>
+					</div>
+				</form>
+				<div class="absolute right-5 bottom-5 text-stone-800/30">
+					<svg class="w-12 h-12 fill-current">
+						<use href="/static/assets/logo.svg#logo"></use>
+					</svg>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ signinScript() {
+}

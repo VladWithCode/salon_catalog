@@ -1,0 +1,234 @@
+package pages
+
+import "github.com/vladwithcode/salon_catalog/internal/templates"
+import "github.com/vladwithcode/salon_catalog/internal/templates/components"
+
+templ CookiePolicy() {
+	@cookiePolicyScript()
+	@templates.BaseLayout("Política de Cookies | Villa Chenacolo", nil, false) {
+		<main class="grid grid-cols-subgrid">
+			<section id="seccion-titulo" class="relative z-0">
+				<div class="absolute inset-0 z-0">
+					<img
+						src="/static/assets/chenacolo_18.jpeg"
+						alt="Villa Chenacolo - Salón de eventos"
+						class="w-full h-full object-cover object-center brightness-75"
+					/>
+				</div>
+				<div class="relative z-10 px-4 pt-32 pb-16 lg:pt-64 lg:pb-32 bg-primary/70">
+					<div class="max-w-2xl lg:max-w-5xl xl:max-w-7xl mx-auto text-light">
+						<h1 class="text-3xl sm:text-4xl lg:text-7xl font-bold mb-4 uppercase translate-y-6 opacity-0" data-view-animate="fadeIn">Política de Cookies</h1>
+						<p class="text-sm sm:text-base tracking-wide text-current/80 translate-y-6 opacity-0" data-view-animate="fadeIn">
+							Información detallada sobre el uso de cookies en nuestro sitio web. Transparencia total sobre cómo mejoramos tu experiencia de navegación.
+						</p>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-que-son" class="relative z-0 px-4 py-16 opacity-0 space-y-4" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold uppercase mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
+								¿Qué son las Cookies?
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas nuestro sitio web. Estas nos ayudan a recordar tus preferencias y mejorar tu experiencia de navegación.
+								</p>
+								<p class="tracking-wide">
+									Villa Chenacolo utiliza cookies de manera responsable y transparente, siempre respetando tu privacidad y dándote control sobre su uso.
+								</p>
+								<div class="bg-gray-50 p-4 rounded-lg">
+									<p class="text-sm text-gray-600 italic">
+										<strong>Nota importante:</strong> Nuestro sitio web puede funcionar sin cookies, pero algunas funcionalidades podrían verse limitadas.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-tipos" class="relative z-0 px-4 py-16 bg-primary space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Tipos de Cookies que Utilizamos
+							</h2>
+							<div class="space-y-6 text-light/80">
+								<div>
+									<h3 class="text-lg font-semibold text-light mb-2">🔧 Cookies Técnicas (Esenciales)</h3>
+									<p class="tracking-wide mb-2">
+										Son imprescindibles para el funcionamiento básico del sitio web:
+									</p>
+									<ul class="list-disc list-inside space-y-1 ml-4">
+										<li>Mantener tu carrito de cotización activo</li>
+										<li>Recordar tu sesión de usuario si inicias sesión</li>
+										<li>Garantizar la seguridad durante la navegación</li>
+									</ul>
+								</div>
+								<div>
+									<h3 class="text-lg font-semibold text-light mb-2">📊 Cookies de Funcionalidad</h3>
+									<p class="tracking-wide mb-2">
+										Mejoran tu experiencia recordando tus preferencias:
+									</p>
+									<ul class="list-disc list-inside space-y-1 ml-4">
+										<li>Configuración de idioma o región</li>
+										<li>Preferencias de visualización de galería</li>
+										<li>Filtros aplicados en el catálogo</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-duracion" class="relative z-0 px-4 py-16 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Duración y Almacenamiento
+							</h2>
+							<div class="space-y-4 text-gray-700/80">
+								<p class="tracking-wide">
+									Las cookies que utilizamos tienen diferentes períodos de vida según su función:
+								</p>
+								<div class="grid gap-4 md:grid-cols-2">
+									<div class="bg-gray-50 p-4 rounded-lg">
+										<h4 class="font-semibold text-primary mb-2">Cookies de Sesión</h4>
+										<p class="text-sm">Se eliminan automáticamente al cerrar tu navegador. Se usan para funciones básicas como mantener tu carrito activo.</p>
+									</div>
+									<div class="bg-gray-50 p-4 rounded-lg">
+										<h4 class="font-semibold text-primary mb-2">Cookies Persistentes</h4>
+										<p class="text-sm">Permanecen hasta 30 días para recordar preferencias como filtros del catálogo y configuraciones de usuario.</p>
+									</div>
+								</div>
+								<p class="tracking-wide mt-6">
+									<strong>Importante:</strong> Todas las cookies se almacenan únicamente en tu dispositivo y nunca contienen información personal identificable sin tu consentimiento.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-control" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Control y Gestión de Cookies
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Tienes control total sobre las cookies. Puedes:
+								</p>
+								<ul class="list-disc list-inside space-y-2 ml-4">
+									<li>Aceptar o rechazar cookies no esenciales</li>
+									<li>Modificar la configuración de cookies en cualquier momento</li>
+									<li>Eliminar cookies existentes desde la configuración de tu navegador</li>
+									<li>Navegar en modo privado/incógnito para evitar el almacenamiento</li>
+								</ul>
+								<div class="bg-primary-dark/30 p-4 rounded-lg mt-6">
+									<h4 class="font-semibold text-light mb-2">🔧 Gestión por Navegador</h4>
+									<p class="text-sm text-current/70">
+										Todos los navegadores modernos permiten controlar cookies desde sus configuraciones de privacidad. 
+										Consulta la ayuda de tu navegador específico para instrucciones detalladas.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-terceros" class="relative z-0 px-4 py-16 text-gray-700 space-y-4 -mb-px opacity-0" data-view-animate="fadeIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-primary font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Cookies de Terceros
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									En Villa Chenacolo no utilizamos cookies de terceros para publicidad o seguimiento. Sin embargo, algunos servicios integrados pueden usar sus propias cookies:
+								</p>
+								<div class="space-y-4">
+									<div class="bg-gray-50 p-4 rounded-lg">
+										<h4 class="font-semibold text-primary mb-2">🗺️ Mapas y Ubicación</h4>
+										<p class="text-sm">Si integramos mapas de ubicación, estos servicios pueden usar cookies para mejorar la funcionalidad del mapa.</p>
+									</div>
+									<div class="bg-gray-50 p-4 rounded-lg">
+										<h4 class="font-semibold text-primary mb-2">💬 Sistemas de Chat</h4>
+										<p class="text-sm">Los widgets de chat o WhatsApp Web pueden usar cookies para mantener conversaciones activas.</p>
+									</div>
+								</div>
+								<p class="tracking-wide mt-6">
+									<strong>Compromiso:</strong> Siempre te informaremos si introducimos nuevos servicios de terceros que utilicen cookies.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="seccion-actualizaciones" class="relative z-0 px-4 py-16 bg-primary text-light space-y-4 -mb-px opacity-0" data-view-animate="opacityIn">
+				<div class="max-w-2xl xl:max-w-7xl mx-auto">
+					<div class="space-y-6">
+						<div>
+							<h2 class="relative text-2xl text-light font-semibold mb-4">
+								<span class="block absolute -top-4 h-2 w-24 bg-current uppercase"></span>
+								Actualizaciones y Contacto
+							</h2>
+							<div class="space-y-4 text-current/80">
+								<p class="tracking-wide">
+									Esta política de cookies puede actualizarse para reflejar cambios en nuestro sitio web o en la legislación aplicable. Te notificaremos de cambios significativos.
+								</p>
+								<p class="tracking-wide mt-6">
+									Si tienes preguntas sobre nuestro uso de cookies o deseas ejercer tus derechos:
+								</p>
+								<div class="space-y-2 ml-4">
+									<p><strong>Teléfono:</strong> +52 (618) 155-6407</p>
+									<p><strong>Ubicación:</strong> Villa Chenacolo, Durango</p>
+								</div>
+								<div class="bg-primary-dark/30 p-4 rounded-lg mt-6">
+									<p class="text-sm text-current/70">
+										<strong>Tu privacidad es importante para nosotros.</strong> Utilizamos cookies únicamente para mejorar tu experiencia y nunca para comprometer tu privacidad.
+									</p>
+								</div>
+								<p class="text-sm text-current/60 mt-8">
+									Última actualización: Agosto 2025
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			@components.CTASection()
+		</main>
+	}
+}
+
+templ cookiePolicyScript() {
+	<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.batch("[data-view-animate]", {
+            start: "top 60%",
+            batchMax: 6,
+            once: true,
+            onEnter: batch => {
+                gsap.to(batch, {
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: "power2.inOut",
+                });
+            },
+        });
+    });
+    </script>
+}

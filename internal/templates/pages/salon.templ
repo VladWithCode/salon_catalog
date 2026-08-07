@@ -1,0 +1,321 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/vladwithcode/salon_catalog/internal/templates"
+	"github.com/vladwithcode/salon_catalog/internal/templates/components"
+)
+
+templ Salon() {
+	@templates.BaseLayout("Salón | VIlla Chenacolo", nil, false) {
+		<script src="/static/js/popup.js" defer></script>
+		@salonScript()
+		<main>
+			/* <section id="seccion-titulo" class="relative z-0">
+				<div class="absolute inset-0 z-0">
+					<img
+						src="/static/assets/chenacolo_5.jpeg"
+						alt="Imagen del area de bar del salon de eventos"
+						class="w-full h-full object-cover object-center brightness-90"
+						data-view-animate="opacityIn"
+					/>
+				</div>
+				<div class="relative text-secondary z-10 px-4 pt-32 pb-16 bg-primary/60">
+					<h1 class="text-4xl font-bold mb-4" data-view-animate="fadeIn">Conoce nuestro salón</h1>
+					<p class="font-medium tracking-wide text-current/80">
+						Chenacolo es un salón de eventos innovador y personalizado, diseñado para ofrecer una experiencia de
+						eventos única y personalizada.
+					</p>
+				</div>
+			</section> */
+			<section id="seccion-video" class="relative z-0 h-[80vh]">
+				<div class="absolute inset-0 z-0">
+					<video
+						width="400"
+						height="890"
+						src="/static/assets/chenacolo_vid.mp4"
+						class="w-full h-full object-cover object-center brightness-80"
+						autoplay
+						muted
+						loop
+						playsinline
+						poster="/static/assets/chenacolo_31.jpeg"
+					></video>
+				</div>
+				<button
+					id="tour-play-btn"
+					class="absolute inset-0 z-10 h-full flex flex-col gap-4 items-center justify-center text-secondary px-4 text-center bg-primary/60"
+				>
+					<h2 class="text-6xl tracking-tight font-bold">
+						<div class="sr-only">Villa Chenacolo</div>
+						<img src="/static/assets/logo_name.png" alt="Logotipo del Villa Chenacolo" class="h-24 md:h-40 max-w-full invert w-auto"/>
+					</h2>
+					<p class="text-xs font-medium tracking-wide text-current/80">
+						Da clic para ver el recorrido del salón
+					</p>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 fill-current"
+					>
+						<use href="/static/assets/play-btn.svg#play"></use>
+					</svg>
+				</button>
+			</section>
+			// Tour video popup
+			<div
+				id="tour-video-popup"
+				class="fixed inset-0 z-40 bg-primary/60 backdrop-blur-sm px-4 py-16"
+				data-popup-group-id="video-tour"
+			>
+				<button
+					class="absolute top-4 right-4 text-white hover:text-gray-300 z-10 p-2 rounded-full hover:bg-black hover:bg-opacity-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white"
+					data-popup-close-btn="video-tour"
+					aria-label="Cerrar video del recorrido"
+				>
+					<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+				<div
+					id="tour-video-container"
+					class="relative w-full h-full bg-paper rounded-md p-2"
+					data-popup-container="video-tour"
+				>
+					<p
+						class="text-lg text-secondary font-bold absolute -top-8 left-0 translate-y-6 opacity-0"
+						data-popup-label="video-tour"
+					>
+						Video Tour | Salón Chenacolo
+					</p>
+					<video
+						id="tour-video-media"
+						width="400"
+						height="890"
+						src="/static/assets/chenacolo_vid.mp4"
+						class="w-full h-full rounded-md object-cover object-center"
+						loop
+						playsinline
+						controls
+						volume="50"
+						poster="/static/assets/chenacolo_31.jpeg"
+						data-popup-contents="video-tour"
+					></video>
+				</div>
+			</div>
+			<section class="px-4 py-16 space-y-4">
+				<div class="flex flex-col gap-8 lg:grid lg:grid-cols-2 max-w-7xl mx-auto">
+					<img
+						src="/static/assets/chenacolo_2.jpeg"
+						alt="Imagen del recibidor del salon de eventos"
+						class="w-full aspect-[3/2] object-cover object-center rounded-lg"
+					/>
+					<div class="flex flex-col gap-4 my-auto">
+						<h2 class="relative text-primary text-2xl font-bold">
+							<span class="block absolute -top-4 h-2 w-24 bg-primary"></span>
+							Exquisita arquitectura
+						</h2>
+						<p class="tracking-wide text-current/90">
+							Nada en Villa Chenacolo está puesto al azar. Cada arco, cada linea, cada textura fue elegida para crear un entorno funcional y estéticamente impecable.
+						</p>
+						<p class="tracking-wide text-current/90">
+							Un lugar que no compite con tu evento: lo realza.
+						</p>
+						<p class="tracking-wide text-current/90">
+							Más que una estructura, Villa Chenacolo es una experiencia arquitectónica que combina equilibrio, privacidad y distinción. 
+						</p>
+						<p class="tracking-wide text-current/90">
+							Todo está diseñado para que tus recuerdos encuentren el escenario perfecto.
+						</p>
+					</div>
+				</div>
+			</section>
+			<div class="section bg-primary px-4 py-16 space-y-8 overflow-hidden">
+				<div class="text-center text-light">
+					<h2 class="text-4xl lg:text-5xl font-bold uppercase">Galería</h2>
+				</div>
+				<div
+					id="gallery-container"
+					class="flex gap-4 w-full max-w-7xl overflow-x-auto overflow-y-hidden mx-auto"
+				>
+					for i := 0; i < len(allGalleryImages); i++ {
+						<button
+							data-gallery-popup-open-btn={ allGalleryImages[i] }
+							class="block relative grow-0 shrink-0 basis-80 aspect-2/3 overflow-hidden rounded-lg cursor-pointer transition-[transform] duration-300 rotate-0 hover:rotate-1"
+						>
+							<img
+								src={ allGalleryImages[i] }
+								alt="Imagen del area de bar del salon de eventos"
+								class="h-full aspect-square object-cover object-center z-0"
+							/>
+						</button>
+					}
+				</div>
+			</div>
+			<div
+				id="gallery-popup"
+				class="fixed inset-0 z-30 pt-16 invisible"
+				data-gallery-popup="closed"
+			>
+				<div
+					id="gallery-popup-backdrop"
+					class="absolute inset-0 z-0 bg-dark/60 backdrop-blur-sm pt-16 opacity-0"
+				></div>
+				<div id="gallery-popup-container" class="relative z-10 flex flex-col inset-x-0 bottom-0 bg-secondary h-full rounded-t-3xl p-2 translate-y-full opacity-0">
+					<div class="absolute -top-2 right-0 z-10">
+						<button
+							id="gallery-popup-close-btn"
+							data-gallery-popup-close-btn="gallery-popup"
+							class="rounded-full bg-primary text-light aspect-square cursor-pointer rotate-0 transition-transform duration-500 hover:-rotate-90"
+						>
+							@components.TimesIcon("h-12 ", nil)
+						</button>
+					</div>
+					<h4 class="pt-2 pb-4 px-4 text-xl font-semibold uppercase">Galería</h4>
+					<div class="flex-1 basis-full flex flex-col gap-4 overflow-hidden">
+						<div class="flex-1 flex items-center basis-full">
+							<img
+								id="gallery-popup-img"
+								src="/static/assets/chenacolo_1.jpeg"
+								alt=""
+								class="w-full object-contain object-center rounded-3xl"
+							/>
+						</div>
+						<div class="h-1/5 grow-0 flex gap-4 w-full overflow-auto">
+							for i, img := range allGalleryImages {
+								<button
+									id={ fmt.Sprintf("gallery-popup-img-btn-%d", i) }
+									class="shrink-0 grow-0 basis-auto aspect-square cursor-pointer rounded-lg group overflow-hidden"
+									data-gallery-popup-img-btn={ img }
+								>
+									<img
+										src={ img }
+										alt="Imagen del area de bar del salon de eventos"
+										class="h-full aspect-square object-cover object-center rounded-lg group-hover:scale-110 transition-transform duration-300"
+									/>
+								</button>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+			@components.CTASection()
+		</main>
+	}
+}
+
+templ salonScript() {
+	<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!window.PopupManager) {
+                return;
+            }
+            const groupId = document.getElementById("tour-video-popup").dataset.popupGroupId;
+
+            new PopupManager({
+                openBtnId: 'tour-play-btn',
+                popupId: 'tour-video-popup',
+                closeBtnSelector: '[data-popup-close-btn="' + groupId + '"]',
+                contentsSelector: '[data-popup-contents="' + groupId + '"]',
+                containerSelector: '[data-popup-container="' + groupId + '"]',
+
+                handleOpenClick: function(e) {
+                    this.contents.play();
+                    this.contents.volume = 0.5;
+                },
+                handleCloseClick: function(e) {
+                    this.contents.pause();
+                    this.contents.currentTime = 0;
+                },
+            })
+
+            const galleryPopupId = 'gallery-popup';
+            const galleryPopup = document.getElementById('gallery-popup');
+            const galleryPopupContainer = document.getElementById('gallery-popup-container');
+            const galleryPopupBackdrop = document.getElementById('gallery-popup-backdrop');
+            const galleryPopupOpenBtns = document.querySelectorAll('[data-gallery-popup-open-btn]');
+            const galleryPopupImgBtns = document.querySelectorAll('[data-gallery-popup-img-btn]');
+            const galleryPopupImg = document.getElementById('gallery-popup-img');
+            const galleryPopupCloseBtn = document.getElementById('gallery-popup-close-btn');
+            const galleryPopupTl = gsap.timeline({paused: true, defaults: {duration: 0.4, ease: "power2.out"}});
+
+            galleryPopupTl.set(galleryPopup, {
+                visibility: 'visible',
+            })
+                .to(galleryPopupBackdrop, {
+                    opacity: 1,
+                })
+                .to(galleryPopupContainer, {
+                    opacity: 1,
+                    y: '0%',
+                }, "0+=0.05")
+
+            for (let openBtn of galleryPopupOpenBtns) {
+                openBtn.addEventListener('click', function(e) {
+                    const imgSrc = openBtn.dataset.galleryPopupOpenBtn;
+                    galleryPopupImg.src = imgSrc;
+                    galleryPopupTl.play();
+                    galleryPopup.dataset.galleryPopup = 'open';
+                });
+            }
+            for (let imgBtn of galleryPopupImgBtns) {
+                imgBtn.addEventListener('click', function(e) {
+                    const imgSrc = imgBtn.dataset.galleryPopupImgBtn;
+                    galleryPopupImg.src = imgSrc;
+                });
+            }
+
+            galleryPopupCloseBtn.addEventListener('click', function(e) {
+                galleryPopupTl.reverse();
+                galleryPopup.dataset.galleryPopup = 'closed';
+            });
+            galleryPopupBackdrop.addEventListener('click', function(e) {
+                galleryPopupTl.reverse();
+                galleryPopup.dataset.galleryPopup = 'closed';
+            });
+
+            document.querySelectorAll("[data-view-animate]").forEach(function (elem) {
+                gsap.to(elem, {
+                    opacity: 1,
+                    y: "0rem",
+                    duration: 1,
+                    ease: "power1.out",
+                    scrollTrigger: elem,
+                    delay: 0.3,
+                });
+            });
+        });
+    </script>
+}
+
+var allGalleryImages = []string{
+	"/static/assets/chenacolo_1.jpeg",
+	"/static/assets/chenacolo_2.jpeg",
+	"/static/assets/chenacolo_3.jpeg",
+	"/static/assets/chenacolo_4.jpeg",
+	"/static/assets/chenacolo_5.jpeg",
+	"/static/assets/chenacolo_6.jpeg",
+	"/static/assets/chenacolo_7.jpeg",
+	"/static/assets/chenacolo_8.jpeg",
+	"/static/assets/chenacolo_9.jpeg",
+	"/static/assets/chenacolo_10.jpeg",
+	"/static/assets/chenacolo_11.jpeg",
+	"/static/assets/chenacolo_12.jpeg",
+	"/static/assets/chenacolo_13.jpeg",
+	"/static/assets/chenacolo_14.jpeg",
+	"/static/assets/chenacolo_15.jpeg",
+	"/static/assets/chenacolo_16.jpeg",
+	"/static/assets/chenacolo_17.jpeg",
+	"/static/assets/chenacolo_18.jpeg",
+	"/static/assets/chenacolo_19.jpeg",
+	"/static/assets/chenacolo_20.jpeg",
+	"/static/assets/chenacolo_21.jpeg",
+	"/static/assets/chenacolo_22.jpeg",
+	"/static/assets/chenacolo_24.jpeg",
+	"/static/assets/chenacolo_25.jpeg",
+	"/static/assets/chenacolo_26.jpeg",
+	"/static/assets/chenacolo_27.jpeg",
+	"/static/assets/chenacolo_28.jpeg",
+	"/static/assets/chenacolo_29.jpeg",
+	"/static/assets/chenacolo_30.jpeg",
+	"/static/assets/chenacolo_31.jpeg",
+}
