@@ -31,7 +31,7 @@ export function SectionHeading({
         className={cn(
           "type-eyebrow",
           align === "center" && "text-center",
-          inverted && "text-accent",
+          inverted && "text-accent-on-dark",
         )}
       >
         {eyebrow}

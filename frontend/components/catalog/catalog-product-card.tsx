@@ -43,7 +43,7 @@ export async function CatalogProductCard({ product }: CatalogProductCardProps) {
           href={`/catalogo/producto/${encodeURIComponent(product.slug)}`}
           prefetch={false}
           aria-label={`Ver detalle de ${product.name}`}
-          className="type-small mt-5 inline-flex min-h-11 items-center self-start font-medium text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          className="type-small mt-5 inline-flex min-h-11 items-center self-start font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           Ver detalle
         </Link>

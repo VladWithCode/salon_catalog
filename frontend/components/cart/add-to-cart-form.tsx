@@ -39,7 +39,7 @@ export async function AddToCartForm({
         disabled={!available}
         className={
           className ??
-          "type-button inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-accent px-5 text-accent-foreground hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+          "type-button inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-accent-strong px-5 text-primary-foreground hover:bg-accent-strong/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
         }
       >
         {available ? label : "No disponible"}

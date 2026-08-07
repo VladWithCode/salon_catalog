@@ -13,8 +13,21 @@
   --secondary-foreground: 24 30% 18%;
   --muted: 32 18% 90%;
   --muted-foreground: 24 12% 38%;
+  /* Decorative gold. 3.42:1 on --background: valid for rules, borders, icons,
+     focus rings and other non-text UI (WCAG 1.4.11 needs 3:1), never for
+     small text. Unchanged from 01-design-system.md. */
   --accent: 32 50% 45%;
   --accent-foreground: 24 30% 18%;
+  /* Same gold family, darkened until it clears 4.5:1 on every light surface
+     the site uses (background 5.81:1, card 6.16:1, secondary 4.83:1,
+     muted 5.26:1). This is what eyebrows, small links and gold button
+     surfaces use — 01-design-system.md §8 already required the eyebrow to
+     drop off pure --accent for contrast; this token makes that concrete
+     without changing the brand hue. */
+  --accent-strong: 32 55% 32%;
+  /* Gold lifted for cocoa (--primary) surfaces: 5.95:1 on --primary, where
+     plain --accent only reaches 3.50:1. */
+  --accent-on-dark: 32 60% 62%;
   --destructive: 0 65% 42%;
   --destructive-foreground: 36 40% 97%;
   --border: 32 22% 82%;
@@ -52,6 +65,8 @@
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-strong: hsl(var(--accent-strong));
+  --color-accent-on-dark: hsl(var(--accent-on-dark));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
@@ -172,14 +187,22 @@
     letter-spacing: -0.005em;
   }
 
+  /* 12px uppercase text: always normal-size text for WCAG, so it needs
+     4.5:1. Plain --accent gives 3.42:1 on cream, so the eyebrow uses the
+     darkened gold instead, and the lifted gold on cocoa surfaces. */
   .type-eyebrow {
-    color: hsl(var(--accent));
+    color: hsl(var(--accent-strong));
     font-family: var(--font-sans);
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+  }
+
+  .section-dark .type-eyebrow,
+  .on-dark .type-eyebrow {
+    color: hsl(var(--accent-on-dark));
   }
 
   .type-lead {

@@ -52,7 +52,7 @@ export function GalleryPreview() {
           <Link
             href={gallery.cta.href}
             prefetch={false}
-            className="type-button inline-flex min-h-12 items-center gap-2 font-semibold uppercase text-primary hover:text-accent"
+            className="type-button inline-flex min-h-12 items-center gap-2 font-semibold uppercase text-primary hover:text-accent-strong"
           >
             {gallery.cta.label}
             <ArrowRight aria-hidden="true" className="size-4" />

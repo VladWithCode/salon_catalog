@@ -55,7 +55,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
         ) : result.cart.items.length === 0 ? (
           <p className="type-body text-muted-foreground">
             Tu selección está vacía.{" "}
-            <Link href="/catalogo" className="text-accent underline underline-offset-4">
+            <Link href="/catalogo" className="text-accent-strong underline underline-offset-4">
               Ver catálogo
             </Link>
           </p>
@@ -70,7 +70,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
             <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/solicitar-cotizacion"
-                className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent px-5 text-accent-foreground hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent-strong px-5 text-primary-foreground hover:bg-accent-strong/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               >
                 Solicitar cotización
               </Link>

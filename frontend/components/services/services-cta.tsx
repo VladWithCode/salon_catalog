@@ -25,7 +25,7 @@ export function ServicesCta() {
             <Link
               href={closing.cta.href}
               prefetch={false}
-              className="type-button inline-flex min-h-12 items-center gap-2 rounded-md bg-primary px-6 font-semibold uppercase text-primary-foreground shadow-soft hover:bg-accent hover:text-accent-foreground"
+              className="type-button inline-flex min-h-12 items-center gap-2 rounded-md bg-primary px-6 font-semibold uppercase text-primary-foreground shadow-soft hover:bg-accent-strong hover:text-primary-foreground"
             >
               {closing.cta.label}
               <ArrowRight aria-hidden="true" className="size-4" />
@@ -34,7 +34,7 @@ export function ServicesCta() {
               href={closing.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="type-small inline-flex min-h-11 items-center text-primary underline decoration-accent underline-offset-4 hover:text-accent"
+              className="type-small inline-flex min-h-11 items-center text-primary underline decoration-accent underline-offset-4 hover:text-accent-strong"
             >
               {closing.whatsappLabel}
             </a>

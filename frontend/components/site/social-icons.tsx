@@ -68,7 +68,7 @@ export function SocialIcons({ socials }: SocialIconsProps) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Visitar ${social.name} de Villa Chenacolo`}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-primary-foreground/20 text-primary-foreground/75 hover:border-accent hover:text-accent"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-primary-foreground/20 text-primary-foreground/75 hover:border-accent hover:text-accent-on-dark"
           >
             <Icon className="size-5" />
           </a>

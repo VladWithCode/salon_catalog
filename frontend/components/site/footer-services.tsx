@@ -22,7 +22,7 @@ export function FooterServices({
             <Link
               href={link.href}
               prefetch={false}
-              className="inline-flex min-h-11 items-center text-sm text-primary-foreground/70 hover:text-accent"
+              className="inline-flex min-h-11 items-center text-sm text-primary-foreground/70 hover:text-accent-on-dark"
             >
               {link.label}
             </Link>

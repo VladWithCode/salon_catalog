@@ -19,7 +19,7 @@ test("open quote request with an empty cart shows the empty state, no cart_id an
 
 test("full quote request lifecycle: add product, open quote, summary, submit, confirm", async ({ page }) => {
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 
@@ -45,7 +45,7 @@ test("full quote request lifecycle: add product, open quote, summary, submit, co
 
 test("missing required field is rejected", async ({ page }) => {
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 
@@ -84,7 +84,7 @@ test("cart request works with JavaScript disabled: PRG 303 to /solicitar-cotizac
   const page = await context.newPage();
 
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await expect(page).toHaveURL(/cart_status=added/);
 
@@ -105,7 +105,7 @@ test("cart request works with JavaScript disabled: PRG 303 to /solicitar-cotizac
 
 test("concurrent double-click uses the same idempotency key: one applied, one replayed, never a conflict", async ({ page, request }) => {
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 
@@ -144,7 +144,7 @@ test("concurrent double-click uses the same idempotency key: one applied, one re
 
 test("same idempotency key, different payload returns a conflict, not a silent overwrite", async ({ page, request }) => {
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 

@@ -259,8 +259,6 @@ export const homeCopy = {
         phoneInvalid:
           "Ingresa un número de teléfono válido de entre 10 y 15 dígitos.",
       },
-      noScriptMessage:
-        "El envío de este formulario requiere JavaScript. Puedes comunicarte con nosotros por teléfono o correo electrónico.",
     },
     info: {
       title: "Encuéntranos",

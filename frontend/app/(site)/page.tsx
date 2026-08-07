@@ -17,7 +17,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function HomePage() {
+type HomePageProps = Readonly<{
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}>;
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  // Set by the no-JavaScript PRG redirect in
+  // app/api/contact-requests/route.ts — with JS the client component shows
+  // its own inline state and this stays undefined.
+  const rawContactStatus = params.contacto;
+  const contactStatus = Array.isArray(rawContactStatus)
+    ? rawContactStatus[0]
+    : rawContactStatus;
   const catalog = await getCatalogListings();
 
   return (
@@ -30,7 +42,7 @@ export default async function HomePage() {
       <CatalogPreview status={catalog.status} categories={catalog.categories} />
       <GalleryPreview />
       <AboutStrip />
-      <ContactSection />
+      <ContactSection status={contactStatus} />
       <ClosingCta />
     </article>
   );

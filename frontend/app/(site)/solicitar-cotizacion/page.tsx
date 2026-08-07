@@ -74,7 +74,7 @@ export default async function QuoteRequestPage({ searchParams }: QuoteRequestPag
           >
             Solicitud enviada con éxito. Nos pondremos en contacto contigo pronto.
             <div className="mt-3">
-              <Link href="/carrito" className="text-accent underline underline-offset-4">
+              <Link href="/carrito" className="text-accent-strong underline underline-offset-4">
                 Ver tu selección
               </Link>
             </div>
@@ -99,7 +99,7 @@ export default async function QuoteRequestPage({ searchParams }: QuoteRequestPag
                     href={contact.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent px-5 text-accent-foreground hover:bg-accent/90"
+                    className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent-strong px-5 text-primary-foreground hover:bg-accent-strong/90"
                   >
                     Escribir por WhatsApp
                   </a>
@@ -108,7 +108,7 @@ export default async function QuoteRequestPage({ searchParams }: QuoteRequestPag
             ) : cartEmpty ? (
               <p className="type-body text-muted-foreground text-center">
                 Tu selección está vacía.{" "}
-                <Link href="/catalogo" className="text-accent underline underline-offset-4">
+                <Link href="/catalogo" className="text-accent-strong underline underline-offset-4">
                   Ver catálogo
                 </Link>{" "}
                 y agrega productos antes de solicitar cotización.
@@ -188,7 +188,7 @@ export default async function QuoteRequestPage({ searchParams }: QuoteRequestPag
 
                   <button
                     type="submit"
-                    className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent px-5 text-accent-foreground hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                    className="type-button inline-flex min-h-11 items-center rounded-lg bg-accent-strong px-5 text-primary-foreground hover:bg-accent-strong/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                   >
                     Enviar solicitud
                   </button>

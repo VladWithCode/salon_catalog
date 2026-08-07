@@ -143,8 +143,8 @@ export function MobileNav() {
                         onClick={close}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "flex min-h-11 items-center border-b py-4 text-lg font-medium hover:text-accent",
-                          active && "text-accent",
+                          "flex min-h-11 items-center border-b py-4 text-lg font-medium hover:text-accent-strong",
+                          active && "text-accent-strong",
                         )}
                       >
                         {link.label}
@@ -171,7 +171,7 @@ export function MobileNav() {
                 href={quoteNavLink.href}
                 prefetch={false}
                 onClick={close}
-                className="type-button flex min-h-12 items-center justify-center rounded-md bg-primary px-5 font-medium uppercase text-primary-foreground shadow-soft hover:bg-accent hover:text-accent-foreground"
+                className="type-button flex min-h-12 items-center justify-center rounded-md bg-primary px-5 font-medium uppercase text-primary-foreground shadow-soft hover:bg-accent-strong hover:text-primary-foreground"
               >
                 Solicitar cotización
               </Link>

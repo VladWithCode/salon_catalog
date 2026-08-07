@@ -21,7 +21,7 @@ test("full cart lifecycle: empty, add, replay, update, insufficient stock, unava
 
   // Add from the catalog.
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 
@@ -62,7 +62,7 @@ test("full cart lifecycle: empty, add, replay, update, insufficient stock, unava
 
   // Unavailable product cannot be added at all.
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const unavailableCard = page.locator("article", { hasText: "Silla Sin Stock" }).first();
+  const unavailableCard = page.locator("article").filter({ has: page.getByRole("heading", { name: "Silla Sin Stock", exact: true }) }).last();
   await expect(unavailableCard.getByRole("button", { name: "No disponible" })).toBeDisabled();
 
   // Remove empties the cart.
@@ -75,7 +75,7 @@ test("full cart lifecycle: empty, add, replay, update, insufficient stock, unava
 test("header shows the cart count on desktop after adding", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
   await page.waitForURL(/cart_status=added/);
 
@@ -88,7 +88,7 @@ test("cart add works with JavaScript disabled end to end", async ({ browser }) =
   const page = await context.newPage();
 
   await page.goto("/catalogo", { waitUntil: "domcontentloaded" });
-  const card = page.locator("article", { hasText: "Mesa Redonda de Prueba" }).first();
+  const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "Mesa Redonda de Prueba", exact: true }) }).last();
   await card.getByRole("button", { name: "Añadir a selección" }).click();
 
   // A real <form> submission with JS disabled performs a full navigation;

@@ -137,7 +137,61 @@ function hasJSONContentType(request: Request): boolean {
   return contentType?.split(";", 1)[0]?.trim().toLowerCase() === "application/json";
 }
 
+function hasFormContentType(request: Request): boolean {
+  const contentType = request.headers.get("Content-Type");
+  return (
+    contentType?.split(";", 1)[0]?.trim().toLowerCase() ===
+    "application/x-www-form-urlencoded"
+  );
+}
+
+/**
+ * Post/Redirect/Get for the no-JavaScript path. `<form action method="post">`
+ * without JS always sends application/x-www-form-urlencoded and follows the
+ * response as a navigation, so a JSON body would render as raw text in the
+ * browser. Returning 303 to the contact anchor with a status code in the
+ * query string gives that visitor a real page, and a refresh never
+ * resubmits — the same PRG contract the cart and quote flows already use
+ * (frontend/lib/actions/cart-actions.ts).
+ */
+function contactRedirect(request: Request, status: string): Response {
+  const target = new URL("/", request.url);
+  target.searchParams.set("contacto", status);
+  target.hash = "contacto";
+  return new Response(null, {
+    status: 303,
+    headers: { Location: `${target.pathname}${target.search}${target.hash}`, "Cache-Control": "no-store" },
+  });
+}
+
+async function readFormSubmission(
+  request: Request,
+): Promise<{ name: string; phone: string } | null> {
+  const encodedBody = await readLimitedRequestBody(request);
+  if (encodedBody === null) return null;
+  let decoded: string;
+  try {
+    decoded = new TextDecoder("utf-8", { fatal: true }).decode(encodedBody);
+  } catch {
+    return null;
+  }
+  const fields = new URLSearchParams(decoded);
+  const name = fields.get("name");
+  const phone = fields.get("phone");
+  if (typeof name !== "string" || typeof phone !== "string") return null;
+  return { name, phone };
+}
+
 export async function POST(request: Request): Promise<Response> {
+  if (hasFormContentType(request)) {
+    const submission = await readFormSubmission(request);
+    if (submission === null) {
+      return contactRedirect(request, "error");
+    }
+    const outcome = await forwardContactRequest(submission);
+    return contactRedirect(request, outcome.status === httpStatusCreated ? "enviado" : "error");
+  }
+
   if (!hasJSONContentType(request)) {
     return jsonResponse(
       { error: "unsupported_media_type" } satisfies ContactRequestErrorResponse,
@@ -170,6 +224,23 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const outcome = await forwardContactRequest({
+    name: payload.name,
+    phone: payload.phone,
+  });
+  return jsonResponse(outcome.body, outcome.status);
+}
+
+/**
+ * Single place where a validated submission reaches Go, shared by the JSON
+ * path (client component) and the urlencoded PRG path (no JavaScript), so
+ * neither can drift from the other. Go stays the only validator of record —
+ * this never decides on its own whether a request is acceptable.
+ */
+async function forwardContactRequest(submission: {
+  name: string;
+  phone: string;
+}): Promise<{ status: number; body: unknown }> {
   try {
     const response = await fetch(`${getGoAPIBaseURL()}/api/contact-requests`, {
       method: "POST",
@@ -180,31 +251,31 @@ export async function POST(request: Request): Promise<Response> {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: payload.name, phone: payload.phone }),
+      body: JSON.stringify({ name: submission.name, phone: submission.phone }),
       signal: AbortSignal.timeout(backendTimeoutMilliseconds),
     });
 
     const body: unknown = await response.json();
     if (response.status === httpStatusCreated && isContactSuccessResponse(body)) {
-      return jsonResponse(body, response.status);
+      return { status: response.status, body };
     }
     if (
       response.status === httpStatusBadRequest &&
       isContactValidationResponse(body)
     ) {
-      return jsonResponse(body, response.status);
+      return { status: response.status, body };
     }
 
     const expectedError = knownErrorStatuses.get(response.status);
     if (expectedError && isContactErrorResponse(body, expectedError)) {
-      return jsonResponse(body, response.status);
+      return { status: response.status, body };
     }
   } catch {
     // Return the same controlled response for network, timeout and parsing failures.
   }
 
-  return jsonResponse(
-    { error: "backend_unavailable" } satisfies ContactRequestErrorResponse,
-    httpStatusBadGateway,
-  );
+  return {
+    status: httpStatusBadGateway,
+    body: { error: "backend_unavailable" } satisfies ContactRequestErrorResponse,
+  };
 }

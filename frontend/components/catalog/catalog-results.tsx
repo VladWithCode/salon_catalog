@@ -55,7 +55,7 @@ function EmptyCatalog({
       <Link
         href={actionHref}
         prefetch={false}
-        className="type-small inline-flex min-h-11 items-center font-medium text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+        className="type-small inline-flex min-h-11 items-center font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong"
       >
         {actionLabel}
       </Link>
@@ -103,7 +103,7 @@ export function CatalogResults({
           <Link
             href={resetHref}
             prefetch={false}
-            className="type-small inline-flex min-h-11 items-center font-medium text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+            className="type-small inline-flex min-h-11 items-center font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong"
           >
             Volver a una página válida
           </Link>
@@ -144,7 +144,7 @@ export function CatalogResults({
                   1,
                 )}
                 prefetch={false}
-                className="type-small inline-flex min-h-11 items-center font-medium text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+                className="type-small inline-flex min-h-11 items-center font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong"
               >
                 Volver a la primera página
               </Link>

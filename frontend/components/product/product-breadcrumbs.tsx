@@ -5,7 +5,7 @@ type ProductBreadcrumbsProps = Readonly<{
 }>;
 
 const linkClassName =
-  "hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "hover:text-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function ProductBreadcrumbs({ productName }: ProductBreadcrumbsProps) {
   return (

@@ -7,8 +7,20 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { contact } from "@/lib/copy/contact";
 import { homeCopy } from "@/lib/copy/home";
 
-export function ContactSection() {
+type ContactSectionProps = Readonly<{
+  /**
+   * Only ever set by the no-JavaScript PRG redirect
+   * (app/api/contact-requests/route.ts). With JavaScript the form component
+   * owns its own success/error state and this is undefined, so the two
+   * paths never render two competing confirmations.
+   */
+  status?: string;
+}>;
+
+export function ContactSection({ status }: ContactSectionProps = {}) {
   const copy = homeCopy.contact;
+  const sent = status === "enviado";
+  const failed = status === "error";
 
   return (
     <section
@@ -34,6 +46,23 @@ export function ContactSection() {
           inverted
         />
 
+        {sent ? (
+          <p
+            role="status"
+            className="rounded-xl border border-primary-foreground/25 bg-primary/90 px-5 py-4 text-center type-body"
+          >
+            {copy.form.successMessage}
+          </p>
+        ) : null}
+        {failed ? (
+          <p
+            role="alert"
+            className="rounded-xl border border-destructive/50 bg-destructive/20 px-5 py-4 text-center type-body"
+          >
+            {copy.form.unavailableMessage}
+          </p>
+        ) : null}
+
         <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
           <ContactForm />
 
@@ -43,51 +72,58 @@ export function ContactSection() {
               {copy.info.description}
             </p>
 
+            {/* A <dl> may only contain <dt>/<dd>, or <div> wrappers whose
+                direct children are <dt>/<dd>. The previous markup nested a
+                second <div> around each pair and put the icon beside it,
+                which Lighthouse flagged (definition-list / dlitem) and which
+                cost the page its ≥95 accessibility target. The icon now
+                lives inside its own <dt>, so the structure is valid while
+                the two-column look is unchanged. */}
             <dl className="mt-8 space-y-6">
               <div className="grid grid-cols-[2.75rem_1fr] gap-x-3">
-                <MapPin aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
-                <div>
-                  <dt className="type-small font-semibold">{copy.info.labels.address}</dt>
-                  <dd className="type-body mt-1 text-primary-foreground/75">
-                    {contact.address}
-                  </dd>
-                </div>
+                <dt className="col-span-2 grid grid-cols-[2.75rem_1fr] gap-x-3 type-small font-semibold">
+                  <MapPin aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
+                  <span>{copy.info.labels.address}</span>
+                </dt>
+                <dd className="type-body col-start-2 mt-1 text-primary-foreground/75">
+                  {contact.address}
+                </dd>
               </div>
               <div className="grid grid-cols-[2.75rem_1fr] gap-x-3">
-                <Mail aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
-                <div>
-                  <dt className="type-small font-semibold">{copy.info.labels.email}</dt>
-                  <dd className="type-body mt-1 break-all text-primary-foreground/75">
-                    <a href={`mailto:${contact.email}`} className="hover:text-accent">
-                      {contact.email}
-                    </a>
-                  </dd>
-                </div>
+                <dt className="col-span-2 grid grid-cols-[2.75rem_1fr] gap-x-3 type-small font-semibold">
+                  <Mail aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
+                  <span>{copy.info.labels.email}</span>
+                </dt>
+                <dd className="type-body col-start-2 mt-1 break-all text-primary-foreground/75">
+                  <a href={`mailto:${contact.email}`} className="hover:text-accent-on-dark">
+                    {contact.email}
+                  </a>
+                </dd>
               </div>
               <div className="grid grid-cols-[2.75rem_1fr] gap-x-3">
-                <span
-                  aria-hidden="true"
-                  className="mt-1 justify-self-center font-display text-xl text-accent"
-                >
-                  f
-                </span>
-                <div>
-                  <dt className="type-small font-semibold">{copy.info.labels.facebook}</dt>
-                  <dd className="type-body mt-1 text-primary-foreground/75">
-                    {copy.info.facebook}
-                  </dd>
-                </div>
+                <dt className="col-span-2 grid grid-cols-[2.75rem_1fr] gap-x-3 type-small font-semibold">
+                  <span
+                    aria-hidden="true"
+                    className="mt-1 justify-self-center font-display text-xl text-accent-on-dark"
+                  >
+                    f
+                  </span>
+                  <span>{copy.info.labels.facebook}</span>
+                </dt>
+                <dd className="type-body col-start-2 mt-1 text-primary-foreground/75">
+                  {copy.info.facebook}
+                </dd>
               </div>
               <div className="grid grid-cols-[2.75rem_1fr] gap-x-3">
-                <Phone aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
-                <div>
-                  <dt className="type-small font-semibold">{copy.info.labels.phone}</dt>
-                  <dd className="type-body mt-1 text-primary-foreground/75">
-                    <a href={contact.phoneHref} className="hover:text-accent">
-                      {contact.phone}
-                    </a>
-                  </dd>
-                </div>
+                <dt className="col-span-2 grid grid-cols-[2.75rem_1fr] gap-x-3 type-small font-semibold">
+                  <Phone aria-hidden="true" className="mt-1 size-5 justify-self-center text-accent" />
+                  <span>{copy.info.labels.phone}</span>
+                </dt>
+                <dd className="type-body col-start-2 mt-1 text-primary-foreground/75">
+                  <a href={contact.phoneHref} className="hover:text-accent-on-dark">
+                    {contact.phone}
+                  </a>
+                </dd>
               </div>
             </dl>
 
@@ -98,7 +134,7 @@ export function ContactSection() {
               <Link
                 href={copy.info.quoteCta.href}
                 prefetch={false}
-                className="type-button mt-3 inline-flex min-h-12 items-center gap-2 rounded-md bg-accent px-6 font-semibold uppercase text-accent-foreground hover:bg-secondary"
+                className="type-button mt-3 inline-flex min-h-12 items-center gap-2 rounded-md bg-accent-strong px-6 font-semibold uppercase text-primary-foreground hover:bg-secondary"
               >
                 {copy.info.quoteCta.label}
                 <ArrowRight aria-hidden="true" className="size-4" />

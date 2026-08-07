@@ -20,7 +20,7 @@ export function AboutStrip() {
       />
       <div className="container-main relative z-10 max-w-4xl">
         <div className="space-y-stack">
-          <p className="type-eyebrow text-center text-accent">{about.eyebrow}</p>
+          <p className="type-eyebrow text-center">{about.eyebrow}</p>
           <h2 id="about-title" className="sr-only">
             {about.eyebrow}
           </h2>

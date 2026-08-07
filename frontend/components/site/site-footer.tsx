@@ -57,7 +57,7 @@ export function SiteFooter({ socials }: SiteFooterProps) {
               <p>
                 <a
                   href={contact.phoneHref}
-                  className="inline-flex min-h-11 items-center hover:text-accent"
+                  className="inline-flex min-h-11 items-center hover:text-accent-on-dark"
                 >
                   {contact.phone}
                 </a>
@@ -65,7 +65,7 @@ export function SiteFooter({ socials }: SiteFooterProps) {
               <p>
                 <a
                   href={`mailto:${contact.email}`}
-                  className="inline-flex min-h-11 items-center break-all hover:text-accent"
+                  className="inline-flex min-h-11 items-center break-all hover:text-accent-on-dark"
                 >
                   {contact.email}
                 </a>
@@ -98,7 +98,7 @@ export function SiteFooter({ socials }: SiteFooterProps) {
                   <Link
                     href={link.href}
                     prefetch={false}
-                    className="inline-flex min-h-11 items-center hover:text-accent"
+                    className="inline-flex min-h-11 items-center hover:text-accent-on-dark"
                   >
                     {link.label}
                   </Link>

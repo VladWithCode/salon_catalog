@@ -79,7 +79,7 @@ export function SiteHeader({ cartCount }: SiteHeaderProps) {
             href={quoteNavLink.href}
             prefetch={false}
             className={cn(
-              "type-button hidden min-h-11 items-center rounded-md border border-accent px-3 font-medium uppercase hover:bg-accent hover:text-accent-foreground md:inline-flex lg:px-4",
+              "type-button hidden min-h-11 items-center rounded-md border border-accent px-3 font-medium uppercase hover:bg-accent-strong hover:text-primary-foreground md:inline-flex lg:px-4",
               !scrolled && pathname === "/" && "text-primary-foreground",
             )}
           >

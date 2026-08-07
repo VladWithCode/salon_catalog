@@ -217,7 +217,7 @@ export function ContactForm() {
         id="contact-submit-button"
         type="submit"
         disabled={isSubmitting}
-        className="type-button mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-accent px-6 font-semibold uppercase text-accent-foreground shadow-soft hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-wait disabled:opacity-70 sm:w-auto"
+        className="type-button mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-accent-strong px-6 font-semibold uppercase text-primary-foreground shadow-soft hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-wait disabled:opacity-70 sm:w-auto"
       >
         {isSubmitting ? copy.button.submitting : copy.button.initial}
       </button>
@@ -238,12 +238,6 @@ export function ContactForm() {
         </p>
       ) : null}
 
-      <noscript>
-        <style>{"#contact-submit-button { display: none !important; }"}</style>
-        <p className="type-small mt-4 text-muted-foreground">
-          {copy.noScriptMessage}
-        </p>
-      </noscript>
     </form>
   );
 }

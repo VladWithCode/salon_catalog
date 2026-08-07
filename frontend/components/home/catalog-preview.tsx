@@ -77,7 +77,7 @@ export function CatalogPreview({ status, categories }: CatalogPreviewProps) {
                   <Link
                     href={`/catalogo?categoria=${encodeURIComponent(category.name)}`}
                     prefetch={false}
-                    className="type-small inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm font-semibold hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                    className="type-small inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm font-semibold hover:text-accent-on-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                   >
                     Ver todos
                     <ArrowRight aria-hidden="true" className="size-4" />
@@ -106,7 +106,7 @@ export function CatalogPreview({ status, categories }: CatalogPreviewProps) {
           <Link
             href={catalog.cta.href}
             prefetch={false}
-            className="type-button inline-flex min-h-12 items-center gap-2 rounded-md bg-accent px-6 font-semibold uppercase text-accent-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            className="type-button inline-flex min-h-12 items-center gap-2 rounded-md bg-accent-strong px-6 font-semibold uppercase text-primary-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             {catalog.cta.label}
             <ArrowRight aria-hidden="true" className="size-4" />

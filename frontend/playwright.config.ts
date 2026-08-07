@@ -27,6 +27,33 @@ export default defineConfig({
       name: "chromium-js-disabled",
       use: { ...devices["Desktop Chrome"], javaScriptEnabled: false },
     },
+    // Cross-engine coverage (03-home-page.md §10.7 asks for Chrome, Safari
+    // and Firefox). Playwright's WebKit is the same engine Safari ships, but
+    // it is not Safari itself — results are reported per engine, never as
+    // "Safari verified".
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"], viewport: { width: 1280, height: 800 } },
+      testMatch: /public-pages\.spec\.ts/,
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"], viewport: { width: 1280, height: 800 } },
+      testMatch: /public-pages\.spec\.ts/,
+    },
+    // prefers-reduced-motion is a real media-query state, not just a code
+    // path: this project drives the whole public-pages suite with it forced
+    // on, so a reduced-motion regression (content hidden instead of merely
+    // still) fails loudly.
+    {
+      name: "reduced-motion",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 800 },
+        reducedMotion: "reduce",
+      },
+      testMatch: /public-pages\.spec\.ts/,
+    },
   ],
   webServer: {
     command: "bunx next start -p 3100",

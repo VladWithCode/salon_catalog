@@ -80,7 +80,7 @@ export function HomeHero() {
           <Link
             href={hero.primaryCta.href}
             prefetch={false}
-            className="type-button inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md bg-accent px-4 text-[0.8125rem] font-semibold uppercase text-accent-foreground shadow-elevated hover:bg-secondary sm:gap-2 sm:px-6 sm:text-button"
+            className="type-button inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md bg-accent-strong px-4 text-[0.8125rem] font-semibold uppercase text-primary-foreground shadow-elevated hover:bg-secondary sm:gap-2 sm:px-6 sm:text-button"
           >
             {hero.primaryCta.label}
             <ArrowRight aria-hidden="true" className="size-4" />

@@ -32,7 +32,7 @@ export function ProductActions({ productId, available }: ProductActionsProps) {
         </Link>
         <a
           href="/solicitar-cotizacion"
-          className={`${actionClassName} bg-accent text-accent-foreground hover:bg-accent/90`}
+          className={`${actionClassName} bg-accent-strong text-primary-foreground hover:bg-accent-strong/90`}
         >
           Solicitar cotización
         </a>

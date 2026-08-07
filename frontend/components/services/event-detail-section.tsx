@@ -88,7 +88,7 @@ export function EventDetailSection({
             aria-label={`${ctaLabel} sobre ${title.toLocaleLowerCase("es")} por WhatsApp`}
             data-event={eventKey}
             className={cn(
-              "type-button inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent px-5 font-semibold uppercase hover:bg-accent hover:text-accent-foreground",
+              "type-button inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent px-5 font-semibold uppercase hover:bg-accent-strong hover:text-primary-foreground",
               inverted && "text-primary-foreground",
             )}
           >

@@ -76,7 +76,7 @@ export function CatalogPagination({
               href={buildCatalogPageHref(filters, pagination.page - 1)}
               prefetch={false}
               aria-label="Ir a la página anterior"
-              className="type-small inline-flex min-h-11 items-center justify-center rounded-md border border-border px-4 font-medium text-foreground hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="type-small inline-flex min-h-11 items-center justify-center rounded-md border border-border px-4 font-medium text-foreground hover:border-accent hover:text-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               Anterior
             </Link>
@@ -99,7 +99,7 @@ export function CatalogPagination({
                 aria-current={
                   item.page === pagination.page ? "page" : undefined
                 }
-                className="type-small inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border px-3 font-medium text-foreground hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-accent-foreground"
+                className="type-small inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border px-3 font-medium text-foreground hover:border-accent hover:text-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent-strong aria-[current=page]:text-primary-foreground"
               >
                 {item.page}
               </Link>
@@ -113,7 +113,7 @@ export function CatalogPagination({
               href={buildCatalogPageHref(filters, pagination.page + 1)}
               prefetch={false}
               aria-label="Ir a la página siguiente"
-              className="type-small inline-flex min-h-11 items-center justify-center rounded-md border border-border px-4 font-medium text-foreground hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="type-small inline-flex min-h-11 items-center justify-center rounded-md border border-border px-4 font-medium text-foreground hover:border-accent hover:text-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               Siguiente
             </Link>

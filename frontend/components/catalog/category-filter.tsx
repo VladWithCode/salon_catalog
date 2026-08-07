@@ -16,7 +16,7 @@ function categoryLinkClass(isActive: boolean): string {
     "type-small inline-flex min-h-11 items-center whitespace-nowrap rounded-md border px-4 font-medium transition-colors",
     isActive
       ? "border-primary bg-primary text-primary-foreground"
-      : "border-border bg-card text-foreground hover:border-accent hover:text-accent",
+      : "border-border bg-card text-foreground hover:border-accent hover:text-accent-strong",
   );
 }
 

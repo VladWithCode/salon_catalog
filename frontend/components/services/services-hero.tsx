@@ -38,7 +38,7 @@ export function ServicesHero() {
           <Link
             href={hero.primaryCta.href}
             prefetch={false}
-            className="type-button mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-accent px-6 font-semibold uppercase text-accent-foreground shadow-elevated hover:bg-secondary hover:text-secondary-foreground"
+            className="type-button mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-accent-strong px-6 font-semibold uppercase text-primary-foreground shadow-elevated hover:bg-secondary hover:text-secondary-foreground"
           >
             {hero.primaryCta.label}
             <ArrowRight aria-hidden="true" className="size-4" />

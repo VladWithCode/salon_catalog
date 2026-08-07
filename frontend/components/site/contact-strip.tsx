@@ -15,14 +15,14 @@ export function ContactStrip() {
         </span>
         <a
           href={contact.phoneHref}
-          className="flex min-h-11 items-center gap-2 hover:text-accent"
+          className="flex min-h-11 items-center gap-2 hover:text-accent-strong"
         >
           <Phone aria-hidden="true" className="size-4" />
           {contact.phone}
         </a>
         <a
           href={`mailto:${contact.email}`}
-          className="flex min-h-11 items-center gap-2 hover:text-accent"
+          className="flex min-h-11 items-center gap-2 hover:text-accent-strong"
         >
           <Mail aria-hidden="true" className="size-4" />
           {contact.email}

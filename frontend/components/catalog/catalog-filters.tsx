@@ -44,7 +44,7 @@ export function CatalogFilters({
         <Link
           href="/catalogo"
           prefetch={false}
-          className="type-small inline-flex min-h-11 items-center font-medium text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+          className="type-small inline-flex min-h-11 items-center font-medium text-accent-strong underline decoration-accent-strong/40 underline-offset-4 hover:decoration-accent-strong"
         >
           Limpiar búsqueda y filtros
         </Link>
